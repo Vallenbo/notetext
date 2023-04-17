@@ -1,29 +1,19 @@
 # Gin框架介绍及使用
-
 `Gin`是一个用Go语言编写的web框架。它是一个类似于`martini`但拥有更好性能的API框架, 由于使用了`httprouter`，速度提高了近40倍。 如果你是性能和高效的追求者, 你会爱上`Gin`。
-
 Go世界里最流行的Web框架，[Github](https://github.com/gin-gonic/gin)上有`32K+`star。 基于[httprouter](https://github.com/julienschmidt/httprouter)开发的Web框架。 [中文文档](https://gin-gonic.com/zh-cn/docs/)齐全，简单易用的轻量级框架。
-
 下载并安装`Gin`:
-
 ```bash
 go get -u github.com/gin-gonic/gin
 ```
 
-## Gin渲染
-
+# Gin渲染
 ### HTML渲染
-
 我们首先定义一个存放模板文件的`templates`文件夹，然后在其内部按照业务分别定义一个`posts`文件夹和一个`users`文件夹。 `posts.html`和`users.html`文件的内容如下：
-
 Gin框架中使用`gin.Default().LoadHTMLGlob()`或者`gin.Default().LoadHTMLFiles()`方法进行HTML模板渲染。
-
 ```
 r.LoadHTMLGlob("templates/*")
 ```
-
 ### 自定义模板函数
-
 定义一个不转义相应内容的`safe`模板函数如下：
 
 ```go
@@ -34,10 +24,7 @@ r.LoadHTMLGlob("templates/*")
 	})
 ```
 
-
-
 ### 静态文件处理
-
 当我们渲染的HTML文件中引用了静态文件时，我们只需要按照以下方式在渲染页面前调用`gin.Static`方法即可。自动在static目录下寻找
 
 ```go
