@@ -5,5 +5,10 @@
   "promptDelete": false,
   "readableLineLength": false,
   "alwaysUpdateLinks": true,
-  "attachmentFolderPath": "./assets"
+  "attachmentFolderPath": "./assets",
+  "showFrontmatter": true,
+  "foldIndent": true,
+  "smartIndentList": true,
+  "autoPairMarkdown": true,
+  "autoConvertHtml": false
 }

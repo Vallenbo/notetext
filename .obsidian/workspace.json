@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Vue3/9、请求库axios.md",
+                "file": "Vue3/2、模板语法.md",
                 "mode": "source",
                 "source": false
               }
@@ -64,23 +64,13 @@
                 "sortOrder": "alphabetical"
               }
             }
-          },
-          {
-            "id": "99d61dc0c41d57b9",
-            "type": "leaf",
-            "state": {
-              "type": "outline",
-              "state": {
-                "file": "Vue3/9、请求库axios.md"
-              }
-            }
           }
         ],
-        "currentTab": 3
+        "currentTab": 2
       }
     ],
     "direction": "horizontal",
-    "width": 271.5
+    "width": 225.5
   },
   "right": {
     "id": "1c9d640254e89fb8",
@@ -91,12 +81,22 @@
         "type": "tabs",
         "children": [
           {
+            "id": "99d61dc0c41d57b9",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Vue3/2、模板语法.md"
+              }
+            }
+          },
+          {
             "id": "a5b49dd54f604d4a",
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Vue3/9、请求库axios.md",
+                "file": "Vue3/2、模板语法.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -113,7 +113,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Vue3/9、请求库axios.md",
+                "file": "Vue3/2、模板语法.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -130,13 +130,11 @@
               }
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -145,35 +143,36 @@
       "canvas:新建白板": false,
       "daily-notes:打开/创建今天的日记": false,
       "templates:插入模板": false,
-      "command-palette:打开命令面板": false
+      "command-palette:打开命令面板": false,
+      "markdown-importer:打开 Markdown 格式转换器": false
     }
   },
-  "active": "0a77996f3cb80adb",
+  "active": "ec81f21314d9382e",
   "lastOpenFiles": [
-    "Vue3/8、状态管理库pinia.md",
+    "Vue3/assets/Pasted image 20230417214658.png",
+    "Vue3/2、模板语法.md",
+    "Vue3/1、基本使用.md",
+    "Vue3/6、模板引用.md",
+    "Vue3/5、组件.md",
+    "Vue3/3、选项式和组合式侦听器.md",
     "Vue3/7、路由.md",
+    "Vue3/8、状态管理库pinia.md",
+    "Vue3/9、请求库axios.md",
+    "Vue3/生命周期.md",
     "Vue3/assets/Pasted image 20230417223941.png",
     "Vue3/assets/Pasted image 20230417223901.png",
     "Vue3/assets/Pasted image 20230417223847.png",
     "Vue3/assets/Pasted image 20230417223426.png",
-    "Vue3/6、模板引用.md",
-    "Vue3/生命周期.md",
     "Vue3/assets/Pasted image 20230417223042.png",
-    "Vue3/5、组件.md",
     "Vue3/assets/Pasted image 20230417222457.png",
     "Vue3/assets/Pasted image 20230417222449.png",
     "Vue3/assets/Pasted image 20230417222338.png",
     "Vue3/assets/Pasted image 20230417222337.png",
-    "Vue3/assets/Pasted image 20230417222327.png",
     "Vue3/4、组合式侦听器.md",
-    "Vue3/3、选项式和组合式侦听器.md",
-    "Vue3/2、模板语法.md",
-    "Vue3/1、基本使用.md",
     "Vue3/assets",
     "技能视频.md",
     "未命名.canvas",
     "2023-04-17.md",
-    "Vue3/9、请求库axios.md",
     "ubantu使用.md",
     "Golang常用服务手册/Gin框架.md",
     "各排序算法时间复杂度.md",
