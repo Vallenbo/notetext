@@ -4,16 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "551fbdd6c1a602a7",
+        "id": "5d3eb1fdcbb64d10",
         "type": "tabs",
         "children": [
           {
-            "id": "ec81f21314d9382e",
+            "id": "ba16a852ce3c99b6",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Vue3/2、模板语法.md",
+                "file": "Web/Vue3/8、请求库axios.md",
                 "mode": "source",
                 "source": false
               }
@@ -86,7 +86,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Vue3/2、模板语法.md"
+                "file": "Web/Vue3/8、请求库axios.md"
               }
             }
           },
@@ -96,7 +96,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Vue3/2、模板语法.md",
+                "file": "Web/Vue3/8、请求库axios.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -113,7 +113,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Vue3/2、模板语法.md",
+                "file": "Web/Vue3/8、请求库axios.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -147,9 +147,43 @@
       "markdown-importer:打开 Markdown 格式转换器": false
     }
   },
-  "active": "ec81f21314d9382e",
+  "active": "973c4a01b8d8f68c",
   "lastOpenFiles": [
-    "Vue3/assets/Pasted image 20230417214658.png",
+    "未命名.canvas",
+    "Web/Vue3/8、请求库axios.md",
+    "Web/Vue3/7、状态管理库pinia.md",
+    "Web/Vue3/6、路由`Vue Router`.md",
+    "Web/Vue3/5、依赖注入与模板引用.md",
+    "Web/Vue3/生命周期.md",
+    "Web/Vue3/4、组件与数据传递.md",
+    "Web/Vue3/2、模板语法.md",
+    "Web/Vue3/3、侦听器.md",
+    "Web.zip",
+    "Golang常用服务手册/reft算法.md",
+    "Go基础",
+    "Web/nodejs安装.md",
+    "Web/Vue3/assets/Pasted image 20230417223941.png",
+    "Web/Vue3/assets/Pasted image 20230417223901.png",
+    "Web/Vue3/assets/Pasted image 20230417223847.png",
+    "Web/Vue3/assets/Pasted image 20230417223426.png",
+    "Web/Vue3/assets/Pasted image 20230417223042.png",
+    "Web/Vue3/assets/Pasted image 20230417222457.png",
+    "Web/Vue3/assets/Pasted image 20230417222449.png",
+    "Web/Vue3/assets/Pasted image 20230417222338.png",
+    "Web/Vue3/assets/Pasted image 20230417222337.png",
+    "Web/Vue3/assets/Pasted image 20230417222327.png",
+    "Web/Vue3/assets",
+    "Web/Vue3/1、基本使用.md",
+    "Web/Vue3",
+    "Web",
+    "新建文件夹",
+    "Golang常用服务手册/mongoDB使用.md",
+    "Golang常用服务手册/sqlite3安装及简单命令.md",
+    "nodejs安装.md",
+    "mongoDB使用.md",
+    "面试自我介绍.md",
+    "技能视频.md",
+    "各排序算法时间复杂度.md",
     "Vue3/2、模板语法.md",
     "Vue3/1、基本使用.md",
     "Vue3/6、模板引用.md",
@@ -157,35 +191,7 @@
     "Vue3/3、选项式和组合式侦听器.md",
     "Vue3/7、路由.md",
     "Vue3/8、状态管理库pinia.md",
-    "Vue3/9、请求库axios.md",
-    "Vue3/生命周期.md",
-    "Vue3/assets/Pasted image 20230417223941.png",
-    "Vue3/assets/Pasted image 20230417223901.png",
-    "Vue3/assets/Pasted image 20230417223847.png",
-    "Vue3/assets/Pasted image 20230417223426.png",
-    "Vue3/assets/Pasted image 20230417223042.png",
-    "Vue3/assets/Pasted image 20230417222457.png",
-    "Vue3/assets/Pasted image 20230417222449.png",
-    "Vue3/assets/Pasted image 20230417222338.png",
-    "Vue3/assets/Pasted image 20230417222337.png",
-    "Vue3/4、组合式侦听器.md",
     "Vue3/assets",
-    "技能视频.md",
-    "未命名.canvas",
-    "2023-04-17.md",
-    "ubantu使用.md",
-    "Golang常用服务手册/Gin框架.md",
-    "各排序算法时间复杂度.md",
-    "面试自我介绍.md",
-    "C/C.md",
-    "Go标准库/net与http库.md",
-    "Go标准库/ini文件读取库.md",
-    "Go标准库/gopsutil库.md",
-    "Golang常用服务手册/WebSocket编程.md",
-    "mongoDB使用.md",
-    "nodejs安装.md",
-    "reft算法.md",
-    "sqlite3安装及简单命令.md",
     "未命名"
   ]
 }
