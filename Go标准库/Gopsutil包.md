@@ -1,12 +1,10 @@
-`psutil`是一个跨平台进程和系统监控的Python库，而`gopsutil`是其Go语言版本的实现。本文介绍了它的基本使用。
+Go语言部署简单、性能好的特点非常适合做一些诸如采集系统信息和监控的服务。
+psutil是一个跨平台进程和系统监控的Python库，而gopsutil是其Go语言版本的实现。
 
-Go语言部署简单、性能好的特点非常适合做一些诸如采集系统信息和监控的服务，本文介绍的[gopsutil](https://github.com/shirou/gopsutil)库是知名Python库：[psutil](https://github.com/giampaolo/psutil)的一个Go语言版本的实现。
+> #gopsutil做系统监控信息的采集，写入influxDB，使用grafana作展示
+> #prometheus监控;采集性能指标数据,保存起来,使用grafana作展示
 
-## 安装
-
-```bash
-go get github.com/shirou/gopsutil
-```
+安装`go get github.com/shirou/gopsutil`
 
 ## 使用
 

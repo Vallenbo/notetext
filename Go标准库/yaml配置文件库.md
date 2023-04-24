@@ -29,10 +29,8 @@ b:
   c: 2
   d: [3, 4]
 `
-
 // Note: struct fields must be public in order for unmarshal to
-// correctly populate the data.
-type T struct {
+type T struct {// correctly populate the data.
         A string
         B struct {
                 RenamedC int   `yaml:"c"`

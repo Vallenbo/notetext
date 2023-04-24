@@ -1,11 +1,12 @@
 `Axios`是一个基于`promise`网络请求库，作用于`node.js`和浏览器中
 `Axios`在服务端它使用原生`node.js``http`模块，而在客户端（浏览端）则使用 `XMLHttpRequests`
 `Axios`可以拦截请求和响应、转换请求和响应数据、取消请求、自动转换`JSON`数据
-`Axios`安装方式：==npm install axios==
+`Axios`安装方式：`npm install axios`
 
 ## 12.1：`Axios`配置项
+
 这些是创建请求时最常用的配置选项；详细的配置项请前往[Axios](https://www.axios-http.cn/docs/req_config)官网
-**提示**：只有**url**是必需的；如果没有指定`method`，则请求将默认使用**GET**方法
+提示：只有url是必需的；如果没有指定`method`，则请求将默认使用GET方法
 
 ```json
 {
@@ -27,22 +28,18 @@
 ```
 
 ## 12.2：发送请求
-可以向 `**axios**`传递相关配置来创建请求
+可以向 `axios`传递相关配置来创建请求
 
-### 12.2.1：`axios(_config_)`
-
-发送一个 POST 请求
-```
-axios({
+```vue
+axios({ //发送一个 POST 请求
     method: 'POST', // 请求方式
     url: '/example-url/……', // 请求地址
     // …… 其他配置 ……
 })
 ```
 
-发送一个 GET 请求
 ```
-axios({
+axios({  //发送一个 GET 请求
     method: 'GET', // 请求方式，可省略不写
     url: '/example-url/……', // 请求地址
     // …… 其他配置 ……
@@ -51,9 +48,8 @@ axios({
 
 ### 12.2.2：`axios(_url_[, config])`
 
-发送一个 POST 请求
 ```
-axios(
+axios( //发送一个 POST 请求
     '/example-url/……', // 请求地址
     {
         method: 'POST', // 请求方式
@@ -62,9 +58,8 @@ axios(
 )
 ```
 
-发送一个 GET 请求
 ```
-axios(
+axios( //发送一个 GET 请求
      '/example-url/……', // 请求地址
     {
         method: 'GET', // 请求方式，可省略不写
@@ -75,29 +70,27 @@ axios(
 
 ### 12.2.3：请求方式别名
 为了方便起见，已经为所有支持的请求方法提供了别名
-1.  `axios.**request**(_config_)`
-2.  `axios.**get**(_url_[, _config_])`
-3.  `axios.**delete**(_url_[, _config_])`
-4.  `axios.**head**(_url_[, config])`
-5.  `axios.**options**(_url_[, config])`
-6.  `axios.**post**(url[, _data_[, _config_]])`
-7.  `axios.**put**(url[, _data_[, _config_]])`
-8.  `axios.**patch**(url[, _data_[, _config_]])`
+1.  `axios.request(_config_)`
+2.  `axios.get(_url_[, _config_])`
+3.  `axios.delete(_url_[, _config_])`
+4.  `axios.head(_url_[, config])`
+5.  `axios.options(_url_[, config])`
+6.  `axios.post(url[, _data_[, _config_]])`
+7.  `axios.put(url[, _data_[, _config_]])`
+8.  `axios.patch(url[, _data_[, _config_]])`
 
-**注意：**在使用别名方法时，`**url**`、`**method**`、`**data**` 这些属性都不必在`**config**`中指定
+注意：在使用别名方法时，`url`、`method`、`data` 这些属性都不必在`config`中指定
 
-发送一个 POST 请求
 ```
-axios.post(
+axios.post( //发送一个 POST 请求
     '/example-url/……', // 请求地址
     { /* 请求体中的参数 */ },
     { /* 其他配置 */ },
 )
 ```
 
-发送一个 GET 请求
 ```
-axios.get(
+axios.get( //发送一个 GET 请求
     '/example-url/……', // 请求地址
     { /* 其他配置 */ },
 )
@@ -118,7 +111,7 @@ const request = axios.create({
 
 export default request
 ```
-**使用自定义实例发送请求：**
+使用自定义实例发送请求：
 
 ```
 import request from '@/request/axiosInstance.js'
@@ -151,7 +144,7 @@ request.post(
 ## 12.4：响应数据
 发送请求后通过`.then(_response_ => {})`来获取服务器响应的数据
 `response`响应式结构：
-1.  `**data**`：服务器提供的响应【最重要】
+1.  `data`：服务器提供的响应【最重要】
 2.  `status`：来自服务器响应的 HTTP 状态码，成功为`200`，请求地址不存在为`404`，服务器异常为`500`，请求方式错误为`405`……
 3.  `statusText`：来自服务器响应的 HTTP 状态信息
 4.  `headers`：服务器响应头
@@ -179,8 +172,7 @@ axios.get(
 ```
 
 ## 12.5：请求错误处理
-发送请求后，使用`.**catch(**_**error**_ **=> {})**`来处理此次请求异常，请求成功发出且服务器也响应了状态码，但状态代码超出了`2xx`的范围
-``
+发送请求后，使用`.catch(_error_ => {})`来处理此次请求异常，请求成功发出且服务器也响应了状态码，但状态代码超出了`2xx`的范围
 ```
 axios({
     method: 'GET', // 请求方式
@@ -190,10 +182,13 @@ axios({
 })
 ```
 
+
+
 ## 12.6：解决跨域问题
+
 1.  跨域：指的是浏览器不能执行其他网站的脚本；它是由浏览器的同源策略造成的，是浏览器对`javascript`施加的安全限制
 2.  同源策略：是指协议，域名，端口都要相同，其中有一个不同都会产生跨域
-3.  浏览器为了安全问题一般都限制了跨域访问，也就是不允许跨域请求资源，如果未处理跨域访问则会在请求时控制台出现`**Access-Control-Allow-Origin**……`的报错信息
+3.  浏览器为了安全问题一般都限制了跨域访问，也就是不允许跨域请求资源，如果未处理跨域访问则会在请求时控制台出现`Access-Control-Allow-Origin……`的报错信息
 4.  如何处理跨域问题，可在`vite`项目的`vite.config.js`文件中添加`proxy`代理
 
 ```
@@ -251,17 +246,20 @@ export default defineConfig({
 
 ### 12.7.1：智能天气实况
 支持全国以及全球多个城市的天气查询，包含国内`3400+`个城市以及国际`4`万个城市的实况数据，更新频率分钟级别
-[**智能天气实况**](https://www.apispace.com/eolink/api/456456/apiDocument)
 
-**请求方式** `**GET**`
-**请求地址**`**https://eolink.o.apispace.com/456456/weather/v001/now**`
-**请求头**   `X-APISpace-Token`  鉴权私钥
+
+
+[智能天气实况](https://www.apispace.com/eolink/api/456456/apiDocument)
+
+请求方式 `GET`
+请求地址`https://eolink.o.apispace.com/456456/weather/v001/now`
+请求头   `X-APISpace-Token`  鉴权私钥
 			`Authorization-Type` 鉴权方式，值为：apikey
 
-**请求**`**URL**`**参数**   `areacode`城市[ID](https://easy-open-link.feishu.cn/wiki/wikcnXfeZ1lmUCbCSac2hYAEFb2)，必填，类型：`String`
+请求`URL`参数   `areacode`城市[ID](https://easy-open-link.feishu.cn/wiki/wikcnXfeZ1lmUCbCSac2hYAEFb2)，必填，类型：`String`
 
-**返回数据格式** `**JSON**`
-**返回案例**
+返回数据格式 `JSON`
+返回案例
 {
     "status": 0, // 状态码
     "result": {

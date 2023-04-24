@@ -454,8 +454,6 @@ w.WriteHeader(302)
 
 
 
-
-
 ### 自定义Client
 
 要管理HTTP客户端的头域、重定向策略和其他设置，创建一个Client：
@@ -592,7 +590,9 @@ func main() {
 }
 ```
 
-将上面的代码编译之后执行，打开你电脑上的浏览器在地址栏输入`127.0.0.1:9090`回车，此时就能够看到如下页面了。![hello页面](https://www.liwenzhou.com/images/Go/socket/hello.png)
+将上面的代码编译之后执行，打开你电脑上的浏览器在地址栏输入`127.0.0.1:9090`回车，此时就能够看到如下页面了。
+
+<img src="assets/image-20230424180141729.png" alt="image-20230424180141729" style="zoom: 33%;" />
 
 ### 自定义Server
 

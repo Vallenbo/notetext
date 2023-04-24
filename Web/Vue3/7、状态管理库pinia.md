@@ -17,13 +17,14 @@ app.mount('#app')
 ```
 
 ## 11.2：`Store`
+
 1.  `store`是一个保存状态和业务逻辑的实体，它并不与你的组件树绑定；换句话说，它承载着全局状态；它有点像一个永远存在的组件，每个组件都可以读取和写入它
 2.  `store`它有三个概念，`state`、`getters`和`actions`，我们可以l理解成组件中的`data`、`computed`和`methods`
 3.  在项目中的`src\store`文件夹下不同的`store.js`文件
 4.  `store`是用`defineStore(_name_, _function_ | _options_)`定义的，建议其函数返回的值命名为`use...Store`方便理解
 
-1.  参数`**name**`：名字，必填值且唯一
-2.  参数`**function|options**`：可以是对象或函数形式
+1.  参数`name`：名字，必填值且唯一
+2.  参数`function|options`：可以是对象或函数形式
 
 -   对象形式【选项模式】，其中配置`state`、`getters`和`actions`选项
 -   函数形式【组合模式，类似组件组合式`API`的书写方式】，定义响应式变量和方法，并且`return`对应的变量和方法；`ref()`相当于`state`，`computed()`相当于`getters`，`function()`相当于`actions`
@@ -105,10 +106,10 @@ export const useUserStore = defineStore('user', () => {
 	b.  `array | object`：字符串数组形式或者对象形式
 	- 【字符串数组形式】直接将`store`中`state`的数据映射为当前组件的计算属性，但是不能自定义名称
 	- 【对象形式时】`key`为自定义当前组件的计算属性名，`value`字符串形式，是`store`中`state`的共享数据
-**提示：**`**mapState()**`函数映射到组件中的计算属性是只读的，如果想在组件中响应式修改`state`的数据，则应该选择`**mapWritableState()**`函数来映射计算属性
+	提示：`mapState()`函数映射到组件中的计算属性是只读的，如果想在组件中响应式修改`state`的数据，则应该选择`mapWritableState()`函数来映射计算属性
 
 2.  在组合式 API 组件中，直接引入对应的`store`，通过`store`对象直接获取和修改`state`
-**提示：**
+提示：
 如果想在组件中自定义变量来接收`store`中的`state`中共享的数据，我们可以这样做：
 -   使用`computed(() => store._dataName_)`，具有响应式，但是只读形式
 -   使用`storeToRefs(_store_)`从`store`解构想要的`state`，具有响应式，可直接修改，可自定义名称
@@ -219,9 +220,9 @@ export default {
 
 ### 11.4.1：定义`Getters`
 1.  `store`采用的是选项式模式时，`getters`选项中声明的函数即为计算属性
-	a.  在其函数内可通过`**this**`关键字来获取`store`实例，也可通过方法的第一个参数得到`store`实例
+	a.  在其函数内可通过`this`关键字来获取`store`实例，也可通过方法的第一个参数得到`store`实例
 	b.  如果采用的是箭头函数的话，无法使用`this`关键字，为了更方便使用`store`中实例，可为其箭头函数设置第一个参数来获取`store`实例
-2.  `store`采用的是组合式模式时，可通过`**computed()**`函数通过计算得到新的数据，再将其`**return**`暴露出去即可
+2.  `store`采用的是组合式模式时，可通过`computed()`函数通过计算得到新的数据，再将其`return`暴露出去即可
 
 getters【选项式】
 ```vue
@@ -269,11 +270,11 @@ export const useUserStore = defineStore('user', () => {
 ```
 
 ### 11.4.2：在组件中使用`Getters`
-1.  选项式`API`的组件中，访问`store`中的`getters`和访问`state`类似，同样可使用`**mapState()**`帮助器将`**getters**`属性映射为只读计算属性
-**注意：**如果采用`**mapWritableState()**`帮助器将`store`中的`getters`映射为组件内部的计算属性，依旧可以具有响应式，一旦对其进行修改则会报错
+1.  选项式`API`的组件中，访问`store`中的`getters`和访问`state`类似，同样可使用`mapState()`帮助器将`getters`属性映射为只读计算属性
+注意：如果采用`mapWritableState()`帮助器将`store`中的`getters`映射为组件内部的计算属性，依旧可以具有响应式，一旦对其进行修改则会报错
 
 2.  在组合式`API`组件中，访问`store`中的`getters`和访问`state`类似，直接引入对应的`store`，通过`store`对象直接获取`getters`，但是如果对其进行修改则会报错
-**提示：**
+提示：
 如果想将`store`中的`getter`中共享的数据映射为本地组件的计算属性，我们可以这样做：
 -   使用`computed(() => store._getterName_)`，具有响应式，但是只读形式
 -   使用`storeToRefs(_store_)`从`store`解构`getter`依旧是计算属性，所以是只读的，一旦对其进行修改则会报错，但是具有响应式，可自定义名称
@@ -414,7 +415,7 @@ export const useUserStore = defineStore('user', () => {
 	-   【对象形式时】`key`为自定义当前组件的函数名，`value`字符串形式，是`store`中`actions`的函数名
 2.  在组合式`API`组件中，直接引入对应的`store`，通过`store`对象直接获取`actions`
 
-**提示：**如果想将`store`中的`actions`中函数映射为本地组件的函数，可将`store`解构出对应的函数即可，也可自定应函数名，此处不可通过`storeToRefs(_store_)`函数
+提示：如果想将`store`中的`actions`中函数映射为本地组件的函数，可将`store`解构出对应的函数即可，也可自定应函数名，此处不可通过`storeToRefs(_store_)`函数
 
 
 ```vue
