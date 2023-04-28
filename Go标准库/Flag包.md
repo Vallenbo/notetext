@@ -2,6 +2,15 @@
 
 Go语言内置的`flag`包实现了命令行参数的解析，`flag`包使得开发命令行工具更为简单。
 
+# 进程信息
+
+`os.Args`是一个存储命令行参数的字符串切片，它的第一个元素是执行文件的名称
+
+```
+func Getenv(key string) string // Getenv检索并返回名为指定key的环境变量值。如果不存在该环境变量会返回空字符串。
+func Setenv(key, value string) error // Setenv设置名为key的环境变量。如果出错会返回该错误。
+```
+
 # os.Args
 
 如果你只是简单的想要获取命令行参数，可以像下面的代码示例一样使用`os.Args`来获取命令行参数。

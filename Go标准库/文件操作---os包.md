@@ -1,3 +1,9 @@
+**文件是什么？**
+
+计算机中的文件是存储在外部介质（通常是磁盘）上的数据集合，文件分为文本文件和二进制文件。
+
+# 打开和关闭文件
+
 os打开一个指定路径的文件，返回一个文件对象，【可对文件对象做（r,w,close操作），或者使用bufio库等进行操作】
 `os.Open(`文件地址`) `返回一个文件对象    
 
@@ -5,33 +11,96 @@ os打开一个指定路径的文件，返回一个文件对象，【可对文件
 func Open(name string) (*File, error){ } // 打开一个文件,支持使用绝对路径
 ```
 
+`*File.close()`方法能够关闭文件
 
+# 1、读取文件：
 
-## 1、读取：
-
-（1、`fileObj.read()`  传统的文件读取方式 
+## fileObj.read()
 
 ```go
-Func (f *File) Read(b []byte) (n int, err error)
+Func (f *File) Read(b []byte) (n int, err error) //传统的文件读取方式 
 ```
 
-（2、bufio缓冲读取文件：是在file的基础上封装了一层API，支持更多的功能
+```
+func main() {
+	file, err := os.Open("./main.go") // 只读方式打开当前目录下的main.go文件
+	if err != nil {
+		fmt.Println("open file failed!, err:", err)
+		return
+	}
+	defer file.Close()
+	
+	var content []byte
+	var tmp = make([]byte, 128)
+	for {
+		n, err := file.Read(tmp) // 使用Read方法读取数据
+		if err == io.EOF {
+			fmt.Println("文件读完了")
+			break
+		}
+		if err != nil {
+			fmt.Println("read file failed, err:", err)
+			return
+		}
+		content = append(content, tmp[:n]...)
+	}
+	fmt.Println(string(content))
+}
+```
+
+## bufio缓冲读取文件
+
+在file的基础上封装了一层API，支持更多的功能
 
 ```go
 bufio.NewReader(fileObj) //创建缓存区从终端去读取数据，指定读取截止符
 ```
 
-（3、`os.ReadFile`方法能够读取完整的文件，只需要将文件名作为参数传入
+```go
+func main() {
+	file, err := os.Open("./xx.txt")
+	if err != nil {
+		fmt.Println("open file failed, err:", err)
+		return
+	}
+	defer file.Close()
+	reader := bufio.NewReader(file)
+	for {
+		line, err := reader.ReadString('\n') //注意是字符
+		if err == io.EOF {
+			if len(line) != 0 {
+				fmt.Println(line)
+			}
+			fmt.Println("文件读完了")
+			break
+		}
+		if err != nil {
+			fmt.Println("read file failed, err:", err)
+			return
+		}
+		fmt.Print(line)
+	}
+}
+```
 
-（4、`*File.close()`方法能够关闭文件
+## os.ReadFile方法
+
+能够读取完整的文件，只需要将文件名作为参数传入
 
 ```go
-func (f *File) Read(b []byte) (n int, err error) //读取文件
+func main() {
+	content, err := os.ReadFile("./main.go")
+	if err != nil {
+		fmt.Println("read file failed, err:", err)
+		return
+	}
+	fmt.Println(string(content))
+}
 ```
 
 
 
-## 2、写入：
+# 2、写入文件：
 
 （1、`os.OpenFile()`函数能够以指定模式打开文件，返回一个文件对象
 
@@ -56,8 +125,27 @@ func (f *File) Write(b []byte) (n int, err error) { } //参数为字节切片数
 func (f *File) WriteString(s string) (n int, err error) { } //参数为字符串数据
 ```
 
+## Write和WriteString
+
+```go
+func main() {
+	file, err := os.OpenFile("xx.txt", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
+	if err != nil {
+		fmt.Println("open file failed, err:", err)
+		return
+	}
+	defer file.Close()
+	str := "hello 沙河"
+	file.Write([]byte(str))       //写入字节切片数据
+	file.WriteString("hello 小王子") //直接写入字符串数据
+}
 ```
-func bufio.NewWriter(w io.Writer) *Writer { }             //返回一个可写的文件操作对象fileObj
+
+## bufio.NewWriter
+
+
+```go
+func bufio.NewWriter(w io.Writer) *Writer { }           //返回一个可写的文件操作对象fileObj
 func (b *Writer) WriteString(s string) (int, error) { } //将数据先写入缓存
 
 fileObj.Flush() //将缓存中的内容写入文件
@@ -65,15 +153,45 @@ fileObj.Flush() //将缓存中的内容写入文件
 func WriteFile(name string, data []byte, perm FileMode) error //写入文件将数据写入命名文件，并在必要时创建它。
 ```
 
+```go
+func main() {
+	file, err := os.OpenFile("xx.txt", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
+	if err != nil {
+		fmt.Println("open file failed, err:", err)
+		return
+	}
+	defer file.Close()
+	writer := bufio.NewWriter(file)
+	for i := 0; i < 10; i++ {
+		writer.WriteString("hello沙河\n") //将数据先写入缓存
+	}
+	writer.Flush() //将缓存中的内容写入文件
+}
+```
+
+## ioutil.WriteFile
+
+```go
+func main() {
+	str := "hello 沙河"
+	err := ioutil.WriteFile("./xx.txt", []byte(str), 0666)
+	if err != nil {
+		fmt.Println("write file failed, err:", err)
+		return
+	}
+}
+```
+
+## Seek()
 
 
 ```go
 func (f *File) Seek(offset int64, whence int) (ret int64, err error) //Seek设置当前读/写位置
 ```
 
-​	offset为相对偏移量（1字节为单位）
-​	whence决定相对位置：0为相对文件开头，1为相对当前位置，2为相对文件结尾
-​	ret返回新的偏移量（相对开头）和可能的错误
+- offset为相对偏移量（1字节为单位）
+- whence决定相对位置：0为相对文件开头，1为相对当前位置，2为相对文件结尾
+- ret返回新的偏移量（相对开头）和可能的错误
 
 ```go
 func Rename(oldpath, newpath string) error  //Rename修改一个文件的名字，移动一个文件。可能会有一些个操作系统特定的限制
@@ -85,13 +203,4 @@ os.Stdout //输出到终端
 ```
 
 
-
-## 进程信息
-
-`os.Args`是一个存储命令行参数的字符串切片，它的第一个元素是执行文件的名称
-
-```
-func Getenv(key string) string // Getenv检索并返回名为指定key的环境变量值。如果不存在该环境变量会返回空字符串。
-func Setenv(key, value string) error // Setenv设置名为key的环境变量。如果出错会返回该错误。
-```
 

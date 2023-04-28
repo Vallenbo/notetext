@@ -15,10 +15,15 @@ TCP/IP(Transmission Control Protocol/Internet Protocol) 即传输控制协议/�
 
 ### TCP服务端
 
-##一个TCP服务端可以同时连接很多个客户端，例如世界各地的用户使用自己电脑上的浏览器访问淘宝网。因为Go语言中创建多个goroutine实现并发非常方便和高效，所以我们可以每建立一次链接就创建一个goroutine去处理。
+​	##一个TCP服务端可以同时连接很多个客户端，例如世界各地的用户使用自己电脑上的浏览器访问淘宝网。因为Go语言中创建多个goroutine实现并发非常方便和高效，所以我们可以每建立一次链接就创建一个goroutine去处理。
 
-TCP服务端程序的处理流程：1、监听端口 2、接收客户端请求建立链接	3、创建goroutine处理链接。
-TCP客户端进行TCP通信的流程如下：1、建立与服务端的链接	2、进行数据收发	3、关闭链接
+> TCP服务端程序的处理流程：
+>
+> 1、监听端口 2、接收客户端请求建立链接	3、创建goroutine处理链接。
+
+> TCP客户端进行TCP通信的流程如下：
+>
+> 1、建立与服务端的链接	2、进行数据收发	3、关闭链接
 
 
 ### “粘包”现象：
@@ -93,8 +98,8 @@ Client和Transport类型都可以安全的被多个goroutine同时使用。出�
 ### 服务端
 
 默认的Server
-ListenAndServe使用指定的监听地址和处理器启动一个HTTP服务端。处理器参数通常是nil，这表示采用包变量DefaultServeMux作为处理器。
-Handle和HandleFunc函数可以向DefaultServeMux添加处理器。
+`ListenAndServe`使用指定的监听地址和处理器启动一个HTTP服务端。处理器参数通常是nil，这表示采用包变量DefaultServeMux作为处理器。
+`Handle`和`HandleFunc函数`可以向DefaultServeMux添加处理器。
 
 ```go
 http.Handle("/foo", fooHandler)
@@ -145,30 +150,31 @@ func (t *Template) ExecuteTemplate(wr io.Writer, name string, data interface{}) 
 
 
 ### 模板语法
+
 {{.}}
 模板语法都包含在{{和}}中间，其中{{.}}中的点表示当前对象。
 当我们传入一个结构体对象时，我们可以根据.来访问结构体的对应字段。
 当我们传入的变量是map时，也可以在模板文件中通过.根据key来取值。
 
 #### 注释
+
 {{/* a comment */}}
 注释，执行时会忽略。可以多行。注释不能嵌套，并且必须紧贴分界符始止。
 
 #### pipeline
+
 pipeline是指产生数据的操作。比如{{.}}、{{.Name}}等。Go的模板语法中支持使用管道符号|链接多个命令，用法和unix下的管道类似：|前面的命令会将运算结果(或返回值)传递给后一个命令的最后一个位置。
 注意：并不是只有使用了|才是pipeline。Go的模板语法中，pipeline的概念是传递数据，只要能产生数据的，都是pipeline。
 
-
-变量
+**变量**
 我们还可以在模板中声明变量，用来保存传入模板的数据或其他语句生成的结果。具体语法如下：
 $obj := {{.}}，其中$obj是变量的名字，在后续的代码中就可以使用该变量了。
 
-移除空格
+**移除空格**
 有时候我们在使用模板语法的时候会不可避免的引入一下空格或者换行符，这样模板最终渲染出来的内容可能就和我们想的不一样，这个时候可以使用{{-语法去除模板内容左侧的所有空白符号， 使用-}}去除模板内容右侧的所有空白符号。
-例如：
-{{- .Name -}}，注意：-要紧挨{{和}}，同时与模板值之间需要使用空格分隔。
+**例如**：{{- .Name -}}，注意：-要紧挨{{和}}，同时与模板值之间需要使用空格分隔。
 
-条件判断
+**条件判断**
 Go模板语法中的条件判断有以下几种:
 
 ```
@@ -177,23 +183,23 @@ Go模板语法中的条件判断有以下几种:
 {{if pipeline}} T1 {{else if pipeline}} T0 {{end}}
 ```
 
-range
+**range**
 Go的模板语法中使用range关键字进行遍历，有以下两种写法，其中pipeline的值必须是数组、切片、字典或者通道。
 {{range pipeline}} T1 {{end}}
 如果pipeline的值其长度为0，不会有任何输出
 {{range pipeline}} T1 {{else}} T0 {{end}}
 如果pipeline的值其长度为0，则会执行T0。
 
-with
+**with**
 {{with pipeline}} T1 {{end}}
 如果pipeline为empty不产生输出，否则将dot设为pipeline的值并执行T1。不修改外面的dot。
 {{with pipeline}} T1 {{else}} T0 {{end}}
 如果pipeline为empty，不改变dot并执行T0，否则dot设为pipeline的值并执行T1。
 
-预定义函数
+**预定义函数**
 执行模板时，函数从两个函数字典中查找：首先是模板函数字典，然后是全局函数字典。一般不在模板内定义函数，而是使用Funcs方法添加函数到模板里。
 
-预定义的全局函数如下：
+预定义的**全局函数**如下：
 `and函数`返回它的第一个empty参数或者最后一个参数；
     就是说"and x y"等价于"if x then y else x"；所有参数都会执行；
 `or`返回第一个非empty参数或者最后一个参数；
@@ -246,7 +252,7 @@ func (t *Template) Funcs(funcMap FuncMap) *Template  ，//嵌入模板函数
 {{block "name" pipeline}} T1 {{end}}
 block是定义模板{{define "name"}} T1 {{end}}和执行{{template "name" pipeline}}缩写，典型的用法是定义一组根模板，然后通过在其中重新定义块模板进行自定义。
 
-###如果我们的模板名称冲突了，例如不同业务线下都定义了一个index.tmpl模板，我们可以通过下面两种方法来解决。
+​	#如果我们的模板名称冲突了，例如不同业务线下都定义了一个index.tmpl模板，我们可以通过下面两种方法来解决。
 
 在模板文件开头使用{{define 模板名}}语句显式的为模板命名，默认使用文件名。
 可以把模板文件存放在templates文件夹下面的不同目录中，然后使用template.ParseGlob("templates/**/*.tmpl")解析模板。
