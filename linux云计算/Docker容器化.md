@@ -52,21 +52,21 @@ Cgroups的工作目录/sys/fs/cgroup下包含了Cgroups的所有内容
 
 ## 一、在线安装Docker
 
-\# 1: 安装必要的一些系统工具	`yum install -y yum-utils`
+1: 安装必要的一些系统工具	`yum install -y yum-utils`
 
-\# 2: 添加软件源信息
+2: 添加软件源信息
 
 ```sh
 yum-config-manager  --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 ```
 
-\# 3: 更新并安装Docker-CE		
+3: 更新并安装Docker-CE
 
 ```sh
 yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
 ```
 
-配置镜像加速器`vim  /etc/docker/daemon.json`
+配置镜像加速器`vim /etc/docker/daemon.json`
 
 ```sh
 {"registry-mirrors": ["https://ustc-edu-cn.mirror.aliyuncs.com","https://docker.mirrors.ustc.edu.cn"]}
@@ -76,7 +76,7 @@ yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-co
 
 ## **二、离线二进制安装**
 
-```
+```sh
 curl -O https://download.docker.com/linux/static/stable/x86_64/docker-20.10.8.tgz 
 cp docker/* /usr/bin/ #复制到可执行目录
 dockerd &  #启动Docker守护程序

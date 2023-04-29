@@ -1,4 +1,4 @@
-<img src="E:\Project\Textbook\linux云计算\assets\wps1-1682690115363-174.jpg" alt="img" style="zoom:50%;" /> 
+<img src="E:\Project\Textbook\linux云计算\assets\wps1-1682690115363-174.jpg" alt="img" style="zoom: 67%;" /> 
 
 /etc/services查看系统所有协议
 
@@ -132,7 +132,7 @@ sort：排序（默认小到大排序）	-n 数字由大到小排序(-r 降序�
 
 squeue 是一个序列的缩写，主要用来输出序列化的东西
 
-用法：seq [选项]... 尾数		或：seq [选项]... 首数 尾数		或：seq [选项]... 首数 增量 尾数（默认增量为1）
+**用法**：seq [选项]... 尾数		或：seq [选项]... 首数 尾数		或：seq [选项]... 首数 增量 尾数（默认增量为1）
 
 -s, --separator=字符串    指定分隔字符(默认使用：\n)			seq -s  '#'  1 2 10
 
@@ -178,7 +178,7 @@ seq -f "as%03gaa" 4#% 前面可以指定字符串，同样 g 的后面也可以�
 
 sed：以行为单位自动编辑一个或多个文件、简化对文件的反复操作、编写转换程序
 
-选项：
+**选项**：
 
 -n：不显示默认输出内容					-i：直接修改(-i.brk先对原文件备份brk，后生成修改文件)
 
@@ -198,7 +198,7 @@ sed：以行为单位自动编辑一个或多个文件、简化对文件的反�
 
 4、步进:		1~2（从第1行后每隔2行才进行匹配）奇数行		2~2（从第2行后每隔2行才进行匹配）偶数行
 
-编辑命令（-i后接）：	d：删除			p：打印，将匹配的行重复打印
+**编辑命令**（-i后接）：	d：删除			p：打印，将匹配的行重复打印
 
 i：前添加 \ a：后添加，a+字符串，原每一行的后一行都会添加指定字符串
 
@@ -216,7 +216,7 @@ p：显示替换成功的行	w + 文件名：将成功的行保存至指定文�
 
  [-n\-i选项]... {选项、地址定界；编辑命令}	 [输入文件]
 
-输出文本：
+**输出文本**：
 
 sed -n 'p' a.txt输出所有行		sed -n '4p' a.txt 输出第4行		sed -n '4,+10p' a.txt输出第4行及其后的10行内容
 
@@ -224,7 +224,7 @@ sed -n '$=' 输出文件的行数		sed -n '4,7p' a.txt输出4-7行		sed -n '/^bi
 
 sed -n 'p;n' a.txt 输出奇数行		sed -n 'n;p’a.txt 输出偶数行	sed -n '10,$' 输出第10行到结尾的所有偶数行
 
-删除文本：
+**删除文本**：
 
 sed -i '3,5d' a.txt删除第3-5行	sed -i '$d' a.txt删除最后一行		sed -i '/xml/d' a.txt 删除所有包含xml的行
 
@@ -232,7 +232,7 @@ sed -i '/^$/' a.txt删除重复空行	sed -i '/^$/d' a.txt 删除所有空行	se
 
 sed -i /^install/d' a.txt删除所有以
 
-替换文本：
+**替换文本**：
 
 sed 's/xml/XML/' a.txt将每行的第一个xml替换为XML		sed 's/xml/XML/3' a.txt 将每行的第3个xml替换为XML
 
@@ -288,7 +288,7 @@ awk '$1 = 100 {print $1 > "file" }' test #上式表示如果第一个域的值�
 
 echo a b c d | awk '{$2=$2" e f g";print}' #将第二段的字符替换为b e f g,再打印出来
 
-awk‘NR%2==0’test 输出偶数行文本			awk -F：'$1=="sync"’/etc/passwd 用户名为sync的行
+awk‘NR%2\==0’test 输出偶数行文本			awk -F：'$1=="sync"’/etc/passwd 用户名为sync的行
 
 awk -F:‘$1==ENVIRON["USER"]’ /etc/passwd
 
@@ -624,7 +624,7 @@ Enabled=1	//是否开启存库
 mount -o loop /root/XianDian-IaaS-v1.4.iso /media/ #挂在镜像文件
 ```
 
-![img](E:\Project\Textbook\linux云计算\assets\wps12-1682690115364-185.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps12-1682690115364-185.jpg" alt="img" style="zoom: 80%;" /> 
 
 yum search ntpd 搜索安装包ntpd					yum provides 查看命令由哪个包提供
 
@@ -776,7 +776,7 @@ semanage fcontext：主要用在安全上下文方面 ：用于管理SElinux策�
 
 -l：查询		-a：增加，你可以增加一些目录的默认安全上下文类型设置		-m：修改		-d：删除
 
-![img](E:\Project\Textbook\linux云计算\assets\wps13-1682690115364-186.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps13-1682690115364-186.jpg" alt="img" style="zoom:67%;" /> 
 
 # 磁盘管理
 
@@ -790,9 +790,9 @@ semanage fcontext：主要用在安全上下文方面 ：用于管理SElinux策�
 
 分配文件的大小：linux以块为单位，win上叫簇（4k为一单位）
 
-![img](E:\Project\Textbook\linux云计算\assets\wps14.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps15-1682690115364-187.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps14.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps15-1682690115364-187.jpg" alt="img" style="zoom: 67%;" /> 
 
-![img](E:\Project\Textbook\linux云计算\assets\wps16-1682690115364-188.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps16-1682690115364-188.jpg" alt="img" style="zoom:67%;" /> 
 
 磁盘分区：MBR(用fdisk分区) 和 GPT（用gdisk命令，需安装软件）
 
@@ -824,9 +824,9 @@ parted -s /dev/sdb mkpart primary 0 -1	 或 parted -s /dev/sdb mkpart primary 0 
 
 mkfs.xfs -f /dev/sdb
 
-![img](E:\Project\Textbook\linux云计算\assets\wps17-1682690115364-189.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps17-1682690115364-189.jpg" alt="img" style="zoom:67%;" /> 
 
-![img](E:\Project\Textbook\linux云计算\assets\wps18-1682690115364-190.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps18-1682690115364-190.jpg" alt="img" style="zoom: 80%;" /> 
 
 Defaults,ro 只读（不能写）		df -Th显示磁盘使用情况		-T显示文件系统的形式	-h以人类可读方式显示
 
@@ -842,7 +842,7 @@ PE的大小可以指定，默认为4MB。PE的大小一旦确定将不能改变�
 
 PV(Physical Volume)	物理卷		VG(Volume Group)	卷组			LV(Logical Volume)	逻辑卷
 
-![img](E:\Project\Textbook\linux云计算\assets\wps19-1682690115364-191.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps20-1682690115364-192.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps19-1682690115364-191.jpg" alt="img" style="zoom: 67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps20-1682690115364-192.jpg" alt="img" style="zoom: 67%;" /> 
 
 1、制作选择物理卷 fdisk t  8e (修改为linux LVM类型)
 
@@ -930,7 +930,7 @@ restore -tf /srv/data.dp		查看归档信息
 
 cd /mnt/5  | Restore -rf /srv/data.dp	会在当前位置释放归档文件
 
-![img](E:\Project\Textbook\linux云计算\assets\wps21-1682690115364-193.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps21-1682690115364-193.jpg" alt="img" style="zoom:67%;" /> 
 
 cfsdump 也是归档			Xfsrestore	恢复
 
@@ -948,7 +948,7 @@ RAID 1：着重安全性，两块硬盘执行同步式的操作，存放不追�
 
 RAID 2/3：是raid 0的升级版，加入了错误纠正码，但写入变慢
 
-![img](E:\Project\Textbook\linux云计算\assets\wps22-1682690115364-194.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps23-1682690115364-195.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps22-1682690115364-194.jpg" alt="img" style="zoom:50%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps23-1682690115364-195.jpg" alt="img" style="zoom:50%;" /> 
 
 RAID 5：最快最安全，每块盘平均存放奇偶校验值，使用率（n-2）/2，且备份盘自动恢复数据
 
@@ -958,7 +958,7 @@ RAID 1+ 0：先两块硬盘组合成raid 1，再将组合硬盘制作成raid 0�
 
 JBOD：将多块磁盘空间合并成一个大的逻辑上连续的空间使用
 
-![img](E:\Project\Textbook\linux云计算\assets\wps24-1682690115365-196.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps25-1682690115365-197.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps24-1682690115365-196.jpg" alt="img" style="zoom:50%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps25-1682690115365-197.jpg" alt="img" style="zoom:50%;" /> 
 
 mdadm：为软RAID提供管理界面，为空余磁盘添加冗余，结合内核中的md（multi devices）,RAID设备名为/dev/md0等
 
@@ -984,7 +984,7 @@ mdadm -G /dev/md0 -n4 -a /dev/sda5 将sda5加入到md0磁盘阵列
 
 reresize2fs /dev/md0 同步md0上所有磁盘的文件系统
 
-![img](E:\Project\Textbook\linux云计算\assets\wps26-1682690115365-198.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps26-1682690115365-198.jpg" alt="img" style="zoom: 50%;" /> 
 
 2048前面空间是放主引导分区
 
@@ -1022,7 +1022,7 @@ shel脚本：包含一些命令或声明有一定格式的文本.sh文件
 
 ### 变量
 
-执行顺序:/etc/profile-->/etc/profile.d/*.shー->~/. bash_profile-->~/.bashrc-->/etc/bashrc
+执行顺序:`/etc/profile-->/etc/profile.d/*.shー->~/. bash_profile-->~/.bashrc-->/etc/bashrc`
 
 /etc/profile 或 /etc/bashrc系统级环境变量文件			 ~/.profile或~/.bashrc用户级环境变量文件
 
@@ -1136,125 +1136,154 @@ expr命令进行算术运算，格式比较严格		a=`expr 1 \* 4`		a=`expr $a \
 
 exit 1函数退出当前程序
 
-三目运算符：a=$([ "$b" == 5 ] && echo "$c" || echo "$d")
+三目运算符：`a=$([ "$b" == 5 ] && echo "$c" || echo "$d")`
 
-![img](E:\Project\Textbook\linux云计算\assets\wps27-1682690115365-199.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps28-1682690115365-200.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps27-1682690115365-199.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps28-1682690115365-200.jpg" alt="img" style="zoom:67%;" /> 
 
 ### For循环
 
 for的一些用法		例：for i in “file1” “file2” “file3”
 
-in /boot/*		 in /etc/*.conf			 in {1…10}		in $( ls )			in $(< file)	in `seq 5 -1 1`
+| in /boot/*                       | in /etc/*.conf                 | in {1…10}            | in $( ls )                               |
+| -------------------------------- | ------------------------------ | -------------------- | ---------------------------------------- |
+| in $(< file)	in $(seq 5 -1 1) | in $(seq -w 10) -->等宽的01-10 | in $(cat /srv/grade) | in “$@” -->取所有位置参数，可简写为for i |
 
-in $(seq -w 10) -->等宽的01-10			in `cat /srv/grade`		in “$@” -->取所有位置参数，可简写为for i
 
+```sh
 function printInfo (){
-
-​    echo -n "Your choice is "
-
+	echo -n "Your choice is "
 }
+```
 
+
+```sh
 for a in {10..15}
-
 do
-
 printInfo;		#使用函数
-
 done	
+```
+
 
 ### If判断语句
 
-[ ]&& ----快捷if				[ "$?" == 0 ] && echo "success" >>/tmp/install.log
+[ ]&& ----快捷if				`[ "$?" == 0 ] && echo "success" >>/tmp/install.log`
 
-单分支if语句
+**单分支if语句**
 
-if	判断条件; then			if ! (ping -c4 -i0.1 192.168.0.22 &>/dev/null) ; then 
-
-输出结果命令				echo "host22 is down" #如果ping22号主机成功的话，会输出host22 is down
-
-fi							fi
-
- 
-
-双分支if语句					#for a in {1..10}
-
-if 判断条件; then				do
-
- 	输出结果命令1				if  ! (ping -c4 -i0.1 192.168.0.$a &>/dev/null) ; then
-
-else								echo "host$a is down" &>>/ tmp/down
-
-​	输出结果命令2				else
-
-fi								echo "host$a is up" &>>/tmp/up
-
+```sh
+if	判断条件; then
+	输出结果命令
 fi
+```
 
+```sh
+if ! (ping -c4 -i0.1 192.168.0.22 &>/dev/null) ; then 
+	echo "host22 is down" #如果ping22号主机成功的话，会输出host22 is down
+fi
+```
+
+**双分支if语句**					
+
+```sh
+if 判断条件; then
+	输出结果命令1	
+else
+	输出结果命令2
+fi
+```
+
+```sh
+#for a in {1..10}
+do
+	if  ! (ping -c4 -i0.1 192.168.0.$a &>/dev/null) ; then
+		echo "host$a is down" &>>/ tmp/down
+	else
+		echo "host$a is up" &>>/tmp/up
+	fi
 done
+```
 
-多分支if语句
+**多分支if语句**
 
-if 	判断条件1; then			if [ "$?" == 0 ] | [ "$?" == 1 ];then	#多个判断条件
-
-输出结果命令1					echo "welcome to joinlabs!
-
-elif	判断条件2; then			elif [ "$1" == "redhat" ] ; then
-
-输出结果命令2					echo "this is redhat classroom"
-
-elif	判断条件3; then			else
-
-输出结果命令3					echo "byebye"
-
-else							fi
-
-输出结果命令2
-
+```sh
+if 	判断条件1; then
+	输出结果命令1
+elif	判断条件2; then
+	输出结果命令2
+elif	判断条件3; then
+	输出结果命令3
+else
+	输出结果命令2
 fi
+```
 
-![img](E:\Project\Textbook\linux云计算\assets\wps29-1682690115365-201.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps30-1682690115365-202.jpg) 
+```sh
+if [ "$?" == 0 ] | [ "$?" == 1 ];then	#多个判断条件
+	echo "welcome to joinlabs!
+elif [ "$1" == "redhat" ] ; then
+	echo "this is redhat classroom"
+else
+	echo "byebye"
+fi
+```
+
+
+
+<img src="E:\Project\Textbook\linux云计算\assets\wps29-1682690115365-201.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps30-1682690115365-202.jpg" alt="img" style="zoom:67%;" /> 
 
 ### Read语句
 
 read能够和用户进行交互式的读取数据,要保证脚本能够根据用户的反馈数据进行下一步操作
 
-read		-p：(提示语)提示输入		-n：(限制字符个数)计数输入		-t(等待时间)计时输入
-
--s(不回显)隐藏输入			-d：delimiter，读到指定字符即退出，例：-dp，读到q即退出
+| read                 | 参数                                                    |                      |
+| -------------------- | ------------------------------------------------------- | -------------------- |
+| -p：(提示语)提示输入 | -n：(限制字符个数)计数输入                              | -t(等待时间)计时输入 |
+| -s：(不回显)隐藏输入 | -d：delimiter，读到指定字符即退出，例：-dp，读到q即退出 |                      |
 
 读文件：每次read命令都会读取文件的“一行”内容。当文本没有可读的行时，read命令将以非零状态退出
 
 name是个变量，Read语句一般是和if语句连用的
 
-while read line							read -dq -s -p "please input YES or NO：" -t 10 -n3 a
-
-do										if [[ $a =~ ^[Yy][Ee][Ss]$ ]];then		#模糊匹配
-
-​    if [[ $line =~ "/sbin/nologin" ]];then			echo "yes"
-
-​        echo "$line"						fi
-
-​    fi
-
+```sh
+while read line
+do
+	if [[ $line =~ "/sbin/nologin" ]];then
+	echo "$line"
+	fi
 done < /etc/passwd
+```
+
+```sh
+read -dq -s -p "please input YES or NO：" -t 10 -n3 a
+if [[ $a =~ ^[Yy][Ee][Ss]$ ]];then		#模糊匹配
+	echo "yes"
+fi
+```
+
+
 
 ### While循环语句
 
-while 条件	count=1							While : 	#无限循环
-
-do			cat /etc/passwd | whiel read a
-
-done		do
-
- 	echo "$count  $a"
-
-let count++
-
+```sh
+while 条件  //While : 	//无限循环
+do
 done
+```
+
+```sh
+count=1							
+cat /etc/passwd | while read a
+do
+ 	echo "$count  $a"
+	let count++
+done
+```
+
+
 
 ### Case语句
 
-![img](E:\Project\Textbook\linux云计算\assets\wps31-1682690115365-203.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps32-1682690115365-204.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps33-1682690115365-205.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps31-1682690115365-203.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps32-1682690115365-204.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps33-1682690115365-205.jpg" alt="img" style="zoom:67%;" /> 
 
 ### select语句
 
@@ -1270,7 +1299,7 @@ select 循环执行后会出现菜单项等待用户选择（不会自动循环�
 
 开机破密码
 
-![img](E:\Project\Textbook\linux云计算\assets\wps34-1682690115365-206.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps34-1682690115365-206.jpg" alt="img" style="zoom: 67%;" /> 
 
 Grub2里面有，菜单，核心，默认走第一个核心
 
@@ -1296,7 +1325,7 @@ Exec /sbin/init #可执行文件
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps36-1682690115365-208.jpg) 
 
-![img](E:\Project\Textbook\linux云计算\assets\wps37-1682690115366-209.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps38-1682690115366-210.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps37-1682690115366-209.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps38-1682690115366-210.jpg" alt="img" style="zoom:67%;" /> 
 
 systemctl get-default	查看运行级别
 
@@ -1426,41 +1455,26 @@ Ctrl + v 		Shif + a		@		Esc			esc
 
 15.1 开出新的窗口:	sp				15.2 切换窗口:	ctrl w 上下键
 
+```sh
 vim ~/.vimrc		#vim脚本编辑工具
-
 set ignorecase
-
 set cursorline
-
 set autoindent
-
 autocmd BufNewFile *.sh exec ":call SetTitle()"
-
 func SetTitle()
-
 ​    if expand("%:e") == 'sh'
-
 ​    call setline(1,"#!/bin/bash")
-
 ​    call setline(2,"#*******************************")
-
 ​    call setline(3,"#Author:		liulengbo")
-
 ​    call setline(4,"#weixin:		13086119057")
-
 ​    call setline(5,"#Date:		".strftime("%Y-%m-%d"))
-
 ​    call setline(6,"#Description:	")
-
 ​    call setline(7,"#*******************************")
-
 ​    call setline(8,"")
-
 ​    endif
-
 endfunc
-
 autocmd BufNewFile * normal G
+```
 
  
 
