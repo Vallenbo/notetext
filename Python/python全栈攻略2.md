@@ -1,6 +1,6 @@
 python全栈攻略2
 
-## 数据库
+# 数据库
 
  PyMySQL是从Python连接到MySQL数据库服务器的接口， 简单理解就是，Pymysql是python操作mysql数据库的三方模块。
 
@@ -10,7 +10,7 @@ pip install pymysql，mysqlclient (mysql客户端连接工具，性能好于pymy
 
 import pymysql;
 
- 
+
 
 #  mysql数据库
 
@@ -54,7 +54,7 @@ connection.close()  *#**关闭连接*
 
  
 
-## 爬虫
+# 爬虫
 
 GET是默认的HTTP请求方法，用于直接输入网址的方式去访问网页
 

@@ -1,4 +1,98 @@
-导入数据库：
+# Mariadb数据库管理系统
+
+数据库管理系统分	Oracle	MySQL---开发相同---Mariadb
+
+`vim /etc/yum.repos.d/CentOS-MariaDB.repo`
+
+```sh
+[mariadb]
+name=MariaDB
+baseurl=http://yum.mariadb.org/10.3/centos7-amd64
+gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+gpgcheck=1
+```
+
+`yum install mariadb-* -y` #安装
+
+MyCLI ：一个支持自动补全和语法高亮的 MySQL/MariaDB 客户端  //`yum install pip`，`pip install mycli`
+
+包：mariadb*			端口号：3306		服务名：mariadb
+
+-u, --user=name         #指定用户名		-p, --password          #指定密码
+
+-h, --host=name         #指定主机名		-P, --port            		#指定端口
+
+```sql
+mysql> use mysql #使用数据库
+mysql> update user set host = '%' where user = 'root'; #使能够远程连接
+mysql> flush privileges; #刷新权限
+```
+
+/var/log/mariadb/mariadb.log日志文件		/var/lib/mysql/数据库实体文件
+
+```sh
+[root@server23 ~]# grep -Ev "^#|^$" /etc/my.cnf	//数据库服务默认主配置文件
+```
+
+```conf
+[mysqld]
+datadir = /data/mysql # 数据库数据文件存放目录
+socket  = /tmp/mysql.sock #为MySQL客户端程序和服务器之间的本地通讯指定一个套接字文件
+symbolic-links=0
+
+[mysqld_safe]
+log-error=/var/log/mariadb/mariadb.log	#记录错误日志文件
+pid-file=/var/run/mariadb/mariadb.pid	#pid所在的目录
+!includedir /etc/my.cnf.d
+```
+
+<img src="E:\Project\Textbook\linux云计算\数据库\assets\wps149.jpg" alt="img" style="zoom:67%;" /> <img src="E:\Project\Textbook\linux云计算\assets\wps150.jpg" alt="img" style="zoom:67%;" />
+
+<img src="E:\Project\Textbook\linux云计算\assets\wps151.jpg" alt="img" style="zoom:67%;" /> <img src="E:\Project\Textbook\linux云计算\数据库\assets\wps152.jpg" alt="img" style="zoom:67%;" />
+
+<img src="E:\Project\Textbook\linux云计算\数据库\assets\wps153.jpg" alt="img" style="zoom:67%;" /> 
+
+
+
+## GRANT命令用于对用户进行授权：
+
+```sql
+grant create ON 数据库.表单名称 TO 用户名@主机名	//对某个特定数据库中的特定表单给予授权
+grant select，delete ON 数据库.* TO 用户名@主机名	//对某个特定数据库中的所有表单给予授权
+grant 权限 ON *.* TO 用户名@主机名				//对所有数据库及所有表单给予授权
+grant 权限1,权限2 ON 数据库.* TO 用户名@主机名	//对某个数据库中的所有表单给予多个授权
+grant all privileges on xd_db.* to 'user'@'%' identified by 'redhat' 
+//允许本地用户user在%任何主机IP地址远程登陆对xd_db数据库下*.*所有表格有访问权限设置密码为redhat
+
+create user 'xiandian'@'localhost' identified by 'xd_paas'; 创建一个xiandian用户在本地授权密码xd_paas
+create user '[用户名称]'@'%' identified by '[用户密码]';	//创建用户
+create user Luigi@localhost identified by "redhat";		//增加管理员账户Luigi及密码redhat
+
+SELECT HOST,USER,PASSWORD FROM user WHERE USER="luke";
+```
+
+## 查询luck主机名称、账户名称以及经过加密的密码值信息
+
+```sh
+show grants for alex@'localhost';	//查看alex所有的权限
+mysqladmin -u root password 123456	//设置mysql数据库密码
+mysql -uroot -p XXX < /home/renwole.sql	//导入数据库
+```
+
+```sh
+[root@rhel ~]#mysql_secure_installation	//更改超级用户管理权限
+Enter current password for root (enter for none): 当前数据库密码为空，直接按回车键
+Set root password? [Y/n]				设置root用户密码
+Remove anonymous users? [Y/n] y		删除匿名用户可登录数据库？
+Disallow root login remotely? [Y/n]		禁止用户远程登陆
+Remove test database and access to it?	删除test测试数据库并访问它？
+Reload privilege tables now?			现在重新加载权限表？
+
+[root@rhel ~]# mysql -u root -p123456	现在需指定用户登录
+MariaDB [(none)]> flush privileges #使配置生效
+```
+
+# 导入数据库
 
 ```sql
 mysql> create database onlinedb;
@@ -6,19 +100,12 @@ mysql> use onlinedb;
 mysql> source d:/onlinedb sql;
 ```
 
- 
-
-sql语句中的快捷键：
+# sql语句中的快捷键
 
 ```sql
-\G格式化输出(文本式，竖立显示)
-\s查看服务器端信息
-\c结束命令输入操作
-\q退出当前sq|命令行模式
-\h查看帮助
+\G格式化输出(文本式，竖立显示)			\s查看服务器端信息
+\c结束命令输入操作						\q退出当前sq|命令行模式				\h查看帮助
 ```
-
- 
 
 # 数据库操作
 
@@ -32,25 +119,25 @@ alter database xxx;							//修改数据库
 alter database xxx character set utf8; 		//修改数据库编码的命令
 drop database xxx;							//删除数据库
 exit	//推出数据库命令
+
+
+mysqldump -u root -p linuxprobe > /root/linuxprobeDB.dump	//mysqldump命令用于备份数据库
+mysql -u root -p linuxprobe < /root/linuxprobeDB.dump	//mysql命令用于导入数据库
 ```
 
- 
-
-数据库模式：
+# 数据库模式
 
 creat schema <模式名> authorization <用户名>
 
 create schema test authorization U1
 
- 
+
 
 drop schema <模式名> <cascade|restrict>
 
 cascade(级联)表示在删除模式的同时把该模式中所有的数据库对象全部删除
 
 restrict(限制)表示如果该模式中已经定义了下属的数据库对象，如表或视图等，则拒绝该删除语句的执行
-
- 
 
 | 数据查询                                                 | select （查询出数据，也可用于变量赋值）        |
 | -------------------------------------------------------- | ---------------------------------------------- |
@@ -78,9 +165,9 @@ restrict(限制)表示如果该模式中已经定义了下属的数据库对象�
 
 日期和时间类型：
 
-![img](E:\Project\Textbook\linux云计算\assets\wps3-1682771292878-2.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps3-1682771292878-2.jpg" alt="img" style="zoom: 80%;" /> 
 
- 
+
 
 表的字段约束：
 
@@ -98,9 +185,7 @@ restrict(限制)表示如果该模式中已经定义了下属的数据库对象�
 
 `unique`	唯一索引(数据不能重复:用户名)可以增加查询速度,但是会降低插入和更新速度
 
- 
 
- 
 
 主键：
 
@@ -108,9 +193,7 @@ restrict(限制)表示如果该模式中已经定义了下属的数据库对象�
 
 2、 应该总是定义主键虽然并不总是都需要主键，但大多数数据库设计人员都应保证他们创建的每个表具有一个主键，以便于以后的数据操纵和管理。
 
- 
 
- 
 
 ## 表定义
 
@@ -119,30 +202,24 @@ use xxx;		//使用数据表
 create table XXX_back select * from XXX //数据表进行备份
 ```
 
- 
 
- 
 
-1、创建数据表
+### 创建数据表
 
-CREATE TABLE<表名> (<表字段名><数据类型> [列级完整性约束条件]
-
-[,<表字段名><数据类型> [列级完整性约束条件]]
-
-[,<表级完整性约束条件>]) ;
-
- 
+**主键约束**：使某个字段不重复且不得为空，确保表内所有数据的唯一性。
 
 ```sql
+CREATE TABLE<表名> (<表字段名><数据类型> [列级完整性约束条件]
+[,<表字段名><数据类型> [列级完整性约束条件]]
+[,<表级完整性约束条件>]) ;
+
 CREATE TABLE Student(Sno CHAR(9) PRIMARY KEY,	/*列级完整性约束条件，Sno 是主码*/
-Sname CHAR(20) UNIQUE,		/* Sname取唯一值*/
-Ssex CHAR(2),
-Sage SMALLINT,
-Sdept CHAR(20)
+	Sname CHAR(20) UNIQUE,		/* Sname取唯一值*/
+	Ssex CHAR(2),
+	Sage SMALLINT,
+	Sdept CHAR(20)
 )engine=innodb default charset=utf8； //设置引擎和字符集
 ```
-
- 
 
 ```sql
 create table xxx（列名字  类型（20））	
@@ -150,46 +227,38 @@ create table 新表 as select  from 旧表	复制数据表结构及数据到新�
 create table 新表 as select  from 旧表 where false	复制数据表结构到新表
 ```
 
- 
-
-创建函数
+### 创建函数
 
 ```sql
 create function xxx()
-return varcher（225）	//返回的数形
+	return varcher（225）	//返回的数形
 begin
 	return (select  from xxx );
 end
 ```
 
- 
-
-创建储存过程(参数化)	
+### 创建储存过程(参数化)	
 
 ```sql
 delimiter  //------使用作为结束提交符号
-create procedure spXXX(id int)
+	create procedure spXXX(id int)
 reads sql data
 begin
 	select  from goods where gdID = id;
 end 
 ```
 
- 
-
-修改函数
+### 修改函数
 
 ```sql
 alter function xxx()
-return type_数值
+	return type_数值
 begin
 	return (select  from xxx );
 end
 ```
 
- 
-
-2、修改表
+## 修改表
 
 ```sql
 alter table 原表名 rename 新表名	重命名数据表；
@@ -202,9 +271,7 @@ alter table 表名 drop uPwd(字段名)	删除字段；
 truncate xxx	清空数据表所有记录；
 ```
 
- 
-
-3、删除表及约束
+### 删除表及约束
 
 ```sql
 drop table xxx1,xxx2，		//删除多个数据表
@@ -214,16 +281,14 @@ drop procedure psXXX		//删除储存过程
 show databases tables  (注意加s)	//查询展示数据库查询展示数据表
 ```
 
-
-
 ```sql
 alter table xxx drop primary key	//删除主键
 alter table xxx drop index 索引名	/删除索引
 ```
 
- 
 
-4、查看
+
+## 查看表
 
 ```sql
 show table engine	//查看数据表引擎
@@ -253,7 +318,7 @@ where 条件的表达式
 
 
 
-运算符
+### 运算符
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps4-1682771292878-6.jpg" alt="img" style="zoom:67%;" /> 
 
@@ -272,8 +337,6 @@ where 条件的表达式
 |        | full [outer] join  |                                        |
 | 右连接 | right [outer] join |                                        |
 
-
-
 ### 嵌套查询格式：
 
 ```sql
@@ -281,21 +344,6 @@ select function fnXXX	//使用函数
 call psXXX(1)		//使用储存过程---1代表参数
 select  from student where order by s_class desc;		//以s_class降序查询student数据表
 ```
-
-
-
-主键约束
-
-理解：使某个字段不重复且不得为空，确保表内所有数据的唯一性。
-
-```sql
-CREATE TABLE user (
-  id INT primary KEY,
-  name VARCHAR(20)
-);
-```
-
- 
 
 ## 数据添加与修改
 
@@ -315,19 +363,23 @@ CREATE TABLE user (
 
 语法四：  ` UPDATE 表名 SET     字段1=值1,     字段2=值2,     WHERE CONDITION;`
 
-`update 表名 set name = 'squirrel' where owner = 'Diane'		修改更新修改数据`
+```sql
+update 表名 set name = 'squirrel' where owner = 'Diane'	//修改更新修改数据
+```
 
- 
+
 
 ## 数据删除
 
 语法：   `DELETE FROM 表名      WHERE CONITION;`
 
-`delect from 表名 where name = 'squirrel'`		//删除数据表中记录where添加条件
+```sql
+delect from 表名 where name = 'squirrel'	//删除数据表中记录where添加条件
+TRUNCATE TABLE tablename;	//删除所有数据，保留表结构，不能撤消还原。
+DROP TABLE table_name ; //删除指定数据库
+```
 
-`TRUNCATE TABLE tablename`	//删除所有数据，保留表结构，不能撤消还原。
 
- 
 
 # 详解mysql引擎
 
@@ -339,9 +391,17 @@ MySQL服务器把数据的存储和提取操作都封装到了一个叫存储引
 
 为了管理方便，人们把连接管理、查询缓存、语法解析、查询优化这些并不涉及真实数据存储的功能划分为MySQLserver的功能，把真实存取数据的功能划分为存储引擎的功能。各种不同的存储引擎向上边的MySQL server 层提供统一的调用接口(也就是存储引擎API) ，包含了几十个底层函数，像"读取索引第一条内容"、 "读取索引下一条内容"、"插入记录"等等。所以在MySQL server 完成了查询优化后，只需按照生成的执行计划调用底层存储引擎提供的API,获取到数据后返回给客户端就好了。
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps6-1682771292878-5.jpg" alt="img" style="zoom:67%;" /> 
+ **MySQL支持非常多种存储引擎**
 
- 
+| 存储引擎 | 描述                               | 存储引擎  | 描述                           |
+| -------- | ---------------------------------- | --------- | ------------------------------ |
+| ARCHIVE  | 用于数据存档(行被插入后不能再修改) | BLACKHOLE | 丢弃写操作，读操作会返回空内容 |
+| CSV      | 在存储数据时，以逗号分隔各个数据项 | FEDERATED | 用来访问远程表                 |
+| InnoDB   | 具备外键支持功能的事务存储引擎     | MEMORY    | 置于内存的表                   |
+| MERGE    | 用来管理多个MyISAM表构成的表集合   | MyISAM    | 主要的非事务处理存储引擎       |
+| NDB      | MySQL集群专用存储引擎              |           |                                |
+
+
 
 MyISAM和InnoDB表引擎的区别
 
@@ -361,20 +421,3 @@ MyISAM和InnoDB表引擎的区别
 
 8)、查询效率
 
- 
-
- 
-
- 
-
- 
-
- 
-
- 
-
- 
-
- 
-
- 

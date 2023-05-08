@@ -32,7 +32,7 @@ Prometheus主服务器，它会刮取并存储时间序列数据
 
 大多数Prometheus组件都是用Go编写的，因此易于构建和部署为静态二进制文件
 
-![img](E:\Project\Textbook\linux云计算\assets\wps1-1682690463420-251.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps1-1682690463420-251.jpg" alt="img" style="zoom: 50%;" /> 
 
 工作流程是：
 
@@ -56,23 +56,21 @@ Prometheus 在数据存储扩展性以及持久性上没有 InfluxDB，OpenTSDB�
 
 ## prometheus服务端软件安装：
 
-下载地址：https://github.com/prometheus/prometheus/releases/download/v2.29.0-rc.1/prometheus-2.29.0-rc.1.linux-amd64.tar.gz
+[prometheus下载地址](https://github.com/prometheus/prometheus/releases/download/v2.29.0-rc.1/prometheus-2.29.0-rc.1.linux-amd64.tar.gz)
 
+```sh
 tar -xzvf prometheus-2.29.0-rc.1.linux-amd64.tar.gz	#解压
-
 cp promtool prometheus /usr/local/sbin/		#复制文件至启动文件夹
-
 promtool check config prometheus.yml	#检查配置文件是否有问题
-
 prometheus --config.file="prometheus.yml"	#启动服务指定配置文件，默认监听9090
-
 -- storage.tsdb.path #指定数据文件存储的位置		--web.enable-lifecycle #支持热更新
+```
 
-\###docker容器安装启用：
+docker容器安装启用：
 
+```sh
 docker run -d -p 9090:9090 -v /tmp/prometheus.yml:/prometheus/prometheus.yml prom/prometheus
-
- 
+```
 
 global:
 
@@ -116,7 +114,7 @@ scrape_configs: #控制Prometheus监视哪些资源
 
   \#metric_relabel_configs：metric #重置标签配置
 
-服务发现：
+**服务发现**：
 
   \#dns_sd_configs: DNS 服务发现
 
@@ -142,7 +140,7 @@ scrape_configs: #控制Prometheus监视哪些资源
 
   \#triton_sd_configs: Triton 服务发现
 
-## node_exporter监控节点：       
+## node_exporter监控节点：
 
 Prometheus 监控模型: 主动抓取目标的指标接口(HTTP 协议)获取监控指标, 再存储到本地或远端的时序数据库,且对于指标接口有一套固定的格式要求
 
@@ -156,15 +154,17 @@ http_requests_total{method="post",code="200"} 1027
 
 http_requests_total{method="post",code="400"}   3 
 
-![img](E:\Project\Textbook\linux云计算\assets\wps2-1682690463420-252.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps2-1682690463420-252.jpg" alt="img" style="zoom:67%;" /> 
 
-下载地址:https://github.com/prometheus/node_exporter/releases/download/v1.2.2/node_exporter-1.2.2.linux-amd64.tar.gz
+[node_exporter下载地址](https://github.com/prometheus/node_exporter/releases/download/v1.2.2/node_exporter-1.2.2.linux-amd64.tar.gz)
 
 cp /node_exporter/node_exporter /usr/local/sbin/ #命令拷贝至全局
 
 node_exporter -h	#帮助命令，也可查看控制器打开状态
 
-1、配置文本文件收集器：mkdir -p  /var/lib/node_exporter/textfile_collector	#创建收集目录
+1、配置文本文件收集器：
+
+mkdir -p  /var/lib/node_exporter/textfile_collector	#创建收集目录
 
 echo 'metadata{role="docker_server",datacenter="NJ"}1' |tee metadata.prom
 
@@ -220,41 +220,29 @@ PATH：这是系统的环境变量，这个东西只是告知系统你的Java开
 
 vim /etc/profile			#配置环境
 
+```sh
 export JAVA_HOME=/usr/lib/jdk/jdk-14.0.1
-
 export JRE_HOME=/${JAVA_HOME}
-
 export CLASSPATH=.:${JAVA_HOME}/libss:${JRE_HOME}/lib
-
 export PATH=${JAVA_HOME}/bin:$PATH
+```
 
+```
 [root@localhost jdk-14.0.1]# java -version	#查看java版本号
-
 [root@localhost jdk-14.0.1]# javac
-
 [user@localhost ~/jsrc]$ vim Hello.java		#Java程序测试
 
-/// Hello.java
-
- 
-
-public class Hello
-
-{
-
-  public static void main(String args[])
-
-  {
-
-​    System.out.println("Hello");
-
+public class Hello {// Hello.java
+  public static void main(String args[]){
+	System.out.println("Hello");
   }	}
+```
 
 openjdk：是开源社区开发的开源实现，yum list | grep openjdk查看jdk版本号
 
-yum install java-1.8.0 -y #进行安装
+`yum install java-1.8.0 -y` #进行安装
 
-nodejs部署安装
+# nodejs部署安装
 
 一、NodeJS基本介绍
 
@@ -274,13 +262,15 @@ nodejs部署安装
 
 Node.js 安装包及源码下载地址为：https://nodejs.org/en/download/，选择Linux Binaries (x64)
 
-或者：wget https://nodejs.org/dist/latest-v14.x/node-v14.4.0-linux-x64.tar.gz
+或者：`wget https://nodejs.org/dist/latest-v14.x/node-v14.4.0-linux-x64.tar.gz`
 
+```sh
 tar -xzvf node-v14.4.0-linux-x64.tar.gz 进行解压
-
 echo "export PATH=/usr/local/lib/node-v14.4.0-linux-x64/bin:$PATH" >>/etc/profile 设置环境
-
 source /etc/profile 刷新文件			node -v && npm version && npx -v 使用测试安装
+```
+
+
 
 # 数据库
 
@@ -328,17 +318,15 @@ Redis：REmote DIctionary Server(远程字典服务)，一款内存高速缓存�
 
 4、发布、订阅消息（消息通知）		5、商品列表、评论列表等
 
-wget http://download.redis.io/releases/redis-6.0.5.tar.gz #下载安装包
+`wget http://download.redis.io/releases/redis-6.0.5.tar.gz` #下载安装包
 
+```
 tar -xzvf redis-6.0.5.tar.gz && cd redis-6.0.5 #进行解压
-
 yum install cpp binutils glibc glibc-kernheaders glibc-common glibc-devel gcc make -y #安装gcc套装
-
 yum -y install centos-release-scl #升级gcc
-
 yum -y install devtoolset-9-gcc devtoolset-9-gcc-c++ devtoolset-9-binutils
-
 scl enable devtoolset-9 bash #切换到 gcc 9版本
+```
 
 1、[root@localhost src]# make  #编译安装
 
@@ -492,21 +480,16 @@ Memcached 是一套开源的高性能分布式内存对象缓存系统，它将�
 
 Memcached是典型的C/S架构，因此需要安装Memcached服务端与MemcachedAPI客户端。
 
-1、 yum install gcc gcc-c++ make -y #yum安装gcc编译环境包
-
-2、 yum install libevent-devel.x86_64 -y #安装依赖包
-
-3、 wget -O memcached-latest.tar.gz http://memcached.org/latest #下载安装包
-
-4、 tar -xzvf memcached-latest.tar.gz  #解压文件包
-
-5、 ./configure --prefix=/usr/local/memcached #指定libevent安装路径
-
-6、 make && make test && make install
-
-7、 ln -s /usr/local/memcached/bin/* /usr/local/bin/	#创建软连接，方便使用memcached服务命令
-
-8、 memcached -d -m 32m -p 11211 -u root	#启动 memcached
+```sh
+yum install gcc gcc-c++ make -y #yum安装gcc编译环境包
+yum install libevent-devel.x86_64 -y #安装依赖包
+wget -O memcached-latest.tar.gz http://memcached.org/latest #下载安装包
+tar -xzvf memcached-latest.tar.gz  #解压文件包
+./configure --prefix=/usr/local/memcached #指定libevent安装路径
+make && make test && make install
+ln -s /usr/local/memcached/bin/* /usr/local/bin/	#创建软连接，方便使用memcached服务命令
+memcached -d -m 32m -p 11211 -u root	#启动 memcached
+```
 
 -d：守护进程后台模式、-m：指定缓存大小为32M 、-p：指定默认端口11211 、 -u：指定登陆用户为 root
 
@@ -532,17 +515,14 @@ GitLab是利用Ruby on Rails一个开源的版本管理系统，实现一个私�
 
 它还提供一个代码片段收集功能可以轻松实现代码复用，便于日后有需要的时候进行查找。
 
-gitlab-ctl start  #启动所有gitlab组件；				gitlab-ctl stop  #停止所有gitlab组件； 
-
+```
+gitlab-ctl start  #启动所有gitlab组件；			gitlab-ctl stop  #停止所有gitlab组件； 
 gitlab-ctl restart  #重启所有gitlab组件； 			gitlab-ctl status  #查看服务状态； 
-
 gitlab-ctl reconfigure  #修改配置文件之后,重新加载gitlab配置文件并启动所有gitlab组件
-
 vim /etc/gitlab/gitlab.rb  #修改默认的配置文件； 
-
 gitlab-rake gitlab:check SANITIZE=true --trace  #检查gitlab； 
-
 gitlab-ctl tail  #查看日志；						gitlab-ctl --help  #查看gitlab命令的帮助
+```
 
 安装使用GitLab需要至少4GB可用内存(RAM + Swap)! 由于操作系统和其他正在运行的应用也会使用内存, 所以安装GitLab前一定要注意当前服务器至少有4GB的可用内存. 少于4GB内存会出现各种诡异的问题, 而且在使用过程中也经常会出现500错误.
 
@@ -550,59 +530,44 @@ gitlab-ctl tail  #查看日志；						gitlab-ctl --help  #查看gitlab命令的
 
 2.设置postfix开机自启并启动，postfix支持gitlab发信功能	systemctl enable postfix && systemctl start postfix
 
-3.下载gitlab安装包，然后安装：
+3.下载gitlab安装包，然后安装：[centos 6系统的下载地址](https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/yum/el6)		[centos 7系统的下载地址](https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/yum/el7)
 
-centos 6系统的下载地址:https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/yum/el6
-
-centos 7系统的下载地址:https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/yum/el7
-
+```sh
 wget https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/yum/el7/gitlab-ce-9.5.9-ce.0.el7.x86_64.rpm
-
 rpm -ivh gitlab-ce-9.5.9-ce.0.el7.x86_64.rpm
+```
 
 4.修改gitlab配置文件指定服务器ip和自定义端口	echo "xternal_url 'http://localhost'" >> /etc/gitlab/gitlab.rb
 
-5.设置发邮件功能	[root@web1134 ~]# vim /etc/gitlab/gitlab.rb
+5.设置发邮件功能	
 
+```sh
+[root@web1134 ~]# vim /etc/gitlab/gitlab.rb
 gitlab_rails['smtp_enable'] = true
-
 gitlab_rails['smtp_address'] = "smtp.163.com"
-
 gitlab_rails['smtp_port'] = 25
-
 gitlab_rails['smtp_user_name'] = "smtp user@163.com"
-
 gitlab_rails['smtp_password'] = "password"
-
 gitlab_rails['smtp_domain'] = "163.com"
-
 gitlab_rails['smtp_authentication'] = "login"
-
 gitlab_rails['smtp_enable_starttls_auto'] = true
+```
 
 \# 修改gitlab配置的发信人
 
+```
 gitlab_rails['gitlab_email_from'] = "smtp user@163.com"
-
 user["git_user_email"] = "smtp user@163.com"
-
 6.GitLab重置并启动	gitlab-ctl reconfigure && gitlab-ctl restart
-
 ok: run: gitlab-git-http-server: (pid 3922) 1s
-
 ok: run: logrotate: (pid 3929) 0s
-
 ok: run: nginx: (pid 3936) 1s
-
 ok: run: postgresql: (pid 3941) 0s
-
 ok: run: redis: (pid 3950) 0s
-
 ok: run: sidekiq: (pid 3955) 0s
-
 ok: run: unicorn: (pid 3961) 1s
-
 提示“ok: run:”表示启动成功。
+```
 
 6.访问 GitLab页面http:192.168.3.8，如果没有域名，直接输入服务器ip和指定端口进行访问，设置初始化密码如: 5iveL!fe，默认账户root
 
@@ -634,83 +599,71 @@ LAMP 架构部署动态网站环境
 
 使用linux系统架构 > apache提供服务,接受用户连接请求 > 调用libphpx.so模块 > 访问mysqld
 
-![img](E:\Project\Textbook\linux云计算\assets\wps3-1682690463420-253.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps3-1682690463420-253.jpg" alt="img" style="zoom:67%;" /> 
 
-![img](E:\Project\Textbook\linux云计算\assets\wps4-1682690463420-254.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps4-1682690463420-254.jpg" alt="img" style="zoom:67%;" /> 
 
-![img](E:\Project\Textbook\linux云计算\assets\wps5-1682690463420-255.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps5-1682690463420-255.jpg" alt="img" style="zoom:50%;" /> 
 
-![img](E:\Project\Textbook\linux云计算\assets\wps6-1682690463420-256.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps6-1682690463420-256.jpg" alt="img" style="zoom:50%;" /> 
 
 作用:PHP主要负责PHP脚本程序的解析以及实现与 MYSQL数据库的交互工作,我们项目中的注册登录/下单皮付等大多数功能都是基于PHP+ MYSQL进行实现。PHP是一种通用开源脚本
 
-![img](E:\Project\Textbook\linux云计算\assets\wps7-1682690463420-257.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps7-1682690463420-257.jpg" alt="img" style="zoom:50%;" /> 
 
 作用:MSQL是一个关系型数据库管理系统,由瑞典 MYSQL AB公司开发,目前属于 Oracl旗下产品。其主要作用用于永久的存储数据
 
 安装启动httpd	php	(非服务不启动)	mariadb-server
 
+```sh
 mysqladmin -u root password 123456设置mysql数据库密码	mysql -u root -p进入数据库
+```
 
 默认数据库文件/var/lib/mysql		测试网站能否解析php文件cat /var/www/html/index.php
 
+```php
 <?php
-
-​    phpinfo();
-
+	phpinfo();
 ?>
+```
 
 传递网页文件		修改文件权限chmod html/		安装
 
 个人博客
 
-（1） 安装apache、php、mariadb更新 yum 中 PHP 的软件源rpm -Uvh https://mirrors.cloud.tencent.com/epel/epel-release-latest-7.noarch.rpm
+```sh
+安装apache、php、mariadb更新 yum 中 PHP 的软件源
+rpm -Uvh https://mirrors.cloud.tencent.com/epel/epel-release-latest-7.noarch.rpm
+rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+yum -y install mod_php72w.x86_64 php72w-cli.x86_64 php72w-common.x86_64 php72w-mysqlnd php72w-fpm.x86_64
+echo "<?php phpinfo(); ?>" >> /usr/share/nginx/html/index.php检测环境
 
-（2） rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
-
-（3） yum -y install mod_php72w.x86_64 php72w-cli.x86_64 php72w-common.x86_64 php72w-mysqlnd php72w-fpm.x86_64
-
-（4） echo "<?php phpinfo(); ?>" >> /usr/share/nginx/html/index.php检测环境
-
-（5） 配置mariadb数据库
-
+配置mariadb数据库
 [mariadb]
-
 name = MariaDB
-
 baseurl = http://yum.mariadb.org/10.5/centos8-amd64
-
 module_hotfixes=1    #是解决被告知的dnf错误的方法
-
 gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
-
 gpgcheck=1
 
-（6） yum -y install MariaDB-client MariaDB-server安装
-
+yum -y install MariaDB-client MariaDB-server安装
 yum install -y httpd mariadb-server
 
 启动相应的服务systemctl start httpd mariadb
-
 chown  apache /var/www/html			修改apache账户为不可登录
-
 mysqladmin -u root password 123456	设置mysql数据库密码
 
 传递wordpress至web服务器根目录
-
 create database wordpress；创建一个名为wordpress的数据库
 
 重启服务	systemctl enable httpd  mariadb && systemctl start mariadb httpd
-
 wp-config.php为wordpres站点基础配置文件
 
 vim /etc/php.ini	修改上传值大小
-
   `upload_max_filesize = 50M` （最大上传文件大小）
-
   `post_max_size = 50M`（POST数据最大字节长度）`
-
   `max_execution_time = 300 `（最大执行时间，单位秒）`
+```
 
 修改ECS云服务器selinux需重启服务器
 
@@ -750,27 +703,24 @@ l playbook模式(剧本模式)
 
 　　是Ansible主要管理方式，也是Ansible功能强大的关键所在。playbook通过多个task集合完成一类功能，如Web服务的安装部署、数据库服务器的批量备份等。可以简单地把playbook理解为通过组合多条ad-hoc操作的配置文件
 
-![img](E:\Project\Textbook\linux云计算\assets\wps8-1682690463420-258.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps8-1682690463420-258.jpg" alt="img" style="zoom:67%;" /> 
 
-![img](E:\Project\Textbook\linux云计算\assets\wps9-1682690463420-259.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps10-1682690463421-260.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps9-1682690463420-259.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps10-1682690463421-260.jpg" alt="img" style="zoom:67%;" /> 
 
 主配置文件/etc/ansible/ansible.cfg，常用参数：
 
+```
 inventory = /etc/ansible/hosts#ansuble主机清单(内附配置格式)
-
 library=/usr/share/ansible	#指向存放Ansible模块的目录
-
 forks = 5					#并发连接数，默认为5
-
 sudo_user = root			#设置默认执行命令的用户
-
 remote_port = 22			#指定连接被管节点的管理端口，默认为22端口，建议修改，能够更加安全
-
 host_key_checking = False	#检查SSH主机的密钥，值为True/False。False则第一次连接不会提示配置实例
-
 timeout = 60				#设置SSH连接的超时时间，单位为秒
-
 log_path = /var/log/ansible.log#ansible日志的文件（默认不记录日志）
+```
+
+
 
 ## ansible 常用命令及参数
 
@@ -1106,7 +1056,7 @@ ansible-playbook -e 'pkname=tree pkname1=epel' sss.yml	对sss.yml里面多个kpn
 
 变量的优先级：命令行中的-e > playbook中定义的变量 > /etc/ansible/hosts[webservs]全局变量>vars共有变量
 
-![img](E:\Project\Textbook\linux云计算\assets\wps11-1682690463421-261.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps12-1682690463421-262.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps13-1682690463421-263.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps11-1682690463421-261.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps12-1682690463421-262.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps13-1682690463421-263.jpg" alt="img" style="zoom:67%;" /> 
 
 templates模板用来存放各种服务配置文件的模板，是一个文本文件，嵌套有脚本（使用模板编程语言编写），用jinja2语言，以 j2 结尾，有如上形式:
 

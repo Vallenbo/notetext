@@ -4,11 +4,18 @@
 
 ##  ssh远程登陆
 
-![img](E:\Project\Textbook\linux云计算\assets\wps2.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps2.jpg" alt="img" style="zoom:67%;" /> 
 
 redhat7默认安装，服务名sshd，端口号22		主配置文件：/etc/ssh/sshd_config（注：修改端口号要关闭selinux）
 
-![img](E:\Project\Textbook\linux云计算\assets\wps3.jpg) 
+| 参数                                | 作用                                | 参数                              | 作用                                |
+| ----------------------------------- | ----------------------------------- | --------------------------------- | ----------------------------------- |
+| Port 22                             | 默认的sshd服务端口                  | ListenAddress 0.0.0.0             | 设定sshd服务器监听的IP地址          |
+| Protocol 2                          | SSH协议的版本号                     | HostKey /etc/ssh/ssh_host_key     | SSH协议版本为1时，DES私钥存放的位置 |
+| HostKey /etc/s3h/ssh_host_rsa_ _key | SSH协议版本为2时，RSA私钥存放的位置 | HostKey /etc/ssh/ssh_host_dsa_key | SSH协议版本为2时，DSA私钥存放的位置 |
+| PermitRootLogin yes                 | 设定是否允许root管理员直接登录      | StrictModes yes                   | 当远程用户的私钥改变时直接拒绝连接  |
+| MaxAuthTries 6                      | 最大密码尝试次数                    | MaxSessions 10                    | 最大终端数                          |
+| PasswordAuthentication yes          | 是否允许密码验证                    | Pe rmi tEmptyPasswords no         | 是否允许空密码登录(很不安全)        |
 
 ssh命令格式：ssh  root@10.0.0.11 -p22 远程登录命令	-p指定端口号
 
@@ -16,7 +23,7 @@ ssh 192.168.0.24 -l（登录用户）root  -X(带图形化)
 
 ssh-keygen	在本机中生成钥匙对
 
- ![img](E:\Project\Textbook\linux云计算\assets\wps4.jpg)
+ <img src="E:\Project\Textbook\linux云计算\assets\wps4.jpg" alt="img" style="zoom: 67%;" />
 
 Ssh-copy-id  192.168.0.26#SSH服务分发公钥命令，将密钥发送给远程机下次登录不需要密码
 
@@ -28,7 +35,7 @@ vim /etc/hosts.deny远程登录黑名单【hosts.allow 文件中的规则优先�
 
 sshd:	172.16.0.1/24拒绝访问的主机
 
-scp远程复制命令
+### scp远程复制命令
 
 scp  -rp /srv/aa.sh 192.168.0.24:/opt/				远程拉取命令-r递归拷贝-p拷贝权限
 
@@ -54,21 +61,17 @@ dropbear主要有以下程序：服务程序：dropbear（类似于Openssh的ssh
 
 yum在线安装的配置文件：/usr/lib/systemd/system/dropbear.service
 
+```sh
 yum groupinstall Development tools -y
-
 yum install zlib-devel -y
 
 ./configure  --prefix=/usr/local	#指定安装目录
-
 make PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp"
-
 make PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp" install
-
 mkdir /etc/dropbear/	#生成key文件存储目录
-
 dropbearkey -t rsa -f /etc/dropbear/dropbear_rsa_host_key	#-t生成的密钥，-f指定存放地
-
 dropbear -E -p 2222 #-E-将日志记录到stderr而不是syslog，-F前台输出信息
+```
 
 ##  Rsync 文件拷贝命令
 
@@ -130,7 +133,7 @@ C/S模式（服务与客户）权威时间		ntpdate -u ntp.api.bz或者配置文
 
 Systemctl enable ntpd 设置开机自启  Systemctl disable ntpd 设置开机关闭
 
-主配置文件vim /etc/ntp.conf
+**主配置文件**vim /etc/ntp.conf
 
 server 127.127.1.0 prefer #设置本机为NTP服务器
 
@@ -138,7 +141,7 @@ restrict 156.0.26.7    #允许客户端156.0.26.7向本机请求时间同步
 
 restrict 156.0.26.0 mask 255.255.255.0 #允许客户端156.0.26.0网段的所有主机向本机请求时间同步
 
-![img](E:\Project\Textbook\linux云计算\assets\wps5.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps5.jpg" alt="img" style="zoom:67%;" /> 
 
 客户端去匹服务器的时间
 
@@ -150,7 +153,7 @@ Chronyc sources -v	查看客户端时钟服务状态
 
 System-config-date	图形化时间设置	ntpq -p查看是否能够被匹配
 
-![img](E:\Project\Textbook\linux云计算\assets\wps6.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps6.jpg" alt="img" style="zoom:67%;" /> 
 
 Restrict	策略限制
 
@@ -168,29 +171,24 @@ Notrust	不信任（客户端要认证）				Noquery	不能
 
 chronyc sources：查看当前时间同步服务器地址		chronyc makestep：立即同步时间
 
- Yum服务器
+# Yum服务器
 
 YUM服务端搭建
 
-​	gpgcheck=1  进行公钥检测，要提供对应的钥匙才能安装对应的包
+```sh
+gpgcheck=1  进行公钥检测，要提供对应的钥匙才能安装对应的包
+rpm -K 包名    	//查看该包需要的钥匙，显示 NOT OK (MISSING KEYS: (MD5) PGP#fd431d51) 
+中文版显示：不正确
 
-​	rpm -K 包名    	//查看该包需要的钥匙，显示 NOT OK (MISSING KEYS: (MD5) PGP#fd431d51) 
+gpg -v 钥匙包  		//从系统上所有的钥匙包里面，找到需要的钥匙
+rpm --import  钥匙包  	//将匹配的钥匙包导入系统
+rpm -qa |grep pubkey	//查看系统上已经导入的所有钥匙
+rpm -e 钥匙			//删除不匹配的钥匙 
+rpm -K 包名    	//查看该包需要的钥匙，显示 OK
+rpm -ivh 或者 yum install 	//最后安装
+```
 
-​				  中文版显示：不正确
-
-​	gpg -v 钥匙包  		//从系统上所有的钥匙包里面，找到需要的钥匙
-
-​	rpm --import  钥匙包  	//将匹配的钥匙包导入系统
-
-​	rpm -qa |grep pubkey	//查看系统上已经导入的所有钥匙
-
-​	rpm -e 钥匙			//删除不匹配的钥匙 
-
- 	rpm -K 包名    	//查看该包需要的钥匙，显示 OK
-
-​	rpm -ivh 或者 yum install 	//最后安装
-
-使用FTP服务端搭建yum源
+## 使用FTP服务端搭建yum源
 
 ​	安装ftp服务，开机自启，启动服务
 
@@ -200,7 +198,7 @@ YUM服务端搭建
 
 ​	客户端仓库文件：baseurl=ftp://192.168.0.22/pub/sss
 
-使用httpd服务端搭建yum源
+## 使用httpd服务端搭建yum源
 
 ​	安装httpd服务，开机自启，启动服务
 
@@ -212,13 +210,18 @@ YUM服务端搭建
 
 ​	做软连接：ln  -s  /var/ftp/pub/dvd  /var/www/html/iso
 
- VPN虚拟专用网络
+# VPN虚拟专用网络
 
 PPTP，Point to Point Tunneling Protocol，点对点隧道协议，这是一种支持多协议虚拟专用网络（VPN）技术。远程用户能够通过装有点对点协议的系统安全访问公司网络
 
 设置两块网卡（外网内网）		安装包和服务名：pptpd
 
-主配置文件：/etc/pptpd.conf	![img](E:\Project\Textbook\linux云计算\assets\wps7.jpg)
+主配置文件：/etc/pptpd.conf	
+
+```
+localip 192.168.127.11
+remoteip 192. 168.0.20-238,192.168.0.245
+```
 
 localip表示VPN服务器本地IP，可以设置为172.16.1.0/24网段，也可以设置为其他网段；
 
@@ -230,7 +233,9 @@ remoteip表示设置一个地址段供客户机连接使用
 
 /etc/ppp/options.pptpd文件一般用户设置DNS的文件（ms-dns配置项）![img](E:\Project\Textbook\linux云计算\assets\wps9.jpg)
 
- DHCP C/S模式(客户端与服务端不在同一主机上）
+# DHCP
+
+C/S模式(客户端与服务端不在同一主机上）
 
 Dynamic Host Configuration Protocol动态主机配置协议,是TCP／IP协议簇中的一种，是一个局域网的网络协议，使用 UDP协议工作。
 
@@ -238,9 +243,9 @@ Dynamic Host Configuration Protocol动态主机配置协议,是TCP／IP协议簇
 
 安装包:dhcp		服务名：dhcpd	端口port：67	主配置文件及模板文件地址：/etc/dhcp/dhcpd.conf
 
-![img](E:\Project\Textbook\linux云计算\assets\wps11.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps12.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps11.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps12.jpg" alt="img" style="zoom:67%;" /> 
 
-分配固定IP地址![img](E:\Project\Textbook\linux云计算\assets\wps13.jpg)
+分配固定IP地址<img src="E:\Project\Textbook\linux云计算\assets\wps13.jpg" alt="img" style="zoom: 67%;" />
 
 #  网络文件共享服务
 
@@ -262,7 +267,7 @@ SAN：存储区域网络(Storage Area Network)
 
 　　SAN是数据以数据块格式存放于存储，对存储是不可见的，数据格式由使用该数据的主机或应用进行定义。存储呈现给主机的是LUN的形式，对主机而言就是一个磁盘设备，一般是独占时访问
 
-![img](E:\Project\Textbook\linux云计算\assets\wps14.png) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps14.png" alt="img" style="zoom: 67%;" /> 
 
 ##  Samba服务
 
@@ -276,9 +281,9 @@ nmbd提供NetBIOS名称解析服务和浏览支持，帮助SMB客户定位服务
 
 服务端端口号：139，445		客户端端口号：137，138		安装包：samba	主配置文件：/etc/samba/smb.conf
 
-![img](E:\Project\Textbook\linux云计算\assets\wps15.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps16.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps15.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps16.jpg" alt="img" style="zoom:67%;" /> 
 
-![img](E:\Project\Textbook\linux云计算\assets\wps17.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps18.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps17.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps18.jpg" alt="img" style="zoom:67%;" /> 
 
 man smb.conf 查看samba服务帮助文档
 
@@ -306,7 +311,7 @@ deadtime = 0：服务器将自动关闭未连接会话的时间。单位是分�
 
 config file = /e	tc/samba/conf.d/%U：实现不同smb用户访问相同的共享目录redhat，实现的配置效果不同，如下
 
-![img](E:\Project\Textbook\linux云计算\assets\wps19.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps20.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps19.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps20.jpg" alt="img" style="zoom:67%;" /> 
 
 [redhat]	共享名，#smclient访问的共享名
 
@@ -334,7 +339,7 @@ display charset = UTF8：置显示的字符集			guest ok = yes/no：意义同�
 
 testparm：检查格式
 
-![img](E:\Project\Textbook\linux云计算\assets\wps21.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps21.jpg" alt="img" style="zoom:67%;" /> 
 
 修改对象（文件）的安全上下文，比如：用户		角色	：		类型	：级别		：	属性
 
@@ -434,7 +439,7 @@ NT_STATUS_ACCESS_DENIED listing \*
 
 ##  FTP服务（vsery secure FTP Daemon）
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps24.jpg" alt="img" style="zoom:50%;" /> 
+<img src="E:\Project\Textbook\linux云计算\assets\wps24.jpg" alt="img" style="zoom: 67%;" /> 
 
 包和服务名：vsftpd		数据端口port：20	只负责数据传输		指令端口port：21	以命令方式负责该服务的数据开启
 
@@ -442,51 +447,39 @@ NT_STATUS_ACCESS_DENIED listing \*
 
 服务端被动模式数据端口：227 Entering Passive Mode（172.16.0.1，224，59）	224*256+59
 
+```sh
 listen=NO 设置为YES时vsftpd以独立运行方式启动，设置为NO时以xinetd方式启动（xinetd是管理守护进程的，将服务集中管理，可以减少大量服务的资源消耗）
-
 listen_ipv6=YES 以上两个只能一个YES一个NO否则会出错
-
 listen_port=21 设置控制连接的监听端口号，默认为21
-
 listen_address=ip地址 将在绑定到指定IP地址运行，适合多网卡
-
 nopriv_user=nobody 指定运行vsftpd服务的用户身份，默认
-
 download_enable=yes|no 是否允许下载文件
-
 connect_from_port_20=YES/NO 若为YES，则强迫FTP－DATA的数据传送使用port 20，默认YES
-
 ftp_data_port=20 指定主动端的端口，默认20
-
 idle_session_timeout=300 设置多长时间不对FTP服务器进行任何操作，则断开该FTP连接，单位为秒
-
 accept_timeout=60	建立FTP连接超时时间，单位秒
-
 connection_timeout=60 PORT方式下建立FTP数据连接超时时间，单位秒
-
 data_connection_timeout=60 数据传输60s超时时间，单位秒
-
 pasv_enable=YES/NO 是否开启被动模式进行数据传输，有的客户机在防火墙后面，所以建议开启
-
 pasv_min_port=n	pasv_max_port=m	设置被动模式后的数据连接端口范围在n和m之间
-
 max_clients=n 在独立启动时限制服务器的连接数，0表示无限制
-
 max_per_ip=0 同一IP地址的最大连接数，0表示无限制
-
 use_localtime=YES 使用本地时间
+```
 
 登录提示信息：
 
+```sh
 ftpd_banner=Welcome to blahFTP service 服务ftp的欢迎信息
-
 banner_file=/etc/vsftpd/banner_file.txt  设置服务ftp的欢迎信息文件，优先级大于ftpd_banner选项
+```
 
 目录访问提示信息：
 
+```sh
 dirmessage_enable=YES 是否显示目录说明文件，需要手工创建.message文件
-
 message_file=.message 此文件放入需要提示的共享文件夹中，默认
+```
 
 vim .message 	#以带有颜色的方式显示
 
@@ -496,31 +489,37 @@ vim .message 	#以带有颜色的方式显示
 
 wu-ftp日志：默认启用
 
+```sh
 xferlog_enable=YES 开启日志记录上传下载日志，默认启用	xferlog_std_format=YES 使用wu-ftp日志格式，默认启用
-
 xferlog_file=/var/log/xferlog 默认日志文件
+```
 
 vsftpd日志：默认不启用
 
+```sh
 dual_log_enable=YES 使用vsftpd日志格式，默认不启用		vsftpd_log_file=/var/log/vsftpd.log 可自动生成，默认路径
+```
 
-\#服务器用户根目录（如/var/ftp）不能拥有写权限，如果具有写权限，那所有用户不能登录
+服务器用户根目录（如/var/ftp）不能拥有写权限，如果具有写权限，那所有用户不能登录
 
 解决方法1：在根目录下创建777权限目录	chmod 777 share
 
 2：根目录具有写权限添加：
 
+```sh
 allow_writeable_chroot=YES 允许被禁锢在 FTP 根目录的用户有写权限，而且不拒绝用户的登录请求
+```
 
 打开ftp服务共享功能，开启 SELinux 域中对 FTP 服务的允许策略
 
+```sh
 setsebool -P更改sebool值		getsebool -a查看所有sebool值
-
 ftpd_anon_write=on			ftpd_full_access=on
-
 allow_ftpd_anon_write #允许vsvtp匿名用户写入权限			ftp_home_dir #ftp用户可以访问自己的家目录的话
-
 ftpd_is_daemon #vsftpd以daemon的方式运行				ftpd_disable_trans 1 #关闭SELINUX对ftpd的保护
+```
+
+
 
 ###  匿名开放模式
 
@@ -530,61 +529,48 @@ ftpd_is_daemon #vsftpd以daemon的方式运行				ftpd_disable_trans 1 #关闭SE
 
 设置共享出去的目录的权限	setfacl -mR u:ftp:rwx  /var/ftp/pub
 
+```sh
 anonymous_enable=YES 允许匿名登陆					anon_mkdir_write_enable=YES 允许匿名用户创建目录
-
 anon_upload_enable=YES 允许匿名用户上传下载，#它的父目录要有可写权限
-
 anon_other_write_enable=YES 允许匿名用户有其他写权限（重命名，删除等）
-
 anon_world_readable_only=YES  允许匿名用户下载a+r的只读文件
-
 anon_root=/var/ftp 匿名用户默认的FTP根目录
-
 no_anon_password=YES 匿名登陆不需要密码
-
 anon_umask=0333 匿名用户上传文件的umask值
-
 anon_max_rate=0 匿名用户的最大传输速率，单位为B/s，0表示不限制
-
 chown_uploads=YES 开启匿名用户账户映射			chown_username=whoever 将匿名用户映射为whoever用户
-
 chown_upload_mode=0644 设置映射用户上传文件的权限
+```
 
 ###  本地用户模式
 
 本地用户模式：通过服务端系统本地的账户密码进行认证的模式，相较于匿名开放模式更安全。由于密码是明文如果被黑客通过抓包等破解了账户的信息。本模式默认用户能随意切换目录，具有读写权限
 
+```sh
 write_enable=YES 登陆用户是否有写权限，全局设置			local_enable=YES 允许本地用户登录
-
 local_root= 指定所有本地用户的FTP根目录，默认为用户各自家目录	local_umask=022 本地用户模式创建文件umask 值
-
 chroot_local_user=YES 将本地用户禁锢在FTP根目录，此时用户不能登录，设置该用户家目录为555即可，或打开以下选项
-
 allow_writeable_chroot=YES 允许被禁锢在 FTP 根目录的用户有写权限，而且不拒绝用户的登录请求
-
 chroot_list_enable=YES 本地用户禁锢列表打开
-
 chroot_list_file=/etc/vsftpd/chroot_list 默认文件
+```
 
 1、 当chroot_local_user=YES和chroot_list_enable=YES时，该文件是不禁锢名单，即白名单
 
 2、 当chroot_local_user=NO，该文件是禁锢名单，即黑名单
 
+```sh
 userlist_enable=YES  开启用户白名单文件vsftpd.user_list功能
-
 userlist_deny=YES	开启“禁止用户名单”名单文件有 ftpusers 和user_list
-
 ftpusers是黑名单，user_list有白名单和黑名单两种功能
-
 guest_enable=yes 将本地用户账户映射为guest用户	，此时默认的根为/var/ftp，可以通过local_root修改默认根
-
 guest_username=vsftp 将guest用户再映射为vsftp用户
-
 anon_max_rate=0 本地用户的最大传输速率，单位为B/s，0表示不限制
+```
 
 更改该用户家目录属性		chcon -R -t public_content_t /var/ftp
 
-![img](E:\Project\Textbook\linux云计算\assets\wps27.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps27.jpg" alt="img" style="zoom:67%;" /> 
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps28.jpg) 
 
@@ -612,39 +598,41 @@ chmod 	600  vusers.db修改数据库权限			删除原有明文信息文件vuser
 
 创建一个新的模块vim /etc/pam.d/vsftpd.vu【第一行密码	第二行账号】
 
-![img](E:\Project\Textbook\linux云计算\assets\wps30.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps30.jpg" alt="img" style="zoom:67%;" /> 
 
 3、打开虚拟用户表，指定认证文件，设置权限文件夹
 
+```
 guest_enable=YES虚拟用户模式开启			guest_username=test指定虚拟映射的本地用户名
-
 pam_service_name=vsftpd.vu指定认证文件
-
 \#user_config_dir=/etc/vsftpd/vusers_dir虚拟用户不同的访问权限文件夹
-
 \#allow_writeable_chroot=YES 允许对禁锢的 FTP 根目录执行写入操作，且不拒绝用户的登录请求
+```
 
 4、将虚拟用户的映射账号到本地用户
 
+```sh
 useradd test -s /sbin/nologin(不能登录服务器但能登录ftp) -d /var/ftproot/
+```
 
 添加虚拟用户账号及虚拟用户登陆进来的主目录，在主目录不能写，设置一个子目录，供用户上传数据
 
+```
 mkdir /var/ftproot/ftp
-
 chmod 777 /var/ftproot/ftp修改虚拟用户主目录权限
+```
 
 5、建立虚拟用户设置不同的访问权限文件（设置按匿名用户操作）	mkdir /etc/vsftpd/vusers_dir
 
-Vim /etc/vsftpd/vusers_dir/vuser1（用户） 	
-
+```
+vim /etc/vsftpd/vusers_dir/vuser1（用户） 	
 anon_mkdir_write_enable=YES 允许匿名用户创建目录
-
 anon_upload_enable=YES 允许匿名用户上传下载，#它的父目录要有可写权限
-
 anon_other_write_enable=YES 允许匿名用户有其他写权限（重命名，删除等）
-
 local_root= /share 指定该用户根目录
+```
+
+
 
 ###  基于msql验证的ftp虚拟用户
 
@@ -654,7 +642,7 @@ local_root= /share 指定该用户根目录
 
 ###  Lftp客户端工具
 
-![img](E:\Project\Textbook\linux云计算\assets\wps31.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps31.jpg" alt="img" style="zoom:67%;" /> 
 
 ##  Tftp简单文件传输协议
 
@@ -687,7 +675,7 @@ NFS是基于内核的文件系统，可以将远程的计算机磁盘挂载到�
 
 原理：NFS本身的服务并没有提供数据传递的协议，而是通过使用RPC（远程过程调用 Remote Procedure Call）来实现。当NFS启动后，会随机的使用一些端口，NFS就会向RPC注册中心提交这些端口。RPC就会记录下这些端口，RPC会开启111端口。通过client端和sever端端口的连接来进行数据的传输。因此在启动nfs之前，首先要确保rpc服务启动
 
-![img](E:\Project\Textbook\linux云计算\assets\wps32.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps32.jpg" alt="img" style="zoom:67%;" /> 
 
 守护进程，连带进程rpc-bind、nfs-server		端口prot：111		包：nfs-utils（包含服务端与客户端相关工具）
 
@@ -749,11 +737,11 @@ LUN（Logical Unit Number，逻辑单元号）是为了使用和描述更多设�
 
 4、Initiator会从iSCSI响应PDU里解析出SCSI响应并传送给操作系统，操作系统再响应给应用程序
 
-![img](E:\Project\Textbook\linux云计算\assets\wps33.jpg)包与服务:target*	工作在tcp3260端口
+<img src="E:\Project\Textbook\linux云计算\assets\wps33.jpg" alt="img" style="zoom:80%;" />包与服务:target*	工作在tcp3260端口
 
 targetcli命令：用于管理iSCSI服务端存储资源的专用配置命令，能够提供交互式配置功能
 
-![img](E:\Project\Textbook\linux云计算\assets\wps34.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps34.jpg" alt="img" style="zoom:67%;" /> 
 
 /backstores/block是iSCSI服务端配置共享设备的位置
 
@@ -761,15 +749,15 @@ targetcli命令：用于管理iSCSI服务端存储资源的专用配置命令，
 
 将 /dev/sda3分区加入网络存储，并重名为redhat，这样用户就不知道是哪块硬盘来提供共享存储资源
 
-![img](E:\Project\Textbook\linux云计算\assets\wps35.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps35.jpg" alt="img" style="zoom:67%;" /> 
 
 2、创建 iqn 名字(即创建ISCSI对象)
 
-![img](E:\Project\Textbook\linux云计算\assets\wps36.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps36.jpg" alt="img" style="zoom:67%;" /> 
 
 自动创建iSCSI target配置共享资源名称。由系统自动生成的，用于描述共享资源的唯一字符串
 
-![img](E:\Project\Textbook\linux云计算\assets\wps37.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps37.jpg" alt="img" style="zoom:67%;" /> 
 
 3、设置访问控制列表（acls），acls参数目录用于存放能够访问iSCSI服务端共享存储资源的客户端名称
 
@@ -777,25 +765,25 @@ iSCSI协议是通过客户端名称进行验证的，即用户在访问存储共
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps38.jpg) 
 
-![img](E:\Project\Textbook\linux云计算\assets\wps39.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps39.jpg" alt="img" style="zoom:67%;" /> 
 
 4、设置luns共享名关联，即将ISCSI共享对象与主机名绑定
 
-![img](E:\Project\Textbook\linux云计算\assets\wps40.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps40.jpg" alt="img" style="zoom:67%;" /> 
 
 5、设置iSCSI服务端的监听IP地址和端口号，系统自动开启服务器对应网卡的3260端口将向外提供iSCSI共享存储资源服务
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps41.jpg)删除原有端口号
 
-![img](E:\Project\Textbook\linux云计算\assets\wps42.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps42.jpg" alt="img" style="zoom:67%;" /> 
 
 /iscsi/iqn.20...hel:rhel/tpg1> get attribute 
 
 authentication=0		//认证关闭
 
-![img](E:\Project\Textbook\linux云计算\assets\wps43.jpg)//写保护模块关闭(让客户可写)
+<img src="E:\Project\Textbook\linux云计算\assets\wps43.jpg" alt="img" style="zoom:67%;" />//写保护模块关闭(让客户可写)
 
-![img](E:\Project\Textbook\linux云计算\assets\wps44.jpg)//生成节点列表开启
+<img src="E:\Project\Textbook\linux云计算\assets\wps44.jpg" alt="img" style="zoom:67%;" />//生成节点列表开启
 
 使用Exit命令退出后生成文件，主配置vim /etc/target/saveconfig.json
 
@@ -803,7 +791,9 @@ authentication=0		//认证关闭
 
 安装iSCSI客户端服务程序 yum install iscsi-initiator-utils【centos 7默认已安装】
 
-1、启动客户端iscsid	service iscsid start	&& systemctl daemon-reload(重新加载)
+### 1、启动客户端iscsid
+
+service iscsid start	&& systemctl daemon-reload(重新加载)
 
 iSCSI 客户端访问 “先发现，再登录，最后挂载并使用” 。iscsiadm 是用于管理、查询、插入、更新或删除 iSCSI 数据库配置文件的命令行工具，用户需要先使用这个工具扫描发现远程 iSCSI 服务端，然后查看找到的服务端上有哪些可用的共享存储资源
 
@@ -829,7 +819,7 @@ iSCSI 客户端访问 “先发现，再登录，最后挂载并使用” 。isc
 
 InitiatorName=iqn.2003-01.com.redhat:rhel
 
-2、 登录 iSCSI 服务端
+### 2、 登录 iSCSI 服务端
 
 -T  iqn.2003-01.com.redhat:rhel #指定要使用的存储资源		 -l，--login参数进行登录验证，--logout注销登录
 
@@ -871,11 +861,11 @@ iscsiadm -d2 -m node -T iqn.1994-05.com.redhat:wsfnk -p 192.168.1.55 --login   #
 
 ##  网络自动挂载 Autofs服务	
 
-![img](E:\Project\Textbook\linux云计算\assets\wps46.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps46.jpg" alt="img" style="zoom:67%;" /> 
 
 安装包：autofs包	相对路径法
 
-![img](E:\Project\Textbook\linux云计算\assets\wps47.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps47.jpg" alt="img" style="zoom:67%;" /> 
 
 当用户到达挂载文件夹内，通过特定的触发器访问到物理或网络资源设备
 
@@ -885,11 +875,11 @@ iscsiadm -d2 -m node -T iqn.1994-05.com.redhat:wsfnk -p 192.168.1.55 --login   #
 
 soft软资源，除硬盘是硬资源，其他全是软资源		Intr可中断地挂载 	--timeout超时时间5秒（主配置文件）
 
-![img](E:\Project\Textbook\linux云计算\assets\wps48.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps48.jpg" alt="img" style="zoom:67%;" /> 
 
 vim /etc/sudoers		sudo命令文件
 
-![img](E:\Project\Textbook\linux云计算\assets\wps49.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps49.jpg" alt="img" style="zoom: 67%;" /> 
 
 zhubajie用户能够在任何地方使用useradd和userdel命令
 
@@ -899,17 +889,17 @@ NOPASSWD	不需要密码就能使用
 
 %wheel行	这个组在任何地方都不需要命令
 
-![img](E:\Project\Textbook\linux云计算\assets\wps50.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps50.jpg" alt="img" style="zoom:67%;" /> 
 
 将useradd和userdel的命令赋予给TEST
 
 ##  网络自动挂载 Autofs服务	
 
-![img](E:\Project\Textbook\linux云计算\assets\wps51.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps51.jpg" alt="img" style="zoom:67%;" /> 
 
 安装包：autofs包	相对路径法
 
-![img](E:\Project\Textbook\linux云计算\assets\wps52.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps52.jpg" alt="img" style="zoom:67%;" /> 
 
 当用户到达挂载文件夹内，通过特定的触发器访问到物理或网络资源设备
 
@@ -919,11 +909,11 @@ NOPASSWD	不需要密码就能使用
 
 soft软资源，除硬盘是硬资源，其他全是软资源		Intr可中断地挂载 	--timeout超时时间5秒（主配置文件）
 
-![img](E:\Project\Textbook\linux云计算\assets\wps53.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps53.jpg" alt="img" style="zoom:67%;" /> 
 
 vim /etc/sudoers		sudo命令文件
 
-![img](E:\Project\Textbook\linux云计算\assets\wps54.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps54.jpg" alt="img" style="zoom:67%;" /> 
 
 zhubajie用户能够在任何地方使用useradd和userdel命令
 
@@ -933,7 +923,7 @@ NOPASSWD	不需要密码就能使用
 
 %wheel行	这个组在任何地方都不需要命令
 
-![img](E:\Project\Textbook\linux云计算\assets\wps55.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps55.jpg" alt="img" style="zoom:67%;" /> 
 
 将useradd和userdel的命令赋予给TEST
 
@@ -941,63 +931,53 @@ NOPASSWD	不需要密码就能使用
 
 #  DNS服务器（域名解析系统）
 
-![img](E:\Project\Textbook\linux云计算\assets\wps56.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps57.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps56.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps57.jpg" alt="img" style="zoom:67%;" /> 
 
- ![img](E:\Project\Textbook\linux云计算\assets\wps58.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps59.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps60.jpg)
+ <img src="E:\Project\Textbook\linux云计算\assets\wps58.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps59.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps60.jpg" alt="img" style="zoom:67%;" />
 
 named_write_master_zones #允许修改dns的主zone文件		named_disable_trans #允许daemon启动named
 
 安装包：bind	服务名named主配置文件/etc/named.conf
 
+```
 options {    //options段用于定义全局设置
-
 listen-on port 53 { 192.168.127.10; };    //定义bind的监听IP地址(IPv4) 
-
 listen-on-v6 port 53{ ::1; };  //定义bind的监听IP地址(IPv6) 
-
 directory "/var/named";     //zone文件的默认路径
-
 dump-file "/var/named/data/cache_dump.db";         //cache的备份
-
 statistics-file "/var/named/data/named_ stats.txt";↓    //静态文件
-
 memstatistics-file "/var/named/data/named_ mem_ stats.t";  //内存静态文件
-
 allow-query { any; };		//允许谁向此DNS进行查询
-
-\#allwo-transfer { ip地址 }；	//主备模式时允许区域传送的主机；白名单
-
+#allwo-transfer { ip地址 }；	//主备模式时允许区域传送的主机；白名单
 recursion yes;				//允许递归查询
-
 }
 
 logging {				//定义日志
-
-  channel my_file {   //定义channel名称
-
-​    file "data/named.run";    //以文件形式存储日志
-
-​    severity dynamic;  //存储日志的级别,一共7个级别从高到低分别是：crit error,warning.notice,info(前面5个属于syslog);debug[level],dynami(后两个属于Bind8,9独有的级别)
-
+	channel my_file {   //定义channel名称
+	file "data/named.run";    //以文件形式存储日志
+	severity dynamic;  //存储日志的级别,一共7个级别从高到低分别是：crit,error,warning.notice,info(前面5个属于syslog);debug[level],dynami(后两个属于Bind8,9独有的级别)
 };
-
   category statistics { my_file; };   //定义bind系统中各子系统的日志
-
   //将日志发给channel,可以发给多个channel,一个channel只能接受一个category
-
 };
+```
 
-![img](E:\Project\Textbook\linux云计算\assets\wps61.jpg) 
+```
+zone "." IN { //定义Dns的zone,"."代表根区域
+	type hint;	//定义zone的类型,根区域的类型就为hint
+	file "named.ca";	//指定zone文件，默认已经生成
+};
+```
 
 named-checkconf /etc/named.conf	查看主配置文件是否有错误
 
-![img](E:\Project\Textbook\linux云计算\assets\wps62.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps62.jpg" alt="img" style="zoom: 80%;" /> 
 
-![img](E:\Project\Textbook\linux云计算\assets\wps63.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps64.jpg)解析多个域可以对应同一个网段
+<img src="E:\Project\Textbook\linux云计算\assets\wps63.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps64.jpg" alt="img" style="zoom:67%;" />解析多个域可以对应同一个网段
 
 allow-update {}：//允许更新区域数据库中的内容
 
-![img](E:\Project\Textbook\linux云计算\assets\wps65.jpg) ![img](E:\Project\Textbook\linux云计算\assets\wps66.jpg)
+<img src="E:\Project\Textbook\linux云计算\assets\wps65.jpg" alt="img" style="zoom: 80%;" /> <img src="E:\Project\Textbook\linux云计算\assets\wps66.jpg" alt="img" style="zoom: 80%;" />
 
 Dig	 -t axtr redhat.com正向挖掘的redhat.com
 
@@ -1005,11 +985,11 @@ Dig	 -t axtr redhat.com正向挖掘的redhat.com
 
 1,在主服务器著配置文件里面添加一行
 
-![img](E:\Project\Textbook\linux云计算\assets\wps67.jpg)Allow-transfer行		允许0.28主机当做从服务器
+<img src="E:\Project\Textbook\linux云计算\assets\wps67.jpg" alt="img" style="zoom: 80%;" />Allow-transfer行		允许0.28主机当做从服务器
 
 2在从服务器修改主配置文件
 
-![img](E:\Project\Textbook\linux云计算\assets\wps68.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps69.jpg) 
+![img](E:\Project\Textbook\linux云计算\assets\wps68.jpg)<img src="E:\Project\Textbook\linux云计算\assets\wps69.jpg" alt="img" style="zoom:80%;" /> 
 
 File “slaves/joinlabs.zone	要拿的文件						Maters{192.168.0.22} 从0.22主机那拿到
 
@@ -1031,7 +1011,7 @@ Postfix试图更快、更容易管理、更安全，同时还与sendmail保持�
 
 postfix的产生是为了替代传统的sendmail。相较于sendmail,postfix在速度，性能和稳定性上都更胜一筹
 
-现在主流邮件服务都在采用postfix. 当需要一个轻量级的的邮件服务器时，postfix也是一种选择![img](E:\Project\Textbook\linux云计算\assets\wps70.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps71.jpg)
+现在主流邮件服务都在采用postfix. 当需要一个轻量级的的邮件服务器时，postfix也是一种选择<img src="E:\Project\Textbook\linux云计算\assets\wps70.jpg" alt="img" style="zoom: 67%;" />![img](E:\Project\Textbook\linux云计算\assets\wps71.jpg)
 
 redhat默认安装有postfix邮件，包名与服务名：postfix，主配置文件vim /etc/postfix/main.cf	 #默认无需修改配置
 
@@ -1061,7 +1041,9 @@ local_transport=error:local  #表示本地所有用户都拒收任何邮件
 
 建立corntab周而复始任务
 
-![img](E:\Project\Textbook\linux云计算\assets\wps72.jpg) 
+```
+30 7* * *	echo good morning | mail -S happy zhubaj ie@desktop22.example.com
+```
 
 ##  Dovecot服务
 
@@ -1085,159 +1067,102 @@ nginx(engine x) 是一款自由的、开源的、高性能的HTTP服务器和反
 
 ​	![img](E:\Project\Textbook\linux云计算\assets\wps73.jpg)
 
-1 yum -y install gcc zlib zlib-devel pcre-devel openssl openssl-devel g++安装依赖包（可以使用epel源进行安装）
-
+```sh
+1、yum -y install gcc zlib zlib-devel pcre-devel openssl openssl-devel g++安装依赖包（可以使用epel源进行安装）
 cd  /usr/local/ && wget http://nginx.org/download/nginx-1.21.1.tar.gz下载tar包		//自定义下载版本
-
 tar -xvf nginx-1.13.7.tar.gz && cd nginx-1.13.7	解压成可编译文件，进入可编译文件夹
 
-2 编译配置 ./configure && make && make install--->生成相应的可执行文件、配置、默认站点等文件/usr/local/nginx
-
+2、编译配置 ./configure && make && make install--->生成相应的可执行文件、配置、默认站点等文件/usr/local/nginx
 useradd nginx -s /sbin/nologin添加nginx用户设置不能登录
-
 echo "/usr/local/sbin/nginx" >>/etc/rc.local	开机启动服务的命令
+```
 
-nginx -s quit 平稳关闭Nginx		stop快速关闭，可能不保存相关信息	reload重载配置	reopen 重新打开日志文件
+```sh
+nginx -s quit //平稳关闭Nginx stop快速关闭，可能不保存相关信息 reload重载配置 reopen重新打开日志文件
+nginx -V 显示 //nginx 的版本，编译器版本和配置参数		nginx -t	//将检查配置文件的语法的正确性	
+nginx -?,-h //打开帮助信息		killall nginx //杀死所有nginx进程
+```
 
-nginx -V 显示 nginx 的版本，编译器版本和配置参数		nginx -t将检查配置文件的语法的正确性	
-
-nginx -?,-h #打开帮助信息		killall nginx杀死所有nginx进程
-
-主配置文件	vim /usr/local/nginx/conf/nginx.conf
+**主配置文件**	vim /usr/local/nginx/conf/nginx.conf
 
 \####### 每个指令必须有分号结束。#################
 
+```
 user root; #配置用户或者组，默认为nobody nobody
-
 worker_processes 2;  #cpu核数允许生成的进程数
-
 pid /nginx/pid/nginx.pid;  #指定nginx进程运行文件存放地址
-
-error_log log/error.log; #制定日志路径
-
-级别以此为：debug |info |notice |warn |error|crit|alert|emerg
+error_log log/error.log; #制定日志路径	级别以此为：debug |info |notice |warn |error|crit|alert|emerg
 
 events {
-
   accept_mutex on;  #设置网路连接序列化，防止惊群现象发生，默认为on
-
   multi_accept on;  #设置一个进程是否同时接受多个网络连接，默认为off
-
-\#use epoll;    #事件驱动模型，select|poll|kqueue|epoll|resig|/dev/poll|eventport
-
+	#use epoll;    #事件驱动模型，select|poll|kqueue|epoll|resig|/dev/poll|eventport
 worker_connections  1024;   #允许客户机连接数
-
 }
 
 http {		//主配置区
-
   include    mime.types;  #文件扩展名与文件类型映射表
-
   default_type  application/octet-stream; #默认文件类型，默认为text/plain
-
-  \#access_log off; #取消服务日志
-
+  #access_log off; #取消服务日志
   access_log log/access.log myFormat;  #combined为日志格式的默认值
-
   sendfile on;  #允许sendfile方式传输文件，默认为off，可以在http块，server块，location块
-
   sendfile_max_chunk 100k; 每个进程每次调用传输数量不能大于设定的值，默认为0，即不设上限。
-
   keepalive_timeout 65; #连接超时时间，默认为75s，可以在http，server，location块
-
-  
-
 \#more_clear_headers "X-Powered-By:";	清除服务器及php信息，在配置文件http段添加(需要head模块)：
-
 \#more_clear_headers "Server:"
-
 \#add_header Cache-Control max-age=no-cache; #设置强制缓存时间，协商缓存
 
- 
-
 upstream myserver; {  //负载均衡的服务器名字myserver
+	轮询（默认）：nginx默认就是轮询其权重都默认为1，服务器处理请求的顺序：ABAB
+	server 192.168.100.138:8080;
+	server 192.168.100.138:8081;
+	热备(mater挂了转backup)
+	server 127.0.0.1:8080;
+	server 192.168.100.138:8081 backup;  
+	加权轮询：跟据权重的大小分发给不同服务器不同数量的请求，权重越高分配越多,服务器的请求顺序为：ABBABB
+ 	server 192.168.100.138:8081 weight=1;
+	server 192.168.100.138:8080 weight=2;
 
-​	轮询（默认）：nginx默认就是轮询其权重都默认为1，服务器处理请求的顺序：ABAB
-
-​	server 192.168.100.138:8080;
-
-​	server 192.168.100.138:8081;
-
-热备(mater挂了转backup)
-
-​	server 127.0.0.1:8080;
-
-​	server 192.168.100.138:8081 backup;  
-
-加权轮询：跟据权重的大小分发给不同服务器不同数量的请求，权重越高分配越多,服务器的请求顺序为：ABBABB
-
-  server 192.168.100.138:8081 weight=1;
-
-​	server 192.168.100.138:8080 weight=2;
-
-ip_hash:nginx会让相同的客户端ip请求相同的服务器		/	fair根据响应时间分配，最短先分配原则
-
-​	server 127.0.0.1:8080; 
-
-​	server 192.168.100.138:8081;
-
-​	ip_hash	/	fair;
-
+ip_hash:nginx会让相同的客户端ip请求相同的服务器	//fair根据响应时间分配，最短先分配原则
+	server 127.0.0.1:8080;
+	server 192.168.100.138:8081;
+	ip_hash	/	fair;
 ● down，表示当前的server暂时不参与负载均衡。
-
 ● backup，预留的备份机器。当其他所有的非backup机器出现故障或者忙的时候，才会请求backup机器，因此这台机器的压力最轻。
-
 ● max_fails，允许请求失败的次数，默认为1。当超过最大次数时，返回proxy_next_upstream 模块定义的错误。
-
 ● fail_timeout，在经历了max_fails次失败后，暂停服务的时间。max_fails可以和fail_timeout一起使用。
 
 server 127.0.0.1:7878 weight=2 max_fails=2 fail_timeout=2;
-
 server 192.168.10.121:3333 weight=1 max_fails=2 fail_timeout=1;
-
 }
 
 error_page 404 500 502 504 https://www.baidu.com; #错误页
+server {	//多个服务时注意文件{}格式
+	keepalive_requests 120 #单连接请求上限次数
+	listen    80 #监听端口
+	server_name  www.aa.com #监听地址    	
+	location  /redhat  {  //在网页根目录下的redhat下
+	root html;  #安装位置根目录/ngnix下
+#proxy_pass  http://192.168.100.138:8080;  #反向代理服务器端口
+#proxy_pass  http://myserver;	#负载均衡指向的服务器名字
+	index index.html;  #设置默认页		//autoindex  on;自动查找,列出反文件
+	deny 127.0.0.1;  #拒绝的ip
+	allow 172.18.5.54; #允许的ip	} 
 
-  server {	//多个服务时注意文件{}格式
-
-​    keepalive_requests 120 #单连接请求上限次数
-
-​    listen    80 #监听端口
-
-​    server_name  www.aa.com #监听地址    	
-
-​    location  /redhat  {  //在网页根目录下的redhat下
-
-​      root html;  #安装位置根目录/ngnix下
-
-​			 #proxy_pass  http://192.168.100.138:8080;  #反向代理服务器端口
-
-​			 #proxy_pass  http://myserver;	#负载均衡指向的服务器名字
-
-​      index index.html;  #设置默认页		//autoindex  on;自动查找,列出反文件
-
-​      deny 127.0.0.1;  #拒绝的ip
-
-​      allow 172.18.5.54; #允许的ip	} 
-
-\#动静分离（静态网页和动态网页分别存放）
-
-\# location = / |~|~*|^~ { ＃ /通用匹配= 为严格匹配，~区分大小写，~*不区分大小写，^~模糊匹配
-
+#动静分离（静态网页和动态网页分别存放）
+#location = / |~|~*|^~ { ＃ /通用匹配= 为严格匹配，~区分大小写，~*不区分大小写，^~模糊匹配
 location ~* \ . ( jpg | png | gif)$ {	#当访问以jpg结尾时直接走代理服务器8081端口，静态访问
-
-​	proxy_pass	http://192.168.100.138:8081:
-
-root     bb;		#nginx根目录下的文件夹, 	/bb	#绝对路径/下的文件夹
-
-​      autoindex  on;	#自动查找,列出反文件	//index index.html; 设置默认页
-
+	proxy_pass	http://192.168.100.138:8081:
+	root     bb;		#nginx根目录下的文件夹, 	/bb	#绝对路径/下的文件夹
+	autoindex  on;	#自动查找,列出反文件	//index index.html; 设置默认页
 }	}		}
+```
+
+
 
 ###  高可用主备集群模式
 
-![img](E:\Project\Textbook\linux云计算\assets\wps74.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps74.jpg" alt="img" style="zoom:67%;" /> 
 
 (1)需要两台服务器192168.100.138和192.168.100.137
 
@@ -1251,53 +1176,36 @@ keepalived.conf:
 
 Copy#检测脚本
 
+```
 vrrp_script chk_http_port {
-
   script "/usr/local/src/check_nginx_pid.sh" #心跳执行的脚本，检测nginx是否启动
-
   interval 2              #检测脚本执行的间隔，单位是秒
-
   weight -2               #执行脚本后权重变化
-
 }
 
-\#vrrp 虚拟ip配置
 
-vrrp_instance VI_1 {
-
+vrrp_instance VI_1 { #vrrp 虚拟ip配置
   state MASTER       # 指定keepalived的角色，MASTER为主	//BACKUP为备
-
   interface ens33     # 需要绑定的物理网卡
-
   virtual_router_id 66   # 虚拟路由编号，主从要一直
-
   priority 100       # 优先级，数值越大，获取处理请求的优先级越高//从服务器修改为99
-
   advert_int 1       # 检查间隔，默认为1s(vrrp组播周期秒数)
-
-  \#授权访问
-
-  authentication {
-
-​    auth_type PASS #设置验证类型和密码，MASTER和BACKUP必须使用相同的密码才能正常通信
-
-​    auth_pass 1111	#密码
-
-  }
-
-  track_script {
-
-​    chk_http_port       #（调用检测脚本）
-
-  }
-
-  virtual_ipaddress {
-
-​    192.168.100.100       # 定义虚拟ip(VIP)，可多设，每行一个
-
-  }
-
 }
+
+authentication { #授权访问
+	auth_type PASS #设置验证类型和密码，MASTER和BACKUP必须使用相同的密码才能正常通信
+	auth_pass 1111	#密码
+}
+
+track_script {
+	chk_http_port       #（调用检测脚本）
+}
+
+virtual_ipaddress {
+	192.168.100.100       # 定义虚拟ip(VIP)，可多设，每行一个
+  }
+}
+```
 
 添加检测脚本vim /usr/local/src/check_nginx_pid.sh		chmod 775 check_nginx_pid.sh
 
@@ -1305,19 +1213,15 @@ Copy#!/bin/bash
 
 \#检测nginx是否启动了
 
+```sh
 A=`ps -C nginx --no-header |wc -l`  #nginx不带头
-
 if [ $A -eq 0 ];then   #如果nginx没有启动就启动nginx
-
    systemctl start nginx         #重启nginx
-
    if [ `ps -C nginx --no-header |wc -l` -eq 0 ];then   #nginx重启失败，则停掉keepalived服务，进行VIP转移
-
-​       killall keepalived
-
+		killall keepalived
    fi
-
 fi
+```
 
 启动两台服务器nginx和service keepalived start启动服务		<--停止服务,测试
 
@@ -1776,9 +1680,9 @@ repo --name="CentOS-6.6" --baseurl=http://192.168.4.150/centos/os/ --cost=100
 
 设置firewalld防火墙和selinux		setsebool -P ftpd_full_access on
 
- 防火墙 
+# 防火墙
 
-![img](E:\Project\Textbook\linux云计算\assets\wps134.jpg) 
+<img src="E:\Project\Textbook\linux云计算\assets\wps134.jpg" alt="img" style="zoom: 80%;" /> 
 
 1.systemctl是CentOS7的服务管理工具中主要的工具，它融合之前service和chkconfig的功能于一体。
 
@@ -1822,13 +1726,13 @@ repo --name="CentOS-6.6" --baseurl=http://192.168.4.150/centos/os/ --cost=100
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps135.jpg) 
 
- Iptables(只是一条命令)
+# Iptables(只是一条命令)
 
 tables实不是真正的防火墙,我们可以把它理解成一个客户端代理,用户通过 iptables这个代理,将用户的安全设定执行到对应的安全框架中,
 
 netfilter.是防火墙真正的安全框架( framework), netfilter位于内核空tables其实是一个命令行位于用户我们用这个工具操作真正的框架。				包：iptables
 
-![img](E:\Project\Textbook\linux云计算\assets\wps136.jpg) ![img](E:\Project\Textbook\linux云计算\assets\wps137.jpg) ![img](E:\Project\Textbook\linux云计算\assets\wps138.jpg)
+<img src="E:\Project\Textbook\linux云计算\assets\wps136.jpg" alt="img" style="zoom:67%;" /> <img src="E:\Project\Textbook\linux云计算\assets\wps137.jpg" alt="img" style="zoom:67%;" /> <img src="E:\Project\Textbook\linux云计算\assets\wps138.jpg" alt="img" style="zoom:67%;" />
 
 -P设置默认策略	-F清空规则链		-L查看规则链		-A在规则链的末尾加人新规则
 
@@ -1844,13 +1748,13 @@ netfilter.是防火墙真正的安全框架( framework), netfilter位于内核�
 
 iptables [-t 表名] <-A增加|I插入|D删除|R丢弃> 链名 [规则编号] [-i|o 网卡名称] [-p 协议类型] [-s 源ip|源子网] [--sport 源端口号] [-d 目的IP|目标子网] [--dport 目标端口号] [-j 动作]
 
-1、查看当前iptables状态
+**1、查看当前iptables状态**
 
 iptables -nL #默认查看filter表的状态，如果需要查看其他表的状态加上 -t 表名
 
 iptables -nL --line-numbers --verbose #可以查看到规则行数包过滤的流量统计，访问次数
 
-2、插入一条记录
+**2、插入一条记录**
 
 iptables -A INPUT 1 -s 192.168.10.0/24 -p tcp --dport 22 -j  ACCEPT
 
@@ -1860,11 +1764,11 @@ iptables -I INPUT 1 -i lo -j ACCPET #在第一条的位置插入一条记录，�
 
 iptables -I INPUT 2 -s 192.168.1.0/24 -j ACCPET # 如果在INPUT中不指明在第几条插入，默认就是在第一条插入
 
-3、追加一条记录
+**3、追加一条记录**
 
 iptables -A INPUT -s 192.168.2.0/24 -j ACCEPT #在INPUT最后追加一条记录。
 
-4、删除一条记录
+**4、删除一条记录**
 
 iptables -D INPUT 7 #删除第7条记录
 
@@ -1872,31 +1776,31 @@ iptables -P INPUT DROP		把 INPUT 规则链的默认策略设置为拒绝
 
 iptables -I INPUT -p imcp -j ACCEPT	针对协议开放
 
-5、针对端口开放（需要指明协议）
+**5、针对端口开放（需要指明协议）**
 
 iptables -I INPUT -p tcp --dport 22 -j ACCEPT
 
-6、限制ip端口访问
+**6、限制ip端口访问**
 
 iptables -I INPUT -s 192.168.1.0/24 -p tcp --dport 22 -j ACCPET
 
-7、拒绝所有访问
+**7、拒绝所有访问**
 
 iptables -A INPUT -j DROP #这个一般放到最后，不然会对前面的规则造成影响。
 
-8、根据时段限制访问
+**8、根据时段限制访问**
 
 iptables -A INPUT -p tcp -m time --timestart 00:00 --timestop 02:00 -j DROP #这里的时间是指UTC时间记得换算
 
-9、限制单个IP一分钟内建立的连接数
+**9、限制单个IP一分钟内建立的连接数**
 
 iptables -A INPUT -p tcp --syn --dport 80 -m connlimit --connlimit-above 25 -j REJECT
 
-10、从文件里面恢复iptables规则
+**10、从文件里面恢复iptables规则**
 
 iptables-restore < /etc/sysconfig/iptables
 
-11、对外建立的连接经过INPUT不拦截
+**11、对外建立的连接经过INPUT不拦截**
 
 iptables -I INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 
@@ -1912,9 +1816,9 @@ iptables -t filter FORWARD -d 192.168.1.22/32 -j ACCEPT #转发的FROWARD要允�
 
 iptables -t filter FORWARD -s 192.168.1.22/32 -j ACCEPT
 
-13、service iptables save让配置的防火墙策略永久生效
+**13、service iptables save让配置的防火墙策略永久生效**
 
-14、自动获取当前网卡ip地址来做SNAT源端口
+**14、自动获取当前网卡ip地址来做SNAT源端口**
 
 iptables -t nat -A POSTROUTING -j MASQUERADE
 
@@ -1930,7 +1834,7 @@ Linux 系统中其实有两个层面的防火墙
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps139.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps140.jpg) 
 
- KVM虚拟技术
+# KVM虚拟技术
 
 业务需求 举例：公司现有部分linux服务器利用率不高，为充分使用这些服务器，可以部署kvm,在物理机上部署多个业务系统。
 
@@ -1938,13 +1842,11 @@ Linux 系统中其实有两个层面的防火墙
 
 虚拟化就是把硬件资源从物理方式转变为逻辑方式，打破原有物理结构，使用户灵活管理这些资源，并且允许一台物理机上同时运行多个操作系统，以实现资源利用率最大化和灵活管理的技术
 
-优点
+**优点**
 
-1减少服务器数量，降低硬件采购成本		2资源利用率量大化
+1减少服务器数量，降低硬件采购成本		2资源利用率量大化		3降低机房空间，收热:用电消耗的成本
 
-3降低机房空间，收热:用电消耗的成本		4硬件资源可动态调整，提高企业IT业多贝活性
-
-5高可用性							6在不中断服务的情况下进行物理硬件调整
+4硬件资源可动态调整，提高企业IT业多贝活性		5高可用性		6在不中断服务的情况下进行物理硬件调整
 
 7降低管理成本							8具备更高效的灾备能力
 
@@ -1958,9 +1860,26 @@ modprobe kvm加载kvm模块
 
 yum -y install libvirt-daemon-kvm qemu-kvm virt-manager libvirt启动libvirtd服务
 
-查看系统上所有的模块![img](E:\Project\Textbook\linux云计算\assets\wps143.jpg)
+查看系统上所有的模块
 
-![img](E:\Project\Textbook\linux云计算\assets\wps144.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps145.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps146.jpg) 
+![img](E:\Project\Textbook\linux云计算\assets\wps143.jpg)
+
+```sh
+[root@Init ~]# vim /etc/sysconfig/network-scripts/ifcfg-ens33
+DEFROUTE= "yes"
+NAME="ens33"
+DEVICE="ens33"
+ONBOOT="yes"
+NM_CONTROLLED=no  //#是否受Network Mangement控制，这里选择no。
+BRIDGE=br0
+[root@Init ~]# vim /etc/sysconfig/network-scripts/ifcfg-brO
+BOOTPROTO=dhcp
+DEVICE=br0
+TYPE=Bridge
+NM_CONTROLLED=no
+```
+
+![img](E:\Project\Textbook\linux云计算\assets\wps146.jpg) 
 
 查看是否支持虚拟化（vmx是intel专用）		brctl	show查看桥接信息
 
@@ -1970,124 +1889,11 @@ virt-manager打开可视化界面		Virsh虚拟化命令	--help			snapshot快照�
 
 创建一个名为gurobi的1个8核cpu，内存容量为512M的，硬盘容量为1TB
 
+```sh
 [root@localhost ~]# virt-install --name=gurobi --memory=512,maxmemory=1024 --vcpus=1,maxvcpus=2 --os-type=linux --os-variant=rhel7 --location=/tmp/CentOS-7-x86_64-DVD-1708.iso --disk path=/kvm_data/gurobi.img,size=10 --bridge=br0 --graphics=none --console=pty,target_type=serial --extra-args=“console=tty0 console=ttyS0”
+```
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps147.jpg) 
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps148.jpg) 
 
- Mariadb数据库管理系统
-
-数据库管理系统分	Oracle	MySQL---开发相同---Mariadb
-
-vim /etc/yum.repos.d/CentOS-MariaDB.repo
-
-[mariadb]
-
-name = MariaDB
-
-baseurl = http://yum.mariadb.org/10.3/centos7-amd64
-
-gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
-
-gpgcheck=1
-
- 
-
-yum install mariadb-* -y #安装
-
-MyCLI ：一个支持自动补全和语法高亮的 MySQL/MariaDB 客户端  //yum install pip，pip install mycli
-
-包：mariadb*			端口号：3306		服务：mariadb
-
--u, --user=name         #指定用户名		-p, --password          #指定密码
-
--h, --host=name         #指定主机名		-P, --port            #指定端口
-
-mysql> use mysql #使用数据库
-
-mysql> update user set host = '%' where user = 'root'; #使能够远程连接
-
-mysql> flush privileges; #刷新权限
-
- 
-
-/var/log/mariadb/mariadb.log日志文件		/var/lib/mysql/数据库实体文件
-
-mysqldump -u root -p linuxprobe > /root/linuxprobeDB.dump	mysqldump命令用于备份数据库
-
-mysql -u root -p linuxprobe < /root/linuxprobeDB.dump	mysql命令用于导入数据库
-
-[root@server23 ~]# grep -Ev "^#|^$" /etc/my.cnf	#数据库服务默认主配置文件
-
-[mysqld]
-
-datadir = /data/mysql # 数据库数据文件存放目录
-
-socket  = /tmp/mysql.sock #为MySQL客户端程序和服务器之间的本地通讯指定一个套接字文件
-
-symbolic-links=0
-
-[mysqld_safe]
-
-log-error=/var/log/mariadb/mariadb.log	#记录错误日志文件
-
-pid-file=/var/run/mariadb/mariadb.pid	#pid所在的目录
-
-!includedir /etc/my.cnf.d
-
-![img](E:\Project\Textbook\linux云计算\assets\wps149.jpg) ![img](E:\Project\Textbook\linux云计算\assets\wps150.jpg)
-
-![img](E:\Project\Textbook\linux云计算\assets\wps151.jpg) ![img](E:\Project\Textbook\linux云计算\assets\wps152.jpg)
-
-![img](E:\Project\Textbook\linux云计算\assets\wps153.jpg) 
-
-MariaDB [(none)]>DROP TABLE table_name ; #删除指定数据库
-
-GRANT命令用于对用户进行授权：
-
-GRANT create ON 数据库.表单名称 TO 用户名@主机名	对某个特定数据库中的特定表单给予授权
-
-GRANT select，delete ON 数据库.* TO 用户名@主机名	对某个特定数据库中的所有表单给予授权
-
-GRANT 权限 ON *.* TO 用户名@主机名				对所有数据库及所有表单给予授权
-
-GRANT 权限1,权限2 ON 数据库.* TO 用户名@主机名		对某个数据库中的所有表单给予多个授权
-
-create user 'xiandian'@'localhost' identified by 'xd_paas'; 创建一个xiandian用户在本地授权密码xd_paas
-
-grant all privileges on xd_db.* to 'user'@'%' identified by 'redhat'
-
-允许本地用户user在%任何主机IP地址远程登陆对xd_db数据库下*.*所有表格有访问权限设置密码为redhat
-
-create user '[用户名称]'@'%' identified by '[用户密码]';--创建用户
-
-create user Luigi@localhost identified by "redhat";	增加管理员账户Luigi及密码redhat
-
-SELECT HOST,USER,PASSWORD FROM user WHERE USER="luke";
-
-查询lunk主机名称、账户名称以及经过加密的密码值信息
-
-show grants for alex@'localhost';		查看alex所有的权限
-
-mysqladmin -u root password 123456	设置mysql数据库密码
-
-mysql -uroot -p XXX < /home/renwole.sql	导入数据库
-
-[root@rhel ~]#mysql_secure_installation	更改超级用户管理权限
-
-Enter current password for root (enter for none): 当前数据库密码为空，直接按回车键
-
-Set root password? [Y/n]				设置root用户密码
-
-Remove anonymous users? [Y/n] y		删除匿名用户可登录数据库？
-
-Disallow root login remotely? [Y/n]		禁止用户远程登陆
-
-Remove test database and access to it?	删除test测试数据库并访问它？
-
-Reload privilege tables now?			现在重新加载权限表？
-
-[root@rhel ~]# mysql -u root -p123456	现在需指定用户登录
-
-MariaDB [(none)]> flush privileges #使配置生效

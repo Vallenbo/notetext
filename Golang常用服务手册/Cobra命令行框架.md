@@ -130,7 +130,6 @@ func Execute() {
 		os.Exit(1)
 	}
 }
-
 ```
 
 您还将在 `init()` 函数中定义标志并处理配置。例子如下：
@@ -160,8 +159,7 @@ var rootCmd = &cobra.Command{ // rootCmd 代表没有调用子命令时的基础
   // Run: func(cmd *cobra.Command, args []string) { },
 }
 
-// Execute 将所有子命令添加到root命令并适当设置标志。会被 main.main() 调用一次。
-func Execute() {
+func Execute() { // Execute 将所有子命令添加到root命令并适当设置标志。会被 main.main() 调用一次。
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -205,7 +203,6 @@ func initConfig() {
 		os.Exit(1)
 	}
 }
-
 ```
 
 ## 创建 main.go
@@ -225,7 +222,6 @@ import (
 func main() {
   cmd.Execute()
 }
-
 ```
 
 ## 创建额外的命令
@@ -235,8 +231,7 @@ func main() {
 如果要创建 `version` 命令，则可以创建 `cmd/version.go` 并使用以下命令进行填充：
 
 ```go
-// cmd/version.go
-package cmd
+package cmd // cmd/version.go
 
 import (
   "fmt"
@@ -279,6 +274,7 @@ var source string
 rootCmd.PersistentFlags() //持久化标志，可以传递子命令
 rootCmd.PersistentFlags().Bool("viper", true, "")
 rootCmd.PersistentFlags().BoolP("viper", "v", true, "") //接受一个可以在短划线后使用的速记字母
+
 var vbool bool
 rootCmd.PersistentFlags().BoolVarP(&vbool, "verbose", "v", false, "verbose output")//接受一个可以在短划线后使用的速记字母。
 ```
@@ -394,7 +390,6 @@ package main
 import (
 	"fmt"
 	"strings"
-
 	"github.com/spf13/cobra"
 )
 
@@ -435,16 +430,13 @@ Echo works a lot like print, except it has a child command.`,
 			}
 		},
 	}
-
 	cmdTimes.Flags().IntVarP(&echoTimes, "times", "t", 1, "times to echo the input")
 
-	// 设置根命令
-	var rootCmd = &cobra.Command{Use: "app"}
+	var rootCmd = &cobra.Command{Use: "app"} // 设置根命令
 	rootCmd.AddCommand(cmdPrint, cmdEcho)
 	cmdEcho.AddCommand(cmdTimes)
 
-	// 初始化应用
-	rootCmd.Execute()
+	rootCmd.Execute() // 初始化应用
 }
 
 ```
@@ -471,7 +463,6 @@ Echo works a lot like print, except it has a child command.`,
 cmd.SetHelpCommand(cmd *Command)
 cmd.setHelpCommand(f func(*Command, []string))
 cmd.setHelpTemplate(s string)
-
 ```
 
 后两者也适用于所有子命令。
@@ -489,7 +480,6 @@ cmd.setHelpTemplate(s string)
 ```go
 cmd.SetUsageFunc(f func(*Command) error)
 cmd.SetUsageTemplate(s string)
-
 ```
 
 可以参考 [GitHub CLI](https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fcli%2Fcli%2Fblob%2Fdcf5a27f5343ea0e9b3ef71ca37a4c3948102667%2Fpkg%2Fcmd%2Froot%2Froot.go%23L63) 的写法。
@@ -513,14 +503,6 @@ cmd.SetUsageTemplate(s string)
 下面这个包含了两个命令的例子使用了这些特性。当子命令执行时，它会运行根命令的 `PersistentPreRun`，但是不会运行根命令的 `PersistentPostRun`：
 
 ```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/spf13/cobra"
-)
-
 func main() {
 	var rootCmd = &cobra.Command{
 		Use:   "root [sub]",
@@ -560,14 +542,12 @@ func main() {
 	}
 
 	rootCmd.AddCommand(subCmd)
-
 	rootCmd.SetArgs([]string{""})
 	rootCmd.Execute()
 	fmt.Println()
 	rootCmd.SetArgs([]string{"sub", "arg1", "arg2"})
 	rootCmd.Execute()
 }
-
 ```
 
 输出：
@@ -584,7 +564,6 @@ Inside subCmd PreRun with args: [arg1 arg2]
 Inside subCmd Run with args: [arg1 arg2]
 Inside subCmd PostRun with args: [arg1 arg2]
 Inside subCmd PersistentPostRun with args: [arg1 arg2]
-
 ```
 
 ## "unknown command" 时的提示
@@ -599,7 +578,6 @@ Did you mean this?
         server
 
 Run 'hugo --help' for usage.
-
 ```
 
 系统会根据注册的每个子命令自动生成建议，并使用[萊文斯坦距離](https://link.juejin.cn?target=https%3A%2F%2Fzh.wikipedia.org%2Fwiki%2F%E8%90%8A%E6%96%87%E6%96%AF%E5%9D%A6%E8%B7%9D%E9%9B%A2)的实现。每个匹配最小距离 2（忽略大小写）的注册命令都将显示为建议。
@@ -608,14 +586,12 @@ Run 'hugo --help' for usage.
 
 ```go
 cmd.DisableSuggestions = true
-
 ```
 
 或
 
 ```go
 cmd.SuggestionsMinimumDistance = 1
-
 ```
 
 您还可以使用 `SuggestFor` 属性显式为给定命令设置建议的名称。这样就可以针对不是距离很近的字符串提出建议，但是对于您的命令集和不希望使用别名的命令来说，它们都是有意义的。比如：
@@ -628,7 +604,6 @@ Did you mean this?
         delete
 
 Run 'kubectl help' for usage.
-
 ```
 
 ## 为你的命令生成文档

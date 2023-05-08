@@ -7,30 +7,21 @@ REST与技术无关，代表的是一种软件架构风格，REST是Representati
 简单来说，REST的含义就是客户端与Web服务器之间进行交互的时候，使用HTTP协议中的4个请求方法代表不同的动作。
 
 **传统的风格**：创建用户
-/api /createuser 
-/api /getuser 
-/api /deluser
 
-**RESTful风格**： /api /user
-http method
+- /api /createuser 
+- /api /getuser 
+- /api /deluser
+
+**RESTful风格**：http method	 /api /user
 
 - `GET`用来获取资源
 - `POST`用来新建资源
 - `PUT`用来更新资源
-- `DELETE`用来删除资源。
+- `DELETE`用来删除资源
 
 只要API程序遵循了REST风格，那就可以称其为RESTful API。目前在前后端分离的架构中，前后端基本都是通过RESTful API来进行交互。
 
-例如，我们现在要编写一个管理书籍的系统，我们可以查询对一本书进行查询、创建、更新和删除等操作，我们在编写程序的时候就要设计客户端浏览器与我们Web服务端交互的方式和路径。按照经验我们通常会设计成如下模式：
-
-| 请求方法 |     URL      |     含义     |
-| :------: | :----------: | :----------: |
-|   GET    |    /book     | 查询书籍信息 |
-|   POST   | /create_book | 创建书籍记录 |
-|   POST   | /update_book | 更新书籍信息 |
-|   POST   | /delete_book | 删除书籍信息 |
-
-同样的需求我们按照RESTful API设计如下：
+例如，我们现在要编写一个管理书籍的系统，我们可以查询对一本书进行查询、创建、更新和删除等操作，我们在编写程序的时候就要设计客户端浏览器与我们Web服务端交互的方式和路径。按照RESTful API设计如下：
 
 | 请求方法 |  URL  |     含义     |
 | :------: | :---: | :----------: |

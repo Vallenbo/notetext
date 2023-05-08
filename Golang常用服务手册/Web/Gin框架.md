@@ -218,7 +218,7 @@ r.GET("/someProtoBuf", func(c *gin.Context) {
 	})
 ```
 
-## 获取path参数
+## 获取url参数
 
 请求的参数通过URL路径传递，例如：`/user/search/小王子/沙河`。 获取请求URL路径中的参数的方式如下。
 
@@ -264,7 +264,6 @@ type Login struct {// Binding from JSON
 	// 绑定JSON的示例 ({"user": "q1mi", "password": "123456"})
 	router.POST("/loginJSON", func(c *gin.Context) {
 		var login Login
-
 		if err := c.ShouldBind(&login); err == nil {
 			fmt.Printf("login info:%#v\n", login)
 			c.JSON(http.StatusOK, gin.H{
@@ -455,7 +454,7 @@ shopGroup := r.Group("/shop")
 
 Gin框架中的路由使用的是[httprouter](https://github.com/julienschmidt/httprouter)这个库。其基本原理就是构造一个路由地址的前缀树。
 
-# Gin中间件
+# jwt中间件鉴权
 
 Gin框架允许开发者在处理请求的过程中，加入用户自己的钩子（Hook）函数。这个钩子函数就叫中间件，中间件适合处理一些公共的业务逻辑，比如登录认证、权限校验、数据分页、记录日志、耗时统计等。
 

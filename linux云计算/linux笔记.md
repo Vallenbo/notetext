@@ -60,25 +60,13 @@ ln  /opt/cc /tmp/aa		硬链接，删除其中一个对另一个没有任何影�
 
 ln -s 软链接 会产生一个全新的文件
 
-top		查看进程活动状态以及一些系统状况
+top		查看进程活动状态以及一些系统状况	vmstat	查看系统状态、硬件和系统信息等
 
-vmstat	查看系统状态、硬件和系统信息等
+iostat		查看CPU负载，硬盘状况		sar	综合工具，查看系统状况
 
-iostat		查看CPU负载，硬盘状况
+mpstat	查看多处理器状况	netstat	查看网络状况	iptraf		实时网络状况监测
 
-sar		综合工具，查看系统状况
-
-mpstat	查看多处理器状况
-
-netstat	查看网络状况
-
-iptraf		实时网络状况监测
-
-tcpdump	抓取网络数据包，详细分析
-
-tcptrace	数据包分析工具
-
-netperf	网络带宽工具
+tcpdump	抓取网络数据包，详细分析	tcptrace	数据包分析工具	netperf	网络带宽工具
 
 dstat		综合工具，综合了vmstat,iostat, ifstat,netstat等多信息
 
@@ -178,7 +166,7 @@ seq -f "as%03gaa" 4#% 前面可以指定字符串，同样 g 的后面也可以�
 
 sed：以行为单位自动编辑一个或多个文件、简化对文件的反复操作、编写转换程序
 
-**选项**：
+### 常用选项：
 
 -n：不显示默认输出内容					-i：直接修改(-i.brk先对原文件备份brk，后生成修改文件)
 
@@ -186,7 +174,7 @@ sed：以行为单位自动编辑一个或多个文件、简化对文件的反�
 
 -{}：可组合多个命令,以分号分割			-f：使用sed脚本（如定义好的字符串或地址定界）
 
-地址定界：
+### 地址定界：
 
 1、不给地址：对全文进行处理
 
@@ -198,7 +186,9 @@ sed：以行为单位自动编辑一个或多个文件、简化对文件的反�
 
 4、步进:		1~2（从第1行后每隔2行才进行匹配）奇数行		2~2（从第2行后每隔2行才进行匹配）偶数行
 
-**编辑命令**（-i后接）：	d：删除			p：打印，将匹配的行重复打印
+### 编辑命令（-i后接）
+
+d：删除			p：打印，将匹配的行重复打印
 
 i：前添加 \ a：后添加，a+字符串，原每一行的后一行都会添加指定字符串
 
@@ -216,7 +206,7 @@ p：显示替换成功的行	w + 文件名：将成功的行保存至指定文�
 
  [-n\-i选项]... {选项、地址定界；编辑命令}	 [输入文件]
 
-**输出文本**：
+### 输出文本：
 
 sed -n 'p' a.txt输出所有行		sed -n '4p' a.txt 输出第4行		sed -n '4,+10p' a.txt输出第4行及其后的10行内容
 
@@ -224,7 +214,7 @@ sed -n '$=' 输出文件的行数		sed -n '4,7p' a.txt输出4-7行		sed -n '/^bi
 
 sed -n 'p;n' a.txt 输出奇数行		sed -n 'n;p’a.txt 输出偶数行	sed -n '10,$' 输出第10行到结尾的所有偶数行
 
-**删除文本**：
+### 删除文本：
 
 sed -i '3,5d' a.txt删除第3-5行	sed -i '$d' a.txt删除最后一行		sed -i '/xml/d' a.txt 删除所有包含xml的行
 
@@ -232,7 +222,7 @@ sed -i '/^$/' a.txt删除重复空行	sed -i '/^$/d' a.txt 删除所有空行	se
 
 sed -i /^install/d' a.txt删除所有以
 
-**替换文本**：
+### 替换文本：
 
 sed 's/xml/XML/' a.txt将每行的第一个xml替换为XML		sed 's/xml/XML/3' a.txt 将每行的第3个xml替换为XML
 
@@ -260,7 +250,7 @@ awk + 选项 +'pattern模式{cation动作}'  ,支持正则表达式、自定义�
 
 取列lsmod | awk -F:  '{print $2}'  以：设置分隔符，默认为空格或Tab位打印第二段(列) 	{} 全选
 
-内置变量：
+### 内置变量：
 
 NR：已读行的个数					NF：已读列的个数，$NF表示最后一列
 
@@ -270,7 +260,7 @@ OFS：将分隔符进行替换				FNR：保存当前处理行在原文本内的�
 
 FILENAME：当前处理的文件名		ENVIRON：表示支持系统环境变量，格式ENVIRON["变量名"]
 
-变量运算
+### 变量运算
 
 ip a | awk 'NR<=9{print $2"@@"$1}' #匹配前九行打印第2段，第1段，并进行反序，中间加入@@字符串
 
@@ -310,7 +300,7 @@ dd if=/dev/zero of=/root/file1 bs=100M count=1
 
 用/dev/zero向file.1里面输入内容	count指定文件个数为1 ，bs=20M大小
 
-find查找文件
+## find查找文件
 
 -type （d文件夹 f文件 l链接 b块设备 c字符）		find  /  -type  f  -name  "*abc*"
 
@@ -326,7 +316,7 @@ find  / -name  "???.conf"任意三个字符（数字，字母，点逗号）
 
 -exec …… {}\; 接下一个命令  --exec这个命令只能接在find命令后，也就是find专用的
 
-xargs(命令传递参数命令) 
+## xargs(命令传递参数命令) 
 
 ls | grep -v ^file$ | xargs  -i  cp  {}  /tmp/		-i 允许用大括号带替前面的内容		{} 代表示管道符号前的内容
 
@@ -334,7 +324,7 @@ ls | grep ^file$ | xargs rm -fr 	查找以file开头且以file结尾的
 
 ls file*  | xargs  -i  mv{}  a{}		在以file开头的文件前加上a这个字符
 
-tar压缩工具zip
+## tar压缩工具和zip
 
 tar -cjvf backup.tar.bz2 * 文件压缩成backup.tar.bz2名字的文件，最好时进入需要打包文件夹
 
@@ -358,7 +348,7 @@ unzip -od /home/sunny myfile.zip #把myfile.zip文件解压到 /home/sunny/
 
 -o:不提示的情况下覆盖文件	-d:将文件解压缩到指定目录下
 
-top ps 进程信息控制kill
+## top ps 进程信息控制kill
 
 进程是个动态的概念，即正在进行的程序，程序是个实体
 
@@ -380,7 +370,7 @@ task lsit：多个任务的task struct组成的链表5
 
 进程创建：init：第一个进程
 
-父子关系
+### 父子关系
 
 进程：都由其父进程创建，Cow	fork（）【用来生成子进程】，clone（）【克隆】
 
@@ -412,7 +402,7 @@ top -p  2822(PID号)	#查询固定PID号
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps7-1682690115363-180.jpg) 
 
-at一次性任务、周而复始计划任务
+## at一次性任务、周而复始计划任务
 
 echo `Ifconfig ens33` | at now+1 min
 
@@ -486,7 +476,27 @@ tcpdump tcp -i eth1 -t -s 0 -c 100 and dst port ! 22 and src net 192.168.1.0/24 
 
 ping -c3 -i0.1 192.168.1.1 		-c 次数		-i间隔	-t不间断
 
-![img](E:\Project\Textbook\linux云计算\assets\wps10-1682690115363-183.jpg) 
+```sh
+TYPE="Ethernet"
+PROXY_METHOD="none"
+BROWSER_ONLY="no"
+BOOTPROTO="static"           //修改：dhcp修改为static
+DEFROUTE="yes"
+IPV4_FAILURE_FATAL="no"
+IPV6INIT="yes"
+IPV6_AUTOCONF="yes"
+IPV6_DEFROUTE="yes"
+IPV6_FAILURE_FATAL="no"
+IPV6_ADDR_GEN_MODE="stable-privacy"
+NAME="ens33"
+UUID="ef482e1b-4f2f-4d23-ae65-784122f24201"
+DEVICE="ens33"
+ONBOOT=yes                  //修改：修改为yes, 配置网卡开机自启动
+IPADDR="10.193.12.23"       //新增：配置静态IP地址
+NETMASK="255.255.255.0"     //新增：配置子网掩码
+GATEWAY="10.193.12.254"     //新增：配置网关
+DNS1="10.1.26.188"          //新增：配置DNS
+```
 
 nmcli	n[etworking]			on\off	#连接设置
 
@@ -504,7 +514,9 @@ nmcli	g[eneral]				status\hostname\logging(支持服务信息)		#概叙信息
 
  
 
-创建网络组接口nmcli con add type team con-name xxx ifname xxx config JSON
+## 创建网络组接口
+
+nmcli con add type team con-name xxx ifname xxx config JSON
 
 type  team 设备类型 ，con-nam 连接名，  ifname 接口名
 
@@ -624,11 +636,47 @@ Enabled=1	//是否开启存库
 mount -o loop /root/XianDian-IaaS-v1.4.iso /media/ #挂在镜像文件
 ```
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps12-1682690115364-185.jpg" alt="img" style="zoom: 80%;" /> 
+**Yum命令**
 
-yum search ntpd 搜索安装包ntpd					yum provides 查看命令由哪个包提供
+| 命令                      | 作用                         | 命令                     | 作用                 |
+| ------------------------- | ---------------------------- | ------------------------ | -------------------- |
+| yum repolist all          | 列出所有仓库                 | yum list all             | 列出仓库中所有软件包 |
+| yum info软件包名称        | 查看软件包信息               | yum install 软件包名称   | 安装软件包           |
+| yum reinstall 软件包名称  | 重新安装软件包               | yum update 软件包名称    | 升级软件包           |
+| yum remove 软件包         | 移除软件包                   | yum clean all            | 清除所有仓库缓存     |
+| yum grouplist             | 查看系统中已经安装的软件包组 | yum check-update         | 检查可更新的软件包   |
+| yum groupinstall 软件包组 | 安装指定的软件包组           | yum groupremove 软件包组 | 移除指定的软件包组   |
+| yum groupinfo 软件包组    | 查询指定的软件包组信息       | yum search ntpd          | 搜索安装包ntpd       |
+| yum provides              | 查看命令由哪个包提供         |                          |                      |
 
 service yum-updatesd stop	#停止yum自动更新服务		chkconfig yum-updatesd off #禁止yum更新开机启动
+
+
+
+ubuntu使用阿里云源
+
+**切换路径** && **备份源文件** && **新建源文件**
+
+```bash
+cd /etc/apt/ && v sources.list sources.list.bak && vi sources.list
+```
+
+```bash
+deb http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
+
+deb http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse
+
+deb http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
+
+deb http://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse
+
+deb http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse
+```
 
 ### make编译安装
 
@@ -1020,7 +1068,7 @@ shel脚本：包含一些命令或声明有一定格式的文本.sh文件
 
 函数：【function】函数名【()】{ 代码段；[return int]}
 
-### 变量
+## 变量
 
 执行顺序:`/etc/profile-->/etc/profile.d/*.shー->~/. bash_profile-->~/.bashrc-->/etc/bashrc`
 
@@ -1028,9 +1076,9 @@ shel脚本：包含一些命令或声明有一定格式的文本.sh文件
 
 【变量引用前加$，命令无法识别变量则加$】
 
-自定义变量：自己定义的变量，例如：a='ll' (即将命令输出的结果进行赋值)，echo "$a" (双引号保留原格式)
+**自定义变量**：自己定义的变量，例如：a='ll' (即将命令输出的结果进行赋值)，echo "$a" (双引号保留原格式)
 
-环境变量：Linux系统已定义的变量，例如：$PATH, $HOME 等..., 这类变量我们可以直接使用
+**环境变量**：Linux系统已定义的变量，例如：$PATH, $HOME 等..., 这类变量我们可以直接使用
 
 env \ export \ declare -x	\printenv 显示当前环境变量
 
@@ -1042,17 +1090,17 @@ unset删除指定临时环境变量（bash 刷新环境变量）
 
 永久命令删除，三步		1vim 进去删除	2刷新环境变量	3unalias 删除命令		source/ 	重新加载文件
 
-参数变量：$0脚本名，$1第一个参数，$2，$3，${10}...表示执行脚本后传递给脚本文件的第n个参数,花括号{}将一整体概括
+**参数变量**：$0脚本名，$1第一个参数，$2，$3，${10}...表示执行脚本后传递给脚本文件的第n个参数,花括号{}将一整体概括
 
-特殊变量：$?	执行脚本返回的值，0或非0值				$$	查看当前进程PID号	
+**特殊变量**：
 
-  $*  所有的参数，全部参数为一个字符串		 $@  所有参数
+$?	执行脚本返回的值，0或非0值			$#   输入的参数个数		$$	查看当前进程PID号
 
-  $RANDOM	产生随机数（0-32767）			 $#   输入的参数个数
+$@  所有参数		$*  所有的参数，全部参数为一个字符串		$RANDOM	产生随机数（0-32767）			 
 
-  ${#变量名} 表示变量的长度				 ${#变量名[@]} 表示数组的个数
+${#变量名} 表示变量的长度				 ${#变量名[@]} 表示数组的个数
 
-特殊字符：
+**特殊字符**：
 
 ？至少匹配一次字符							*代表0或重复多个前面的字符
 
@@ -1080,15 +1128,15 @@ unset删除指定临时环境变量（bash 刷新环境变量）
 
 判断中的与或非：&		|	！
 
-$(())或$【】可以进算数运算	``不可以
+$(())或$[]可以进算数运算	``不可以
 
-判断：<= 小于等于(需要双括号),如:(("$a" <= "$b"))  		>= 大于等于(需要双括号),如:(("$a" >= "$b"))
+**判断**：<= 小于等于(需要双括号),如:(("$a" <= "$b"))  		>= 大于等于(需要双括号),如:(("$a" >= "$b"))
 
 大于 -gt (greater than)					小于 -lt (less than)			大于或等于 -ge (greater than or equal)
 
 小于或等于 -le (less than or equal)		不相等 -ne （not equal）	相等 -eq （equal）
 
-shell脚本内的特殊命令：
+**shell脚本内的特殊命令**：
 
 echo $-：查看当前set环境功能		$-代表的是当前Bash的运行选项，这些Bash选项控制着Bash运行时的行为
 
@@ -1104,7 +1152,7 @@ H，history：开启历史命令
 
 set：显示所有变量及函数，用来定制shell环境			set +h删除hash功能		set --清空所有
 
-参数
+**参数**
 
 -u：引用一个没有设置的变量时，显示错误信息，等同set -o nounset
 
@@ -1140,7 +1188,7 @@ exit 1函数退出当前程序
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps27-1682690115365-199.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps28-1682690115365-200.jpg" alt="img" style="zoom:67%;" /> 
 
-### For循环
+## For循环
 
 for的一些用法		例：for i in “file1” “file2” “file3”
 
@@ -1159,12 +1207,11 @@ function printInfo (){
 ```sh
 for a in {10..15}
 do
-printInfo;		#使用函数
+	printInfo;		#使用函数
 done	
 ```
 
-
-### If判断语句
+## If判断语句
 
 [ ]&& ----快捷if				`[ "$?" == 0 ] && echo "success" >>/tmp/install.log`
 
@@ -1193,7 +1240,7 @@ fi
 ```
 
 ```sh
-#for a in {1..10}
+for a in {1..10}
 do
 	if  ! (ping -c4 -i0.1 192.168.0.$a &>/dev/null) ; then
 		echo "host$a is down" &>>/ tmp/down
@@ -1227,11 +1274,30 @@ else
 fi
 ```
 
+例18、将zhubajie. sunwukong. tangseng重定向到/tmp/userdb中
+创建一个添加用户脚本。在本机上创建一 个脚本,名为/tmp/user.sh, 此脚本能实现为本机系统创建本地用户,
+并且这些用户的用户名来自一个包含用户列表的文件(userdb) .同时满足以下要求:
+此脚本要求提供一 个参数，此参数就是包含用户列表的文件
+如果没有提供参数，此脚本应该给出下面的提示信息Usage:/tmp/userdb, 然后退出并返回相应的值
+如果提供一 个不存在的文件名，此脚本应该给出下面的提示信息Input file not found, 然后退出并返回相应的值
+此脚本需要为用户设置密码，密码为redhat,且都为非交互式登录shell
 
+```sh
+#! /bin/bash
+if [ $# -eq 0 ];then
+	echo "Usage: /tmp/userdb"
+elif [ $1 == "/tmp/userdb" ];then
+	for a in、cat /tmp/userdb"
+	do
+		useradd -s /sbin/nologin $a;
+		echo redhat| passwd -- stdin $a;
+	done
+else
+	echo "Input file not found"
+fi 
+```
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps29-1682690115365-201.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps30-1682690115365-202.jpg" alt="img" style="zoom:67%;" /> 
-
-### Read语句
+## Read语句
 
 read能够和用户进行交互式的读取数据,要保证脚本能够根据用户的反馈数据进行下一步操作
 
@@ -1262,7 +1328,7 @@ fi
 
 
 
-### While循环语句
+## While循环语句
 
 ```sh
 while 条件  //While : 	//无限循环
@@ -1281,23 +1347,51 @@ done
 
 
 
-### Case语句
+## Case语句
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps31-1682690115365-203.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps32-1682690115365-204.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps33-1682690115365-205.jpg" alt="img" style="zoom:67%;" /> 
+<img src="E:\Project\Textbook\linux云计算\assets\wps31-1682690115365-203.jpg" alt="img" style="zoom:67%;" />
 
-### select语句
+```sh
+read -n 1 -p "Do you want to cont inue [Y/N]?" answer
+case $answer in
+	Y)
+		echo " fine , continue"
+	;;
+	N)
+		echo " ok, goodbye"
+	;;
+	*)
+		echo "error choice"
+esac
+```
 
+```sh
+case $l in 
+	joinlabs)
+		echo "welcome to joinlabs !"
+	;;
+	redhat)
+		echo "this is redhat class room'
+	;;
+	*)
+		echo " byebye'
+esac
+```
+
+ 
+
+## select语句
+
+```sh
 select variable in list 		select name in ylt yyy lll ttt
-
-do						do
-
-循环体命令				    echo $name
-
-done					done
+do								do
+	循环体命令				    	echo $name
+done							done
+```
 
 select 循环执行后会出现菜单项等待用户选择（不会自动循环所有变量列表），而用户输入的只能是菜单项前面的数字序号，每输入一次对应的序号就会执行一次循环，直到变量后面对应列表取完为止
 
-开机破密码
+# 开机破密码
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps34-1682690115365-206.jpg" alt="img" style="zoom: 67%;" /> 
 
@@ -1335,7 +1429,7 @@ ll  /lib/system/system	| grep run	查找级别
 
 查看默认级别号
 
-生成复杂密码
+# 生成复杂密码
 
 Linux系统随机生成复杂密码方法：使用 mkpasswd 命令生成随机密码
 
@@ -1361,7 +1455,7 @@ mkpasswd 使用 mkpasswd 命令来生成随机密码了（区分大小写）：
 
 openssl工具生成强密码操作示例：$ openssl rand -base64 8		-->	vZfr+eeIxeE=		#生成 8 位随机密码
 
-vim常用模式
+# vim常用模式
 
 1、命令模式	2、插入模式	3、底行模式	4、可视化模式，命令模式按v进入	5、替换模式，命令模式下按r进入
 
@@ -1462,16 +1556,16 @@ set cursorline
 set autoindent
 autocmd BufNewFile *.sh exec ":call SetTitle()"
 func SetTitle()
-​    if expand("%:e") == 'sh'
-​    call setline(1,"#!/bin/bash")
-​    call setline(2,"#*******************************")
-​    call setline(3,"#Author:		liulengbo")
-​    call setline(4,"#weixin:		13086119057")
-​    call setline(5,"#Date:		".strftime("%Y-%m-%d"))
-​    call setline(6,"#Description:	")
-​    call setline(7,"#*******************************")
-​    call setline(8,"")
-​    endif
+	if expand("%:e") == 'sh'
+	call setline(1,"#!/bin/bash")
+	call setline(2,"#*******************************")
+	call setline(3,"#Author:		liulengbo")
+	call setline(4,"#weixin:		13086119057")
+	call setline(5,"#Date:		".strftime("%Y-%m-%d"))
+	call setline(6,"#Description:	")
+	call setline(7,"#*******************************")
+	call setline(8,"")
+	endif
 endfunc
 autocmd BufNewFile * normal G
 ```
