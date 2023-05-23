@@ -38,12 +38,15 @@ Raft是一个用于管理日志一致性的协议。它将分布式一致性分�
   Raft确保新当选的Leader包含所有已提交（集群中大多数成员中已提交）的日志条目。这个保证是在RequestVoteRPC阶段做的，candidate在发送RequestVoteRPC时，会带上自己的last log entry的term_id和index，follower在接收到RequestVoteRPC消息时，如果发现自己的日志比RPC中的更新，就拒绝投票。日志比较的原则是，如果本地的最后一条log entry的term id更大，则更新，如果term id一样大，则日志更多的更大(index更大)。
 
 ## 5、Raft数据一致性如何实现？
+
   主要是通过日志复制实现数据一致性，leader将请求指令作为一条新的日志条目添加到日志中，然后发起RPC 给所有的follower，进行日志复制，进而同步数据。
 
 ## 6、Raft的日志有什么特点？
+
   日志由有序编号（log index）的日志条目组成，每个日志条目包含它被创建时的任期号（term）和用于状态机执行的命令。
 
 ## 10、Raft日志压缩是怎么实现的？增加或删除节点呢？？
+
   在实际的系统中，不能让日志无限增长，否则系统重启时需要花很长的时间进行回放，从而影响可用性。Raft采用对整个系统进行snapshot来解决，snapshot之前的日志都可以丢弃（以前的数据已经落盘了）。
 
   snapshot里面主要记录的是日志元数据，即最后一条已提交的 log entry的 log index和term。

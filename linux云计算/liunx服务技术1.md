@@ -181,10 +181,10 @@ rpm -K 包名    	//查看该包需要的钥匙，显示 NOT OK (MISSING KEYS: (
 中文版显示：不正确
 
 gpg -v 钥匙包  		//从系统上所有的钥匙包里面，找到需要的钥匙
-rpm --import  钥匙包  	//将匹配的钥匙包导入系统
+rpm --import  钥匙包	//将匹配的钥匙包导入系统
 rpm -qa |grep pubkey	//查看系统上已经导入的所有钥匙
 rpm -e 钥匙			//删除不匹配的钥匙 
-rpm -K 包名    	//查看该包需要的钥匙，显示 OK
+rpm -K 包名			//查看该包需要的钥匙，显示 OK
 rpm -ivh 或者 yum install 	//最后安装
 ```
 
@@ -216,7 +216,7 @@ PPTP，Point to Point Tunneling Protocol，点对点隧道协议，这是一种�
 
 设置两块网卡（外网内网）		安装包和服务名：pptpd
 
-主配置文件：/etc/pptpd.conf	
+主配置文件：/etc/pptpd.conf
 
 ```
 localip 192.168.127.11
@@ -229,9 +229,21 @@ remoteip表示设置一个地址段供客户机连接使用
 
 用户文件/etc/ppp/chap-secrets 
 
-![img](E:\Project\Textbook\linux云计算\assets\wps8.jpg) 
+```
+#用户名				服务器名				密码					IP *号表示随机分配
+#client				server					secret					IP addresses
+ admin				pptpd					123456					*
+```
 
-/etc/ppp/options.pptpd文件一般用户设置DNS的文件（ms-dns配置项）![img](E:\Project\Textbook\linux云计算\assets\wps9.jpg)
+/etc/ppp/options.pptpd文件一般用户设置DNS的文件（ms-dns配置项）
+
+```
+#配置DNS
+#ms-dns 10.0.0.1
+#ms-dns 10.0.0.2
+```
+
+
 
 # DHCP
 
@@ -640,7 +652,7 @@ local_root= /share 指定该用户根目录
 
  
 
-###  Lftp客户端工具
+##  Lftp客户端工具
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps31.jpg" alt="img" style="zoom:67%;" /> 
 
@@ -1822,7 +1834,7 @@ iptables -t filter FORWARD -s 192.168.1.22/32 -j ACCEPT
 
 iptables -t nat -A POSTROUTING -j MASQUERADE
 
- 服务的访问控制列表(TCP Wrappers)
+# 服务的访问控制列表(TCP Wrappers)
 
 TCP Wrappers 是RHEL 7 系统中默认启用的一款流量监控程序，它能够根据来访主机的地址 与本机的目标服务程序作出允许或拒绝的操作。
 

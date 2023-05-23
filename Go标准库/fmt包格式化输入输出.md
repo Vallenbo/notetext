@@ -2,7 +2,7 @@
 
 fmt包实现了类似C语言printf和scanf的格式化I/O。主要分为向外输出内容和获取输入内容两大部分。
 
-## 向外输出
+# 向外输出
 
 标准库`fmt`提供了以下几种输出相关函数。
 
@@ -47,16 +47,14 @@ func Fprintln(w io.Writer, a ...interface{}) (n int, err error)
 举个例子：
 
 ```go
-// 向标准输出写入内容
-fmt.Fprintln(os.Stdout, "向标准输出写入内容")
+fmt.Fprintln(os.Stdout, "向标准输出写入内容") // 向标准输出写入内容
 fileObj, err := os.OpenFile("./xx.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 if err != nil {
 	fmt.Println("打开文件出错，err:", err)
 	return
 }
 name := "沙河小王子"
-// 向打开的文件句柄中写入内容
-fmt.Fprintf(fileObj, "往文件中写如信息：%s", name)
+fmt.Fprintf(fileObj, "往文件中写如信息：%s", name) // 向打开的文件句柄中写入内容
 ```
 
 注意，只要满足`io.Writer`接口的类型都支持写入。
@@ -103,7 +101,7 @@ e := errors.New("原始错误e")
 w := fmt.Errorf("Wrap了一个错误%w", e)
 ```
 
-## 格式化占位符
+# 格式化占位符
 
 `*printf`系列函数都支持format格式化参数，在这里我们按照占位符将被替换的变量类型划分，方便查询和记忆。
 
@@ -334,7 +332,7 @@ fmt.Printf("%05s\n", s)
 00小王子
 ```
 
-## 获取输入
+# 获取输入
 
 Go语言`fmt`包下有`fmt.Scan`、`fmt.Scanf`、`fmt.Scanln`三个函数，可以在程序运行过程中从标准输入获取用户的输入。
 
@@ -348,8 +346,6 @@ func Scan(a ...interface{}) (n int, err error)
 
 - Scan从标准输入扫描文本，读取由空白符分隔的值保存到传递给本函数的参数中，换行符视为空白符。
 - 本函数返回成功扫描的数据个数和遇到的任何错误。如果读取的数据个数比提供的参数少，会返回一个错误报告原因。
-
-具体代码示例如下：
 
 ```go
 func main() {
@@ -383,8 +379,6 @@ func Scanf(format string, a ...interface{}) (n int, err error)
 
 - Scanf从标准输入扫描文本，根据format参数指定的格式去读取由空白符分隔的值保存到传递给本函数的参数中。
 - 本函数返回成功扫描的数据个数和遇到的任何错误。
-
-代码示例如下：
 
 ```go
 func main() {
@@ -427,8 +421,6 @@ func Scanln(a ...interface{}) (n int, err error)
 - Scanln类似Scan，它在遇到换行时才停止扫描。最后一个数据后面必须有换行或者到达结束位置。
 - 本函数返回成功扫描的数据个数和遇到的任何错误。
 
-具体代码示例如下：
-
 ```go
 func main() {
 	var (
@@ -453,7 +445,7 @@ $ ./scan_demo
 
 ### bufio.NewReader
 
-有时候我们想完整获取输入的内容，而输入的内容可能包含空格，这种情况下可以使用`bufio`包来实现。示例代码如下：
+有时候我们想完整获取输入的内容，而输入的内容可能包含空格，这种情况下可以使用`bufio`包来实现。
 
 ```go
 func bufioDemo() {

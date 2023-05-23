@@ -242,34 +242,6 @@ openjdk：是开源社区开发的开源实现，yum list | grep openjdk查看jd
 
 `yum install java-1.8.0 -y` #进行安装
 
-# nodejs部署安装
-
-一、NodeJS基本介绍
-
- 1、NodeJS是为了开发高性能的服务器而诞生的一种技术
-
- 2、是运行在服务端的 JavaScript，基于V8（谷歌浏览器的版本）进行运行 
-
- 3、使用了一个事件驱动、非阻塞式 I/O 的模型，使其轻量又高效
-
-二、学习node的意义
-
- 1、 开发沟通：开发时更容易理解后端实现，降低交流成本
-
- 2、 后端开发：想写些自己感兴趣的项目时，可以自己独立完成，即使没有后端支持，且成本特别低。
-
- 3、 中间层开发：为了进一步的前后端分离，提高性能，使用nodejs做中间层是一个非常好的实践（由于nodejs具有异步io的特点）
-
-Node.js 安装包及源码下载地址为：https://nodejs.org/en/download/，选择Linux Binaries (x64)
-
-或者：`wget https://nodejs.org/dist/latest-v14.x/node-v14.4.0-linux-x64.tar.gz`
-
-```sh
-tar -xzvf node-v14.4.0-linux-x64.tar.gz 进行解压
-echo "export PATH=/usr/local/lib/node-v14.4.0-linux-x64/bin:$PATH" >>/etc/profile 设置环境
-source /etc/profile 刷新文件			node -v && npm version && npx -v 使用测试安装
-```
-
 
 
 # 数据库
@@ -695,11 +667,11 @@ ConnectionPlugins：连接插件，Ansible和Host通信使用
 
 ## ansible 任务执行模式及过程
 
-l ad-hoc模式(点对点模式)
+**ad-hoc模式(点对点模式)**
 
 　　使用单个模块，支持批量执行单条命令。ad-hoc 命令是一种可以快速输入的命令，而且不需要保存起来的命令。就相当于bash中的一句话shell
 
-l playbook模式(剧本模式)
+**playbook模式(剧本模式)**
 
 　　是Ansible主要管理方式，也是Ansible功能强大的关键所在。playbook通过多个task集合完成一类功能，如Web服务的安装部署、数据库服务器的批量备份等。可以简单地把playbook理解为通过组合多条ad-hoc操作的配置文件
 
@@ -719,8 +691,6 @@ host_key_checking = False	#检查SSH主机的密钥，值为True/False。False�
 timeout = 60				#设置SSH连接的超时时间，单位为秒
 log_path = /var/log/ansible.log#ansible日志的文件（默认不记录日志）
 ```
-
-
 
 ## ansible 常用命令及参数
 
