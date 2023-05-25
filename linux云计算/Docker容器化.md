@@ -72,7 +72,7 @@ yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-co
 配置镜像加速器`vim /etc/docker/daemon.json`
 
 ```sh
-{"registry-mirrors": ["https://ustc-edu-cn.mirror.aliyuncs.com"，"https://docker.mirrors.ustc.edu.cn"]}
+{"registry-mirrors": ["https://ustc-edu-cn.mirror.aliyuncs.com","https://docker.mirrors.ustc.edu.cn"]}
 ```
 
 `systemctl daemon-reload && systemctl restart docker`	#重新加载配置文件及服务
@@ -560,6 +560,237 @@ rancher-server
 
 # docker应用部署
 
+## Portainer可视化管理
+
+Portainer是一个轻量级的管理UI，可让您轻松管理不同的Docker环境（Docker主机或Swarm集群）。 Portainer的意图是易于部署和使用。它由一个可以在任何Docker引擎上运行的容器组成（可以部署为Linux容器或Windows本机容器，也支持其他平台）。 Portainer允许您管理所有Docker资源（容器，映像，卷，网络等）！它与独立的Docker引擎和 Docker Swarm模式兼容。
+
+优点
+（1）支持容器管理、镜像管理(导入、导出)
+（2）轻量级，消耗资源少
+（3）基于docker api，安全性高，可指定docker api端口，支持TLS证书认证
+（4）支持权限分配
+（5）支持集群
+（6）github上目前持续维护更新
+
+### 一、下载Portainer镜像
+
+```
+docker pull portainer/portainer
+```
+
+### 二、运行Portainer镜像
+
+运行方式有两种：单机运行 和 集群运行
+
+3.1 单机运行
+
+```shell
+docker run -d -p 9000:9000 --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data --name prtainer-libai portainer/portainer
+```
+
+参数说明：
+-d：容器在后台运行；
+-p 9000:9000 ：宿主机9000端口映射容器中的9000端口（前面的是宿主机端口，后面的是容器端口）；
+–restart 标志会检查容器的退出代码，并据此来决定是否要重启容器，默认不会重启；
+–restart=always：自动重启该容器；
+-v /var/run/docker.sock:/var/run/docker.sock ：把宿主机的Docker守护进程(Docker daemon)默认监听的Unix域套接字挂载到容器中；
+-v portainer_data:/data ：把宿主机portainer_data数据卷挂载到容器/data目录；
+–name prtainer-test ： 给容器起名为portainer-libai；
+
+### 三、汉化安装：
+
+默认安装的是英文版的，有需要中文汉化的可以上传汉化包进行汉化。（汉化版点击下载）提取码：6chp
+
+将解压后的public文件夹上传到centos系统的根目录下，请注意，是centos系统的根目录。
+
+然后执行以下命令：
+docker run -d -p 9000:9000 --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data -v /public:/public --name prtainer-test portainer/portainer（如果已部署，需要将已部署的容器删除）
+
+
+
+## Mysql PXC集群环境部署
+
+PXC集群特点：
+
+- 同步复制，事务在所有的集群节点要么同时提交，要么同时不提交
+- Replication采用异步复制，无法保证数据的一致性
+
+1.下载镜像
+
+```sh
+docker pull percona/percona-xtradb-cluster
+```
+
+2.出于安全考虑，需要给pxc集群实例创建docker内部网络
+
+```shell
+inidocker network create --subnet=172.20.1.0/24 net1
+docker network ls
+# docker network inspect net1
+# docker network rm net1
+```
+
+ps:阿里云服务器没有成功???!!中间遇到了一个小问题，`Error response from daemon`, 这个是因为172.18 的网段已经存在，可以`docker network ls`查看,换一个网段就解决了
+
+3.创建docker卷
+
+```shell
+docker volume create --name v1
+docker volume create --name v2
+docker volume create --name v3
+```
+
+4.查看docker卷信息
+
+```shell
+docker inspect v1
+#创建第一个节点
+docker run -d -p 3310:3306 -e MYSQL_ROOT_PASSWORD=123456 -e CLUSTER_NAME=PXC -e XTRABACKUP_PASSWORD=123456 --name=node1 --net=net1 --ip 172.20.1.2 percona/percona-xtradb-cluster
+
+#创建第二个节点
+docker run -d -p 3311:3306 -e MYSQL_ROOT_PASSWORD=123456 -e CLUSTER_NAME=PXC -e XTRABACKUP_PASSWORD=123456 -e CLUSTER_JOIN=node1 --name=node2 --net=net1 --ip 172.20.1.3 percona/percona-xtradb-cluster
+
+#创建第三个节点
+docker run -d -p 3312:3306 -e MYSQL_ROOT_PASSWORD=123456 -e CLUSTER_NAME=PXC -e XTRABACKUP_PASSWORD=123456 -e CLUSTER_JOIN=node1 --name=node3 --net=net1 --ip 172.20.1.7 percona/percona-xtradb-cluster
+```
+
+ps:在这个地方又遇到了个问题，创建了5个node节点，但是只启动了2个，3个失败???暂时还不知道原因???启动的状态都为Exited???!!
+
+使用这句命令全部启动实例`docker ps -aq | xargs -I {} docker start {}`
+
+5.mysql的负载均衡haproxy
+
+```shell
+docker pull haproxy
+```
+
+6.实例化haproxy
+
+```shell
+diffdocker run -it -d -p 4001:8888 -p 4002:3306 
+-v /home/soft/haproxy:/usr/local/etc/haproxy 
+--name h1 --privileged 
+--net=net1 --ip 172.20.1.10 haproxy
+	
+shellglobal
+	#工作目录
+	chroot /usr/local/etc/haproxy
+	#日志文件，使用rsyslog服务中local5日志设备（/var/log/local5），等级info
+	log 127.0.0.1 local5 info
+	#守护进程运行
+	daemon
+
+defaults
+	log	global
+	mode	http
+	#日志格式
+	option	httplog
+	#日志中不记录负载均衡的心跳检测记录
+	option	dontlognull
+   #连接超时（毫秒）
+	timeout connect 5000
+   #客户端超时（毫秒）
+	timeout client  50000
+	#服务器超时（毫秒）
+   timeout server  50000
+
+#监控界面
+listen  admin_stats
+	#监控界面的访问的IP和端口
+	bind  0.0.0.0:8888
+	#访问协议
+   mode        http
+	#URI相对地址
+   stats uri   /dbs
+	#统计报告格式
+   stats realm     Global\ statistics
+	#登陆帐户信息
+   stats auth  admin:abc123456
+#数据库负载均衡
+listen  proxy-mysql
+	#访问的IP和端口
+	bind  0.0.0.0:3306
+   #网络协议
+	mode  tcp
+	#负载均衡算法（轮询算法）
+	#轮询算法：roundrobin
+	#权重算法：static-rr
+	#最少连接算法：leastconn
+	#请求源IP算法：source
+   balance  roundrobin
+	#日志格式
+   option  tcplog
+	#在MySQL中创建一个没有权限的haproxy用户，密码为空。Haproxy使用这个账户对MySQL数据库心跳检测
+   option  mysql-check user haproxy
+   server  MySQL_1 172.20.1.2:3306 check weight 1 maxconn 2000
+   server  MySQL_2 172.20.1.3:3306 check weight 1 maxconn 2000
+   server  MySQL_3 172.20.1.7:3306 check weight 1 maxconn 2000
+   server  MySQL_4 172.20.1.5:3306 check weight 1 maxconn 2000
+   server  MySQL_5 172.20.1.6:3306 check weight 1 maxconn 2000
+	
+	#使用keepalive检测死链
+   option  tcpka
+```
+
+7.登陆到交互容器里
+
+```bash
+bash
+docker exec -it h1 bash
+```
+
+8.安装keepalive 完成双机热备，登录haproxy，执行命令
+
+```sql
+sqlapt-get update
+apt-get install keepalived
+```
+
+9.配置keepalive，
+
+```diff
+diff#创建第2个Haproxy负载均衡服务器
+docker run -it -d -p 4003:8888 
+-p 4004:3306 
+-v /home/soft/haproxy:/usr/local/etc/haproxy 
+--name h2 --privileged 
+--net=net1 
+--ip 172.20.1.10 
+haproxy
+shell vrrp_instance  VI_1 {
+    state  MASTER
+    interface  eth0
+    virtual_router_id  51
+    priority  100
+    advert_int  1
+    authentication {
+        auth_type  PASS
+        auth_pass  123456
+    }
+    virtual_ipaddress {
+        172.20.1.201
+    }
+}
+
+#启动Keepalived
+service keepalived start
+#宿主机执行ping命令
+ping 172.20.1.201
+shell
+#创建第2个Haproxy负载均衡服务器
+docker run -it -d -p 4003:8888 -p 4004:3306 
+-v /home/soft/haproxy:/usr/local/etc/haproxy 
+--name h2 --privileged 
+--net=net1 --ip 172.20.1.11 haproxy
+#进入h2容器，启动Haproxy
+docker exec -it h2 bash
+haproxy -f /usr/local/etc/haproxy/haproxy.cfg
+```
+
+
+
+
+
 ## Nginx和Apache
 
 ```sh
@@ -642,6 +873,14 @@ systemctl start vsftpd
 
 3. 创建容器，设置端口映射		`docker run -id --name=c_redis -p 6379:6379 redis:5.0`
 4. 使用外部机器连接redis		`./redis-cli.exe -h 192.168.149.135 -p 6379`
+
+# docker集群应用部署
+
+
+
+
+
+
 
 # registry私有仓库搭建
 
