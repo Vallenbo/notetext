@@ -70,6 +70,27 @@ tcpdump	抓取网络数据包，详细分析	tcptrace	数据包分析工具	netp
 
 dstat		综合工具，综合了vmstat,iostat, ifstat,netstat等多信息
 
+
+
+lsof | grep /mnt/sdb1_mount //查看正在使用文件的进程
+
+如果存在输出，则说明有进程正在使用该目录，需要先结束这些进程对该目录的占用。例如，输出可能类似如下：
+
+```
+COMMAND     PID        USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+bash      1234        root  cwd    DIR  253,0     4096   12 /mnt/sdb1_mount
+```
+
+则可以使用上述命令中显示的PID来结束该进程对目录的占用。例如，在本例中可以使用以下命令结束该bash进程：
+
+```
+kill -9 1234
+```
+
+
+
+
+
 # 文本处理工具
 
 cat输出文件的内容		-n显示行数且空行显示行数		-b显示行数且空行不显示行数
@@ -653,30 +674,53 @@ service yum-updatesd stop	#停止yum自动更新服务		chkconfig yum-updatesd o
 
 
 
-ubuntu使用阿里云源
+### ubuntu使用阿里云源
 
 **切换路径** && **备份源文件** && **新建源文件**
 
 ```bash
-cd /etc/apt/ && v sources.list sources.list.bak && vi sources.list
+mv /etc/apt/sources.list /etc/apt/sources.list.bak && vi /etc/apt/sources.list
 ```
 
+ubuntu 18.04(bionic) 配置如下
 ```bash
-deb http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
+deb https://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
+deb-src https://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
 
-deb http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse
+deb https://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
+deb-src https://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
 
-deb http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
+deb https://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
+deb-src https://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
 
-deb http://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse
+# deb https://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
+# deb-src https://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
 
-deb http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse
+deb https://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
+deb-src https://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
+
 ```
+
+ubuntu 20.04(focal) 配置如下
+
+```sh
+deb https://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
+deb-src https://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
+
+deb https://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse
+deb-src https://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse
+
+deb https://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
+deb-src https://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
+
+# deb https://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse
+# deb-src https://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse
+
+deb https://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse
+deb-src https://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse
+```
+
+
 
 ### make编译安装
 

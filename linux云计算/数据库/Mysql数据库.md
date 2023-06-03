@@ -23,8 +23,9 @@ MyCLI ：一个支持自动补全和语法高亮的 MySQL/MariaDB 客户端  //`
 -h, --host=name         #指定主机名		-P, --port            		#指定端口
 
 ```sql
+[root@localhost ~]# mysql -uroot -p123456 #登录
 mysql> use mysql #使用数据库
-mysql> update user set host = '%' where user = 'root'; #使能够远程连接
+mysql> update user set host='%' where user='root'; #使能够远程连接
 mysql> flush privileges; #刷新权限
 ```
 
@@ -63,6 +64,9 @@ grant 权限 ON *.* TO 用户名@主机名				//对所有数据库及所有表�
 grant 权限1,权限2 ON 数据库.* TO 用户名@主机名	//对某个数据库中的所有表单给予多个授权
 grant all privileges on xd_db.* to 'user'@'%' identified by 'redhat' 
 //允许本地用户user在%任何主机IP地址远程登陆对xd_db数据库下*.*所有表格有访问权限设置密码为redhat
+
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root' WITH GRANT OPTION;
+
 
 create user 'xiandian'@'localhost' identified by 'xd_paas'; 创建一个xiandian用户在本地授权密码xd_paas
 create user '[用户名称]'@'%' identified by '[用户密码]';	//创建用户

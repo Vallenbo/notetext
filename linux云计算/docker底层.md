@@ -616,7 +616,10 @@ https://docs.docker.com/storage/storagedriver/select-storage-driver/
 
 挂载OverlayFS：
 
+```
 $ mount -t overlay overlay -o lowerdir=lower1:lower2:lower3...,upperdir=upper,workdir=work  merged
+```
+
 参考：
 
 http://man7.org/linux/man-pages/man8/mount.8.html#FILESYSTEM-SPECIFIC_MOUNT_OPTIONS （搜overlay）

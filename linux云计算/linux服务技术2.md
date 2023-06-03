@@ -34,7 +34,7 @@ Prometheus主服务器，它会刮取并存储时间序列数据
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps1-1682690463420-251.jpg" alt="img" style="zoom: 50%;" /> 
 
-工作流程是：
+## 工作流程是：
 
 Prometheus server 定期从配置好的 jobs 或者 exporters 中拉 metrics，或者接收来自Pushgateway 发过来的 metrics，或者从其他的 Prometheus server 中拉 metrics。
 
@@ -82,9 +82,9 @@ global:
 
 rule_files:	#指定加载的任何规则的位置
 
- \# - "first.rules"
+/# - "first.rules"
 
- \# - "second.rules"
+/#- "second.rules"
 
  
 
@@ -98,47 +98,47 @@ scrape_configs: #控制Prometheus监视哪些资源
 
  
 
-  \#honor_labels： #用于解决拉取数据标签有冲突，当设置为 true, 以拉取数据为准，否则以服务配置为准
+  #honor_labels： #用于解决拉取数据标签有冲突，当设置为 true, 以拉取数据为准，否则以服务配置为准
 
-  \#params：#数据拉取访问时带的请求参数
+  #params：#数据拉取访问时带的请求参数
 
-  \#scrape_timeout:  #拉取超时时间
+  #scrape_timeout:  #拉取超时时间
 
-  \#metrics_path： #拉取节点的 metric 路径
+  #metrics_path： #拉取节点的 metric 路径
 
-  \#scheme： #拉取数据访问协议
+  #scheme： #拉取数据访问协议
 
-  \#sample_limit： #存储的数据标签个数限制，如果超过限制，该数据将被忽略，不入存储；默认值为0，表示没有限制
+  #sample_limit： #存储的数据标签个数限制，如果超过限制，该数据将被忽略，不入存储；默认值为0，表示没有限制
 
-  \#relabel_configs： #拉取数据重置标签配置
+  #relabel_configs： #拉取数据重置标签配置
 
-  \#metric_relabel_configs：metric #重置标签配置
+  #metric_relabel_configs：metric #重置标签配置
 
-**服务发现**：
+## 服务发现：
 
-  \#dns_sd_configs: DNS 服务发现
+  #dns_sd_configs: DNS 服务发现
 
-  \#file_sd_configs: 文件服务发现
+  #file_sd_configs: 文件服务发现
 
-  \#consul_sd_configs: Consul 服务发现
+  #consul_sd_configs: Consul 服务发现
 
-  \#serverset_sd_configs: Serverset 服务发现
+  #serverset_sd_configs: Serverset 服务发现
 
-  \#nerve_sd_configs: Nerve 服务发现
+  #nerve_sd_configs: Nerve 服务发现
 
-  \#marathon_sd_configs: Marathon 服务发现
+  #marathon_sd_configs: Marathon 服务发现
 
-  \#kubernetes_sd_configs: Kubernetes 服务发现
+  #kubernetes_sd_configs: Kubernetes 服务发现
 
-  \#gce_sd_configs: GCE 服务发现
+  #gce_sd_configs: GCE 服务发现
 
-  \#ec2_sd_configs: EC2 服务发现
+  #ec2_sd_configs: EC2 服务发现
 
-  \#openstack_sd_configs: OpenStack 服务发现
+  #openstack_sd_configs: OpenStack 服务发现
 
-  \#azure_sd_configs: Azure 服务发现
+  #azure_sd_configs: Azure 服务发现
 
-  \#triton_sd_configs: Triton 服务发现
+  #triton_sd_configs: Triton 服务发现
 
 ## node_exporter监控节点：
 
@@ -146,9 +146,9 @@ Prometheus 监控模型: 主动抓取目标的指标接口(HTTP 协议)获取监
 
 格式大致如下:
 
-\# HELP http_requests_total The total number of HTTP requests.
+/# HELP http_requests_total The total number of HTTP requests.
 
-\# TYPE http_requests_total counter
+/# TYPE http_requests_total counter
 
 http_requests_total{method="post",code="200"} 1027
 
@@ -200,7 +200,7 @@ mkdir /usr/lib/jdk	#建立jdk解压文件夹
 
  wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-linux-x64.rpm
 
-\#在线下载jdk8
+#在线下载jdk8
 
 rpm -ivh jdk-8u131-linux-x64.rpm #安装
 
@@ -235,7 +235,8 @@ export PATH=${JAVA_HOME}/bin:$PATH
 public class Hello {// Hello.java
   public static void main(String args[]){
 	System.out.println("Hello");
-  }	}
+  }
+}
 ```
 
 openjdk：是开源社区开发的开源实现，yum list | grep openjdk查看jdk版本号
@@ -276,67 +277,11 @@ NoSQL（Not Only SQL），指的是非关系型的数据库。是对不同于传
 
 **例如：**低延迟数据访问比如以广告为目标的应用，高并发的 web 应用比如网络游戏（例如 Zynga）
 
-## Redis数据库
-
-Redis：REmote DIctionary Server(远程字典服务)，一款内存高速缓存数据库。是完全开源免费的，用C语言编写的，遵守BSD协议，高性能的(key/value)分布式内存数据库，提供多种语言的API，基于内存运行并支持持久化的NoSQL数据库。
-
-因为值（value）可以是字符串（string）、列表（list）、集合（sets）和有序集合（sorted sets）等类型，通常被称为数据结构服务器。
-
-因为Resdis是基于键值对的数据库，关于键有以下几点规则：
-
-任何二进制的序列都可以作为键使用，Redis有统一的规则来设计键，键、值允许最大长度都是512M
-
-应用场景：1、最常用的是会话缓存	2、消息列队、比如支付		3、活动排行榜
-
-4、发布、订阅消息（消息通知）		5、商品列表、评论列表等
-
-`wget http://download.redis.io/releases/redis-6.0.5.tar.gz` #下载安装包
-
-```
-tar -xzvf redis-6.0.5.tar.gz && cd redis-6.0.5 #进行解压
-yum install cpp binutils glibc glibc-kernheaders glibc-common glibc-devel gcc make -y #安装gcc套装
-yum -y install centos-release-scl #升级gcc
-yum -y install devtoolset-9-gcc devtoolset-9-gcc-c++ devtoolset-9-binutils
-scl enable devtoolset-9 bash #切换到 gcc 9版本
-```
-
-1、[root@localhost src]# make  #编译安装
-
-src 目录中现在提供了已编译的二进制文件 。使用以下命令运行Redis：
-
-2、[root@localhost src]# ./redis-server #redis服务启动程序
-
-[root@localhost redis-6.0.5]# ./src/redis-server --help
-
-将Redis设置为以守护进程的方式进行启动，即可以后台运行：
-
-[root@localhost redis-6.0.5]# vim redis.conf --> daemonize yes
-
-[root@localhost redis-6.0.5]# ./src/redis-server /root/redis-6.0.5/redis.conf #以后台方式启动服务
-
-或者[root@localhost src]# nohup ./redis-server &
-
-redis-benchmark #性能测试工具		redis-check-aof #AOF文件修复工具，检测更新日志
-
-redis-check-rdb #RDB文件检查工具
-
-3、[root@localhost src]# ./redis-cli #客户端交互式操作工具：
-
-./src/redis-cli shutdown #关闭redis服务，有密码需要加上 -a {password} 参数
-
-127.0.0.1:6379> set foo bar
-
-OK
-
-127.0.0.1:6379> get foo
-
-"bar"
-
 ## MongoDB数据库
 
 MongoDB是一个文档数据库，旨在简化开发和扩展。
 
-\#主配置文件/etc/mongod.conf		服务名：mongod	Port端口：27017
+#主配置文件/etc/mongod.conf		服务名：mongod	Port端口：27017
 
 1、cat >>		/etc/yum.repos.d/mongodb.repo	<<EOF
 
@@ -358,7 +303,7 @@ EOF
 
 mongod -f /etc/mongod.conf	#启动服务器
 
-\#确保运行MongoDB的用户有权访问一个或多个目录：chown -R mongod:mongod <directory>
+#确保运行MongoDB的用户有权访问一个或多个目录：chown -R mongod:mongod <directory>
 
 /var/log/mongodb/mongod.log文件中输出来跟踪错误或重要消息的处理状态
 
@@ -525,7 +470,7 @@ gitlab_rails['smtp_authentication'] = "login"
 gitlab_rails['smtp_enable_starttls_auto'] = true
 ```
 
-\# 修改gitlab配置的发信人
+# 修改gitlab配置的发信人
 
 ```
 gitlab_rails['gitlab_email_from'] = "smtp user@163.com"
@@ -689,8 +634,10 @@ sudo_user = root			#设置默认执行命令的用户
 remote_port = 22			#指定连接被管节点的管理端口，默认为22端口，建议修改，能够更加安全
 host_key_checking = False	#检查SSH主机的密钥，值为True/False。False则第一次连接不会提示配置实例
 timeout = 60				#设置SSH连接的超时时间，单位为秒
-log_path = /var/log/ansible.log#ansible日志的文件（默认不记录日志）
+log_path=/var/log/ansible.log#ansible日志的文件（默认不记录日志）
 ```
+
+> ubuntu22版本不稳定，建议18版本
 
 ## ansible 常用命令及参数
 
@@ -702,7 +649,7 @@ ansible *web -m command -a 'ls / ' -u root -k	对所有配置清单内主机基�
 
 all：表示所有Inventory中的所有主机
 
-*：通配符ansible “*” -m ping
+`*`：通配符ansible “*” -m ping
 
 或关系ansible 'webserver:dbserver' -m ping #执行在web组并且在dbserver组中的主机
 
@@ -1006,7 +953,7 @@ playbook 是 ansible 用于配置，部署，和管理被控节点的剧本
 
  sudo_user: wang		 #sudo为wang		#sudo: yes#默认sudo为root
 
- \#如果命令或脚本的退出码不为零，可以使用如下方式替代
+ #如果命令或脚本的退出码不为零，可以使用如下方式替代
 
  shell : /usr/bin/yum || /bin/true
 
@@ -1058,7 +1005,7 @@ playbook中template模板对于for  if 循环的使用
 
 ​    port: 82
 
-​    \#name: web2.magedu.com
+​    #name: web2.magedu.com
 
 ​    rootdir: /data/website2
 
@@ -1166,7 +1113,9 @@ Ipvsadm程序包: ipvsadm		服务名: ipvsadm.service
 
 规则重载工具:/usr/sbin/ /ipvsadm- restore	配置文件:/etc/ sysconfig/ ipsan- config
 
+```
 ipvsadm -A|E -t|u|f service-address [-s scheduler] [-p [timeout]] [-M netmask] [--pe persistence_engine] [-b sched-flags]
+```
 
 -A	添加一个虚拟服务，使用ip地址、端口号、协议来唯一定义一个虚拟服务
 
@@ -1196,19 +1145,20 @@ ipvsadm -A|E -t|u|f service-address [-s scheduler] [-p [timeout]] [-M netmask] [
 
 -R	从标准输入中还原虚拟服务列表		-S 保存虚拟服务规则至标准输出
 
+```
 ipvsadm-save -n >> /etc/sysconfig/ipvsadm	保存至开机文件夹
-
 ipvsadm -Sn > /tmp/ipvsadm-config	保存虚拟服务规则备份
-
 ipvsadm -Rn < /tmp/ipvsadm-config	还原配置
-
 systemctl enable ipvsadm	设置开机自启
+```
+
+
 
 ## LVS相关术语
 
-CIP：Client IP，访问客户端的IP地址		VIP：Virtual server IP面对客户的虚拟IP地址	
+CIP：Client IP，访问客户端的IP地址		VIP：Virtual server IP面对客户的虚拟IP地址
 
-VS / DS：Director Server调度器			DIP：Director Server IP，面对内网服务器通讯的IP地址	
+VS / DS：Director Server调度器			DIP：Director Server IP，面对内网服务器通讯的IP地址
 
 RIP：Real Server IP，后端服务器的IP地址	RS：Real Server后端真实的工作服务器
 
@@ -1234,25 +1184,22 @@ director服务器上开启路由转发功能: echo net.ipv4.ip_forward=1 >> /etc
 
 配置NAT--VIP：
 
+```
 ipvsadm -A -t 192.168.0.10:80 -s rr #添加虚拟服务10/tcp:80(必须指定port)，采用权重rr
-
 ipvsadm -a -t 192.168.0.10:80 -r 192.168.100.10 -m  -w 3
+```
 
-\#添加服务器10/tcp:80的真实服务器100.10，lvs工作模式为nat集群
+#添加服务器10/tcp:80的真实服务器100.10，lvs工作模式为nat集群
 
+```
 ipvsadm -a -t 192.168.0.10:80 -r 192.168.100.11 -m
-
 ipvsadm-save	 -n >> /etc/sysconfig/ipvsadm	保存至开机文件夹
-
 systemctl enable ipvsadm && systemctl restart ipvsadm.service	#设置开机自启
-
 service network restart
-
-\#ipvsadm -E -t 192.168.0.10:80 -s wrr 	#修改scheduler调度为wrr
-
-\#ipvsadm -e -t 192.168.0.10:80 -r 192.168.100.11:81 -m -w 3	#修改权重为3
-
-\#ipvsadm -d -t 192.168.0.10:80 -r 192.168.100.11:81	#删除虚拟服务（不指定，默认删除80端口）
+#ipvsadm -E -t 192.168.0.10:80 -s wrr 	#修改scheduler调度为wrr
+#ipvsadm -e -t 192.168.0.10:80 -r 192.168.100.11:81 -m -w 3	#修改权重为3
+#ipvsadm -d -t 192.168.0.10:80 -r 192.168.100.11:81	#删除虚拟服务（不指定，默认删除80端口）
+```
 
 LVS—dr（Direct Routing）：封装新的MAC地址，直接路由,LVS默认模式应用最广泛通过为请求报文重新封装一个MAC首部进行转发,源MAC是DP所在的接口的MAC,目标MAC是某挑选出的RS的RIP所在接口的MAC地址;源IP/PORT,以及目标IP/PORT均保持不变
 
@@ -1264,19 +1211,24 @@ LVS—dr（Direct Routing）：封装新的MAC地址，直接路由,LVS默认模
 
 （2）在RS上使用 arptables工具
 
+```
 arptables -A In-d VIP -j DROP
-
 arptables-a OUT -S SVIP -j mangle --mangle-ip-s SRIP
+```
 
 （3）在RS上修改内核参数以限制arp通告及应答级别【推荐】
 
-/proc/sys/ net/ipv4/conf/a/arp_ ignore忽略arp的地址回应请求
+```
+/proc/sys/ net/ipv4/conf/a/arp_ ignore #忽略arp的地址回应请求
+```
 
 0：默认值,表示可使用本地任意接口上配置的任意地址进行响应
 
 1：仅在请求的目标IP配置在本地主机的接收到请求报文的接口上时,才给予晌应
 
+```
 /proc/sys net/ipv4/conf/all/arp_ announce不公布自己的MAC地址
+```
 
 0：默认值,把本机所有接口的所有信息向每个接口的网络进行通告
 
@@ -1304,25 +1256,22 @@ VS和RS上开启路由转发功能: echo net.ipv4.ip_forward=1 >> /etc/sysctl.co
 
 VS安装ipvsadm
 
+```
 ifconfig ens33:0 192.168.100.200 netmask 255.255.255.255 up为VS端网卡配置上虚拟VIP
-
 route add -host 192.168.100.200 dev ens33:0 设置路由
-
 ipvsadm -A -t 192.168.100.200:80 -s rr
-
 ipvsadm -a -t 192.168.100.200:80 -r 192.168.100.130 -g
-
 ipvsadm -a -t 192.168.100.200:80 -r 192.168.100.131 -g
+```
 
 配置IPdirector,RS安装httpd
 
+```
 ifconfig ens33:0 192.168.100.200/24 up为RS端网卡配置上虚拟VIP
-
 route add -host 192.168.100.200 dev ens33:0 设置路由
-
 echo 1 > /proc/sys/net/ipv4/conf/all/arp_ignore
-
 echo 2 > /proc/sys/net/ipv4/conf/all/arp_announce
+```
 
 LVS—tun：在原请求IP报文之外新增加一个IP首部，不修改请求报文的IP首部(源IP为CIP,目标IP为ⅥP),而在原IP报文之外再封装一个IP首部(源IP是DIP,目标IP是RIP),将报文发往挑选出的目标RS;RS直接响应给客户端(源IP是VIP,目标IP是CIP
 
@@ -1410,181 +1359,113 @@ vrrp模块是来实现VRRP协议的，keepalived只有一个配置文件keepaliv
 
 安装包：keepalived		主配置文件：vim /etc/keepalived/keepalived.conf
 
-\#由于keepalived是监控端口IP状态，无法监控web服务状态，当master节点无法访问，整个服务会处于假死状态
+#由于keepalived是监控端口IP状态，无法监控web服务状态，当master节点无法访问，整个服务会处于假死状态
 
-vim /etc/keepalived/keep_nginx.sh				chmod +x  keep_nginx.sh
+```
+vim /etc/keepalived/keep_nginx.sh		&&		chmod +x  keep_nginx.sh
 
-\#!/bin/bash 
-
+#!/bin/bash 
 counter=$(netstat -tupln |grep nginx |wc -l)       #检查nginx进程是否存在
-
 if [ "$counter"="0" ]; then
-
-​    systemctl restart nginx #尝试启动一次 nginx,停止5秒后再次检测
-
-​    sleep 5
-
-​    counter=$(netstat -tupln |grep nginx |wc -l)
-
-​    if [ "$counter"="0" ]; then
-
-​    systemctl stop keepalived #如果启动没成功,就杀掉 keepalive触发主备切换
-
-​    fi
+	systemctl restart nginx #尝试启动一次 nginx,停止5秒后再次检测
+	sleep 5
+	counter=$(netstat -tupln |grep nginx |wc -l)
+	if [ "$counter"="0" ]; then
+		systemctl stop keepalived #如果启动没成功,就杀掉 keepalive触发主备切换
+	fi
 
 fi
+```
 
- 
+编辑主配置文件：
 
-编辑主配置文件：[root@localhost ~]# vim /etc/keepalived/keepalived.conf
-
-\#master节点配置，主要是配置故障发生时的通知对象以及机器标识
-
+```
+[root@localhost ~]# vim /etc/keepalived/keepalived.conf
+#master节点配置，主要是配置故障发生时的通知对象以及机器标识
 global_defs {
-
-\#   notification_email {
-
-\#     r_xl@xl.com   # 设置报警邮件接收地址，需要开启 sendmail 服务
-
-\#   }
-
-\#   notification_email_from s_xl@xl.com   # 设置邮件的发送地址
-
-\#   smtp_server 192.168.2.241	# 设置通知的 SMTP Server 地址 
-
-\#   smtp_connect_timeout 30 	# 设置通知的 SMTP Server 的超时时间 
-
+#   notification_email {
+#     r_xl@xl.com   # 设置报警邮件接收地址，需要开启 sendmail 服务
+#   }
+#   notification_email_from s_xl@xl.com   # 设置邮件的发送地址
+#   smtp_server 192.168.2.241	# 设置通知的 SMTP Server 地址 
+#   smtp_connect_timeout 30 	# 设置通知的 SMTP Server 的超时时间 
 router_id 1				 # VRRP组ID
+}
 
-​	}
-
-\#
-
-\## 自定义 keepalived只能做到对自身问题和网络故障的监控，Script可以>增加其他的监控来判定是否需要切换主备
-
+# 自定义 keepalived只能做到对自身问题和网络故障的监控，Script可以>增加其他的监控来判定是否需要切换主备
 vrrp_script keep_nginx {	#VRRP实例健康检查脚本
-
   script "/etc/keepalived/keep_nginx.sh"    # 示例为检查sshd服务是否运行中
-
   interval 2			# 检查间隔时间
-
   fall 3				#当失败三次自动降低权重
-
   weight -4			# 检查失败降低的权重
-
-​    }
-
- 
+}
 
 vrrp_instance VI_1 {	# VRRP实例 定义对外提供服务的VIP区域及其相关属性
-
   state MASTER		# 必须大写，MASTER 为工作状态，BACKUP 是备用状态
-
   interface ens33		# 节点固有IP(非VIP)的网卡，用来发VRRP包
-
   virtual_router_id 51	# 虚拟路由id，和备节点保持一致
-
   mcast_src_ip 10.139.1.10	# 本机IP地址
-
   priority 100      	# 优先级， MASTER 优先级必须比 BACKUP 高
-
   advert_int 1			# 心跳通告间隔，单位为秒
 
- 
+	authentication {		# 设置认证
+		auth_type PASS	# 认证方式，支持PASS和HA
+		auth_pass 1111	# 认证密码为明文，同一vrrp 实例 MASTER 与 BACKUP 使用相同的密码才能正常通信
+	}
 
-  authentication {		# 设置认证
+	virtual_ipaddress { 	# 虚拟IP地址(VIP)，可以有多个地址，每个地址占一行
+		192.168.0.200/24 dev ens33
+	}
 
-​    auth_type PASS	# 认证方式，支持PASS和HA
-
-​    auth_pass 1111	# 认证密码为明文，同一 vrrp 实例 MASTER 与 BACKUP 使用相同的密码才能正常通信
-
-  }
-
- 
-
-  virtual_ipaddress { 	# 虚拟IP地址(VIP)，可以有多个地址，每个地址占一行
-
-​    192.168.0.200/24 dev ens33
-
-  }
+	track_script {     # 自定义健康检查脚本
+		keep_nginx	 # 配置上面自定义的vrrp脚本调用名
+	}	
+}
 
  
+## 设置虚拟服务器
+#virtual_server 192.168.12.200 6500 {   # 指定虚拟IP地址和服务端口
+#   delay_loop 6	# 服务健康检查周期，6秒
+#   lb_algo rr		# 负载均衡调度算法，一般用wrr、rr、wlc
+#   lb_kind DR		# 负载均衡转发规则。一般包括DR,NAT,TUN 3种
+#   persistence_timeout 5  #会话保持时间。把用户请求请求间隔在未超过保持时间时一>直分发到某个服务节点
 
-  track_script {     # 自定义健康检查脚本
+#   protocol TCP	# 转发协议 有TCP和UDP两种# 配置真实服务器
+#   real_server 192.168.2.222 6500 {   #指定VIP和端口，可设置多个VIP
+#	 weight 1    # 权重，数值越大，权重越高
 
-​    keep_nginx	 # 配置上面自定义的vrrp脚本调用名
+# 健康检查方式 常见有 TCP_CHECK, HTTP_GET, SSL_GET, MISC_CHECK(自定义脚本)
+#     TCP_CHECK {        # 通过TcpCheck方式判断RealServer的健康状态
+#       connect_timeout 10   # 连接超时时间
+#       nb_get_retry 3		 # 重连次数
+#       delay_before_retry 3	 # 重连时间间隔
+#       connect_port 6500	 # 检测端口
+#     }   }
 
-  }	}
+## 配置真实服务器
+#   real_server 192.168.2.222 6500 {   #指定IP和端口
+#     weight 1    # 权重，数值越大，权重越高
 
- 
-
-\## 设置虚拟服务器
-
-\#virtual_server 192.168.12.200 6500 {   # 指定虚拟IP地址和服务端口
-
-\#   delay_loop 6	# 服务健康检查周期，6秒
-
-\#   lb_algo rr		# 负载均衡调度算法，一般用wrr、rr、wlc
-
-\#   lb_kind DR		# 负载均衡转发规则。一般包括DR,NAT,TUN 3种
-
-\#   persistence_timeout 5   # 会话保持时间。把用户请求请求间隔在未超过保持时间时，一>
-
-直分发到某个服务节点
-
-\#   protocol TCP	# 转发协议 有TCP和UDP两种# 配置真实服务器
-
-\#   real_server 192.168.2.222 6500 {   #指定VIP和端口，可设置多个VIP
-
-\#	 weight 1    # 权重，数值越大，权重越高
-
-\# 健康检查方式 常见有 TCP_CHECK, HTTP_GET, SSL_GET, MISC_CHECK(自定义脚本)
-
-\#     TCP_CHECK {        # 通过TcpCheck方式判断RealServer的健康状态
-
-\#       connect_timeout 10   # 连接超时时间
-
-\#       nb_get_retry 3		 # 重连次数
-
-\#       delay_before_retry 3	 # 重连时间间隔
-
-\#       connect_port 6500	 # 检测端口
-
-\#     }   }
-
-\#
-
-\## 配置真实服务器
-
-\#   real_server 192.168.2.222 6500 {   #指定IP和端口
-
-\#     weight 1    # 权重，数值越大，权重越高
-
-\## 健康检查方式 常见有 TCP_CHECK, HTTP_GET, SSL_GET, MISC_CHECK(自定义脚本)
-
-\#     TCP_CHECK {        # 通过TcpCheck判断RealServer的健康状态
-
-\#       connect_timeout 10   # 连接超时时间
-
-\#       nb_get_retry 3     # 重连次数
-
-\#       delay_before_retry 3  # 重连时间间隔
-
-\#       connect_port 6500   # 检测端口
-
-\#     }    }  }
+## 健康检查方式 常见有 TCP_CHECK, HTTP_GET, SSL_GET, MISC_CHECK(自定义脚本)
+#     TCP_CHECK {        	# 通过TcpCheck判断RealServer的健康状态
+#       connect_timeout 10	# 连接超时时间
+#       nb_get_retry 3		# 重连次数
+#       delay_before_retry 3  # 重连时间间隔
+#       connect_port 6500   # 检测端口
+#     }    }  }
 
 service keepalived start	启动服务
+```
 
+```
 vim  ifcfg-ens33:0
-
 DEVICE=ens33:0
-
 IPADDR=192.168.0.200
-
 NETMASK=255.255.255.0
-
 ONBOOT=yes
+```
+
+
 
 # 监控服务
 
@@ -1834,7 +1715,7 @@ Kafka是一种高吞吐量的分布式发布订阅消息系统，它可以处理
 
  
 
-**一、****Kafka****集群的架构**
+### 一、Kafka集群的架构
 
 Producer: 即生产者，消息的产生者，是消息的入口。
 
@@ -1862,7 +1743,7 @@ Follower:分区的从节点
 
  
 
-**二、生产者往****kafka****发送数据的流程**（6步）
+### 二、生产者往kafka发送数据的流程（6步）
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps24.png) 
 
@@ -1879,7 +1760,7 @@ Follower:分区的从节点
 
  
 
-**三、****kafka****选择分区的模式**（3种）
+### 三、kafka选择分区的模式（3种）
 
 1、指定往那个分区写
 
@@ -1889,7 +1770,7 @@ Follower:分区的从节点
 
  
 
-**四、生产者往****kafka****发送数据的模式**（3种）
+### 四、生产者往kafka发送数据的模式（3种）
 
 `0`:把数据发给leader就成功，效率最高、安全性最低。
 
@@ -1899,7 +1780,7 @@ Follower:分区的从节点
 
  
 
-\###最后要注意的是，如果往不存在的topic写数据，kafka会 自动创建topic, partition和replication的数量
+###最后要注意的是，如果往不存在的topic写数据，kafka会 自动创建topic, partition和replication的数量
 
 默认配置都是1。
 
@@ -1907,7 +1788,7 @@ Follower:分区的从节点
 
  
 
-**五、分区存储文件的原理**
+### 五、分区存储文件的原理
 
 Topic和数据日志
 
@@ -1931,13 +1812,13 @@ Partition在服务器上的表现形式就是一个F 个的文件夹， 每个pa
 
  
 
-**六、为什么****kafka****快****?**
+### 六、为什么kafka快?
 
 虽然是写入物理磁盘，但是每条记录都是通过index索引能快速定位
 
  
 
-**七、消费者组消费数据的原理**
+### 七、消费者组消费数据的原理
 
 **消费数据**
 
@@ -1965,7 +1846,7 @@ vim /etc/profile# 配置环境变量
 
  
 
-\# 在 profile 文件最后加上
+### 在 profile 文件最后加上
 
 export JAVA_HOME=/usr/local/java/jdk1.8.0_201
 
@@ -1977,7 +1858,7 @@ export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tool.jar
 
 source /etc/profile# 使配置生效
 
-\# 最后输入 java 命令测试
+### 最后输入 java 命令测试
 
  
 
@@ -1991,7 +1872,7 @@ cp conf/zoo_sample.cfg conf/zoo.cfg# 复制一份配置文件, 方便修改
 
 bin/zkServer.sh start# 启动
 
-\#使用内置kafka内置zk
+#使用内置kafka内置zk
 
 bin/zookeeper-server-start.sh -daemon config/zookeeper.properties
 
@@ -2023,7 +1904,7 @@ zookeeper.connect=192.xxx.xx.xx:2181# kafka 连接 zookeeper 的地址
 
  
 
-\# 启动服务 , 运行的日志打印在 logs 目录里的server.log 里
+### 启动服务 , 运行的日志打印在 logs 目录里的server.log 里
 
 1：bin/kafka‐server‐start.sh ‐daemon config/server.properties 
 
@@ -2043,7 +1924,7 @@ bin/kafka-console-consumer.sh --bootstrap-server=192.168.1.3:9092 --topic=mysql_
 
 --bootstrapver指定连接服务器		 --from-beginning开始读取
 
-\# 启动成功后,可以进入zookeeper 查看kafka节点
+### 启动成功后,可以进入zookeeper 查看kafka节点
 
 bin/zk.Cli.sh
 
@@ -2051,7 +1932,7 @@ ls /
 
  
 
-\# 停止kafka 
+### 停止kafka
 
 bin/kafka‐server‐stop.sh
 
@@ -2223,13 +2104,13 @@ Java 监控：ZabbixJMX Interface				网络设备监抟：Zabbix SNMP Interface
 
 URL监控：Zabbix Web监控
 
-\#!/bin/bash
+#!/bin/bash
 
-\#服务端安装脚本，关闭防火墙，关闭selinux
+#服务端安装脚本，关闭防火墙，关闭selinux
 
 systemctl stop firewalld && setenforce 0
 
-\#配置yum源
+#配置yum源
 
 rpm -ivh http://repo.zabbix.com/zabbix/4.0/rhel/7/x86_64/zabbix-release-4.0-2.el7.noarch.rpm && yum repolist
 
@@ -2261,37 +2142,37 @@ if [ $? -eq 0 ];then
 
 fi
 
-\#数据库的操作
+#数据库的操作
 
 mysql -e 'create database zabbix character set utf8 collate utf8_bin;'
 
-\#授权
+#授权
 
 mysql -e 'grant all privileges on zabbix.* to zabbix@localhost identified by "zabbix";'
 
-\#导入初始数据库
+#导入初始数据库
 
 zcat `find / -name zabbix-server-mysql-*`/create.sql.gz | mysql -uzabbix -pzabbix zabbix
 
-\#修改配置文件
+#修改配置文件
 
 sed -i 's/# DBPassword=/DBPassword=zabbix/' /etc/zabbix/zabbix_server.conf
 
-\#编辑php文件
+#编辑php文件
 
 sed -i 's#;date.timezone =#date.timezone = Asia/Shanghai#' /etc/php.ini
 
-\#启动服务
+#启动服务
 
 systemctl start httpd zabbix-agent zabbix-server
 
-\#解决中文乱码，\cp强制覆盖且不提示
+#解决中文乱码，\cp强制覆盖且不提示
 
 yum -y install wqy-microhei-fonts
 
 \cp /usr/share/fonts/wqy-microhei/wqy-microhei.ttc /usr/share/fonts/dejavu/DejaVuSans.ttf
 
-\#输出信息
+#输出信息
 
 echo "浏览器访问 http://`hostname -I|awk '{print $1}'`/zabbix"
 
@@ -2299,25 +2180,25 @@ echo "登陆界面(区分大小写) 账号Admin密码zabbix"
 
  
 
-\#!/bin/bash
+#!/bin/bash
 
-\#zabbix客户端快速安装脚本，安装zabbix源
+#zabbix客户端快速安装脚本，安装zabbix源
 
 rpm -Uvh https://repo.zabbix.com/zabbix/4.0/rhel/7/x86_64/zabbix-release-4.0-2.el7.noarch.rpm
 
 yum clean all && yum -y install zabbix-agent
 
-\#修改Master为节点地址，ServerActive为被动接收监控
+#修改Master为节点地址，ServerActive为被动接收监控
 
 sed -i.brk "s/Server=127.0.0.1/Server=192.168.3.5/g" /etc/zabbix/zabbix_agentd.conf
 
 sed -i "s/ServerActive=127.0.0.1/ServerActive=192.168.3.5/g" /etc/zabbix/zabbix_agentd.conf
 
-\#修改该node机的主机名，在添加被监控时使用的
+#修改该node机的主机名，在添加被监控时使用的
 
 sed -i "s/Hostname=Zabbix server/Hostname=zabbix node1/g" /etc/zabbix/zabbix_agentd.conf 
 
-\#开机自启服务
+#开机自启服务
 
 systemctl start  zabbix-agent.service && systemctl enable  zabbix-agent.service && service firewalld stop
 

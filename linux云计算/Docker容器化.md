@@ -53,6 +53,8 @@ Cgroups的工作目录/sys/fs/cgroup下包含了Cgroups的所有内容
 
 # 安装docker-ce包社区版
 
+[官方文档]([Install Docker Engine on Ubuntu | Docker Documentation](https://docs.docker.com/engine/install/ubuntu/))
+
 ## 一、在线安装Docker
 
 1: 安装必要的一些系统工具	`yum install -y yum-utils`
@@ -423,7 +425,195 @@ Docker官方的[Docker hub](https://hub.docker.com)是一个用于管理公共�
 
 **三、 从私有仓库拉取镜像** 	docker pull 私有仓库服务器ip:5000/centos:7
 
-# 数据卷
+# docker网络管理
+
+## Docker网络基础理论
+
+docker使用Linux桥接网卡，在宿主机虚拟一个docker容器网桥（docker0），docker启动一个容器时会根据docker网桥的网段分配给容器一个IP地址，称为Container-IP，同时Docker网桥是每个容器的默认网络网关。因为在同一宿主机内的容器都接入同一个网桥，这样容器之间就能够通过容器的Container-IP直接通信。
+
+docker网桥是宿主机虚拟出来的，并不是真实存在的网络设备，外部网络是无法寻址到的，这也意味着外部网络无法通过直接Container-IP访问到容器。
+
+如果容器希望外部访问能够访问到，可以通过映射容器端口到宿主主机(端口映射)，即docker run创建容器时候通过-p或-P参数来启用，访问容器的时候就通过`宿主机IP:容器端口`访问容器。
+
+## Docker网络模式
+
+| Docker网络模式   | 配置                      | 说明                                                         |
+| ---------------- | ------------------------- | ------------------------------------------------------------ |
+| host模式         | –net=host                 | 容器和宿主机共享`Network namespace`。容器将不会虚拟出自己的网卡，配置自己的IP 等，而是使用宿主机的IP和端口。 |
+| container模式    | –net=container:NAME_or_ID | 容器和另外一个容器共享`Network namespace`。kubernetes中的pod就是多个容器共享一个Network namespace。创建的容器不会创建自己的网卡，配置自己的 IP， 而是和`一个指定的容器共享IP、端口范围`。 |
+| none模式         | –net=none                 | 容器有独立的Network namespace，并没有对其进行任何网络设置，如分配veth pair和网桥连接，配置IP等。 `该模式关闭了容器的网络功能。` |
+| bridge模式       | –net=bridge               | (默认模式)。此模式会为每一个容器分配、设置IP等，并将容器连接到一个`docker0虚拟网桥`，通过`docker0网桥`以及`Iptable nat`表配置与宿主机通信 |
+| Macvlan/ network | 无                        | 容器具备Mac地址，使其显示为网络上的物理 设备                 |
+| Overlay          | 无                        | (覆盖网络): 利用VXLAN实现的bridge模式                        |
+
+## bridge模式
+
+默认的网络模式。bridge模式下容器没有一个公有ip,只有宿主机可以直接访问,外部主机是不可见的,但容器通过宿主机的NAT规则后可以访问外网。
+
+### Bridge桥接模式的实现步骤
+
+Docker Daemon利用veth pair技术，在宿主机上创建两个虚拟网络接口设备，假设为veth0 和veth1。而veth pair技术的特性可以保证无论哪一个veth接收到网络报文，都会将报文传输给另一方。
+
+Docker Daemon将veth0附加到Docker Daemon创建的docker0网桥上。保证宿主机的网络报 文可以发往veth0;
+
+Docker Daemon 将veth1添加到Docker Container所属的namespace下，并被改名为eth0。 如此一来，保证宿主机的网络报文若发往veth0则立即会被eth0接收，实现宿主机到Docker Container网络的联通性;同时也保证Docker Container单独使用eth0，实现容器网络环境的隔离性。
+
+### Bridge模式的缺陷
+
+Docker Container不具有一个公有IP，即和宿主机eth0不处于同一个网段。导致的结果是宿主机以外的世界不能直接和容器进行通信。
+
+#### 注意
+
+eth设备是成双成对出现的，一端是容器内部命名为eth0，一端是加入到网桥并命名的veth(通常命名为veth)，它们组成了一个数据传输通道，一端进一端出，veth设备连接了两个网络设备并实现了数据通信。
+
+## Host网络模式
+
+host模式相当于Vmware中的NAT模式，与宿主机在同一个网络中，但`没有独立IP地址`。
+
+启动容器使用host模式，容器将不会获得一个独立的Network Namespace，而是和宿主机共用一个Network Namespace。
+
+容器将不会虚拟出自己的网卡，配置自己的IP等，而是使用宿主机的IP和端口。除此之外容器的其他方面，比如文件系统、进程列表等还是和宿主机隔离
+
+使用host模式的容器可以直接使用宿主机的IP地址与外界通信，容器内部的服务端口也可以使用宿主机的端口，不需要进行NAT，`host最大的优势就是网络性能比较好`，docker host上已经使用的端口就不能再用了，网络的隔离性不好。
+
+host网络模式需要在容器创建时指定–network=host
+
+host模式是bridge桥接模式很好的补充。采用host模式的Docker Container，可以直接使用宿主机的IP地址与外界进行通信，若宿主机的eth0是一个公有IP，那么容器也拥有这个公有IP。同时容器内服务的端口也可以使用宿主机的端口，无需额外进行NAT转换。
+
+host模式可以让容器共享宿主机网络栈,这样的好处是外部主机与容器直接通信,但是容器的网络缺少隔离性。
+
+### Host模式的缺陷
+
+使用Host模式的容器不再拥有隔离、独立的网络环境。虽然可以让容器内部的服务和传统情况无差别、无改造的使用，但是由于网络隔离性的弱化，该容器会与宿主机共享竞争网络栈的使用; 另外，容器内部将不再拥有所有的端口资源，原因是部分端口资源已经被宿主机本身的服务占用，还有部分端口已经用以bridge网络模式容器的端口映射。
+
+## Container网络模式
+
+一种特殊host网络模式， ontainer网络模式是Docker中一种较为特别的网络的模式。在容器创建时使用– network=container:vm1指定。(vm1指定的是运行的容器名)处于这个模式下的 Docker 容器会共享一个网络环境,这样两个容器之间可以使用localhost高效快速通信。
+
+### Container模式的缺陷
+
+Container网络模式没有改善容器与宿主机以外世界通信的情况(和桥接模式一样，不能连接宿主机以外的其他设备)。
+
+这个模式指定新创建的容器和已经存在的一个容器共享一个Network Namespace，而不是和宿主机共享。新创建的容器不会创建自己的网卡，配置自己的IP，而是和一个指定的容器共享IP、端口范围等。 同样，两个容器除了网络方面，其他的如文件系统、进程列表等还是隔离的。两个容器的进程可以通过lo网卡设备通信
+
+## none模式
+
+使用none模式，Docker容器拥有自己的Network Namespace，但是，并不为Docker容器进行任何网络配置。`Docker容器没有网卡、IP、路由等信息。需要我们自己为Docker容器添加网卡、配置IP等。`
+
+这种网络模式下容器只有lo回环网络，没有其他网卡。none模式可以在容器创建时通过-- network=none来指定。`这种类型的网络没有办法联网，封闭的网络能很好的保证容器的安全性。`
+
+## 解决容器IP地址变化(新建bridge网络)
+
+解决重启容器IP地址会发生变化的问题
+
+```
+docker network create -d bridge test-bridge
+参数-d : 指DRIVER的类型，
+test-bridge : network的自定义名称，这个和docker0是类似的。
+```
+
+1、如何把容器连接到test-bridge这个网络。
+
+```
+docker network ls
+docker network inspect test-bridge
+docker run -itd --name nginx3 --network test-bridge nginx:1.19.3-alpine
+docker network inspect test-bridg
+```
+
+2、把一个运行中容器连接到test-bridge网络
+
+```
+docker network connect test-bridge nginx2
+docker network inspect test-bridge
+```
+
+## docker网络命令汇总
+
+查看已经建立的网络对象
+
+```
+docker network ls [OPTIONS]
+常用参数:
+-f --filter filter 过滤条件(如 'driver=bridge’)
+	--format string
+	--no-trunc
+-q, --quiet 格式化打印结果 不缩略显示 只显示网络对象的ID
+
+基本使用:
+docker network ls --no-trunc
+docker network ls -f 'driver=host'
+```
+
+### 创建网络(docker network create)
+
+创建新的网络对象
+
+```
+docker network create [OPTIONS] NETWORK
+常用参数:
+--driver string 指定网络的驱动(默认 "bridge")
+--subnet strings 指定子网网段(如192.168.0.0/16、172.88.0.0/24)
+--ip-range strings  执行容器的IP范围，格式同subnet参数
+--gateway strings 子网的IPv4 or IPv6网关，如(192.168.0.1)
+
+基本使用
+docker network create -d bridge my-bridge
+```
+
+### 网络删除(docker network rm)
+
+删除一个或多个网络
+
+```bash
+docker network rm NETWORK [NETWORK...]
+```
+
+### 查看网络详细信息（docker network inspect）
+
+查看一个或多个网络的详细信息
+
+```sh
+docker network inspect [OPTIONS] NETWORK [NETWORK...]
+docker inspect [OPTIONS] NETWORK [NETWORK...]
+常见参数
+- -f, --format string 根据format输出结果
+```
+
+### 使用网络（docker run –-network）
+
+为启动的容器指定网络模式
+
+```lua
+docker run/create --network NETWORK
+```
+
+### 网络连接与断开(docker network connect/disconnect)
+
+```arduino
+docker network connect [OPTIONS] NETWORK CONTAINER 
+docker network disconnect [OPTIONS] NETWORK CONTAINER
+常见参数
+- -f, --force 强制断开连接(用于disconnect)
+```
+
+### 容器镜像设定固定ip
+
+```sql
+docker network create -d bridge --subnet=172.172.0.0/24  --gateway 172.172.0.1 network
+# 172.172.0.0/24: 24代表子码掩码是255.255.255.0 172.172.0.0/16: 16 代表子码掩码
+
+docker network ls
+docker run -itd --name nginx3 -p 80:80 --net network --ip 172.172.0.10 nginx:1.19.3-alpine
+--net mynetwork:选择存在的网络
+--ip 172.172.0.10:给nginx分配固定的IP地址
+
+docker network inspect network
+```
+
+
+
+# volume数据卷
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps24-1682691150324-346.jpg" alt="img" style="zoom:50%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps25-1682691150324-347.jpg" alt="img" style="zoom:50%;" /> 
 
@@ -444,29 +634,38 @@ Docker官方的[Docker hub](https://hub.docker.com)是一个用于管理公共�
 
 **数据卷类型type**
 
-volume普通数据卷，默认映射到主机/var/lib/docker/volumes路径下
+1、volume普通数据卷，默认映射到主机/var/lib/docker/volumes路径下
 
-bind	绑定数据卷，映射到主机指定路径下
+2、bind绑定数据卷，映射到主机指定路径下
 
-tmpfs	临时数据卷，只存在于内存中
+3、tmpfs临时数据卷，只存在于内存中
+
+**使用参数**：
 
 -v，--volume=[]，给容器挂载存储卷，挂载到容器的某个目录
 
 --volumes-from=[]，给容器挂载其他容器上的卷，挂载到容器的某个目录
 
-普通数据卷	docker run -it --name=c1 -v /media:/media : ro -v /media:/sss centos:latest  bash
+普通数据卷
+
+```
+docker run -it --name=c1 -v /media:/media : ro -v /media:/sss centos:latest  bash
+```
 
 创建运行c1映射主机的/media以只读到容器的/media目录下
 
-docker volume create test建立本地数据卷test
+```sh
+docker volume create test //建立本地数据卷
+```
 
 docker volume inspect（查看详细信息）ls(列出已有数据卷）prune（清理未使用数据卷）rm(删除数据卷）
 
 绑定数据卷	src/source主机挂载点		target/destination/dst映射文件夹	ro/readonly指定数据卷只可读
 
-docker run -id  --name c1 --mount type=bind，source=/media，target=/sss，readonly  ubuntu  bash
-
-创建容器c1挂载类型bind将主机目录/media绑定到容器/sss以只读的形式
+```sh
+//创建容器c1挂载类型bind将主机目录/media绑定到容器/sss以只读的形式
+docker run -id  --name c1 --mount type=bind，source=/media，target=/sss，readonly  ubuntu bash
+```
 
 ## 数据卷容器
 
@@ -492,21 +691,25 @@ docker run -id  --name c1 --mount type=bind，source=/media，target=/sss，read
 
 # 网络操作
 
-bridge --net=bridge 指定，此模式会为每一个容器分配、设置IP等，并将容器连接到一个docker0虚拟网桥，通过docker0网桥以及Iptables nat表配置与宿主机通信
+- bridge --net=bridge 指定，此模式会为每一个容器分配、设置IP等，并将容器连接到一个docker0虚拟网桥，通过docker0网桥以及Iptables nat表配置与宿主机通信
 
-host --net=host 指定，容器不会虚拟出自己的网卡，配置自己的IP等，而是使用宿主机的IP和端口
 
-none --net=none 指定，将容器放置在它自己的网络栈中，不进行任何配置。该模式关闭了容器的网络功能，在以下两种情况下是有用的：容器并不需要网络（例如只需要写磁盘卷的批处理任务）
+- host --net=host 指定，容器不会虚拟出自己的网卡，配置自己的IP等，而是使用宿主机的IP和端口
+
+
+- none --net=none 指定，将容器放置在它自己的网络栈中，不进行任何配置。该模式关闭了容器的网络功能，在以下两种情况下是有用的：容器并不需要网络（例如只需要写磁盘卷的批处理任务）
+
 
 container，创建的容器不会创建自己的网卡，配置自己的IP，而是和一个指定的容器共享IP、端口范围
 
 创建docker network create -d bridge lll创建网络定义驱动类型为bridge
 
-`docker network create --subnet=192.168.5.0/24 --ip-range=192.168.5.0/24 --gateway=192.168.5.1 xd_net`
+```
+#创建subnet子网，ip地址范围为5网段，网关为5.1
+docker network create --subnet=192.168.5.0/24 --ip-range=192.168.5.0/24 --gateway=192.168.5.1 xd_net
+```
 
-\#创建subnet子网，ip地址范围为5网段，网关为5.1
-
-`[root@server ~]#docker inspect -f '{{.State.Pid}}' ce3271024189`   #查找正在运行容器的pid号
+`[root@server ~]#docker inspect -f '{{.State.Pid}}' ce3271024189`   #查找指定容器的pid号
 
 1337
 
@@ -582,7 +785,7 @@ docker pull portainer/portainer
 
 运行方式有两种：单机运行 和 集群运行
 
-3.1 单机运行
+单机运行
 
 ```shell
 docker run -d -p 9000:9000 --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data --name prtainer-libai portainer/portainer
@@ -606,200 +809,14 @@ docker run -d -p 9000:9000 --restart=always -v /var/run/docker.sock:/var/run/doc
 然后执行以下命令：
 docker run -d -p 9000:9000 --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data -v /public:/public --name prtainer-test portainer/portainer（如果已部署，需要将已部署的容器删除）
 
-
-
-## Mysql PXC集群环境部署
-
-PXC集群特点：
-
-- 同步复制，事务在所有的集群节点要么同时提交，要么同时不提交
-- Replication采用异步复制，无法保证数据的一致性
-
-1.下载镜像
-
-```sh
-docker pull percona/percona-xtradb-cluster
-```
-
-2.出于安全考虑，需要给pxc集群实例创建docker内部网络
-
-```shell
-inidocker network create --subnet=172.20.1.0/24 net1
-docker network ls
-# docker network inspect net1
-# docker network rm net1
-```
-
-ps:阿里云服务器没有成功???!!中间遇到了一个小问题，`Error response from daemon`, 这个是因为172.18 的网段已经存在，可以`docker network ls`查看,换一个网段就解决了
-
-3.创建docker卷
-
-```shell
-docker volume create --name v1
-docker volume create --name v2
-docker volume create --name v3
-```
-
-4.查看docker卷信息
-
-```shell
-docker inspect v1
-#创建第一个节点
-docker run -d -p 3310:3306 -e MYSQL_ROOT_PASSWORD=123456 -e CLUSTER_NAME=PXC -e XTRABACKUP_PASSWORD=123456 --name=node1 --net=net1 --ip 172.20.1.2 percona/percona-xtradb-cluster
-
-#创建第二个节点
-docker run -d -p 3311:3306 -e MYSQL_ROOT_PASSWORD=123456 -e CLUSTER_NAME=PXC -e XTRABACKUP_PASSWORD=123456 -e CLUSTER_JOIN=node1 --name=node2 --net=net1 --ip 172.20.1.3 percona/percona-xtradb-cluster
-
-#创建第三个节点
-docker run -d -p 3312:3306 -e MYSQL_ROOT_PASSWORD=123456 -e CLUSTER_NAME=PXC -e XTRABACKUP_PASSWORD=123456 -e CLUSTER_JOIN=node1 --name=node3 --net=net1 --ip 172.20.1.7 percona/percona-xtradb-cluster
-```
-
-ps:在这个地方又遇到了个问题，创建了5个node节点，但是只启动了2个，3个失败???暂时还不知道原因???启动的状态都为Exited???!!
-
-使用这句命令全部启动实例`docker ps -aq | xargs -I {} docker start {}`
-
-5.mysql的负载均衡haproxy
-
-```shell
-docker pull haproxy
-```
-
-6.实例化haproxy
-
-```shell
-diffdocker run -it -d -p 4001:8888 -p 4002:3306 
--v /home/soft/haproxy:/usr/local/etc/haproxy 
---name h1 --privileged 
---net=net1 --ip 172.20.1.10 haproxy
-	
-shellglobal
-	#工作目录
-	chroot /usr/local/etc/haproxy
-	#日志文件，使用rsyslog服务中local5日志设备（/var/log/local5），等级info
-	log 127.0.0.1 local5 info
-	#守护进程运行
-	daemon
-
-defaults
-	log	global
-	mode	http
-	#日志格式
-	option	httplog
-	#日志中不记录负载均衡的心跳检测记录
-	option	dontlognull
-   #连接超时（毫秒）
-	timeout connect 5000
-   #客户端超时（毫秒）
-	timeout client  50000
-	#服务器超时（毫秒）
-   timeout server  50000
-
-#监控界面
-listen  admin_stats
-	#监控界面的访问的IP和端口
-	bind  0.0.0.0:8888
-	#访问协议
-   mode        http
-	#URI相对地址
-   stats uri   /dbs
-	#统计报告格式
-   stats realm     Global\ statistics
-	#登陆帐户信息
-   stats auth  admin:abc123456
-#数据库负载均衡
-listen  proxy-mysql
-	#访问的IP和端口
-	bind  0.0.0.0:3306
-   #网络协议
-	mode  tcp
-	#负载均衡算法（轮询算法）
-	#轮询算法：roundrobin
-	#权重算法：static-rr
-	#最少连接算法：leastconn
-	#请求源IP算法：source
-   balance  roundrobin
-	#日志格式
-   option  tcplog
-	#在MySQL中创建一个没有权限的haproxy用户，密码为空。Haproxy使用这个账户对MySQL数据库心跳检测
-   option  mysql-check user haproxy
-   server  MySQL_1 172.20.1.2:3306 check weight 1 maxconn 2000
-   server  MySQL_2 172.20.1.3:3306 check weight 1 maxconn 2000
-   server  MySQL_3 172.20.1.7:3306 check weight 1 maxconn 2000
-   server  MySQL_4 172.20.1.5:3306 check weight 1 maxconn 2000
-   server  MySQL_5 172.20.1.6:3306 check weight 1 maxconn 2000
-	
-	#使用keepalive检测死链
-   option  tcpka
-```
-
-7.登陆到交互容器里
-
-```bash
-bash
-docker exec -it h1 bash
-```
-
-8.安装keepalive 完成双机热备，登录haproxy，执行命令
-
-```sql
-sqlapt-get update
-apt-get install keepalived
-```
-
-9.配置keepalive，
-
-```diff
-diff#创建第2个Haproxy负载均衡服务器
-docker run -it -d -p 4003:8888 
--p 4004:3306 
--v /home/soft/haproxy:/usr/local/etc/haproxy 
---name h2 --privileged 
---net=net1 
---ip 172.20.1.10 
-haproxy
-shell vrrp_instance  VI_1 {
-    state  MASTER
-    interface  eth0
-    virtual_router_id  51
-    priority  100
-    advert_int  1
-    authentication {
-        auth_type  PASS
-        auth_pass  123456
-    }
-    virtual_ipaddress {
-        172.20.1.201
-    }
-}
-
-#启动Keepalived
-service keepalived start
-#宿主机执行ping命令
-ping 172.20.1.201
-shell
-#创建第2个Haproxy负载均衡服务器
-docker run -it -d -p 4003:8888 -p 4004:3306 
--v /home/soft/haproxy:/usr/local/etc/haproxy 
---name h2 --privileged 
---net=net1 --ip 172.20.1.11 haproxy
-#进入h2容器，启动Haproxy
-docker exec -it h2 bash
-haproxy -f /usr/local/etc/haproxy/haproxy.cfg
-```
-
-
-
-
-
 ## Nginx和Apache
 
 ```sh
 docker pull httpd #拉取镜像
 docker run -it -p 8080:80 httpd /bin/bash #创建容器及映射端口
 docker cp daff89e81c3c:/usr/local/apache2/conf/httpd.conf httpd.conf #复制配置文件
-\#ServerName www.example.com:80 >> ServerName localhost:80 #修改文件
-
-docker cp httpd.conf daff89e81c3c:/usr/local/apache2/conf/httpd.conf
+# docker cp httpd.conf daff89e81c3c:/usr/local/apache2/conf/httpd.conf
+#ServerName www.example.com:80 >> ServerName localhost:80 #修改文件
 
 bin/apachectl start #容器内启动服务
 nginx命令启动		#nginx -c /etc/nginx/nginx.conf #指定配置文件启动
@@ -876,7 +893,605 @@ systemctl start vsftpd
 
 # docker集群应用部署
 
+## Mysql PXC集群环境部署
 
+### MySQL常用集群方案
+
+前后端系统架构图
+
+ <img src="https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201109224842020-986406361.png" alt="img" style="zoom: 33%;" />
+
+了解 MySQL 集群之前，先看看单节点数据库的弊病
+
+- 大型互联网程序用户群体庞大，所以架构需要特殊设计。
+- 单节点数据库无法满足大并发时性能上的要求。
+- 单节点的数据库没有冗余设计，无法满足高可用。
+- 单节点 MySQL无法承载巨大的业务量，数据库负载巨大
+
+常见 MySQL 集群方案
+
+-   Repliaction 集群方案
+-   PXC 集群方案（ Percona XtraDB Cluster ）
+
+两种集群方案特性如下图
+
+<img src="https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201111223202538-1883882163.png" alt="img" style="zoom: 67%;" />
+
+#### PXC方案 和 Replication方案对比
+
+PXC方案
+
+<img src="https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201111223239844-777060586.png" alt="img" style="zoom: 67%;" />
+
+很明显 PXC方案在任何一个节点写入的数据都会同步到其他节点，数据双向同步的（在任何节点上都可以同时读写）
+
+#### Replication 集群方案
+
+![img](https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201111223305137-1785602517.png)
+
+**PXC 数据的强一致性**
+
+- PXC 采用同步复制，事务在所有集群节点要么同时提交，要么不提交。
+- Replication 采用异步复制，无法保证数据的一致性。
+
+PXC写入操作
+
+![img](https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201111223408424-516057871.png)
+
+当一个写入请求到达PXC集群中的一个 mysql（node1数据库） 数据库时，node1数据库会将该写入请求同步给集群中的其他所有数据库，等待所有数据库都成功提交事务后，node1节点才会将写入成功的结果告诉给 node1的客户端。
+
+PXC 的强一致性对保存高价值数据时特别重要。
+
+在看Replication集群写入操作：
+
+![img](https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201111223447155-1480635225.png)
+
+当一个写入请求到达 Master数据库时，Master数据库执行写入操作，然后 Master 向客户端返回写入成功，同时异步的复制写入操作给 Slave数据库，如果异步复制时出现问题，从数据库将无法执行写入操作，而客户端得到的是写入成功。这也
+
+是弱一致性的体现
+
+### 创建MySQL PXC集群
+
+1 安装PXC镜像
+
+```
+docker pull percona/percona-xtradb-cluster:5.7.21　　
+```
+
+2 为PXC镜像改名
+
+```
+docker tag percona/percona-xtradb-cluster:5.7.21 pxc
+```
+
+![img](https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201111224736682-295876287.png)
+
+ 3 创建net1网段
+
+```
+docker network create --subnet=172.18.0.0/16 net1
+```
+
+4 创建5个数据卷　　
+
+```
+docker volume create --name v1``docker volume create --name v2``docker volume create --name v3``docker volume create --name v4``docker volume create --name v5
+```
+
+ 5 创建备份数据卷（用于热备份数据）
+
+```
+docker volume create --name backup
+```
+
+6 创建5节点的PXC集群　　
+
+注意，每个MySQL容器创建之后，因为要执行PXC的初始化和加入集群等工作，耐心等待1分钟左右再用客户端连接MySQL。另外，必须第1个MySQL节点启动成功，用MySQL客户端能连接上之后，再去创建其他MySQL节点。　　
+
+创建第1个MySQL节点
+
+```
+docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=abc123456 -e CLUSTER_NAME=PXC -e XTRABACKUP_PASSWORD=abc123456 -v v1:/``var``/lib/mysql -v backup:/data --privileged --name=node1 --net=net1 --ip 172.18.0.2 pxc　
+```
+
+<img src="https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201111231959104-73950283.png" alt="img" style="zoom:33%;" />
+
+创建第2个MySQL节点
+
+```
+docker run -d -p 3307:3306 -e MYSQL_ROOT_PASSWORD=abc123456 -e CLUSTER_NAME=PXC -e XTRABACKUP_PASSWORD=abc123456 -e CLUSTER_JOIN=node1 -v v2:/``var``/lib/mysql -v backup:/data --privileged --name=node2 --net=net1 --ip 172.18.0.3 pxc　　
+```
+
+创建第3个MySQL节点
+
+```
+docker run -d -p 3308:3306 -e MYSQL_ROOT_PASSWORD=abc123456 -e CLUSTER_NAME=PXC -e XTRABACKUP_PASSWORD=abc123456 -e CLUSTER_JOIN=node1 -v v3:/``var``/lib/mysql --privileged --name=node3 --net=net1 --ip 172.18.0.4 pxc　　
+```
+
+创建第4个MySQL节点
+
+```
+docker run -d -p 3309:3306 -e MYSQL_ROOT_PASSWORD=abc123456 -e CLUSTER_NAME=PXC -e XTRABACKUP_PASSWORD=abc123456 -e CLUSTER_JOIN=node1 -v v4:/``var``/lib/mysql --privileged --name=node4 --net=net1 --ip 172.18.0.5 pxc　　
+```
+
+创建第5个MySQL节点
+
+```
+docker run -d -p 3310:3306 -e MYSQL_ROOT_PASSWORD=abc123456 -e CLUSTER_NAME=PXC -e XTRABACKUP_PASSWORD=abc123456 -e CLUSTER_JOIN=node1 -v v5:/``var``/lib/mysql -v backup:/data --privileged --name=node5 --net=net1 --ip 172.18.0.6 pxc
+```
+
+查看容器运行状态　　
+
+```
+docker container ls
+```
+
+ 可以发现在任意节点创建的数据都会同步到其他节点
+
+### 数据库负载均衡
+
+虽然搭建了集群,但是不使用数据库负载均衡,单节点处理所有请求，负载高，性能差
+
+ <img src="https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201117220725462-1224282658.png" alt="img" style="zoom:33%;" />
+
+将请求均匀地发送给集群中的每一个节点。
+
+- 所有请求发送给单一节点，其负载过高，性能很低，而其他节点却很空闲。
+- 使用Haproxy做负载均衡，可以将请求均匀地发送给每个节点，单节点负载低，性能好
+
+<img src="https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201117220752185-1618077221.png" alt="img" style="zoom:33%;" />
+
+####  负载均衡中间件对比
+
+负载均衡首先是数据库的集群，加入5个集群，每次请求都是第一个的话，有可能第一个数据库就挂掉了，所以更优的方案是对不同的节点都进行请求，这就需要有中间件进行转发，比较好的中间件有nginx，haproxy等，因nginx 支持插件，但是
+
+刚刚支持了tcp/ip 协议，haproxy 是一个老牌的中间转发件。如果要用haproxy的话，可以从官方下载镜像，然后呢对镜像进行配置（自己写好配置文件，因为这个镜像是没有配置文件的，配置好之后再运行镜像的时候进行文件夹的映射，配置文
+
+件开放3306（数据库请求，然后根据check心跳检测访问不同的数据库，8888 对数据库集群进行监控））。配置文件里面设置用户（用户在数据库进行心跳检测，判断哪个数据库节点是空闲的，然后对空闲的进行访问），还有各种算法（比如
+
+轮训），最大连接数，时间等，还有对集群的监控。配置文件写好以后运行这个镜像，镜像运行成功后进入容器启动配置文件 。其实haprocy返回的也是一个数据库实例（但是并不存储任何的数据，只是转发请求），这个实例用来check其他节
+
+点。
+
+<img src="https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201117220854117-499423859.png" alt="img" style="zoom:33%;" />
+
+####  安装haproxy
+
+[参考文档](https://zhangge.net/5125.html)
+
+1 从Docker仓库拉取haproxy镜像：https://hub.docker.com/_/haproxy
+
+```
+docker pull haproxy
+```
+
+2 创建Haproxy配置文件。供Haproxy容器使用（docker中未生成配置文件，我们需要在宿主机中自己创建配置文件）　
+
+```
+mkdir /home/soft/haproxy
+vi /home/soft/haproxy/haproxy.cfg
+```
+
+ 配置信息如下
+
+```
+global
+    #工作目录
+    chroot /usr/local/etc/haproxy
+    #日志文件，使用rsyslog服务中local5日志设备（/var/log/local5），等级info
+    log 127.0.0.1 local5 info
+    #守护进程运行
+    daemon
+
+defaults
+    log    global
+    mode    http
+    #日志格式
+    option    httplog
+    #日志中不记录负载均衡的心跳检测记录
+    option    dontlognull
+    #连接超时（毫秒）
+    timeout connect 5000
+    #客户端超时（毫秒）
+    timeout client  50000
+    #服务器超时（毫秒）
+    timeout server  50000
+
+#监控界面    
+listen  admin_stats
+    #监控界面的访问的IP和端口
+    bind  0.0.0.0:8888
+    #访问协议
+    mode        http
+    #URI相对地址
+    stats uri   /dbs
+    #统计报告格式
+    stats realm     Global\ statistics
+    #登陆帐户信息
+    stats auth  admin:abc123456
+#数据库负载均衡
+listen  proxy-mysql
+    #访问的IP和端口
+    bind  0.0.0.0:3306  
+    #网络协议
+    mode  tcp
+    #负载均衡算法（轮询算法）
+    #轮询算法：roundrobin
+    #权重算法：static-rr
+    #最少连接算法：leastconn
+    #请求源IP算法：source 
+    balance  roundrobin
+    #日志格式
+    option  tcplog
+    #在MySQL中创建一个没有权限的haproxy用户，密码为空。Haproxy使用这个账户对MySQL数据库心跳检测
+    option  mysql-check user haproxy
+    server  MySQL_1 172.18.0.2:3306 check weight 1 maxconn 2000  
+    server  MySQL_2 172.18.0.3:3306 check weight 1 maxconn 2000  
+    server  MySQL_3 172.18.0.4:3306 check weight 1 maxconn 2000 
+    server  MySQL_4 172.18.0.5:3306 check weight 1 maxconn 2000
+    server  MySQL_5 172.18.0.6:3306 check weight 1 maxconn 2000
+    #使用keepalive检测死链
+    option  tcpka  
+```
+
+[![复制代码](https://common.cnblogs.com/images/copycode.gif)](javascript:void(0);)
+
+3 在数据库集群中创建空密码、无权限用户haproxy，来供Haproxy对MySQL数据库进行心跳检测
+
+```
+create user 'haproxy'@'%' identified by '';
+```
+
+<img src="https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201117221541876-1890411505.png" alt="img" style="zoom:50%;" />
+
+ 4 创建Haproxy容器(name=h1的原因是为了高可用) 这里要加 --privileged
+
+```
+docker run -it -d -p 4001:8888 -p 4002:3306 -v /home/soft/haproxy:/usr/local/etc/haproxy --name h1 --privileged --net=net1 --ip 172.18.0.7 haproxy
+```
+
+![img](https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201117222923532-1279359995.png)
+
+5 进入容器，在容器bash中启动Haproxy
+
+```
+docker exec -it h1 bash
+haproxy -f /usr/local/etc/haproxy/haproxy.cfg
+```
+
+6 接下来便可以在浏览器中打开Haproxy监控界面，端口4001，在配置文件中定义有用户名admin，密码abc123456。
+
+我这边访问的是http://192.168.163.129:4001***\*/dbs，并且要使用用户名密码进行登录（小插曲，使用的是Basic登录，我的Chrome不知为何被屏蔽了，我最后用的火狐）\****　　
+
+![img](https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201117223330229-1002756910.png)
+
+ 这时候我们手动挂掉一个Docker节点，看一下变化（我们会发现已经显示挂掉了）
+
+```
+docker stop node1　
+```
+
+<img src="https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201117223458930-1755580534.png" alt="img"  />
+
+Haproxy不存储数据，只转发数据。可以在数据库中建立Haproxy的连接，端口4002，用户名和密码为数据库集群的用户名和密码（用户名：root密码：abc123456）
+
+**<img src="https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201117225116868-506029717.png" alt="img" style="zoom:33%;" />**
+
+### 为什么要采用双机热备
+
+单节点Haproxy不具备高可用,必须要有冗余设计
+
+双机就是两个请求处理程序，比如两个haproxy，当一个挂掉的时候，另外 一个可以顶上。热备我理解就是keepalive。在haproxy 容器中安装keepalive
+
+<img src="https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201117225511911-1892627030.png" alt="img" style="zoom:33%;" />
+
+####  虚拟ip
+
+linux系统可以在一个网卡中定义多个IP地址，把这些地址分配给多个应用程序，这些地址就是虚拟IP，Haproxy的双机热备方案最关键的技术就是虚拟IP。
+
+关键就是虚拟ip，定义一个虚拟ip，然后比如两个haproxy分别安装keepalive镜像，因为haproxy是ubuntu系统的，所以安装用apt-get，keepalive是作用是抢占虚拟ip，抢到的就是主服务器，没有抢到的就是备用服务器，然后两个keepalive进行
+
+心跳检测（就是创建一个用户到对方那里试探，看是否还活着，mysql的集群之间也是心跳检测），如果 挂掉抢占ip。所以在启动keepalive 之前首先要编辑好他的配置文件，怎么抢占，权重是什么，虚拟ip是什么，创建的用户交什么。配置完启
+
+动完以后可以ping一下看是否正确，然后将虚拟ip映射到局域网的ip
+
+<img src="https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201117233249892-1588786394.png" alt="img" style="zoom:33%;" />
+
+ 使用keepalive实现双机热备
+
+- 定义虚拟IP
+- 在Docker中启动两个Haproxy容器，每个容器中还需要安装Keepalived程序（以下简称KA）
+- 两个KA会争抢虚拟IP，一个抢到后，另一个没抢到就会等待，抢到的作为主服务器，没抢到的作为备用服务器
+- 两个KA之间会进行心跳检测，如果备用服务器没有受到主服务器的心跳响应，说明主服务器发生故障，那么备用服务器就可以争抢虚拟IP，继续工作
+- 我们向虚拟IP发送数据库请求，一个Haproxy挂掉，可以有另一个接替工作
+
+<img src="https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201117233335015-2117112465.png" alt="img" style="zoom:33%;" />
+
+ haproxy双机热备方案
+
+<img src="https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201117233408900-518859338.png" alt="img" style="zoom: 33%;" />
+
+- Docker中创建两个Haproxy，并通过Keepalived抢占Docker内地虚拟IP
+- Docker内的虚拟IP不能被外网，所以需要借助宿主机Keepalived映射成外网可以访问地虚拟IP
+
+1 进入Haproxy容器，安装Keepalived：　　
+
+```
+docker exec -it h1 bash
+apt-get update
+apt-get install keepalived
+```
+
+2 Keepalived配置文件(Keepalived.conf)：
+
+Keepalived的配置文件是/etc/keepalived/keepalived.conf　　
+
+```
+vrrp_instance  VI_1 {
+    state  MASTER
+    interface  eth0
+    virtual_router_id  51
+    priority  100
+    advert_int  1
+    authentication {
+        auth_type  PASS
+        auth_pass  123456
+    }
+    virtual_ipaddress {
+        172.18.0.201
+    }
+}
+```
+
+启动Keepalived　　
+
+```
+service keepalived start
+```
+
+启动成功后，通过 ip a 可以查看网卡中虚拟IP是否成功，另外可以在宿主机中ping成功虚拟IP 172.18.0.201 　
+
+可以按照以上步骤，再另外创建一个Haproxy容器，注意映射的宿主机端口不能重复，Haproxy配置一样。然后在容器中安装Keepalived，配置也基本一样（可以修改优先权重）。这样便基本实现了Haproxy双机热备方案
+命令如下：
+
+创建Haproxy容器(name=h2的原因是为了高可用)
+
+```
+docker run -it -d -p 4003:8888 -p 4004:3306 -v /home/soft/haproxy:/usr/local/etc/haproxy --name h2 --net=net1 --ip 172.18.0.8 --privileged haproxy
+```
+
+进入容器，在容器bash中启动Haproxy
+
+```
+docker exec -it h2 bash
+haproxy -f /usr/local/etc/haproxy/haproxy.cfg
+```
+
+接下来便可以在浏览器中打开Haproxy监控界面，端口4003，在配置文件中定义有用户名admin，密码abc123456。
+
+我这边访问的是http://192.168.63.144:4003***\*/dbs，并且要使用用户名密码进行登录（小插曲，使用的是Basic登录，我的Chrome不知为何被屏蔽了，我最后用的火狐）\****　　
+
+进入h2容器
+
+```
+docker exec -it h2 bash
+#更新软件包
+apt-get update
+#安装VIM
+apt-get install vim
+#安装Keepalived
+apt-get install keepalived
+#编辑Keepalived配置文件
+vim /etc/keepalived/keepalived.conf
+#启动Keepalived
+service keepalived start
+#宿主机执行ping命令
+ping 172.18.0.201
+```
+
+配置文件内容如下：
+
+```
+vrrp_instance  VI_1 {
+    state  MASTER
+    interface  eth0
+    virtual_router_id  51
+    priority  100
+    advert_int  1
+    authentication {
+        auth_type  PASS
+        auth_pass  123456
+    }
+    virtual_ipaddress {
+        172.18.0.201
+    }
+}
+```
+
+### 实现外网访问虚拟ip
+
+宿主机安装 keepalive
+
+```
+apt-get update
+apt-get install keepalived
+```
+
+Keepalived配置文件(Keepalived.conf)：
+
+Keepalived的配置文件是/etc/keepalived/keepalived.conf　　
+
+```
+#宿主机执行安装Keepalived
+yum -y install keepalived
+#修改Keepalived配置文件
+vi /etc/keepalived/keepalived.conf
+#启动Keepalived
+service keepalived start
+```
+
+Keepalived配置文件如下：　　
+
+```
+vrrp_instance VI_1 {
+    state MASTER
+    interface ens33
+    virtual_router_id 51
+    priority 100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    virtual_ipaddress {
+        192.168.99.150
+    }
+}
+
+virtual_server 192.168.99.150 8888 {
+    delay_loop 3
+    lb_algo rr
+    lb_kind NAT
+    persistence_timeout 50
+    protocol TCP
+    real_server 172.18.0.201 8888 {
+        weight 1
+    }
+}
+
+virtual_server 192.168.99.150 3306 {
+    delay_loop 3
+    lb_algo rr
+    lb_kind NAT
+    persistence_timeout 50
+    protocol TCP
+    real_server 172.18.0.201 3306 {
+        weight 1
+    }
+}
+```
+
+启动Keepalived服务
+
+```
+service keepalived restart
+```
+
+1. 之后其他电脑便可以通过虚拟IP 192.168.63.160 的8888和3306端口来访问宿主机Docker中的 172.18.0.201 的相应端口。
+
+### 暂停PXC集群的办法
+
+```
+vi /etc/sysctl.conf
+#文件中添加net.ipv4.ip_forward=1这个配置
+systemctl restart network
+```
+
+### 热备份数据　　
+
+冷备份
+
+- 冷备份是关闭数据库时候的备份方式，通常做法是拷贝数据文件
+- 是简单安全的一种备份方式，不能在数据库运行时备份。
+- 大型网站无法做到关闭业务备份数据,所以冷备份不是最佳选择
+
+热备份
+
+- 热备份是在系统运行状态下备份数据
+
+MySQL常见的热备份有LVM和XtraBackup两种方案
+
+- LVM：linux的分区备份命令，可以备份任何数据库；但是会对数据库加锁，只能读取；而且命令复杂
+- XtraBackup：不需要锁表，而且免费
+
+XtraBackup
+
+XtraBackup是一款基于InnoDB的在线热备工具,具有开源免费,支持在线热备,占用磁盘空间小,能够非常快速地备份与恢复mysql数据库
+
+- 备份过程中不锁表，快速可靠
+- 备份过程中不会打断正在执行地事务
+- 备份数据经过压缩，占用磁盘空间小
+
+全量备份和增量备份
+
+- 全量备份：备份全部数据。备份过程时间长，占用空间大。第一次备份要使用全量备份
+- 增量备份： 只备份变化的那部分数据。备份的时间短，占用空间小。第二次以后使用增量备份
+
+#### PXC全量备份
+
+备份要在某个PXC节点的容器内进行，但应该把备份数据保存到宿主机内。所以采用目录映射技术。先新建Docker卷：
+
+```
+docker volume create backup
+```
+
+挑选一个PXC节点node1，将其容器停止并删除，然后重新创建一个增加了backup目录映射的node1容器　　
+
+```
+docker stop node1
+docker rm node1    # 数据库数据保存在Docker卷v1中，不会丢失
+# 参数改变：
+# 1. -e CLUSTER_JOIN=node2;原来其他节点是通过node1加入集群的，现在node1重新创建，需要选择一个其他节点加入集群
+# 2. -v backup:/data;将Docker卷backup映射到容器的/data目录
+docker run -d -u root -p 3306:3306 -e MYSQL_ROOT_PASSWORD=abc123456 -e CLUSTER_NAME=PXC -e XTRABACKUP_PASSWORD=abc123456 -e CLUSTER_JOIN=node2 -v v1:/var/lib/mysql -v backup:/data --network=net1 --ip 172.18.0.2 --name=node1 pxc
+```
+
+在node1容器中安装 `percona-xtrabackup-24`　　
+
+```
+docker exec -it node1 bash
+apt-get update
+apt-get install percona-xtrabackup-24
+```
+
+之后便可以执行如下命令进行全量备份，备份后的数据会保存在 `/data/backup/full` 目录下：　　
+
+```
+mkdir /data/backup
+mkdir /data/backup/full
+#不建议，已过时 innobackupex --backup -u root -p abc123456 --target-dir=/data/backup/full
+xtrabackup --backup -uroot -pabc123456 --target-dir=/data/backup/full
+```
+
+官方文档已经不推荐使用 `innobackupex`，而推荐使用 `xtrabackup` 命令　　
+
+### PXC全量还原
+
+数据库可以热备份，但是不能热还原，否则会造成业务数据和还原数据的冲突。
+
+对于PXC集群为了避免还原过程中各节点数据同步冲突的问题，我们要先解散原来的集群，删除节点。然后新建节点空白数据库，执行还原，最后再建立起其他集群节点。
+
+还原前还要将热备份保存的未提交的事务回滚，还原之后重启MySQL
+
+1 停止并删除PXC集群所有节点
+
+```
+docker stop node1 node2 node3 node4 node5
+docker rm node1 node2 node3 node4 node5
+docker volume rm v1 v2 v3 v4 v5
+```
+
+2 按照之前的步骤重新创建node1容器，并进入容器，执行冷还原　　
+
+```
+# 创建卷
+docker volume create v1
+# 创建容器
+docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=abc123456 -e CLUSTER_NAME=PXC -e XTRABACKUP_PASSWORD=abc123456 -v v1:/var/lib/mysql -v backup:/data --name=node1 --network=net1 --ip 172.18.0.2 pxc
+# 以root身份进入容器
+docker exec -it -uroot node1 bash
+# 删除数据
+rm -rf /var/lib/mysql/*
+# 准备阶段
+xtrabackup --prepare --target-dir=/data/backup/full/
+# 执行冷还原
+xtrabackup --copy-back --target-dir=/data/backup/full/
+# 更改还原后的数据库文件属主
+chown -R mysql:mysql /var/lib/mysql
+# 退出容器后，重启容器
+docker stop node1
+docker start node1
+```
 
 
 
@@ -1261,21 +1876,36 @@ RESTful API ： RESTful API 提供给管理员对于Harbor更多的操控，使�
 
 Harbor的每个组件都是以Docker容器的形式构建的。用于部署Harbor的Docker Compose模板位于 harbor/docker-compose.yml，打开这个模板文件，发现Harbor是由7个容器组成的；
 
-nginx：nginx负责流量转发和安全验证，对外提供的流量都是从nginx中转，所以开放https的443端口，它将流量分发到后端的ui和正在docker镜像存储的docker registry。
+- nginx：nginx负责流量转发和安全验证，对外提供的流量都是从nginx中转，所以开放https的443端口，它将流量分发到后端的ui和正在docker镜像存储的docker registry。
 
-harbor-jobservice：harbor-jobservice 是harbor的job管理模块，job在harbor里面主要是为了镜像仓库之前同步使用的;
 
-harbor-ui：harbor-ui是web管理页面，主要是前端的页面和后端CURD的接口;
+- harbor-jobservice：harbor-jobservice 是harbor的job管理模块，job在harbor里面主要是为了镜像仓库之前同步使用的;
 
-registry：registry就是docker原生的仓库，负责保存镜像。
 
-harbor-adminserver：harbor-adminserver是harbor系统管理接口，可以修改系统配置以及获取系统信息。
+- harbor-ui：harbor-ui是web管理页面，主要是前端的页面和后端CURD的接口;
 
-harbor-db：harbor-db是harbor的数据库，这里保存了系统的job以及项目、人员权限管理。由于本harbor的认证也是通过数据，在生产环节大多对接到企业的ldap中；
 
-harbor-log：harbor-log是harbor的日志服务，统一管理harbor的日志。通过inspect可以看出容器统一将日志输出的syslog。
+- registry：registry就是docker原生的仓库，负责保存镜像。
+
+
+- harbor-adminserver：harbor-adminserver是harbor系统管理接口，可以修改系统配置以及获取系统信息。
+
+
+- harbor-db：harbor-db是harbor的数据库，这里保存了系统的job以及项目、人员权限管理。由于本harbor的认证也是通过数据，在生产环节大多对接到企业的ldap中；
+
+
+- harbor-log：harbor-log是harbor的日志服务，统一管理harbor的日志。通过inspect可以看出容器统一将日志输出的syslog。
+
 
 这几个容器通过Docker link的形式连接在一起，这样，在容器之间可以通过容器名字互相访问。对终端用户而言，只需要暴露proxy （即Nginx）的服务端口。
+
+## 启动私有 Registry
+
+启动一个私有仓库也非常简单，在服务器上执行命令
+
+```cobol
+docker run -d -p 5000:5000 --name="docker-registry" --restart=always -v /docker/registry/:/var/lib/registry/ registry
+```
 
 上传所需docker、docker-compose、harbor文件
 
@@ -1322,7 +1952,7 @@ vi /etc/docker/daemon.json #编辑加速器
 
 ```sh
 {
-  "registry-mirrors": ["https://k4i1aeje.mirror.aliyuncs.com"，"https://docker.mirrors.ustc.edu.cn"]，"insecure-registries": ["localhost"]
+  "registry-mirrors":["https://k4i1aeje.mirror.aliyuncs.com","https://docker.mirrors.ustc.edu.cn"],"insecure-registries": ["localhost"]
 }
 ```
 
@@ -1332,13 +1962,13 @@ harbor支持http和https，但如果使用http的话，在拉取镜像的时候�
 
 ```sh
 {
-  "insecure-registries": ["https://*.*.*.*"]
+  "insecure-registries": ["192.168.4.6:5000"]
 }
 ```
 
 添加用户，添加项目管理用户
 
-**Harbor****中的用户有****3****种角色：项目管理员（****MDRWS****）、开发人员（****RWS****）和访客（****RS****），当然还有一个最高管理员权限****admin****系统管理员**
+**Harbo**r中的用户有 3 种角色：项目管理员（ MDRWS）、开发人员（RWS）和访客（RS），当然还有一个最高管理员权限 admin 系统管理员
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps35-1682691150324-357.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps36-1682691150325-358.jpg" alt="img" style="zoom:67%;" /> 
 
@@ -1356,229 +1986,7 @@ Gogs（极易搭建的自助 Git 服务，默认8080）、Elasticsearch（基于
 
 Prometheus （开源的服务监控系统和时间序列数据库）、Grafana（可视化监控信息工具）
 
- 
 
- 
-
-# swarm集群(支持多容器操作的利器)
-
-docker swarm是运维人员便捷操作多个容器的编排工具，利用每个主机的docker engine集合成一个虚拟的docker资源池，采用最典型的主从结构（即通过manages对worker进行操作）中内置了基于DNS的负载均衡和对外部负载均衡机制的集成支持，通过Raft协议管理多个节点
-
-节点：运行docker engine引擎的主机且加入swarm集群中
-
-管理节点负责外部对集群的请求操作，维持集群资源，分发任务，自身也是工作节点
-
-工作节点负责执行具体任务
-
-端口号port 2377/ TCP集群管理通信						7946节点通信TCP/UDP
-
-4789/UDP覆盖型网络Pover1ay驱动
-
-<img src="E:\Project\Textbook\linux云计算\assets\wps37-1682691150325-359.jpg" alt="img" style="zoom:67%;" /> 
-
-创建集群	docker	swarm init在管理节点上创建一个集群
-
---advertise-addr指定swarem服务监昕的地址和端口	docker swarm init --advertise-addr 192.168.100.139
-
---autolock自动锁定管理服务的启停操作，对服务进行启动或停止都需要通过口令来解锁
-
---availability节点的可用性，包括 active 、 pause、 drain 三种，默认为 active
-
---cert-expiry根证书的过期时长，默认为90天
-
---data-path-port指定数据流量使用的网络接口或地址
-
---dispatcher-heartbeat分配组件的心跳时长，默认为 5 秒
-
---external-ca指定使用外部的证书签名服务地址
-
---force-new-cluster强制创建新集群
-
---max-snapshots协议Raft快照保留的个数
-
---snapshot-interval协议Raft进行快照的间隔（单位为事务个数），默认为10000个事物
-
---task-history-limit任务历史的保留个数，默认为5
-
-查看集群信息	docker info
-
-节点操作	docker node list列出集群中的节点信息
-
-docker node promote 命令来提升一个工作节点为管理节点
-
-docker node demote 命令来将一个管理节点降级为工作节点
-
-加入离开集群	docker swarm join
-
---token xxx:向指定集群中加入工作节点的认证信息（xxx返回的token串是集群唯一id）
-
-docker swarm join --token xxx 192.168.100.138: 2377 (worker2)
-
-swarm update更新一个Swarm 集群
-
-swarm leave离开一个 Swarm 集群					-f意味着强制离开集群
-
-更新集群		docker swarm update
-
--autolock启动或关闭自动锁定
-
--cert-expiry duration根证书的过期时长，默认为90天
-
--dispatcher-heartbeat duration分配组件的心跳时长，默认为5秒
-
--external-ca external-ca指定使用外部的证书签名服务地址
-
--max- snapshots uint : Ra玩协议快照保留的个数
-
--snapshot-interval uint : Raft 协议进行快照的间隔（单位为事务个数），默认为10000个事物
-
--task-history-limit int任务历史的保留个数， 默认为5
-
-使用服务操作docker service
-
-create	创建应用
-
--e环境变量列表
-
--mode string服务模式
-
--u指定用户信息，UID:GID
-
--config config:指定暴露给服务的配置
-
--constraint list:应用实例在集群中被放置时的位置限制
-
--dns自定义使用的DNS服务器地址
-
--endpoint-mode string:指定外部访问的模式，包括vip(虚地址自动负载均衡)或dnsr(DNS轮询)
-
--workdir string:指定容器中的工作目录位置
-
-ls		列出服务的信息
-
--f只输出符合过滤条件的服务			-q只输出服务的ID信息
-
-ps 		列出服务中包括的任务信息		docker service ps helloworld
-
--f只输出符合过滤条件的任务
-
--no-resolve:不将IDs映射为名称
-
--no- trunc:不截断输出信息
-
--quiet:只输出服务的ID信息。
-
-rm 		删除服务
-
-inspect 查看应用的详细信息			-f使用Go板指定格式化输出		--pretty仅显示重要信息
-
-rollback 回滚服务的配置
-
--q不显示执行进度信息					-d执行后返回，不等待服务状态校验完整
-
-logs 	获取服务或任务的日志信息
-
--details输出所有的细节日志信息
-
--f持续跟随输出
-
--no-resolve在输出中不将对象的ID映射为名称
-
--no-task-ids输出中不包括任务的ID信息
-
--no trunc不截断输出信息
-
--raw输出原始格式信息
-
--since输出自指定时间开始的日志，如2018-01-02T03:04:56或42m
-
--tail只输出给定行数的最新日志信息
-
--t打印日志的时间
-
-scale 	对服务副本调整			docker service scale helloworld=3
-
-update 更新服务
-
-<img src="E:\Project\Textbook\linux云计算\assets\wps38-1682691150325-360.jpg" alt="img" style="zoom:50%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps39-1682691150325-361.jpg" alt="img" style="zoom:67%;" /> 
-
-<img src="E:\Project\Textbook\linux云计算\assets\wps40-1682691150325-362.jpg" alt="img" style="zoom:67%;" /> 
-
-初始化第一个管理节点 -> 加入额外的管理节点 -> 加入工作节点 -> 完成
-
-操作修改/etc/hosts文件	master		worker1		wordker2
-
-## 1创建
-
-docker swarm		关闭防火墙
-
-在 manager.1机器上创建 docker swarm集群
-
-docker swarm init --advertise-addr 192.168.100.139 
-
-advertise-addr将该Ip地址的机器设置为集群管理节点（如果是单节点，无需该参数)
-
-## 2查看管理节点集群信息
-
-docker node ls	---生成ingress覆盖式网络
-
-向 docker swarm中添加工作节点:在两个工作节点中分别执行如下命令，ip地址是 manager节点的
-
-添加两个vrk节点
-
-`docker swarm join --token xxx 192.168.100.138: 2377(worker1)`
-
-`docker swarm join --token xxx 192.168.100.138: 2377 (worker2)`
-
---token xxx:向指定集群中加入工作节点的认证信息（xxx认证信息是在创建docker swarm时产生的）
-
-查看管理节点集群信息与之前的区别		docker node ls
-
-## 3在 docker swarma中部署服务
-
-在 Docker Swarm集群中部署服务时，既可以使用 Docker Hub上自带的像来启动服务，也可以使用Dockerfile构建的镜像来启动服务。使用自己通过 Dockerfilet构建的镜像来启动服务那么必须先将镜像推送到 Docker Hub中心仓库，为了方便读者的学习，这里以使用 Docker Hub上自带的a1pine镜像为例来部集群服务
-
-## 4部署服务
-
-`docker service create --replicas 1 --name helloworld alpine ping docer.com`
-
-docker service create指令:用于在 Swarm集群中创違一个基于 alpine镜像的服务
-
---replicast参数:指定了该服务只有一个副本实例（只有一个节点去执行）
-
---name参数:指定创建成功后的服务名称为hel1oword
-
-ping docker.com指令:表示服务启动后执行的命令
-
-## 5查看 docker swarm集群中的服务
-
-`docker service ls`查看服务列表:
-
-`docker service inspect`查看部署具体服务的详细信息
-
-服务名称查看服务在集群节点上的分配以及运行情兄: `docker service ps`服务名称
-
-## 6修改副本数量
-
-在 manager1上，更改服务副本的数量(创建的副本会随机分配到不同的节点
-
-`docker service scale helloworld=5`
-
-## 7删除服务(在管理节点)
-
-docker service rm服务名称
-
-## 8访问服务
-
-查看集群环境下的网络列表: docker network ls
-
-在manager1上创建- -overlay为驱动的网络(默认使用的网络连接 ingress)
-
-`docker network create -d=overlay my-network`
-
-在集群管理节点 manager1上部署一个 nginx服务
-
-`docker service create --network my-network --name my-web -p 8080:80 --replicas 2  nginx`
 
 # 容器限制块设备I/O速率
 
