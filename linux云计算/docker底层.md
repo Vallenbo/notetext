@@ -82,7 +82,7 @@ hugetlbfs on /dev/hugepages type hugetlbfs (rw,relatime)
 
 因此我们看到的mount信息是父进程的一份拷贝，我们重新mount一下/proc，好让ps能正常显示。 
 
-```
+```sh
 [root@unshare-bash ~]# # 重新mount一下/proc
 [root@unshare-bash ~]# mount -t proc none /proc
 [root@unshare-bash ~]# ps -ef
@@ -100,7 +100,7 @@ root        77     1  0 21:47 pts/0    00:00:00 ps -ef
 
 为了满足pivot_root的一些参数要求，需要额外做一次bind mount：
 
-```
+```sh
 [root@unshare-bash container]# mount --bind /root/container/ /root/container/
 [root@unshare-bash container]# cd /root/container/
 [root@unshare-bash container]# mkdir oldroot/
@@ -128,12 +128,11 @@ rootfs on / type rootfs (rw)
 /dev/vda2 on /oldroot type xfs (rw,relatime,attr2,inode64,noquota)  <-- oldroot 还在
 /dev/vda2 on / type xfs (rw,relatime,attr2,inode64,noquota)
 none on /proc type proc (rw,relatime)
-
 ```
 
 可以看到oldroot这个旧跟目录的挂载信息还在，我们把它unmount掉:
 
-```
+```sh
 [root@unshare-bash /]# umount -l oldroot/ # lazy umount
 [root@unshare-bash /]# mount
 rootfs on / type rootfs (rw)
@@ -146,7 +145,7 @@ none on /proc type proc (rw,relatime)
 **step4：为我们的容器添加网络**
 接下来，我们初始化容器的网络。使用veth pair，借助docker提供的docker0网桥，打通容器与主机的网络。
 
-```
+```sh
 [root@unshare-bash /]# ping 8.8.8.8 # 配置网络前，网络显然是不通的
 PING 8.8.8.8 (8.8.8.8): 56 data bytes
 ping: sendto: Network unreachable
@@ -175,7 +174,7 @@ lo        Link encap:Local Loopback
 
 设置完veth pair，回到容器中：
 
-```
+```sh
 [root@unshare-bash /]# ifconfig -a # 设置完之后回来看
 c11363    Link encap:Ethernet  HWaddr 1A:47:BF:B8:FB:88
           BROADCAST MULTICAST  MTU:1500  Metric:1
@@ -282,7 +281,7 @@ memory/
 
 如果你使用docker启动一个容器，那么docker会为该容器在每个子系统目录下创建docker/$container_id目录。这样cgroups就能对该容器的资源进行管理和限制了。
 
-memory cgroup
+## memory cgroup
 memory cgroup是管理内存的cgroup，其两个主要功能是：
 
 统计当前分组的内存使用情。
@@ -587,6 +586,7 @@ $ cat /sys/fs/cgroup/pids/docker/$container_id/pids.max
 ```
 
 # UnionFS
+
 UnionFS是一种文件系统，它允许将多个目录组合成一个逻辑目录，该逻辑目录包含这些目录中的所有内容，并对外提供一个统一的视图。
 
 举个例子，假设我们需要更新一块CD-ROM中的内容，但是CD-ROM是不可写的，这个时候可以将CD-ROM与另一个可写目录挂载成UnionFS。当我们更新文件的时候，内容会被写入可写的目录，就好像CD-ROM中的内容被更新了一样。
@@ -630,7 +630,7 @@ workdir是系统用于做挂载前的一些准备工作。需要一个空目录�
 
 通过一个示例直观展示OverlayFS的读写行为：
 
-```
+```sh
 $ mkdir lower upper work merged
 $ echo "lowerdir" > lower/test
 $ echo "upper" > upper/test # upper跟lower都有相同的文件test
@@ -652,7 +652,7 @@ lowerdir
 
 使用docker run创建一个容器后，docker就会为容器mount一个OverlayFS：
 
-```
+```sh
 $ docker run -itd alpine /bin/sh
 $ mount | grep overlay2
 overlay on /var/lib/docker/overlay2/a2a37f61c515f641dbaee62cf948817696ae838834fd62cf9395483ef19f2f55/merged type overlay
@@ -669,7 +669,7 @@ docker将镜像中的每个layer按顺序添加到lowerdir中，将upperdir设�
 
 当你使用docker pull拉镜像的时候，一定出现过Already exists的标识。
 
-```
+```sh
 docker pull xxxx
 ...
 68ced04f60ab: Already exists <---

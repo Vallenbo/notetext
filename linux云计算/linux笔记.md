@@ -463,6 +463,12 @@ iperf3网络质量测试工具（默认用tcp协议测试）		-s运行server模�
 
 -c + host：连接指定客户端ip地址					-R服务端发送，客户端单方接受
 
+vim /etc/NetworkManager/system-connections/ens160.nmconnection rocky系统网卡文件
+
+
+
+
+
 lsof -i：22	通过端口号查看对应服务（ftp的端口）
 
 ss / netstat -tupln 查看网络状态(查看各类服务)				route 显示和设置linux系统的路由表
@@ -519,11 +525,11 @@ GATEWAY="10.193.12.254"     //新增：配置网关
 DNS1="10.1.26.188"          //新增：配置DNS
 ```
 
-nmcli	n[etworking]			on\off	#连接设置
+nmcli	n[etworking]		on\off	#连接设置
 
 nmcli	d[evice]				status查看设备状态 \ show ens33查看网卡设备信息 \set
 
-nmcli 	c[onnection]  		reload重载 \ up激活 + 网卡配置文件 \ down  \ load \ modify 修改 ens160
+nmcli 	c[onnection]  	reload重载 \ up激活 + 网卡配置文件 \ down  \ load \ modify 修改 ens160
 
 ipv4.addresses 192.168.127.10/24修改IP地址	+ipv4.addresses 172.16.10.10/16添加第二个IP地址\DNS
 
@@ -617,7 +623,7 @@ ethtool -i eth2 #-i显示网卡驱动名称、版本信息		-d网口注册性信
 
 # 软件包管理
 
-### Rpm
+## Rpm
 
 /run/media/root/CentOS\ 7\ x86_64/Packages/	文件下默认含有rpmb=包
 
@@ -643,7 +649,7 @@ rpm包的命名方式：name-version-release.arch.rpm
 
 ​      例如：i386、x86_64、amd64、ppc、noarch不区分平台
 
-### Yum仓库
+## Yum仓库
 
 **vim /etc/yum.repo.d/**
 
@@ -674,7 +680,7 @@ service yum-updatesd stop	#停止yum自动更新服务		chkconfig yum-updatesd o
 
 
 
-### ubuntu使用阿里云源
+## ubuntu使用阿里云源
 
 **切换路径** && **备份源文件** && **新建源文件**
 
@@ -722,7 +728,7 @@ deb-src https://mirrors.aliyun.com/ubuntu/ focal-backports main restricted unive
 
 
 
-### make编译安装
+## make编译安装
 
 make：项目管理器，进行源码包编译安装
 
@@ -800,7 +806,7 @@ gpasswd  管理组成员	-a向组中添加用户		-d从组中删除用户
 
 groupdel 删除组
 
-### 文件权限
+## 文件权限
 
 user group other					su 切换用户 用法：su -xxx(用户)
 
@@ -820,7 +826,7 @@ o+t这个目录只有root和此目录的拥有者可以删除，其他用户全�
 
 chattr +i/-i	 123	 锁定/取消文件或目录（锁定后无法修改删除移动）	lsattr 查看文件是否被锁定
 
-### ACL访问控制列表
+## ACL访问控制列表
 
 setfacl：具体权限设置ACL		u：用户		g：组	d：默认
 
@@ -846,7 +852,7 @@ umask 0644一次性缺省权限		/etc/profile	文件里修改反掩码
 
 用户设置自己永久性的umask值，在自己$HOME目录下的.profile或.bash_profile文件中
 
-### selinux权限设置
+## selinux权限设置
 
 配置文件：/etc/sysconfig/seliunx						chcon和setsebool、getsebool都是selinux的一部分
 

@@ -715,6 +715,8 @@ exportfs：管理NFS共享文件系统列表			-au临时关闭所有共享
 
 -a：打开取消所有目录共享	-r：重载配置文件	-u：取消一个或多个目录的共享		-v：输出共享的目录详细信息
 
+### 使用
+
 showmount -e 192.168.0.22查看服务器22的共享文件夹
 
 mount -t nfs 192.168.0.109:/www  /public	指定挂载类型，nfs挂载文件umount命令)
@@ -1054,7 +1056,7 @@ local_transport=error:local  #表示本地所有用户都拒收任何邮件
 建立corntab周而复始任务
 
 ```
-30 7* * *	echo good morning | mail -S happy zhubaj ie@desktop22.example.com
+30 7 * * *	echo good morning | mail -S happy zhubaj ie@desktop22.example.com
 ```
 
 ##  Dovecot服务
@@ -1262,6 +1264,21 @@ http协议	超文本传输协议	80		https协议	TLS/SSL协议	443
 ![img](E:\Project\Textbook\linux云计算\assets\wps80.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps81.jpg) 
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps82.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps83.jpg) 
+
+
+
+```
+NameVirtualHost *:80
+<VirtualHost *:80>
+​	ServerName [web1.abc.com](http://web1.abc.com/)
+​	DocumentRoot /var/www/web1
+</VirtualHost>
+
+<VirtualHost *:80>
+​	ServerName [web2.abc.com](http://web2.abc.com/)
+​	DocumentRoot /var/www/web2
+</VirtualHost>
+```
 
 建立子目录：子网页只能搭建在虚拟子目录下，且访问还需指定文件夹
 
