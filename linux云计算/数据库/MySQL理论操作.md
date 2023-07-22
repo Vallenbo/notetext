@@ -949,7 +949,7 @@ Memory 引擎的表数据是存储在内存中的，受硬件问题、断电问�
 慢查询日志记录了所有执行时间超过指定参数（long_query_time，单位：秒，默认10秒）的所有SQL语句的日志。
 MySQL的慢查询日志默认没有开启，需要在MySQL的配置文件（/etc/my.cnf）中配置如下信息：
 
-# 开启慢查询日志开关
+### 开启慢查询日志开关
 
 ​	slow_query_log=1
 
@@ -978,12 +978,19 @@ profiling 默认关闭，可以通过set语句在session/global级别开启 prof
 
 EXPLAIN 或者 DESC 命令获取 MySQL 如何执行 SELECT 语句的信息，包括在 SELECT 语句执行过程中表如何连接和连接的顺序。
 语法：
-	# 直接在select语句之前加上关键字 explain / desc
-	EXPLAIN SELECT 字段列表 FROM 表名 HWERE 条件;
+
+#直接在select语句之前加上关键字 explain / desc
+
+​	EXPLAIN SELECT 字段列表 FROM 表名 HWERE 条件;
+
+![image-20230708095543153](assets/image-20230708095543153.png)
 
 EXPLAIN 各字段含义：
 
 - id：select 查询的序列号，表示查询中执行 select 子句或者操作表的顺序（id相同，执行顺序从上到下；id不同，值越大越先执行）
+
+![image-20230708100643020](assets/image-20230708100643020.png)
+
 - select_type：表示 SELECT 的类型，常见取值有 SIMPLE（简单表，即不适用表连接或者子查询）、PRIMARY（主查询，即外层的查询）、UNION（UNION中的第二个或者后面的查询语句）、SUBQUERY（SELECT/WHERE之后包含了子查询）等
 - type：表示连接类型，性能由好到差的连接类型为 NULL、system、const、eq_ref、ref、range、index、all
 - possible_key：可能应用在这张表上的索引，一个或多个

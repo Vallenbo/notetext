@@ -62,32 +62,56 @@ ln -s 软链接 会产生一个全新的文件
 
 top		查看进程活动状态以及一些系统状况	vmstat	查看系统状态、硬件和系统信息等
 
-iostat		查看CPU负载，硬盘状况		sar	综合工具，查看系统状况
+sar	综合工具，查看系统状况
 
-mpstat	查看多处理器状况	netstat	查看网络状况	iptraf		实时网络状况监测
+mpstat	查看多处理器状况					netstat	查看网络状况			iptraf实时网络状况监测
 
 tcpdump	抓取网络数据包，详细分析	tcptrace	数据包分析工具	netperf	网络带宽工具
 
-dstat		综合工具，综合了vmstat,iostat, ifstat,netstat等多信息
+dstat综合工具，综合了vmstat,iostat, ifstat,netstat等多信息
 
+ifstat：监测网络接口的状态
 
+```
+-a监测能监测到的所有网络接口状态		-i指定需要监测的网络接口
+-t在每一行开头显示时间戳				-T显示所有监测的网络接口的全部宽带
+```
 
-lsof | grep /mnt/sdb1_mount //查看正在使用文件的进程
+lsof：查看进程打开的文件或文件打开的进程，也可用于查看端口是否为打开的状态
 
 如果存在输出，则说明有进程正在使用该目录，需要先结束这些进程对该目录的占用。例如，输出可能类似如下：
 
-```
+```sh
+#lsof | grep /mnt/sdb1_mount #查看正在使用文件的进程
 COMMAND     PID        USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
 bash      1234        root  cwd    DIR  253,0     4096   12 /mnt/sdb1_mount
 ```
 
-则可以使用上述命令中显示的PID来结束该进程对目录的占用。例如，在本例中可以使用以下命令结束该bash进程：
+则可以使用上述命令中显示的PID来结束该进程对目录的占用。
+
+例如，在本例中可以使用以下命令结束该bash进程：
 
 ```
 kill -9 1234
 ```
 
+iostat：监控系统输入/输出设备和CPU使用情况，可能需要用到的安装包 sysstat
 
+```
+-d：显示磁盘统计信息。			-x 1：显示详细的磁盘统计信息，包括平均等待时间和队列长度等。
+-k：以KB为单位显示统计信息。	   -m：以MB为单位显示统计信息。
+-t：显示时间戳。
+```
+
+time命令统计执行指定命令所花费的总时间
+
+```
+-f格式化时间输出		-a将显示信息追加到文件		-o将显示信息写入文件中
+```
+
+```
+time iostat 统计iostat命令执行所需总时间
+```
 
 
 
@@ -182,6 +206,8 @@ seq -f "as%03gaa" 4#% 前面可以指定字符串，同样 g 的后面也可以�
 *：重复0个或多个前面的一个字符，不代表所有			[abc]：匹配字符集合内任意一个字符[a-z]
 
 [^abc] ：^在中括号表示非，表示不包含a或者b或者c
+
+
 
 ## sed行（Stream EDitor）流编辑器，
 
@@ -317,9 +343,14 @@ awk -F: '{if($3>999 && $7 == "/bin/bash" || $7 == "/bin/sh")print}' /etc/passwd 
 
 输出内容到这里</etc/passwd
 
-dd if=/dev/zero of=/root/file1 bs=100M count=1
+dd：用指定大小的块拷贝一个文件，并在拷贝的同时进行指定的转换。
 
-用/dev/zero向file.1里面输入内容	count指定文件个数为1 ，bs=20M大小
+```
+dd if=/dev/zero of=/root/file1 bs=100M count=1 conv=fdatasync
+用/dev/zero向file.1里面输入内容	count指定文件个数为1 ，bs=20M大小，fdatasync将数据写入磁盘
+```
+
+
 
 ## find查找文件
 
@@ -539,7 +570,7 @@ ipv4.method manual修改为手动配置 			ipv4.method auto修改为DHCP获取
 
 nmcli	g[eneral]				status\hostname\logging(支持服务信息)		#概叙信息
 
- 
+
 
 ## 创建网络组接口
 
@@ -1085,6 +1116,131 @@ reresize2fs /dev/md0 同步md0上所有磁盘的文件系统
 <img src="E:\Project\Textbook\linux云计算\assets\wps26-1682690115365-198.jpg" alt="img" style="zoom: 50%;" /> 
 
 2048前面空间是放主引导分区
+
+
+
+
+
+# systemd架构
+
+新服务，在 /usr/lib/systemd/system 下新建服务脚本，`systemctl daemon-reload` #重新加载
+
+```
+vim /usr/lib/systemd/system/zdy.service
+
+[Unit]
+Description=描述
+Environment=环境变量或参数(系统环境变量此时无法使用)
+After=network.target
+
+[Service]
+Type=forking
+EnvironmentFile=所需环境变量文件或参数文件
+ExecStart=启动命令(需指定全路径)
+ExecStop=停止命令(需指定全路径)
+User=以什么用户执行命令
+
+[Install]
+WantedBy=multi-user.target
+```
+
+示例，配置文件主要放在/usr/lib/systemd/system目录，也可能在/etc/systemd/system目录
+
+```
+$ systemctl cat sshd.service
+[Unit]
+Description=OpenSSH server daemon
+Documentation=man:sshd(8) man:sshd_config(5)
+After=network.target sshd-keygen.service
+Wants=sshd-keygen.service
+
+[Service]
+EnvironmentFile=/etc/sysconfig/sshd
+ExecStart=/usr/sbin/sshd -D $OPTIONS
+ExecReload=/bin/kill -HUP $MAINPID
+Type=simple
+KillMode=process
+Restart=on-failure
+RestartSec=42s
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## [Unit] 启动顺序与依赖关系
+
+```
+Description：当前服务的简单描述
+Documentation：指定 man 文档位置
+ 
+After：如果 network.target 或 sshd-keygen.service 需要启动，那么 sshd.service 应该在它们之后启动
+Before：定义 sshd 应该在哪些服务之前启动
+注意：After 和 Before 字段只涉及启动顺序，不涉及依赖关系。
+ 
+Wants：表示 sshd.service 与 sshd-keygen.service 之间存在"弱依赖"关系，即如果"sshd-keygen.service"启动失败或停止运行，不影响 sshd.service 继续执行
+Requires：表示"强依赖"关系，即如果该服务启动失败或异常退出，那么sshd.service 也必须退出
+注意：Wants 字段与 Requires 字段只涉及依赖关系，与启动顺序无关，默认情况下是同时启动。
+```
+
+## [Service] 启动行为
+
+```
+EnvironmentFile：许多软件都有自己的环境参数文件，该字段指定文件路径
+注意：/etc/profile 或者 /etc/profile.d/ 这些文件中配置的环境变量仅对通过 pam 登录的用户生效，而 systemd 是不读这些配置的。
+systemd 是所有进程的父进程或祖先进程，它的环境变量会被所有的子进程所继承，如果需要给 systemd 配置默认参数可以在 /etc/systemd/system.conf  和 /etc/systemd/user.conf 中设置。
+加载优先级 system.conf 最低，可能会被其他的覆盖。
+ 
+
+Type：定义启动类型。可设置：simple，exec，forking，oneshot，dbus，notify，idle
+simple(设置了 ExecStart= 但未设置 BusName= 时的默认值)：ExecStart 字段启动的进程为该服务的主进程
+forking：ExecStart 字段的命令将以 fork() 方式启动，此时父进程将会退出，子进程将成为主进程
+
+ 
+ExecStart：定义启动进程时执行的命令
+上面的例子中，启动 sshd 执行的命令是 /usr/sbin/sshd -D $OPTIONS，其中的变量 $OPTIONS 就来自 EnvironmentFile 字段指定的环境参数文件。类似的，还有如下字段：
+ExecReload：重启服务时执行的命令
+ExecStop：停止服务时执行的命令
+ExecStartPre：启动服务之前执行的命令
+ExecStartPost：启动服务之后执行的命令
+ExecStopPost：停止服务之后执行的命令
+
+
+RemainAfterExit：设为yes，表示进程退出以后，服务仍然保持执行
+
+
+KillMode：定义 Systemd 如何停止服务，可以设置的值如下：
+control-group（默认值）：当前控制组里面的所有子进程，都会被杀掉
+process：只杀主进程
+mixed：主进程将收到 SIGTERM 信号，子进程收到 SIGKILL 信号
+none：没有进程会被杀掉，只是执行服务的 stop 命令
+
+
+Restart：定义了退出后，Systemd 的重启方式。可以设置的值如下：
+no（默认值）：退出后不会重启
+on-success：只有正常退出时（退出状态码为0），才会重启
+on-failure：非正常退出时（退出状态码非0），包括被信号终止和超时，才会重启
+on-abnormal：只有被信号终止和超时，才会重启
+on-abort：只有在收到没有捕捉到的信号终止时，才会重启
+on-watchdog：超时退出，才会重启
+always：不管是什么退出原因，总是重启
+
+
+RestartSec：表示 Systemd 重启服务之前，需要等待的秒数
+```
+
+## [Install]
+
+```html
+WantedBy：表示该服务所在的 Target(服务组)
+```
+
+
+
+
+
+
+
+
 
 # Shell编程
 

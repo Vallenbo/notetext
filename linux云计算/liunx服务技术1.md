@@ -13,9 +13,9 @@ redhat7默认安装，服务名sshd，端口号22		主配置文件：/etc/ssh/ss
 | Port 22                             | 默认的sshd服务端口                  | ListenAddress 0.0.0.0             | 设定sshd服务器监听的IP地址          |
 | Protocol 2                          | SSH协议的版本号                     | HostKey /etc/ssh/ssh_host_key     | SSH协议版本为1时，DES私钥存放的位置 |
 | HostKey /etc/s3h/ssh_host_rsa_ _key | SSH协议版本为2时，RSA私钥存放的位置 | HostKey /etc/ssh/ssh_host_dsa_key | SSH协议版本为2时，DSA私钥存放的位置 |
-| PermitRootLogin yes                 | 设定是否允许root管理员直接登录      | StrictModes yes                   | 当远程用户的私钥改变时直接拒绝连接  |
+| ==PermitRootLogin yes==             | 设定是否允许root管理员直接登录      | StrictModes yes                   | 当远程用户的私钥改变时直接拒绝连接  |
 | MaxAuthTries 6                      | 最大密码尝试次数                    | MaxSessions 10                    | 最大终端数                          |
-| PasswordAuthentication yes          | 是否允许密码验证                    | Pe rmi tEmptyPasswords no         | 是否允许空密码登录(很不安全)        |
+| PasswordAuthentication yes          | 是否允许密码验证                    | PermitEmptyPasswords no           | 是否允许空密码登录(很不安全)        |
 
 ssh命令格式：ssh  root@10.0.0.11 -p22 远程登录命令	-p指定端口号
 
@@ -83,15 +83,21 @@ rsync -r /etc  172.16.10.5:/tmp将本地/etc目录拷贝到远程主机的/tmp�
 
 rsync -r -b /123/ 192.168.0.109:/123 已存在的文件就被做一个备份
 
+rsync -avz /mnt/sata/* /var/lib/mysql/data #拷贝mysql数据，与cp命令不同
+
 -v：显示rsync过程中详细信息。可以使用"-vvvv"获取更详细信息
+
+-a --archive  ：归档模式，表示递归传输并保持文件属性。
+
+-z     ：传输时进行压缩提高效率。
+
+-r --recursive：递归到目录中去
 
 -P：显示文件传输的进度信息。(实际上"-P"="--partial --progress"，其中的"--progress"才是显示进度信息的)。
 
 -n --dry-run  ：仅测试传输，而不实际传输。常和"-vvvv"配合使用来查看rsync是如何工作的。
 
--a --archive  ：归档模式，表示递归传输并保持文件属性。等同于"-rtopgDl"。
-
--r --recursive：递归到目录中去
+-e      ：指定所要使用的远程shell程序，默认为ssh。
 
 -t --times：保持mtime属性。强烈建议任何时候都加上"-t"，否则目标文件mtime会设置为系统时间，导致下次更新
 
@@ -101,15 +107,11 @@ rsync -r -b /123/ 192.168.0.109:/123 已存在的文件就被做一个备份
 
 -l --links：如果文件是软链接文件，则拷贝软链接本身而非软链接所指向的对象。
 
--z     ：传输时进行压缩提高效率。
-
 --exclude  ：指定排除规则来排除不需要传输的文件。
 
 -b --backup ：对目标上已存在的文件做一个备份，备份的文件名后默认使用"~"做后缀。
 
 --backup-dir：指定备份文件的保存路径。不指定时默认和待备份文件保存在同一目录下。
-
--e      ：指定所要使用的远程shell程序，默认为ssh。
 
 --port    ：连接daemon时使用的端口号，默认为873端口。
 
@@ -118,6 +120,8 @@ rsync -r -b /123/ 192.168.0.109:/123 已存在的文件就被做一个备份
 --existing  ：要求只更新目标端已存在的文件，目标端还不存在的文件不传输。注意，使用相对路径时如果上层目录不存在也不会传输。
 
 --ignore-existing：要求只更新目标端不存在的文件。和"--existing"结合使用有特殊功能，见下文示例。
+
+
 
 #  时间同步服务器
 

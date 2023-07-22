@@ -1,5 +1,335 @@
 # Mariadb数据库管理系统
 
+
+
+## 主从复制
+
+### 概述
+
+​	主从复制是指将主数据库的DDL和DML操作通过二进制日志传到从库服务器中，然后在从库上对这些日志重新执行(也叫重做) ，从而使得从库和主库的数据保持同步。
+
+​	MySQL支持一台主库同时向多 台从库进行复制，从库同时 也可以作为其他从服务器的主库,实现链状复制。
+
+MySQL复制的有点主要包含以下三个方面:
+1、主，库出现问题，可以快速切换到从库提供服务。
+2、实现读写分离，降低主库的访问压力。
+3、可以在从库中执行备份，以避免备份期间影响主库服务。
+
+### 原理
+
+MySQL的主从复制原理如下：
+
+<img src="assets/image-20230716221823993.png" alt="image-20230716221823993" style="zoom: 50%;" />
+
+从上图来看，复制分成三步：
+1、Master 主库在事务提交时会把数据变更记录在:二进制日志文件Binlog中。
+2、从库读取主库的二进制日志文件Binlog，写入到从库的中继日志Relay Log。
+3、slave重做中继 日志中的事件,将改变反映它自己的数据。
+
+### 搭建
+
+**主库配置操作**
+1、修改配置文件/etc/my.cnf 
+
+```sql
+server-id=1		#mysql服务ID，保证整个集群环境中唯一， 取值范围: 1-2^32-1， 默认为1
+read-only=0		#是否只读,1代表只读, 0代表读写
+#binlog-ignore-db=mysql		#忽略的数据，指不需要同步的数据库
+#binlog-do-db=db01 			#指定同步的数据库
+```
+
+2、重启mysql数据库
+
+```sh
+service mysql restart
+```
+
+3、登录mysql,创建远程连接的账号，并授予主从复制权限
+
+```sql
+#创建itcast用户，并设置密码，该用户可在任意主机连接该MySQL服务
+CREATE USER 'itcast'@'%' IDENTIFIED WITH mysql_native_password BY 'Root@123456' ;
+#为'itcast'@'%'用户分配主从复制权限
+GRANT REPLICATION SLAVE ON *.* TO 'itcast'@'%';
+```
+
+4、通过指令，查看二进制日志坐标
+
+```sql
+show master status ;
+输出内容字段含义说明:
+file :从哪个日志文件开始推送日志文件
+position:从哪个位置开始推送日志
+binlog_ignore_db :指定不需要同步的数据库
+```
+
+**从库配置操作**
+1、修改配置文件/etc/my.cnf
+
+```sql
+server-id=2		#mysql服务ID，保证整个集群环境中唯一，取值范围: 1-2^32-1，和主库不一样即可
+read-only=1		#是否只读，1代表只读，0代表读写
+```
+
+2、重启mysql数据库
+
+```sh
+service mysql restart
+```
+
+3.登录mysql,设置主库配置
+
+```sql
+CHANGE REPLICATION SOURCE TO SOURCE_ HOST='192.168.1.1', SOURCE_USER='itcast', SOURCE_PASSWORD='root@123', SOURCE_LOG_FILE='binlog.00004', SOURCE_LOG_POS=663;
+```
+
+上述是8.0.23中的语法。如果mysql是8.0.23之前的版本，执行如下SQL：
+
+```sql
+CHANGE MASTER TO MASTER_HOST='xxxx.xxx' MASTER_USER-='xx', MASTER_PASSWORD='xxx', MASTER_LOG_FILE='xx', MASTER_LOG_POS=xxx;
+```
+
+| 参数名          | 含义               | 8.0.23之前       |
+| --------------- | ------------------ | ---------------- |
+| SOURCE_HOST     | 主库IP地址         | MASTER_HOST      |
+| SOURCE_USER     | 连接主库的用户名   | MASTER_USER      |
+| SOURCE PASSWORD | 连接主库的密码     | MASTER_PASSWORD  |
+| SOURCE LOG_FILE | binlog日志文件名   | MASTER_ LOG_FILE |
+| SOURCE_LOG_POS  | binlog日志文件位置 | MASTER_LOG_POS   |
+
+4.开启同步操作
+
+```sql
+start replica;  #8.0.22之后
+start slave;	#8.0.22之前
+```
+
+slave验证是否开始同步：
+
+<img src="assets/image-20230716230457436.png" alt="image-20230716230457436" style="zoom: 67%;" />
+
+
+之后就可以在主从之间进行测试了。
+
+
+## 分库分表
+
+随着互联网及移动互联网的发展,应用系统的数据量也是成指数式增长,若采用单数据库进行数据存储,存在以下性能瓶颈:
+
+1. I0瓶颈:热点数据太多,数据库缓存不足,产生大量磁盘I0,效率较低。请求数据太多,带宽不够,网络I0瓶颈。
+
+2. CPU瓶颈:排序、分组、连接查询、聚合统计等SQL会耗费大量的CPU资源，请求数太多, CPU出现瓶颈。
+
+
+分库分表的中心思想都是将数据分散存储，使得单一数据库/表的数据量变小来缓解单一数据库的性能问题，从而达到提升数据库性能的目的。
+
+<img src="assets/image-20230718224138026.png" alt="image-20230718224138026" style="zoom:67%;" />
+
+### 拆分策略
+
+<img src="assets/image-20230718224407765.png" alt="image-20230718224407765" style="zoom:50%;" />
+
+垂直分库:以表为依据，根据业务将不同表拆分到不同库中，
+特点:
+1、每个库的表结构都不一样。
+2、每个库的数据也不一 样。
+3、所有库的并集是全量数据。
+
+<img src="assets/image-20230718224703109.png" alt="image-20230718224703109" style="zoom: 50%;" />
+
+垂直分表:以字段为依据，根据字段属性将不同字段拆分到不同表中。
+特点:
+1. 每个表的结构都不一样。
+2. 每个表的数据也不一样，一般通过一列(主键/外键)关联。
+3. 所有表的并集是全量数据 。
+
+<img src="assets/image-20230718224943807.png" alt="image-20230718224943807" style="zoom:50%;" />
+
+水平分库:以字段为依据，按照一定策略, 将-一个库的数据拆分到多个库中，
+特点:
+1、每个库的表结构都一样。
+2、每个库的数据都不一样。
+3、所有库的并集是全量数据。
+
+<img src="assets/image-20230718225406904.png" alt="image-20230718225406904" style="zoom:50%;" />
+
+
+
+水平分表:以字段为依据，按照一定策略,将- -个表的数据拆分到多个表中。
+特点:
+1、每个表的表结构都一样。
+2、每个表的数据都不一样。
+3、所有表的并集是全量数据。
+
+<img src="assets/image-20230718225457362.png" alt="image-20230718225457362" style="zoom:50%;" />
+
+### 实现技术
+
+shardingJDBC：基于AOP原理,在应用程序中对本地执行的SQL进行拦截，解析、改写、路由处理。需要自行编码配置实现,只支持java语言，性能较高。
+MyCat：数据库分库分表中间件，不用调整代码即可实现分库分表，支持多种语言，性能不及前者。
+
+
+
+
+
+
+
+# mysql备份还原
+
+mysqld --initialize #重新初始化命令
+
+跳过密码认证
+
+```sql
+vim /etc/my.cnf
+
+[mysqld]
+skip-grant-tables      //指定位置加一行
+```
+
+之后会生成随机密码在my.cnf或者哪个目录下s
+
+```bash
+grep 'password'  /var/log/mysqld.log  #过滤初始密码
+```
+
+mysql备份内容还原
+
+```sh
+rsync -avz /mnt/sata/* /var/lib/mysql/data
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 日志
+
+### 错误日志
+
+错误日志是MySQL中最重要的日志之一，它记录了当mysqld启动和停止时，以及服务器在运行过程中发生任何严重错误时的相关信息。当数据库出现任何故障导致无法正常使用时，建议首先查看此日志。
+该日志是默认开启的，默认存放目录/var/log/mysqld.log ,默认的日志文件名为mysqld.log 。查看日志位置:
+
+```sql
+show variables like '%log_ error%';
+```
+
+
+
+```sh
+root@node1:~# cat /var/lib/mysql/auto.cnf  //mysql服务的uuid值
+[auto]
+server-uuid=8ad434ed-2186-11ee-907c-000c29bd8e90
+```
+
+
+
+### 二进制日志
+
+● 介绍
+二进制日志(BINLOG) 记录了所有的DDL (数据定义语言)语句和DML (数据操纵语言)语句，但不包括数据查询(SELECT、 SHOW)语句。
+作用：①.灾难时的数据恢复;②. MySQL的主从复制(就是基于二进制日志)。在MySQL .8版本中，默认二进制日志是开启着的，涉及到的参数如下:
+
+```sql
+show variables like '%log_ bin%';
+```
+
+<img src="assets/image-20230713222231177.png" alt="image-20230713222231177" style="zoom: 50%;" />
+
+#### 日志格式
+
+MySQL服务器中提供了多种格式来记录二进制日志，具体格式及特点如下:
+
+| 日志格式  | 含义                                                         |
+| --------- | ------------------------------------------------------------ |
+| STATEMENT | 基于SQL语句的日志记录，记录的是SQL语句，对数据进行修改的SQL都会记录在日志文件中。 |
+| ROW       | 基于行的日志记录，记录的是每- -行的数据变更。(默认)          |
+| MIXED     | 混合了STATEMENT和ROW两种格式，默认采用STATEMENT,在某些特殊情况下会自动切换为ROW进行记录。 |
+
+```sql
+show variables like '%binlog_ format%';
+```
+
+#### 日志查看
+
+由于日志是以二进制方式存储的，不能直接读取，需要通过二进制日志查询工具mysqlbinlog来查看，具体语法:
+
+```sql
+mysqlbinlog [ 参数选项] logfilename
+参数选项:
+-d	指定数据库名称，只列出指定的数据库相关操作
+-o	忽略掉日志中的前n行命令
+-v	将行事件(数据变更)重构为SQL语句
+-W	将行事件(数据变更)重构为SQL语句，并输出注释信息
+```
+
+
+
+#### 日志删除
+
+对于比较繁忙的业务系统，每天生成的binlog数据巨大，如果长时间不清除，将会占用大量磁盘空间。可以通过以下几种方式清理日志:
+
+| 指令                                             | 含义                                                         |
+| ------------------------------------------------ | ------------------------------------------------------------ |
+| reset master;                                    | 删除全部binlog日志，删除之后，日志编号，将从binlog.000001重新开始 |
+| purge master logs to ‘birf.*****’;               | 删除*****编号之前的所有日志                                  |
+| purge master logs before 'yyy-mm-dd hh24:mi:ss'; | 删除日志为"yyyy-mm-dd hh24:mi:ss"之前产生的所有日志          |
+
+也可以在mysql的配置文件中配置二进制日志的过期时间。设置了之后,二进制日志过期会自动删除。
+
+```sql
+show variables like '%binlog_expire_logs_seconds%';
+```
+
+
+
+
+
+### 查询日志
+
+查询日志中记录了客户端的所有操作语句，而二进制日志不包含查询数据的SQL语句。默认情况下，查询日志是未开启的。如果需要开启查询日志，可以设置以下配置:
+
+<img src="assets/image-20230713231753318.png" alt="image-20230713231753318" style="zoom:50%;" />
+
+修改MySQL的配置文件/etc/my.cnf文件，添加如下内容:
+
+```sql
+general log=1  #该选项用来开启查询日志，可选值: 0或者1 ; 0代表关闭，1 代表开启
+general_log_file=mysql_querytog  #设置日志的文件名，如果没有指定， 默认的文件名为host_ name.log
+```
+
+
+
+### 慢查询日志
+
+慢查询日志记录了所有执行时间超过参数long_ query_ time 设置值并且扫描记录数不小于min_examined_row_limit。localhost-slow.log慢查询日志文件的所有的SQL语句的日志，默认未开启。long_query_time默认为10秒,最小为0，精度可以到微秒。
+
+```sql
+slow_query_log=1   #慢查询日志
+long_query_time=2  #执行时间参数
+```
+
+
+
+默认情况下，不会记录管理语句，也不会记录不使用索引进行查找的查询。可以使用log_ slow_ admin_ statements和更改此行为log_ queries_ _not_ _using_ indexes, 如下所述。
+
+```sql
+log_slow_ admin_statements=1 #记录执行较慢的管理语句
+log_queries_not_using_jindexes=1 #记录执行较慢的未使用索弓|的语句
+```
+
+
+
+
+
 数据库管理系统分	Oracle	MySQL---开发相同---Mariadb
 
 `vim /etc/yum.repos.d/CentOS-MariaDB.repo`
@@ -27,6 +357,23 @@ MyCLI ：一个支持自动补全和语法高亮的 MySQL/MariaDB 客户端  //`
 mysql> use mysql #使用数据库
 mysql> update user set host='%' where user='root'; #使能够远程连接
 mysql> flush privileges; #刷新权限
+
+
+#卸载安装mysql时报错，无法正常卸载或安装
+#需要删除或者mv掉mysql的数据目录
+mv /var/lib/mysql /var/lib/mysql-bak
+
+#编译安装mysql停止方式
+mysqladmin -u root shutdown
+
+
+mysql> create user test@'localhost' identified by '123456';
+mysql> grant all privileges on tpcc1g.* to test@'localhost';
+mysql> flush privileges;
+
+root@kylin-pc:/home/tpcc-mysql# mysqladmin create tpcc1g
+root@kylin-pc:/home/tpcc-mysql# mysql tpcc1g < create_table.sql
+root@kylin-pc:/home/tpcc-mysql# mysql tpcc1g < add_fkey_idx.sql
 ```
 
 /var/log/mariadb/mariadb.log日志文件		/var/lib/mysql/数据库实体文件
