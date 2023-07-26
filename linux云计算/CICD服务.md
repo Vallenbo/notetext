@@ -1,0 +1,3 @@
+git代码管理
+jenkins持续集成
+docker或者k8s集群

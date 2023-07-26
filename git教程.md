@@ -172,17 +172,19 @@
 
 `git config `//配置
 
+```
 `--list `看所有用户
-
 `--global user.name "liu" user.email "2581210093@qq.com" ` \\\ 设置全局用户名liu和e-mail邮箱
+```
 
 
 
 `git log` //查看commit的日志，下一页：空格、上一页：b、退出：q
 
-` --oneline `//一行简短进行展示
-
-`-pretty=oneline `//美丽的方式：一行进行展示  
+```
+--oneline //一行简短进行展示
+-pretty=oneline //美丽的方式：一行进行展示  
+```
 
 ![img](E:\Project\Textbook\assets\wps7.jpg) 
 
@@ -194,19 +196,20 @@
 
 `git reset --hard 53b88b0` //跳到指定索引位置，
 
-\###--hard本地库的指针移动的同时，重置暂存区，重置工作区
-
-\###--mix本地库的指针移动的同时，重置暂存区，但工作区不动
-
-\###--soft本地库的指针移动，但暂存区、工作区都不动
+```
+--hard本地库的指针移动的同时，重置暂存区，重置工作区
+--mix本地库的指针移动的同时，重置暂存区，但工作区不动
+--soft本地库的指针移动，但暂存区、工作区都不动
+```
 
  
 
 `git diff`  //比较工作区和暂存区，所有文件的差异
 
+```
 +文件名：单个文件的比对
-
 +版本索引 文件名：比较暂存区和文件库，该文件的差异
+```
 
 ![img](E:\Project\Textbook\assets\wps9.jpg) 
 
@@ -226,23 +229,25 @@
 
 `git branch ` //创建主分支
 
+```
 +分支名：创建副分支
-
-`-a ` //查看本地和远程所有分支
-
+-a //查看本地和远程所有分支
 -d 分支名  // 删除本地分支  *删除前记得切换到别的分支。*-D 强制删除
+```
 
 `git branch  -v ` //查看分支
 
 `git checkout 分支名`  //切换分支
 
-`-b 分支名 `// 创建并切换到分支 
+```
+b 分支名 // 创建并切换到分支 
+```
 
  
 
 `  git merge ` //合并，合并某个分支到当前分支下，并自动进行新的提交
 
-  `git merge --abort ` //当我们使用git merge操作合并代码但还没add时，若想取消这次合并就用这个
+`git merge --abort ` //当我们使用git merge操作合并代码但还没add时，若想取消这次合并就用这个
 
  
 
@@ -252,21 +257,27 @@
 
 `git push 远程库 本地分支 ` //推送本地指定分支到指定远程库的指定分支上
 
-`--delete 分支名 ` // 上传，删除远程分支
+```
+--delete 分支名 // 上传，删除远程分支
+```
 
 ![img](E:\Project\Textbook\assets\wps11.jpg) 
 
 `git pull   `// 拉取，下拉指定主机的指定分支，并与本地的指定分支合并
 
-\##pull = fetch + merge 操作的合并
+```
+pull = fetch + merge 操作的合并
+```
 
 `git pull 远程库 远程分支 --allow-unrelated-histories ` //允许不相关历史合并
 
- 
+
 
 `git clone 地址 ` // 克隆，其作用是将存储库克隆到新目录中
 
-`--branch 分支名 ` //克隆指定分支代码到本地
+```
+--branch 分支名 //克隆指定分支代码到本地
+```
 
  
 
@@ -318,15 +329,13 @@ pull request请求按钮：
 
 执行之后会在linux用户主目录下的.gitconfig文件中多加 helper = store
 
+```
 [user]
-
-​    name = 用户名
-
-​    email = 邮箱
-
+	name = 用户名
+	email = 邮箱
 [credential]
-
-​    helper = store
+	helper = store
+```
 
  
 

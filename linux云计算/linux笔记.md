@@ -60,11 +60,11 @@ ln  /opt/cc /tmp/aa		硬链接，删除其中一个对另一个没有任何影�
 
 ln -s 软链接 会产生一个全新的文件
 
-top		查看进程活动状态以及一些系统状况	vmstat	查看系统状态、硬件和系统信息等
-
 sar	综合工具，查看系统状况
 
-mpstat	查看多处理器状况					netstat	查看网络状况			iptraf实时网络状况监测
+top查看进程活动状态以及一些系统状况		vmstat查看系统状态、硬件和系统信息等
+
+mpstat查看多处理器状况					netstat查看网络状况			iptraf实时网络状况监测
 
 tcpdump	抓取网络数据包，详细分析	tcptrace	数据包分析工具	netperf	网络带宽工具
 
@@ -141,11 +141,11 @@ tail	参数		-f 实时输出文件内容的变化（tailf也常用于跟踪脚�
 
 列剪贴工具 / paste列合并工具	cut -d " " -f1,4-7 --complement  --c 1-4  a
 
--d delimiter：分隔符，默认的字段分隔符为“Tab”			-c：输出指定范围的字符	
-
--f  file：提取指定段（可以多个段）的内容					--complement反向选择字符段（除指定字段外的所有）
-
+```
+-d delimiter：分隔符，默认的字段分隔符为“Tab”		-c：输出指定范围的字符	
+-f  file：提取指定段（可以多个段）的内容		--complement反向选择字符段（除指定字段外的所有）
 -b：输出指定范围的字节
+```
 
 paste：合并文件的列	 -s 将行换成列输出	-d，--delimiters=<间隔字符>分隔符
 
@@ -165,13 +165,12 @@ sort：排序（默认小到大排序）	-n 数字由大到小排序(-r 降序�
 
 squeue 是一个序列的缩写，主要用来输出序列化的东西
 
-**用法**：seq [选项]... 尾数		或：seq [选项]... 首数 尾数		或：seq [选项]... 首数 增量 尾数（默认增量为1）
-
+```
+用法：seq [选项]... 尾数		或：seq [选项]... 首数 尾数		或：seq [选项]... 首数 增量 尾数（默认增量为1）
 -s, --separator=字符串    指定分隔字符(默认使用：\n)			seq -s  '#'  1 2 10
-
 -w, --equal-width   在列前添加0 使得宽度相同（自动补位）		seq -w 1 10
-
 -f, --format=格式   指定格式输出，%g为默认格式
+```
 
 seq -f ‘%g’1 5	#表示指定“位宽”为三位，数字位数不足部分用空格补位）
 
@@ -183,31 +182,21 @@ seq -f "as%03gaa" 4#% 前面可以指定字符串，同样 g 的后面也可以�
 
 强大的文本搜索工具，支持正则表达式搜索文本，显示具有指定字符的行
 
--n显示匹配行及行号					grep -n root /etc/passwd
-
--v反向选择匹配到的内容	grep -v aa file		grep -v '^$' /etc/zabbix_server.conf		找出所有非空行
-
+```
+-n显示匹配行及行号		 grep -n root /etc/passwd
+-v反向选择匹配到的内容	grep -v aa file
+grep -v '^$' /etc/zabbix_server.conf 找出所有非空行
 -i不区分大小写						grep -i ROOT /etc/passwd
-
--c输出匹配到字符的行数					grep -c root /etc/passwd
-
+-c输出匹配到字符的行数				 grep -c root /etc/passwd
 -E选择多个字符						grep -E "root|zhunajie"  /etc/passwd
-
 -h查询多文件时不显示文件名				grep -h  root  /etc/passwd /etc/shadow
-
--l只输出包含匹配字符的文件名			grep  -l root /etc/passwd
-
+-l只输出包含匹配字符的文件名				grep  -l root /etc/passwd
 -s不显示不存在或无匹配文本的错误信息
-
 ^：以某某开头的内容		$：以某某结尾的内容		^$： 空行	.*：匹配所有的字符		^.*：任意多个字符开头
-
 .：表示且只能代表任意一个字符 (当前目录，加载文件) 	\：转移字符，让有着特殊身份的字符，变回原来的字符
-
 *：重复0个或多个前面的一个字符，不代表所有			[abc]：匹配字符集合内任意一个字符[a-z]
-
 [^abc] ：^在中括号表示非，表示不包含a或者b或者c
-
-
+```
 
 ## sed行（Stream EDitor）流编辑器，
 
@@ -215,43 +204,35 @@ sed：以行为单位自动编辑一个或多个文件、简化对文件的反�
 
 ### 常用选项：
 
+```
 -n：不显示默认输出内容					-i：直接修改(-i.brk先对原文件备份brk，后生成修改文件)
-
--e：可以指定多个地址定界、选项、命令	-r：启用扩展的正则表达式,当与其他选项使用时应作为首个选项
-
+-e：可以指定多个地址定界、选项、命令		 -r：启用扩展的正则表达式,当与其他选项使用时应作为首个选项
 -{}：可组合多个命令,以分号分割			-f：使用sed脚本（如定义好的字符串或地址定界）
+```
 
 ### 地址定界：
 
+```
 1、不给地址：对全文进行处理
-
 2、单地址：	如：5：指定的行	$：最后一行		/正则表达式/：能被此模式所匹配到的每一行
-
 3、地址范围：	1，3（1到3行）	或	1，+5（第一行再加5行）或	1，/正则表达式/
-
 /字符串/	或	/正则表达式/		或	/正则表达式（开头）/，/或字符串（结尾）/
-
 4、步进:		1~2（从第1行后每隔2行才进行匹配）奇数行		2~2（从第2行后每隔2行才进行匹配）偶数行
+```
 
 ### 编辑命令（-i后接）
 
+```
 d：删除			p：打印，将匹配的行重复打印
-
 i：前添加 \ a：后添加，a+字符串，原每一行的后一行都会添加指定字符串
-
 c：代替，c+字符串，原每一行都会替换成指定的字符串
-
 w：保存，w+文件名，保存匹配的行到指定文件
-
 ！：取反，放地址地址定界的后面		=：显示行号
-
 s///：查找替代，支持其他分割符如s@@@，s###
-
 替代标记：g：所有行替换，不加即替换匹配到的第一个字符串
-
 p：显示替换成功的行	w + 文件名：将成功的行保存至指定文件
-
  [-n\-i选项]... {选项、地址定界；编辑命令}	 [输入文件]
+```
 
 ### 输出文本：
 
@@ -335,13 +316,12 @@ awk -F: '{if($3>999 && $7 == "/bin/bash" || $7 == "/bin/sh")print}' /etc/passwd 
 
 ## 输入/出重定向
 
+```
 1>正确输出						2> 错误输出		cat /opt/cc /home/  >/opt/right		2>/opt/wrong
-
 1>>正确输出只能保存正确的输出		1>>正确且覆盖式重定向	
-
-2>>错误输出只能保存错误的输出		2>>错误重定向	&>只要输出就能保存				&>混合重定向
-
+2>>错误输出只能保存错误的输出		2>>错误重定向	&>只要输出就能保存		&>混合重定向
 输出内容到这里</etc/passwd
+```
 
 dd：用指定大小的块拷贝一个文件，并在拷贝的同时进行指定的转换。
 
@@ -350,23 +330,18 @@ dd if=/dev/zero of=/root/file1 bs=100M count=1 conv=fdatasync
 用/dev/zero向file.1里面输入内容	count指定文件个数为1 ，bs=20M大小，fdatasync将数据写入磁盘
 ```
 
-
-
 ## find查找文件
-
--type （d文件夹 f文件 l链接 b块设备 c字符）		find  /  -type  f  -name  "*abc*"
-
--name匹配文件名								find  /  -name  "[a-z][a-z][a-z].conf"
 
 find  / -name  "???.conf"任意三个字符（数字，字母，点逗号）
 
--size文件大小（+表示大于）						find  /  -size +100M 
-
+```
+-type （d文件夹 f文件 l链接 b块设备 c字符）	find  /  -type  f  -name  "*abc*"
+-name匹配文件名							  find  /  -name  "[a-z][a-z][a-z].conf"
+-size文件大小（+表示大于）				   find  /  -size +100M 
 -user所有者（-group所有组）					find  /  -user zhubajie ! (且)-group zhubajie
-
--nouser无所有者（-nogroup无所有组）			find  /  -nouser
-
+-nouser无所有者（-nogroup无所有组）		   find  /  -nouser
 -exec …… {}\; 接下一个命令  --exec这个命令只能接在find命令后，也就是find专用的
+```
 
 ## xargs(命令传递参数命令) 
 
@@ -384,11 +359,11 @@ tar -xzvf test.tar.gz	解压gz文件（在要压缩的目录里）
 
 tar -xf node-v12.18.1-linux-x64.tar.xz 解压xz格式压缩包
 
--z 使用gzip压缩	.gz后缀压缩包
-
+```
+-z 使用gzip压缩(.gz后缀压缩包)
 -j 使用bzip2压缩（压缩的更小,当时间更长）.bz2后缀压缩包（-k 可保留源文件）	-C指定解压地址
-
 -c 创建/压缩		-x 释放/解压缩		-f 指定压缩文件名字		-v 显示提示信息		-tf 查询内容
+```
 
 zip /srv/file.zip  * 将当前文件压缩成file.zip文件		-sf查看压缩包里面的内容	-r表示递归压缩子目录下所有文件
 
@@ -432,7 +407,7 @@ ps -ef/aux	显示当前进程（ e显示所有进程 f全格式  /  a所有u用�
 
 kill -9暴力杀死进程		-9（暴力杀死）  -15（逐步杀死）+进程号	18继续 19停止 20暂停
 
-pkill -9 dns	杀掉相关的进程（如杀掉dns服务)				pkill -9 zhubajie	杀掉用户zhubajie的所有进程
+pkill -9 dns	杀掉相关的进程（如杀掉dns服务)				        pkill -9 zhubajie	杀掉用户zhubajie的所有进程
 
 pkill -vu root	(-v反选)杀掉除root用户打开的所有进程			pkill -9 %2		作业号为2的进程
 
@@ -472,33 +447,48 @@ watch -n1  ls /srv/ 				watch每一秒监控一次 ls命令srv下输出结果
 
 # 网络管理工具
 
+## ubuntu
+
+```sh
+ systemctl start systemd-networkd //开启 systemd-networkd服务
+ netplan apply //重启网络服务
+ vim 01-network-manager-all.yaml //修改网络配置文件
+```
+
+
+
+## centos
+
 wget -O -r -p /etc/yum.repos.d/ali.repo http://mirrors.aliyun.com/repo/Centos-7.repo	下载阿里源
 
- -O下载并指定文件名保存	-b后台下载	-r递归	-P指定下载目录		-S模拟输出服务器GET响应
+```
+-O下载并指定文件名保存	-b后台下载	-r递归	-P指定下载目录		-S模拟输出服务器GET响应
+```
 
 curl -u admin:12345 http://192.168.2.5:3000	#-u指定admin用户名密码12345和指定端口进行登陆
 
+```
 curl -vs -o /dev/null -A "Google Chrome" -e -e www.baidu.com -x 103.219.36.13:8080 http://cacti.rednetcloud.com
+```
 
--v输出详细信息				-x指定使用的http代理				-A,--user-agent 用户访问代理软件
-
--o将输出信息保存到指定文件		-s,silent静默模式，不输出任何信息	-I只显示响应报文头部信息
-
--O将服务器回应保存成文件，并将 URL 的最后部分当作文件名			-e,--referer告诉服务器我从哪个页面链接过来的
-
+```
+-v输出详细信息			-x指定使用的http代理				-A,--user-agent 用户访问代理软件
+-o将输出信息保存到指定文件	-s,silent静默模式，不输出任何信息	-I只显示响应报文头部信息
+-O将服务器回应保存成文件，并将 URL 的最后部分当作文件名
+-e,--referer告诉服务器我从哪个页面链接过来的
 -b,--cookie使用指定cookie文件	-X GET|POST 设置请求方式
+```
 
 sz +文件名：将选定的文件发送（send）到本地机器			rz从本地选择文件上传到Linux服务器
 
-iperf3网络质量测试工具（默认用tcp协议测试）		-s运行server模式		-D在后台以服务的方式运行
+iperf3网络质量测试工具（默认用tcp协议测试）
 
--c + host：连接指定客户端ip地址					-R服务端发送，客户端单方接受
+```
+-s运行server模式					-D在后台以服务的方式运行
+-c + host：连接指定客户端ip地址		-R服务端发送，客户端单方接受
+```
 
 vim /etc/NetworkManager/system-connections/ens160.nmconnection rocky系统网卡文件
-
-
-
-
 
 lsof -i：22	通过端口号查看对应服务（ftp的端口）
 
@@ -530,7 +520,7 @@ tcpdump tcp -i eth1 -t -s 0 -c 100 and dst port ! 22 and src net 192.168.1.0/24 
 
 8、-w ./target.cap : 保存成cap文件，方便用ethereal(即wireshark)分析
 
-## Network、链路聚合
+### Network、链路聚合
 
 ping -c3 -i0.1 192.168.1.1 		-c 次数		-i间隔	-t不间断
 
@@ -572,7 +562,7 @@ nmcli	g[eneral]				status\hostname\logging(支持服务信息)		#概叙信息
 
 
 
-## 创建网络组接口
+### 创建网络组接口
 
 nmcli con add type team con-name xxx ifname xxx config JSON
 
@@ -616,29 +606,20 @@ mode1(自动备援模式):平时只有一块网卡工作,在它故障后自动�
 
 mode6 (适配器适应性负载均衡模式):平时两块网卡均工作，且自动备援,无须交换机设备提供辅助支持
 
+```
 ifcfg-eno1					ifcfg-bond
-
-TYPE=Ethernet				DEVICE=bond				#和文件名没关系
-
-NAME=eno1					NAME=bond				#和文件名没关系
-
+TYPE=Ethernet				DEVICE=bond	 #和文件名没关系
+NAME=eno1					NAME=bond	 #和文件名没关系
 DEVICE=eno1					TYPE=Bond
-
-BOOTPROTO=none			IPADDR=192.168.5.249
-
-ONBOOT=yes				NETMASK=255.255.255.0
-
+BOOTPROTO=none				IPADDR=192.168.5.249
+ONBOOT=yes					NETMASK=255.255.255.0
 MASTER=bond0				GATEWAY=192.168.5.1
-
 SLAVE=yes					PEERDNS=yes
-
 ONBOOT=yes
-
 BOOTPROTO=static
-
 BONDING_MASTER=yes
-
 BONDING_OPTS="mode=6 miimon=100 updelay=600000 primary=eno1"	#模式和网卡
+```
 
 bond模式起不来步骤：1、service NetworkManager stop 临时和永久关闭NetworkManager		2、reboot重启
 
@@ -797,21 +778,16 @@ shadow 存放系统所有密码的文件				group 存放所有组的文件
 
 chage命令负责管理用户密码时效问题			chage 改用户密码（也就是shadow类里面的）
 
+```
  -d 0， --lastday 最近日期   指定用户最后修改日期为今天
-
  -E, --expiredate 过期日期   将帐户过期时间设为“过期日期” 
-
  -I, --inactive INACITVE	 过期 INACTIVE 天数后，设定密码为失效状态
-
  -l, --list          		 显示帐户年龄信息
-
  -m, --mindays 最小天数     将两次改变密码之间相距的最小天数设为“最小天数”
-
  -M, --maxdays 最大天数     将两次改变密码之间相距的最大天数设为“最大天数”
-
  -R, --root CHROOT_DIR     chroot 到的目录
-
  -W, --warndays 警告天数    将过期警告天数设为“警告天数”
+```
 
 1.设置用户密码最小天数（-m），最大天数（-M），提醒天数（-W），不活跃天数（-I）
 
@@ -821,17 +797,19 @@ id -gn zhubajie	查看zhubajie组名			-gn (group name) 组名		-un (user name) 
 
 useradd aaa（建立用户名aaa）
 
+```
 usermod 修改用户属性信息 	-d 改变用户主目录		-g 修改用户主组	-G 指定用户所属附加组	-l name:更改账户的名称
-
 -u UID：改变用户的UID为新的值		-s 指定以/sbin/nologin非shell登录	-e设置用户账户使用期限
+```
 
 userdel 删除用户 -fr（强制删除用户及其主目录）	passwd aaa（给用户aaa设置密码）
 
 groupadd 添加组
 
+```
 groupmod 修改组		-g 修改用户所属的群组	-l 修改用户帐号名称	-u 修改用户ID
-
 -d 修改用户登入时的目录	-s 修改用户登入后所使用的shell（/sbin/logoin非交互式登录)
+```
 
 gpasswd  管理组成员	-a向组中添加用户		-d从组中删除用户
 
@@ -861,19 +839,19 @@ chattr +i/-i	 123	 锁定/取消文件或目录（锁定后无法修改删除移
 
 setfacl：具体权限设置ACL		u：用户		g：组	d：默认
 
+```
 -m更改文件的访问控制列表		setfacl -m u:zhangy:rw- test修改文件的acl权限，添加一个用户权限
-
 -R递归操作子目录				setfacl -Rm d:zhangsan:rwx /opt/tt 为目录/opt/tt设置ACL规则
-
 -x从文件中访问控制列表移除条目	setfacl -x u:zhangsan /opt/ta 删除用户zhangsan对/opt/ta文件的ACL规则
+```
 
 setfacl -x u:zhangsan /opt/ta删除用户zhangsan对/opt/ta文件的ACL规则
 
+```
 -b还原成默认acl列表			setfacl -b  test 还原acl列表
-
 -d应用到默认访问控制列表的操作	setfacl -d --set g:zhangsan:rwx /ok 设置ok目录默认ACL
-
 -h显示本帮助信息
+```
 
 getfacl  /file查文件权限的内容			-n显示数字的用户/组标识		-R递归显示子目录
 
@@ -889,11 +867,11 @@ umask 0644一次性缺省权限		/etc/profile	文件里修改反掩码
 
 chcon：控制文件的访问属性
 
--R, --recursive：递归处理所有的文件及子目录			-t, --type=类型：设置指定类型的目标安全环境
-
--u, --user=用户：设置指定用户的目标安全环境			-r, --role=角色：设置指定角色的目标安全环境
-
--v, --verbose：为处理的所有文件显示诊断信息			-l, --range=范围：设置指定范围的目标安全环境
+```
+-R, --recursive：递归处理所有的文件及子目录		-t, --type=类型：设置指定类型的目标安全环境
+-u, --user=用户：设置指定用户的目标安全环境		   -r, --role=角色：设置指定角色的目标安全环境
+-v, --verbose：为处理的所有文件显示诊断信息		-l, --range=范围：设置指定范围的目标安全环境
+```
 
 restorecon：恢复SELinux文件属性即恢复文件的安全上下文		-R/-r：递归处理目录	-v：将过程显示到屏幕上
 
@@ -1233,14 +1211,6 @@ RestartSec：表示 Systemd 重启服务之前，需要等待的秒数
 ```html
 WantedBy：表示该服务所在的 Target(服务组)
 ```
-
-
-
-
-
-
-
-
 
 # Shell编程
 
@@ -1643,11 +1613,11 @@ Linux系统随机生成复杂密码方法：使用 mkpasswd 命令生成随机�
 
 mkpasswd 使用 mkpasswd 命令来生成随机密码了（区分大小写）：
 
+```
 -l  生成密码的长度，默认是 9 位，不同版本默认长度可能是不一样	-d  生成密码中包含数字的位数，默认是 2 位
-
--c  生成密码中包含小写字母的位数，默认是 2 位					-C  生成密码中包含大写字母的位数，默认是 2 位
-
+-c  生成密码中包含小写字母的位数，默认是 2 位			-C  生成密码中包含大写字母的位数，默认是 2 位
 -s  生成密码中包含特殊字符的位数，默认是 1 位
+```
 
 示例输出：$ mkpasswd -l 20 -d 5 -c 5 -C 5 -s 2		-->	9i'aR:iJSt03t5uU3Drl
 
@@ -1673,39 +1643,53 @@ R! echo `pwd`		(  ` ` 将命令输出结果（/etc/yum.repo.d/路径）)
 
 2,6 %s/\//9/g	 2到6行的/ 全部换成9（vim里面支持 \转移符号）
 
+**按键**
+
+```
 强制退出(不保存) : 普通模式下::q!
-
 保存:	4.1 另存为:	:w 文件名			4.2 保存&退出:	:wq
-
 复制		5.1 复制当行到系统剪贴板:	"+yy 这个是真+			5.2 复制所选至系统剪贴板:	"+y
+```
 
-5.3 选择+复制 普通模式下:	选择: v		复制: y				5.4 复制当前行至vim剪贴板:	yy
-
-黏贴:		6.1 系统剪贴板:	shift+ctrl+v					6.2 vim剪切板粘贴至下一行:	p
-
-普通模式下删除/剪切:	dd
-
+```
 8.1 删除所在光标下的#行:	#dd (#自然数)				8.2 删除所在光标上的#行:	#dk
+8.3 向下删除至底: dG						  		8.4 向上删除至顶: dgg
+撤销以及反撤销	9.1 撤销: 普通模式下 u				   9.2 反撤销: 普通模式下 Ctrl+r
+```
 
-8.3 向下删除至底: dG								8.4 向上删除至顶: dgg
+批量选择:
 
-撤销以及反撤销	9.1 撤销: 普通模式下 u				9.2 反撤销: 普通模式下 Ctrl+r
+```
+选择+复制 普通模式下:	选择: v		复制: y		复制当前行至vim剪贴板:	yy
+```
 
-批量选择:10.1 向下: G		10.2 向上: gg				10.3 选中某个方格: Ctrl+v
+黏贴:	
+```
+6.1 系统剪贴板:	shift+ctrl+v				vim剪切板粘贴至下一行:	p
+普通模式下删除/剪切:	dd
+10.3 选中某个方格: Ctrl+v
+```
 
-屏幕滚动:11.1 向下↓ 一页:Ctrl+f ; 向上↑ 一页:Ctrl+b		11.2 向下↓ 半页:Ctrl+d ; 向下↓ 半页:Ctrl+u
+```
+屏幕滚动:向下↓ 一页:Ctrl+f ; 向上↑ 一页:Ctrl+b		向下↓ 半页:Ctrl+d ; 向下↓ 半页:Ctrl+u
+```
 
 移动光标(上下左右)：
 
-1.3 本行头:0或^ 本行尾:$	1.4 迅速移动: ctrl+箭头(跳过空格)或Shift+箭头(跳过符号)	1.5 移至顶部：gg 移至底部：G
+```
+向下: G		向上: gg						本行头：0或^ 本行尾：$
+迅速移动: ctrl+箭头(跳过空格)或Shift+箭头(跳过符号)
+移至顶部：gg 移至底部：G
+5gg或者5G：光标跳至第五行
+```
 
 在vim中有3中方法可以跳转到指定行（首先按esc进入命令行模式）：
 
+```
 1、ngg/nG （跳转到文件第n行，无需回车）
-
 2、:n （跳转到文件第n行，需要回车）
-
 3、vim +n filename （在打开文件后，跳转到文件的第n行）
+```
 
 搜索:
 
@@ -1725,7 +1709,9 @@ R! echo `pwd`		(  ` ` 将命令输出结果（/etc/yum.repo.d/路径）)
 
 在每一行前加@符号（操作要在在光标前进入编辑模式）
 
+```
 Ctrl + v 		Shif + a		@		Esc			esc
+```
 
 :#1,#2s/x/y/g (#1 #2 为自然数)
 
@@ -1745,11 +1731,11 @@ Ctrl + v 		Shif + a		@		Esc			esc
 
 设置set:
 
-14.1 显示行号:	:set nu				14.2 取消行号:	:set nonu				14.3 设置缩进:	:set tabstop=#		
-
-14.4 自动缩进:	:set autoindent		14.5 显示名称:	:set laststatus=2		14.6 显示行符:	:set list	
-
-14.7 取消行符:	:set nolist
+```
+显示行号:	:set nu				取消行号:	:set nonu			设置缩进:	:set tabstop=#	
+自动缩进:	:set autoindent		显示名称:	:set laststatus=2	显示行符:	:set list	
+取消行符:	:set nolist
+```
 
 多窗口:
 
@@ -1765,9 +1751,9 @@ func SetTitle()
 	if expand("%:e") == 'sh'
 	call setline(1,"#!/bin/bash")
 	call setline(2,"#*******************************")
-	call setline(3,"#Author:		liulengbo")
-	call setline(4,"#weixin:		13086119057")
-	call setline(5,"#Date:		".strftime("%Y-%m-%d"))
+	call setline(3,"#Author: liulengbo")
+	call setline(4,"#weixin: 13086119057")
+	call setline(5,"#Date: ".strftime("%Y-%m-%d"))
 	call setline(6,"#Description:	")
 	call setline(7,"#*******************************")
 	call setline(8,"")
