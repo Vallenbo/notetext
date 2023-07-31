@@ -1,7 +1,5 @@
 # 安装使用
 
-
-
 使用aptitude进行安装：aptitude是一个交互式的软件包管理器，它可以更好地处理软件包之间的依赖关系。如果您还没有安装aptitude，请运行以下命令安装它。
 
 ```sh
@@ -48,7 +46,7 @@ yum install bpftrace bpftrace-tools bpftrace-doc bcc-static bcc-tools bpftool
 - bpftrace地址/usr/share/bpftrace/tools
 - export PATH=$PATH:/usr/share/bcc/tools:/usr/share/bpftrace/tools
 
-# 隐藏警告信息
+## 隐藏警告信息
 
 要隐藏bpftrace和bcc工具输出时的警告信息，可以在运行命令时使用2>/dev/null将标准错误重定向到空设备。
 
@@ -70,7 +68,7 @@ BPF提供了一种在各种内核时间和应用程序事件发生时运行一�
 BCC(BPF编辑器集合，BPF Compiler Collection)是最早用于开发BPF跟踪程序的高级框架。它提供了一个编写内核BPF程序的C语言环境，同时还提供了其他高级语言环境来实现用户端接口。
 bpftrace是一个新近出现的前端，它提供了专门用于创建BPF工具的高级语言支持。
 
-```
+```shell
 bpftrace -e 'tracepoint:syscalls:sys_enter_open { printf("%s %s\n",comm,str(args->filename)); }'
 
 bpftrace -l 'tracepoint:syscalls:sys_enter_open*'
@@ -102,7 +100,7 @@ bpftrace在编写功能强大的单行程序、短小的脚本方面甚为理想
 
 - BPF指令集查看：bpftool
 
-```
+```sh
 bpftool prog show
 bpftool prog dump xlated id 36
 bpftool prog dump xlated id 37 opcodes
@@ -110,7 +108,7 @@ bpftool prog dump xlated id 37 opcodes
 
 - bpftrace查看BPF指令集
 
-```
+```sh
 bpftrace -v /usr/share/bpftrace/tools/biolatency.bt
 ```
 
@@ -216,7 +214,7 @@ bpftrace -v /usr/share/bpftrace/tools/biolatency.bt
 
   - 负载怎样随着时间发生变化（比较每个周期的摘要信息）？
 
-  - ```
+  - ```sh
     vfsstat
     bpftrace -e 'kprobe:vfs_read {@[comm] = count();}'
     ```
@@ -231,7 +229,7 @@ bpftrace -v /usr/share/bpftrace/tools/biolatency.bt
   - 检查清单发：列出一系列工具和指标，用于对照运行和检查。
   - Linux60秒分析
 
-- ```
+- ```sh
   uptime # 平均负载
   dmesg|tail # 系统日志
   vmstat 1 # r CPU正在执行和等待执行的进程数量。不包括I/O
@@ -246,7 +244,7 @@ bpftrace -v /usr/share/bpftrace/tools/biolatency.bt
 
 - BCC工具检查列表
 
-- ```
+- ```sh
   execsnoop # 跟踪execve系统调用
   opensnoop # 跟踪open系统调用,包括打开文件的路径、打开操作是否成功
   ext4slower(或者brtfs*、xfs*、zfs*) # 跟踪ext4文件系统的常见操作
@@ -263,7 +261,7 @@ bpftrace -v /usr/share/bpftrace/tools/biolatency.bt
 # 第四章 BCC
 - funccount:对事件--特别是函数调用--进行计数
 
-- ```
+- ```sh
   funccount [-h] [-p PID] [-i INTERVAL] [-d DURATION] [-T] [-r] [-D] pattern
   Count all malloc() calls in libc:
   #funccount c:malloc
@@ -327,7 +325,7 @@ trace -I 'net/sock.h' 'udpv6_sendmsg(struct sock *sk) (sk->sk_dport == 13568)'
   - $retval:函数的返回值
   - $latency:从进入到返回的时长，单位是纳秒
   - $entry(param):在探针进入(entry)时param的值。
-```
+```sh
 argdist -H 'r::__tcp_select_window():int:$retval'
 #将内核函数vfs_read的返回值以直方图的形式打印出来
 argdist -H 'r::vfs_read()'
@@ -338,7 +336,46 @@ argdist -C 't:irq:irq_handler_entry():int:args->irq'
 ```
 
 # 第五章 bpftrace
+
+## 用法
+
+命令：
+
+```sh
+bpftrace -e program
 ```
+
+将执行程序，检测它定义的任何事件。程序将一直运行到Ctrl-C，
+
+或者直到它显式调用exit（）。作为-e参数运行的bpftrace程序称为一行程序。
+
+或者，程序可以保存到文件中，并使用以下方法执行：
+
+```sh
+bpftrace file.bt //.bt扩展名不是必需的，但有助于以后识别。
+```
+
+bpf程序指定解释器：
+
+```sh
+#/usr/local/bin/bpftrace
+```
+
+该文件可以成为可执行的（chmod一个+x文件。bt），并像任何其他程序一样运行：
+
+```
+./file.bt
+```
+
+
+
+
+
+
+
+
+
+```sh
 bpftrace -e 'tracepoint:syscalls:sys_enter_execve {printf("%s -> %s\n",comm,str(args->filename))}'
 #展示新进程的创建，以及参数信息
 bpftrace -e 'tracepoint:syscalls:sys_enter_execve {join(args->argv)}'
@@ -375,51 +412,62 @@ kretprobe:vfs_read
 }
 ```
 
-- 变量
-  - 内置变量：由bpftrace预先定义好，通常是一个只读的信息源
-  - 临时变量：被用于临时计算，字首加"$"作为前缀。
-  - 映射表变量：使用BPF映射表来存储对象，名字带有"@"前缀。它们可以用作全局存储，在不同动作之间传递数据。
+## 变量
 
-- 探针类型
+- 内置变量：由bpftrace预先定义好，通常是一个只读的信息源
 
-  - 内核静态插桩点 tracepoint[t]
-  - 用户静态定义插桩点 usdt[U]
+- 临时变量：被用于临时计算，字首加"$"作为前缀。
 
-  - 内核动态函数插桩 kprobe[k]
+- 映射表变量：使用BPF映射表来存储对象，名字带有"@"前缀。它们可以用作全局存储，在不同动作之间传递数据。
 
-  - 内核动态函数返回值插桩 kretprobe[kr]
+## 探测格式
 
-  - 用户态动态函数插桩 uprobe[u]
 
-  - 用户态动态函数返回值插桩 uretprobe[ur]
 
-  - 内核软件事件 software[s]
+## 探针
 
-    - cpu-clock[cpu] CPU真实时间，默认采样间隔1000000
+| 探针类型   | 缩写 | 描述                     |
+| ---------- | ---- | ------------------------ |
+| tracepoint | [t]  | 内核静态插桩点           |
+| usdt       | [U]  | 用户静态定义插桩点       |
+| kprobe     | [k]  | 内核动态函数插桩         |
+| kretprobe  | [kr] | 内核动态函数返回值插桩   |
+| uprobe     | [u]  | 用户态动态函数插桩       |
+| uretprobe  | [ur] | 用户态动态函数返回值插桩 |
+| software   | [s]  | 内核软件事件             |
+| hardware   | h    | 硬件基于计数器的插装     |
+| profile    | p    | 对所有cpu进行定时采样    |
+| interval   | i    | 定时报告（来自一个CPU)   |
+| BEGIN      |      |                          |
+| END        |      |                          |
 
-    - task-clock CPU任务时间，默认采样间隔1000000
+-  内核软件事件software[s]
 
-    - page-faults[faults] 缺页中断，默认采样间隔100
+  - cpu-clock[cpu] CPU真实时间，默认采样间隔1000000
 
-    - context-switches[cs] 上下文切换，默认采样间隔100
+  - task-clock CPU任务时间，默认采样间隔1000000
 
-    - 略…
+  - page-faults[faults] 缺页中断，默认采样间隔100
 
-  - 硬件基于计数器的插桩 hardware[h]
+  - context-switches[cs] 上下文切换，默认采样间隔100
 
-  - 对全部CPU进行时间采样 profile[p]
-    - profile:[hz|s|ms|us]:rate；对于全部CPU激活
+  - 略…
 
-  - 周期性报告(从一个CPU上) interval[i]
-    - interval:[s:ms]:rate ;对于一个CPU
+- 硬件基于计数器的插桩 hardware[h]
 
-  - BEGIN bpftrace启动
+- 对全部CPU进行时间采样 profile[p]
+  - profile:[hz|s|ms|us]:rate；对于全部CPU激活
 
-  - END bpftrace退出
+- 周期性报告(从一个CPU上) interval[i]
+  - interval:[s:ms]:rate ;对于一个CPU
 
-  - ```
+- BEGIN bpftrace启动
+
+- END bpftrace退出
+
+- ```sh
   bpftrace -lv tracepoint:syscalls:sys_enter_read
-  
+
 - bpftrace控制流
 
   - 过滤器 probe /filter/ {action}
@@ -450,28 +498,28 @@ kretprobe:vfs_read
 
 - bpftrace函数
 
-```
+```sh
 printf time str
-join 将多个字符串用空格进行连接并打印出来
+join #将多个字符串用空格进行连接并打印出来
 kstack ustack
-ksym usym 地址转换为字符串形式名字
-system 执行shell命令
+ksym usym #地址转换为字符串形式名字
+system #执行shell命令
 ```
 
 - bpftrace映射表的操作函数
 
 
-```
+```sh
 count() sum(int n) avg(int n) min(int n) max(int n)
-stats(int n) 返回事假次数、平均值和总和
-hist(int n) 打印2的幂方的直方图
-lhist(int n,int min,int max,int step) 打印线性直方图
-delete(@m[key]) 删除key
-print(@m[,top[,div]]) 打印映射表，top指明只打印最高的top项目，div是一个整数分母，用来将数值整除后输出
+stats(int n) #返回事假次数、平均值和总和
+hist(int n) #打印2的幂方的直方图
+lhist(int n,int min,int max,int step) #打印线性直方图
+delete(@m[key]) #删除key
+print(@m[,top[,div]]) #打印映射表，top指明只打印最高的top项目，div是一个整数分母，用来将数值整除后输出
 bpftrace -e 'k:vfs_* {@[probe] = count();} END {print(@,5);clear(@);}'
 
-clear(@m) 删除映射表中全部的键
-zero(@m) 将映射表中所有的值设置为0
+clear(@m) #删除映射表中全部的键
+zero(@m) #将映射表中所有的值设置为0
 ```
 
 # 第六章 CPU
@@ -502,7 +550,7 @@ perf script -i cycle_0526.perf &> perf.unfold
 - execsnoop 跟踪全系统中新进程执行信息的工具。利用这个工具可以找到消耗大量CPU的短进程，并且可以用来分析软件执行过程，包括启动脚本等。
 
 
-```
+```sh
 #bpftrace版本实现
 bpftrace -e 't:syscalls:sys_enter_execve {printf ("%-10u %-5d ",elapsed/1000000,pid);join(args->argv);}'
 ```
@@ -522,7 +570,7 @@ bpftrace -e 't:syscalls:sys_enter_execve {printf ("%-10u %-5d ",elapsed/1000000,
 
 - runqlen 采样CPU运队列的长度信息，可以统计有多少线程正在等待运行，并以直方图的方式输出。
 
-- ```
+- ```sh
   runqlen -C 10 1
   #-C 每个CPU输出一个直方图
   #-O 运行队列占有率信息，运行队列不为0的时长百分比
@@ -549,7 +597,7 @@ bpftrace -e 't:syscalls:sys_enter_execve {printf ("%-10u %-5d ",elapsed/1000000,
 
   - p PID 仅跟踪给定的进程
 
-```
+```sh
 profile -af 30 > out.stacks01
 ./flamegraph.pl --color=java < ../out.stacks01 > out.svg
 
@@ -572,7 +620,7 @@ bpftrace -e 'profile:hz:49 /pid/ { @samples[ustack,kstack,comm]=count();}'
 
   - p PID 仅跟踪给定的进程
 
-```
+```sh
 #内核调用栈5秒的火焰图
 offcputime -fKu 5 > out.offcuptime01.txt
 ./flamegraph.pl --hash --bgcolors=blue --title="OFF-CPU Time Flame Graph" \
@@ -581,7 +629,7 @@ offcputime -fKu 5 > out.offcuptime01.txt
 
 - syscount 统计系统中的系统调用数量.
 
-```
+```sh
 /usr/share/bcc/tools/syscount -LP
 bpftrace -e 't:syscalls:sys_enter_*{@[probe]=count();}'
 ```
@@ -658,7 +706,7 @@ bpftrace -e 't:irq:softirq_entry {@[args->vec] = count();}'
   - 文件系统缓存和缓冲区：Linux会借用空闲内存作为文件系统的缓存，如果有需要的话会再释放。
   - 事件源
 
-```
+```sh
 用户态内存分配  usdt:/usr/lib64/libc-2.28.so:*
 内核态内存分配  t:kmem:*
 堆内存扩展
@@ -722,13 +770,13 @@ bpftrace -l 'usdt:/usr/lib64/libc-2.28.so:*'
 - mmapsnoop：跟踪全系统的mmap系统调用并打印出映射请求的详细信息，这对内存映射调试来说是很有用的。
 
 
-```
+```sh
 bpftrace -e 't:syscalls:sys_enter_mmap {@[comm] = count();}'
 ```
 
 - brkstack:跟踪brk调用
 
-```
+```sh
 trace -U t:syscalls:sys_enter_brk
 stackcount -PU t:syscalls:sys_enter_brk
   
@@ -739,7 +787,7 @@ bpftrace -e 't:syscalls:sys_enter_brk {@[ustack,comm]=count();}'
 
 - faults:跟踪缺页错误和对应的调用栈信息，截取首次使用该内存触发缺页错误的代码路径。缺页错误会直接导致RSS的增长，所以这里截取的调用栈信息可以用来解释进程内存用量的增长。
 
-- ```
+- ```sh
   stackcount -U t:exceptions:page_fault_user
   stackcount  t:exceptions:page_fault_kernel
   
@@ -753,29 +801,27 @@ bpftrace -e 't:syscalls:sys_enter_brk {@[ustack,comm]=count();}'
 
 - ffaults根据文件名来跟踪缺页错误。
 
-- ```
+- ```sh
   find / -name "mm.h"
   bpftrace --include "/usr/src/kernels/4.18.0-193.28.1.el8_2.x86_64/include/linux/mm.h" -e 'k:handle_mm_fault{$vma=(struct vm_area_struct *)arg0; $file=$vma->vm_file->f_path.dentry->d_name.name; @[str($file)]=count();}'
   ```
 
 - vmscan:使用vmscan跟踪点来观察页换出守护进程(kswapd)的操作，该进程在系统内存压力上升时负责释放内存以便重用。
 
-- ```
+- ```sh
   funccount 't:vmscan:*'
   ```
-
-  
 
 - drsnoop:用来跟踪内存释放过程中直接回收部分，可以显示受到影响的进程，以及对应的延迟：直接回收所需的时间。可以用来分析内存受限的系统中应用程序的性能影响。
 - swapin：展示了那个进程正在从换页设备中换入页，前提是系统有正在使用的换页设备。
 
-```
+```sh
 bpftrace -e 'k:swap_readpage{@[comm,pid]=count();} interval:s:1{time();print(@);clear(@)}'
 ```
 
 - hfaults：通过跟踪巨页相关的缺页错误信息，按进程展示详细信息。
 
-```
+```sh
 bpftrace -e 'k:hugetlb_fault{@[pid,comm]=count();}'
 ```
 
@@ -802,16 +848,16 @@ bpftrace -e 'k:hugetlb_fault{@[pid,comm]=count();}'
   - mount可以将文件系统挂载到系统上，并且可以列出这些文件系统的类型和挂载参数。
   - strace可以跟踪系统中的系统调用，可以用这个命令来观察系统中的文件系统调用操作。
 
-- ```
+- ```sh
   strace -tttT cksum /usr/bin/cksum
   ```
 
 - perf可以跟踪文件系统跟踪点,利用kprobes来跟踪VFS和文件系统的内部函数
 
-- ```
+- ```sh
   perf trace cksum /usr/bin/cksum
   perf stat -e 'ext4:*' -a
-  perf record -e ext4:ext4_da_write_begin -a // 由于perf.data是写入文件系统的，如果跟踪的是文件系统的写事件，那么就会产生一个自反馈循环
+  perf record -e ext4:ext4_da_write_begin -a #由于perf.data是写入文件系统的，如果跟踪的是文件系统的写事件，那么就会产生一个自反馈循环
   
   bpftrace -e 't:ext4:ext4_da_write_begin{@ = hist(args->len);}'
   ```
@@ -824,7 +870,7 @@ bpftrace -e 'k:hugetlb_fault{@[pid,comm]=count();}'
 
 - mmapfiles: 跟踪mmap调用，并且统计映射入内存地址范围的文件频率信息
 
-```
+```sh
 #!/usr/bin/bpftrace
 #include <linux/mm.h>
 kprobe:do_mmap{
@@ -839,7 +885,7 @@ kprobe:do_mmap{
 - scread：跟踪read系统调用，同时展示对应的文件名
 
 
-```
+```sh
 #!/usr/bin/bpftrace
 #include <linux/sched.h>
 #include <linux/fs.h>
@@ -853,7 +899,7 @@ t:syscalls:sys_enter_read{
 
 - fmapfault 跟踪内存映射文件的缺页错误，按进程名和文件名来统计。
 
-```
+```sh
 #!/usr/bin/bpftrace
 #include <linux/mm.h>
 kprobe:filemap_fault{
@@ -869,7 +915,7 @@ kprobe:filemap_fault{
 
 - vfscount 统计所有的VFS函数。
 
-```
+```sh
 funccount 'vfs_*'
 bpftrace -e 'kprobe:vfs_* {@[func] = count();}'
 ```
@@ -918,7 +964,7 @@ bpftrace -e 'kprobe:vfs_* {@[func] = count();}'
   - iostat：按磁盘分别输出I/O统计信息，可以提供IOPS、吞吐量、I/O请求时长，以及使用率的信息。
 
 
-```
+```sh
 yum install sysstat
 -y 不输出从系统启动就开始的统计信息，默认输出
 -x 展示扩展统计
@@ -940,7 +986,7 @@ w_await：和await类似，只包含写，对于使用写延迟技术，那么�
 - perf:
 
 
-```
+```sh
 #跟踪进入队列的请求、发往存储设备的请求，以及完成的请求
 perf record -e block:block_rq_insert,block:block_rq_issue,block:block_rq_complete -a
 perf script
@@ -948,7 +994,7 @@ perf script
 
 - blktrace：跟踪块I/O事件的专用工具，可以使用btrace前台程序来跟踪所有事件
 
-```
+```shell
 df -h
 blktrace /dev/vda1 # 后台统计
 blkparse vda1.blktrace.0 # 解析后台统计
@@ -957,7 +1003,7 @@ btrace /dev/vda1 # 前台展示
 
 - SCSI日志
 
-```
+```sh
 sysctl -w dev.scsi.logging_level=0x1b6db6db
 echo 0x1b6db6db > /proc/sys/dev/scsi/logging_level
 dmesg
@@ -966,7 +1012,7 @@ dmesg
 - biolatency：以直方图方式统计块I/O设备的延迟信息。这里的设备延迟指的是向设备发出请求到请求完成的全部时间，这包括在操作系统内部排队的时间。单位微秒
 
 
-```
+```sh
 -Q 同时输出操作系统排队时长
 -D 按磁盘分别输出
 -F 按不同的I/O标识输出
@@ -978,14 +1024,14 @@ dmesg
 
 - biotop: 块设备I/O top版
 
-```
+```sh
 -C 不刷新屏幕
 ```
 
 - bitesize：展示磁盘I/O的尺寸。使用block:block_rq_issue
 
 
-```
+```sh
 顺序型I/O的负载应该尝试使用最大的I/O尺寸，以达到最好的性能
 随机访问I/O的负载应该尽量将I/O请求尺寸与应用程序记录尺寸保持一致。过大的I/O尺寸会读取不需要的数据，污染页缓存；而过小的I/O尺寸会导致过多的I/O请求，增加额外开销。
 ```
@@ -999,7 +1045,7 @@ dmesg
 - iosched：跟踪I/O请求在I/O调度器中排队的时间，并且按照调度器名称分组显示。【脚本执行报错】
 
 
-```
+```sh
 #!/usr/bin/bpftrace
 #include <linux/blkdev.h>
 BEGIN{printf("Tracing block I/O schedulers. Hit Ctrl-C to end.\n");}
@@ -1080,7 +1126,7 @@ END{clear(@start);}
   - ss：套接字统计工具，可以简要输出当前打开的套接字信息
 
 
-```
+```sh
 ss -tiepm # i 显示tcp内部信息 e 显示扩展套接字信息 p 进程 m 内存用量
 ESTAB            0             0                     172.17.142.151:https                       222.217.132.169:37986                  
 users:(("nginx",pid=28735,fd=241)) ino:496282700 sk:1916645 <->
@@ -1100,7 +1146,7 @@ pacing_rate 10.6Mbps：节奏控制率控制在10.6Mbps
 - ip 管理路由、网络设备、接口以及隧道的工具
 
 
-```
+```sh
 ip -s link
 ip route
 ```
@@ -1111,7 +1157,7 @@ ip route
 - netstat
 
 
-```
+```sh
 a 列出所有套接字的信息
 s 网络软件栈统计信息
 i 网络接口统计信息
@@ -1120,7 +1166,7 @@ r 列出路由表
 
 - sar 系统活动报表工具
 
-```
+```sh
 -n DEV：网路接口统计信息
 -n EDEV
 -n IP,IP6：IP统计信息
@@ -1140,7 +1186,7 @@ r 列出路由表
 - tcpdump 网络包嗅探器
 
 
-```
+```sh
 -i 指定网络接口
 -w 输出到指定文件
 ```
@@ -1151,12 +1197,12 @@ r 列出路由表
 - sockstat 打印套接字统计信息
 
 
-```
+```sh
 #按进程统计
 bpftrace -e 'kprobe:sock_sendmsg{ @[comm] =count();}'
 ```
 
-```
+```sh
 #!/usr/bin/bpftrace
 BEGIN
 {
@@ -1182,7 +1228,7 @@ interval:s:1
 ```
 
 sofamily:通过跟踪accept和connect系统调用来跟踪新的套接字连接，同时展示对应的进程名和协议类型。定量分析目前的系统负载，并且寻找是否有意料之外的套接字使用信息。
-```
+```sh
 #!/usr/bin/bpftrace
 #include <linux/socket.h>
 BEGIN
@@ -1224,7 +1270,7 @@ END
 ```
 
 soprotocol：按进程名和传输协议来跟踪新套接字连接的建立。专门针对传输协议。
-```
+```sh
 #!/usr/bin/bpftrace
 #include <net/sock.h>
 BEGIN
@@ -1256,7 +1302,7 @@ END
 - socketio 按进程、方向、协议和端口来展示套接字的I/O统计信息。
 - socksize 按进程和操作方向统计套接字的I/O数量和字节数。
 
-```
+```sh
 @read_bytes[nginx]:
 [0]                  672 |@@@@@@@@@@@@@@@@@@@@@@@                             |
 [1]                  695 |@@@@@@@@@@@@@@@@@@@@@@@@                            |
@@ -1278,7 +1324,7 @@ END
 ```
 
 可以修改hist为stats，提供另外一种统计信息
-```
+```sh
 #I/O数量 平均字节数 总吞吐量字节数
 @write_bytes[nginx]: count 7135, average 9346, total 66689498
 ```
@@ -1287,7 +1333,7 @@ END
 - @rmem_alloc展示了为接收区缓冲分配了多少内存
 - @rmem_limit是接收缓冲区的上限，可以通过sysctl来调节。
 
-```
+```sh
 @rmem_alloc:
 [0]                 3191 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@             |
 [1]                    0 |                                                    |
@@ -1317,7 +1363,7 @@ END
 - tcpconnect 跟踪新的TCP主动连接
 - tcpaccept 跟踪新的TCP被动连接。课程配套资源tcpaccept.bt可以跟踪积压队列。
 
-```
+```sh
 -t 输出时间戳
 -p PID：指定跟踪进程
 -P PORT,[PORT…]：指定跟踪端口
@@ -1325,7 +1371,7 @@ END
 
 - tcplife 用来跟踪TCP连接的时长：可以显示进程的连接时长、吞吐量，以及在可能的情况下显示对应的进程ID和进程名。该工具跟踪的是TCP套接字状态变化事件，当状态变成TCP_CLOSE的时候打印摘要信息。
 
-```
+```sh
 -p PID ；-t ；-w 以宽列显示
 -L PORT[,PORT,…]：仅跟踪指定的本地端口
 -D PORT[,PORT,…]：仅跟踪指定的远端端口
@@ -1333,7 +1379,7 @@ END
 
 - tcptop 可以展示使用tcp的进程
 
-```
+```sh
 tcp [options] [interval [count]]
 -c 不要清除屏幕
 -p PID：仅测量给定的进程
@@ -1341,7 +1387,7 @@ tcp [options] [interval [count]]
 
 - tcpretrans：跟踪TCP重传消息，展示IP地址、端口，以及TCP连接状态。
 
-```
+```sh
 如果ESTABLISHED状态下的重传发生较多，可能是由于外部网络问题造成的。
 如果SYN_SENT状态下的高频重传可能意味着远端应用程序过载，导致无法及时处理SYN积压队列中积压的SYN包
 -l 包括所有的丢包率探测数据
@@ -1367,7 +1413,7 @@ tcp [options] [interval [count]]
 - shellsnoop.bt 可以镜像另一个shell会话的输出
 - ttysnoop 可以镜像tty或pts设备输出的工具
 
-```
+```sh
 w # 查看当前的终端
 ttysnoop 1
 ```
@@ -1407,3 +1453,81 @@ ttysnoop 1
 2. **[iovisor/gobpf](https://github.com/iovisor/gobpf)**: 这个库提供了在Go语言中编写和加载eBPF程序所需的工具。它还包含用于解析bpftrace格式文件、处理内核数据结构等实用函数。
 3. **crazyboycjr/egpfbuilder**: 这个库允许您以更简单和直观的方式编写和构建eBPF程序。它提供高级API来生成各种类型的eBPF代码，并隐藏了底层细节。
 4. **NewRelic-OpenSource/go-ebpf**: 该项目旨在为Go开发人员提供一组易于使用且功能齐全的API，用于创建、加载和执行基于eBPF技术的网络过滤器和跟踪器。
+
+
+
+# 报错
+
+## BEGIN_trigger未找到
+
+```bash
+jizy@ sbin > sudo bpftrace -e 'BEGIN { @++ }'
+Attaching 1 probe...
+ERROR: Could not resolve symbol: /proc/self/exe:BEGIN_trigger
+```
+
+### 无法执行原因
+
+此问题是由于在 bpftrace 在集成到发行版中的时候，符号信息被去除了（`strip`）。去除后，在 `bpftrace` 中找不到 `BEGIN_trigger` 等符号了。
+
+```bash
+$ nm  /usr/bin/bpftrace
+nm: /usr/bin/bpftrace：无符号
+```
+
+### 解决措施
+
+安装 分离的调试信息 `debuginfo`。在 `ubuntu` 中称之为 `dbgsym`。可以配置源，也可以进行独立安装。下面我们看如何配置发行版仓库的源进行安装。
+
+1. 配置发行版仓库的源
+
+所有的调试信息包都存放在 `http://ddebs.ubuntu.com` 处。
+
+```bash
+$ U=http://ddebs.ubuntu.com
+$ D=$(lsb_release -cs)
+$ cat <<EOF | sudo tee /etc/apt/sources.list.d/ddebs.list
+deb ${U} ${D} main restricted universe multiverse
+#deb ${U} ${D}-security main restricted universe multiverse
+deb ${U} ${D}-updates main restricted universe multiverse
+deb ${U} ${D}-proposed main restricted universe multiverse
+EOF
+```
+
+2. 为 `http://ddebs.ubuntu.com` 添加公钥 `key`，否则 `apt-get update` 会报验证错误
+
+```bash
+$ wget -O - http://ddebs.ubuntu.com/dbgsym-release-key.asc | sudo apt-key add -
+```
+
+3. 安装分离的调试信息包
+
+一般形式为：`<package>-dbgsym`
+
+这里我们需要为 `bpftrace` 安装调试信息包
+
+```bash
+$ sudo apt-get install bpftrace-dbgsym
+```
+
+4. 还可以安装对应的源码包
+
+需要在发行版的源中（ubuntu 的配置位置：`/etc/apt/source.list`）添加 `deb-src` 的源信息：
+
+```bash
+# enable deb-src
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse
+
+$ apt source <package> # download package source code
+```
+
+5. 检查是否成功
+
+```bash
+$ sudo execsnoop.bt
+Attaching 3 probes...
+TIME(ms)   PID   ARGS
+6971       18604 ls --color
+27087      18605 git status -z -uall
+27087      18605 git status -z -uall
+```

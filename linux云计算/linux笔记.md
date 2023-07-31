@@ -131,7 +131,7 @@ echo "redhat" | passwd -- stdin alex 将密码redhat添加到alex账户
 
 tac	/ rev		从下至上 / 从右至左 输出文件内容
 
-less			分页查看
+less 分页查看
 
 head / tail	显示文件前 / 后几行	-n 指定文本显示的行数		-c 指定文本显示的字符数
 
@@ -235,33 +235,21 @@ p：显示替换成功的行	w + 文件名：将成功的行保存至指定文�
 ```
 
 ### 输出文本：
-
 sed -n 'p' a.txt输出所有行		sed -n '4p' a.txt 输出第4行		sed -n '4,+10p' a.txt输出第4行及其后的10行内容
-
 sed -n '$=' 输出文件的行数		sed -n '4,7p' a.txt输出4-7行		sed -n '/^bin/p' a.txt 输出以bin开头的行
-
 sed -n 'p;n' a.txt 输出奇数行		sed -n 'n;p’a.txt 输出偶数行	sed -n '10,$' 输出第10行到结尾的所有偶数行
 
 ### 删除文本：
-
 sed -i '3,5d' a.txt删除第3-5行	sed -i '$d' a.txt删除最后一行		sed -i '/xml/d' a.txt 删除所有包含xml的行
-
 sed -i '/^$/' a.txt删除重复空行	sed -i '/^$/d' a.txt 删除所有空行	sed -i '/xml/!d' a.txt 删除所有不包含xml的行
-
 sed -i /^install/d' a.txt删除所有以
 
 ### 替换文本：
-
 sed 's/xml/XML/' a.txt将每行的第一个xml替换为XML		sed 's/xml/XML/3' a.txt 将每行的第3个xml替换为XML
-
 sed 's/doc/$docs/g' a.txt 	将所有的doc替换为docs $代表查找串
-
 sed -r 's/^(.)(.)(.*)/\2\1\3/' a.txt	将文件中每行的第一个和第二个字符互换
-
 sed -r 's/([a-Z]+)([^a-Z]*)([a-Z]+)(.*)/\3\2\1\4/' a.txt	将文件中每行的第一个和第二个单词互换
-
 sed -r 's/[0-9]//g;s/^( )+//' a.txt	删除所有的数字和行首的空格
-
 sed -r s/[A-Z]/(&)/g a.txt		为每个大写字母添加括号
 
 echo rancher_elasticsearch-conf_v0.5.0| sed 's@_@/@;s@_@:@' 	#两次使用地址定界
@@ -357,12 +345,14 @@ tar -cjvf backup.tar.bz2 * 文件压缩成backup.tar.bz2名字的文件，最好
 
 tar -xzvf test.tar.gz	解压gz文件（在要压缩的目录里）
 
+tar -xvf test.tar 解压tar文件
+
 tar -xf node-v12.18.1-linux-x64.tar.xz 解压xz格式压缩包
 
 ```
 -z 使用gzip压缩(.gz后缀压缩包)
 -j 使用bzip2压缩（压缩的更小,当时间更长）.bz2后缀压缩包（-k 可保留源文件）	-C指定解压地址
--c 创建/压缩		-x 释放/解压缩		-f 指定压缩文件名字		-v 显示提示信息		-tf 查询内容
+-c 创建/压缩	-x 释放/解压缩		-f 指定压缩文件名字		-v 显示提示信息		-tf 查询内容
 ```
 
 zip /srv/file.zip  * 将当前文件压缩成file.zip文件		-sf查看压缩包里面的内容	-r表示递归压缩子目录下所有文件
@@ -413,9 +403,9 @@ pkill -vu root	(-v反选)杀掉除root用户打开的所有进程			pkill -9 %2	
 
 Command &	放到后台运行		jobs查看当前终端后台的进程
 
-fg 2把后台2进程放到前台来运行			fg	%1将后台job编号为1的进程调回到前台
+fg 2把后台2进程放到前台来运行			fg%1将后台job编号为1的进程调回到前台
 
-bg把后台暂停的进程放到后台运行			bg 	%2把后台编号为2的进程恢复运行状态
+bg把后台暂停的进程放到后台运行			bg %2把后台编号为2的进程恢复运行状态
 
 firefox  www.baidu.com  & 打开浏览器放到后台运行
 
