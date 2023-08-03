@@ -523,13 +523,16 @@ zero(@m) #将映射表中所有的值设置为0
 ```
 
 # 第六章 CPU
-- 事件源
-  - 软中断 irq:softirq* 跟踪点[t:irq:softirq*]
-  - 硬中断 irq:irq_handler* 跟踪点[t:irq:irq_handler*]
-  - 运行队列 t:workqueue:*跟踪点
-  - 定时采样 PMC或是基于定时器的采样器
-  - CPU电源控制事件 power跟踪点 [t:workqueue:*]
-  - CPU周期 PMC数据
+
+## 事件源
+
+- 软中断 irq:softirq* 跟踪点[t:irq:softirq*]
+- 硬中断 irq:irq_handler* 跟踪点[t:irq:irq_handler*]
+- 运行队列 t:workqueue:*跟踪点
+- 定时采样 PMC或是基于定时器的采样器
+- CPU电源控制事件 power跟踪点 [t:workqueue:*]
+- CPU周期 PMC数据
+
 - 查看所有cpu是否正常使用 mpstat -P ALL
 - perf火焰图
 
@@ -547,7 +550,9 @@ perf script -i cycle_0526.perf &> perf.unfold
 ./flamegraph.pl perf.folded > perf.svg
 ```
 
-- execsnoop 跟踪全系统中新进程执行信息的工具。利用这个工具可以找到消耗大量CPU的短进程，并且可以用来分析软件执行过程，包括启动脚本等。
+## cpu工具
+
+1、execsnoop 跟踪全系统中新进程执行信息的工具。利用这个工具可以找到消耗大量CPU的短进程，并且可以用来分析软件执行过程，包括启动脚本等。
 
 
 ```sh
@@ -555,47 +560,42 @@ perf script -i cycle_0526.perf &> perf.unfold
 bpftrace -e 't:syscalls:sys_enter_execve {printf ("%-10u %-5d ",elapsed/1000000,pid);join(args->argv);}'
 ```
 
-- exitsnoop 跟踪进程退出事件，打印出进程的总运行时长和退出原因。可以帮助调试短时进程。
+2、exitsnoop 跟踪进程退出事件，打印出进程的总运行时长和退出原因。可以帮助调试短时进程。
 
-- runqlat: CPU调度延迟分析工具。在需求超过供给，CPU资源处于饱和状态时，这个工具可以用来识别和量化问题的严重性。runqlat利用对CPU调度器的线程唤醒事件和线程上下文切换事件的跟踪来计算线程从唤醒到运行之间的时间间隔。
+3、runqlat: CPU调度延迟分析工具。在需求超过供给，CPU资源处于饱和状态时，这个工具可以用来识别和量化问题的严重性。runqlat利用对CPU调度器的线程唤醒事件和线程上下文切换事件的跟踪来计算线程从唤醒到运行之间的时间间隔。
 
-  ```sh
-  runqlat 10 1 # 运行10s，只打印1次。nsecs单位为微秒
-  #-m 以毫秒为单位输出
-  #-P 给每个进程打印一个直方图
-  #--pidnss 给每个PID空间打印一个直方图
-  #-p PID 指定进程
-  #-T 输出包含时间戳
-  ```
+```sh
+runqlat 10 1 # 运行10s，只打印1次。nsecs单位为微秒
+#-m 以毫秒为单位输出
+#-P 给每个进程打印一个直方图
+#--pidnss 给每个PID空间打印一个直方图
+#-p PID 指定进程
+#-T 输出包含时间戳
+```
 
-- runqlen 采样CPU运队列的长度信息，可以统计有多少线程正在等待运行，并以直方图的方式输出。
+4、runqlen 采样CPU运队列的长度信息，可以统计有多少线程正在等待运行，并以直方图的方式输出。
 
-- ```sh
+```sh
   runqlen -C 10 1
   #-C 每个CPU输出一个直方图
   #-O 运行队列占有率信息，运行队列不为0的时长百分比
   #-T 输出时间戳信息
-  ```
+```
 
-- 
-  runqslower 可以列出运行队列中等待延迟超过阈值的线程名字，可以输出受延迟影响的进程名和对应的延时时长。
+5、runqslower 可以列出运行队列中等待延迟超过阈值的线程名字，可以输出受延迟影响的进程名和对应的延时时长。
 
-- cpudist 用来展示每次线程唤醒之后在CPU上执行的时长分布。在内部跟踪CPU调度器的上下文切换事件，在繁忙的生产环境中发生的频率很高，额外消耗显著，使用时多小心。
+6、cpudist 用来展示每次线程唤醒之后在CPU上执行的时长分布。在内部跟踪CPU调度器的上下文切换事件，在繁忙的生产环境中发生的频率很高，额外消耗显著，使用时多小心。
 
-- profile:定时采样调用栈信息并且汇报调用栈出现频率信息。默认以49Hz的频率同时采样所有的CPU的用户态和内核态的调用栈。
+7、profile:定时采样调用栈信息并且汇报调用栈出现频率信息。默认以49Hz的频率同时采样所有的CPU的用户态和内核态的调用栈。
 
-  - U 仅输出用户态调用栈信息
-
-
-  - K 仅输出内核态调用栈
-
-  - a 在函数名称上加上标记(例如，在内核态函数加上"_[k]")
-
-  - d 在用户态和内核态调用栈之间加上分隔符
-
-  - f 以折叠方式输出
-
-  - p PID 仅跟踪给定的进程
+```sh
+-U 仅输出用户态调用栈信息
+-K 仅输出内核态调用栈
+-a 在函数名称上加上标记(例如，在内核态函数加上"_[k]")
+-d 在用户态和内核态调用栈之间加上分隔符
+-f 以折叠方式输出
+-p PID 仅跟踪给定的进程
+```
 
 ```sh
 profile -af 30 > out.stacks01
@@ -605,20 +605,16 @@ profile -af 30 > out.stacks01
 bpftrace -e 'profile:hz:49 /pid/ { @samples[ustack,kstack,comm]=count();}'
 ```
 
-- offcputime 用于统计线程阻塞和脱离CPU运行的时间，同时输出调用栈信息，以便理解阻塞原因。这个工具正好是profile工具的对立面；这两个工具结合起来覆盖了线程的全部生命周期：profile覆盖在CPU之上运行的分析，而offcputime则分析脱离CPU运行的时间
+8、offcputime 用于统计线程阻塞和脱离CPU运行的时间，同时输出调用栈信息，以便理解阻塞原因。这个工具正好是profile工具的对立面；这两个工具结合起来覆盖了线程的全部生命周期：profile覆盖在CPU之上运行的分析，而offcputime则分析脱离CPU运行的时间
 
-  - U 仅输出用户态调用栈信息
-
-
-  - K 仅输出内核态调用栈
-
-  - u 仅包括用户态线程
-
-  - k 仅包括内核态线程
-
-  - f 以折叠方式输出
-
-  - p PID 仅跟踪给定的进程
+```sh
+-U 仅输出用户态调用栈信息
+-K 仅输出内核态调用栈
+-u 仅包括用户态线程
+-k 仅包括内核态线程
+-f 以折叠方式输出
+-p PID 仅跟踪给定的进程
+```
 
 ```sh
 #内核调用栈5秒的火焰图
@@ -627,19 +623,18 @@ offcputime -fKu 5 > out.offcuptime01.txt
 < out.offcputime01.txt > out.offcputime01.svg
 ```
 
-- syscount 统计系统中的系统调用数量.
+9、syscount 统计系统中的系统调用数量.
 
 ```sh
 /usr/share/bcc/tools/syscount -LP
 bpftrace -e 't:syscalls:sys_enter_*{@[probe]=count();}'
 ```
 
-- argdist和trace：针对每个事件自定义处理方法、
+10、argdist和trace：针对每个事件自定义处理方法、
 
 
 ```sh
-#获取参数名字
-$ tplist -v syscalls:sys_enter_read
+$ tplist -v syscalls:sys_enter_read #获取参数名字
 syscalls:sys_enter_read
   int __syscall_nr;
   unsigned int fd;
@@ -653,7 +648,6 @@ argdist -H 't:syscalls:sys_exit_read():int:args->ret'
 #等价bpftrace程序如下
 bpftrace -e 't:syscalls:sys_enter_read {@ = hist(args->count);}'
 bpftrace -e 't:syscalls:sys_exit_read {@ = hist(args->ret);}'
-
 #bpftrace针对负值有一个单独的统计区间([...,0])，read的返回值如果是负数就说明出现了错误
 #统计出现的错误频率
 bpftrace -e 't:syscalls:sys_exit_read /args->ret<0/ {@ = lhist(- args->ret,0,100,1);}'
@@ -661,24 +655,25 @@ bpftrace -e 't:syscalls:sys_exit_read /args->ret<0/ {@ = lhist(- args->ret,0,100
 trace 't:syscalls:sys_enter_execve "-> %s", args->filename'
 ```
 
-- funccount 可以统计事件和函数调用频率。此工具是根据函数动态跟踪来统计的：对内核态函数使用kprobes，对用户态函数使用uprobes
+11、funccount 可以统计事件和函数调用频率。此工具是根据函数动态跟踪来统计的：对内核态函数使用kprobes，对用户态函数使用uprobes
 
 ```sh
 funccount 'tcp_*' # 统计内核以tcp_开头的所有函数
 funccount -i 1 get_page_from_freelist
-  
+
 bpftrace -e 'k:tcp_* {@[probe] = count();} interval:s:1{print(@);clear(@);}'
 ```
 
-- softirqs 显示系统中软中断消耗的CPU时间。
+12、softirqs 显示系统中软中断消耗的CPU时间。
 
 
 ```sh
 bpftrace -e 't:irq:softirq_entry {@[args->vec] = count();}'
 ```
 
-- hardirqs 显示系统处理硬中断的时间。
-- cpuwalk.bt 采样每个CPU上运行的进程名，并且以线性直方图的方式输出。
+13、hardirqs 显示系统处理硬中断的时间。
+
+14、cpuwalk.bt 采样每个CPU上运行的进程名，并且以线性直方图的方式输出。
 
 # 第七章 内存
 

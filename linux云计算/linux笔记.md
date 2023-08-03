@@ -1,8 +1,33 @@
-<img src="E:\Project\Textbook\linux云计算\assets\wps1-1682690115363-174.jpg" alt="img" style="zoom: 67%;" /> 
+
+
+| 目录名称    | 目录内相应文件内容                                          |
+| ----------- | ----------------------------------------------------------- |
+| /boot       | 开机所需文件-----内核、开机菜单以及所需配置文件等           |
+| /dev        | 以文件形式存放任何设备与接口                                |
+| /etc        | 配置文件                                                    |
+| /home       | 用户家目录                                                  |
+| /bin        | 存放单用户模式下还可以操作的命令                            |
+| /lib        | 开机时用到的函数库，以及/bin 与/sbin 下面的命令要调用的函数 |
+| /sbin       | 开机过程中需要的命令                                        |
+| /media      | 用于挂载设备文件的目录                                      |
+| /opt        | 放置第三方的软件                                            |
+| /root       | 系统管理员的家目录                                          |
+| /srv        | 些网络服务的数据文件目录                                    |
+| /tmp        | 任何人均可使用的“共享”临时目录                              |
+| /proc       | 虚拟文件系统，例如系统内核、进程、外部设备及网络状态等      |
+| /usr/local  | 用户自行安的软件                                            |
+| /usr/sbin   | Linux系统开机时不会使用到的软件/命令/脚本                   |
+| /usr/share  | 帮助与说明文件，也可放置共享文件                            |
+| /var        | 主要存放经常变化的文件，如日志                              |
+| /lost+found | 当文件系统发生错误时，将一些丢失的文件片段存放在这里        |
 
 /etc/services查看系统所有协议
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps2-1682690115363-175.jpg" alt="img" style="zoom:50%;" />修改语言
+```sh
+[root@desktop22]# echo $LANG
+en_US.UTF-8
+[root@desktop22]# LANG=zh_CN,UTF-8  #修改系统语言
+```
 
 echo export EDITOR=vim >> /etc/profile.d/env.sh解决vimu无颜色问题
 
@@ -18,7 +43,7 @@ pwd 显示当前所在目录		whoami 谁					which mysql查看内部命令
 
 mv 移动，改名字	-b 若目标文件存在则创建备份文件			-f 强制覆盖且不提醒
 
-uptime 用于查看系统的负载信息,运行时间					tree成树状显示当前目录所有文件
+tree成树状显示当前目录所有文件
 
 mkdir创建目录	-p多级创建		-v提示是否创建成功	 –m 创建同时设置权限值如755
 
@@ -30,9 +55,7 @@ cp	-r /etc/passwd	递归拷贝文件或目录	-p拷贝权限，文件夹也是�
 
 cd ：进入该用户的主目录 ~（root用户为/root,其他用户为/home/用户名）
 
-cd ~student 回到student用户的家目录
-
-cd .. ：返回上一级目录（注意要空格）		cd - ：返回上次所在目录
+cd ~student 回到student用户的家目录		cd .. ：返回上一级目录（注意要空格）		cd - ：返回上次所在目录
 
 cd / ：返回根目录 （绝对路径）			cd ./目录1/目录2 ：进入当前目录下的子目录（相对路径）
 
@@ -62,9 +85,7 @@ ln -s 软链接 会产生一个全新的文件
 
 sar	综合工具，查看系统状况
 
-top查看进程活动状态以及一些系统状况		vmstat查看系统状态、硬件和系统信息等
-
-mpstat查看多处理器状况					netstat查看网络状况			iptraf实时网络状况监测
+vmstat查看系统状态、硬件和系统信息等	netstat查看网络状况			iptraf实时网络状况监测
 
 tcpdump	抓取网络数据包，详细分析	tcptrace	数据包分析工具	netperf	网络带宽工具
 
@@ -112,6 +133,400 @@ time命令统计执行指定命令所花费的总时间
 ```
 time iostat 统计iostat命令执行所需总时间
 ```
+
+nc（netcat）是一个网络工具，它可以在命令行下进行网络连接、端口扫描和数据传输等操作。下面是nc命令的一些常见用法和示例：
+
+1. 连接到主机和端口：使用以下命令连接到指定的主机和端口：
+
+   ```sh
+   nc example.com 80 #要连接到主机http://example.com/的端口 80
+   ```
+
+2. 监听端口：使用以下命令在指定的端口上监听传入的连接：
+
+   ```sh
+   nc -l 8080 #要在本地监听端口 8080
+   ```
+
+3. 文件传输：使用以下命令从发送方传输文件到接收方：
+
+   ```
+   bashCopy Code# 接收方
+   nc -l <port> > output.txt
+   
+   # 发送方
+   nc <receiver_host> <receiver_port> < file_to_send.txt
+   ```
+
+   例如，接收方在端口 1234 上接收文件，并保存到 output.txt；发送方使用 `nc receiver.example.com 1234 < file_to_send.txt` 将文件发送给接收方。
+
+4. 端口扫描：使用以下命令扫描指定主机的端口范围：
+
+   ```sh
+   nc -zv example.com 1-100 #要扫描http://example.com/的端口从 1 到 100 的范围
+   ```
+
+这些只是nc命令的一些基本用法示例，还有更多高级用法可以在 `man nc` 命令中查看。请注意，在实际使用中，请确保你遵守当地的法律法规，并且获得了系统管理员或网络拥有者的授权才能进行网络连接和端口扫描等操作。
+
+
+
+# CPU工具
+
+## 内核统计：
+
+1、`uptime` 用于查看系统的负载信息,运行时间
+
+```sh
+$ uptime
+ 00:34:10 up 6:29, 1 user, load average：20.29, 18.90, 18.70
+```
+
+## 负载平均值：
+
+1、`top`是Linux下常用的性能分析工具，能够实时显示系统中各个进程的资源占用状况，类似于Windows的任务管理器
+
+```sh
+top -p 2822(PID号)	#查询固定PID号
+$ top
+top - 02:25:43 up  6:37,  2 users,  load average：0.09, 0.04, 0.01
+Tasks：227 total,   1 running, 226 sleeping,   0 stopped,   0 zombie
+%Cpu(s)： 0.0 us,  3.2 sy,  0.0 ni, 96.8 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem ：  1963.2 total,    761.0 free,    248.9 used,    953.3 buff/cache
+MiB Swap：  1788.0 total,   1788.0 free,      0.0 used.   1556.9 avail Mem
+
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   4486 root      20   0   10416   3864   3240 R   6.2   0.2   0:00.01 top
+      1 root      20   0  167740  12476   8812 S   0.0   0.6   0:01.10 systemd
+      2 root      20   0       0      0      0 S   0.0   0.0   0:00.02 kthreadd
+      3 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 rcu_gp
+      4 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 rcu_par_gp
+      5 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 slub_flushwq
+      6 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 netns
+[...]
+```
+
+第1行:系统时间、运行时间、登录终端数、系统负载(三个数值分别为1分钟、5分钟、15 分钟内的平均值，数值越小意味着负载越低)。
+第2行:进程总数、运行中的进程数、睡眠中的进程数、停止的进程数、僵死的进程数。
+第3行:用户占用资源百分比、系统内核占用资源百分比、改变过优先级的进程资源百分比、空闲的资源百分比等。
+第4行:物理内存总量、内存使用量、内存空闲量、作为内核缓存的内存量。
+第5行:虚拟内存总量、虛拟内存使用量、虛拟内存空闲量、已被提前加载的内存量。
+
+2、`mpstat`（Multiprocessor Statistics）是实时系统监控工具，可查看多处理器状况。
+
+```sh
+apt install sysstat -y
+```
+
+其报告与CPU的一些统计信息，这些信息存放在/proc/stat文件中。
+在多CPUs系统里，其不但能查看所有CPU的平均状况信息，而且能够查看特定CPU的信息。
+mpstat最大的特点是：可以查看多核心cpu中每个计算核心的统计数据；而类似工具vmstat只能查看系统整体cpu情况。
+
+```sh
+root@l:~# mpstat [-P {|ALL}] [internal [count]]
+参数 			解释
+-P {|ALL} 	表示监控哪个CPU， cpu在[0,cpu个数-1]中取值
+internal 	相邻的两次采样的间隔时间、
+count 		采样的次数，count只能和delay一起使用
+当没有参数时，mpstat则显示系统启动以后所有信息的平均值。有interval时，第一行的信息自系统启动以来的平均信息。从第二行开始，输出为前一个interval时间段的平均信息。
+
+root@l:~# mpstat -P ALL 1  
+Linux 5.19.0-46-generic (l)     08/01/2023      _x86_64_        (2 CPU)
+02:27:36 AM  CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest  %gnice   %idle
+02:27:37 AM  all    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
+02:27:37 AM    0    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
+02:27:37 AM    1    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
+[...]
+```
+
+## 硬件统计
+
+`perf`：性能分析和跟踪工具，能够进行函数级与指令级的热点查找。
+
+```sh
+apt install linux-tools-common linux-tools-generic -y #安装包
+```
+
+Perf List：利用perf剖析程序性能时，需要指定当前测试的性能时间。性能事件是指在处理器或操作系统中发生的，可能影响到程序性能的硬件事件或软件事件
+
+```sh
+Perf top #实时显示系统/进程的性能统计信息
+-e：指定性能事件							   -d 选项用于启用perf工具的统计功能
+-a：显示在所有CPU上的性能统计信息				  -C：显示在指定CPU上的性能统计信息
+-p：指定进程PID								-t：指定线程TID
+-K：隐藏内核统计信息							 -U：隐藏用户空间的统计信息
+-s：指定待解析的符号信息
+
+perf record：#运行一个命令并记录其性能数据到perf.data文件中。
+perf report：#读取perf.data文件（由perf record创建）并显示性能分析报告，展示函数和符号的耗时信息。
+perf stat：#运行一个命令并收集性能计数器的统计信息，例如CPU周期、缓存命中率等。
+perf top：#显示当前系统的性能概况，包括使用CPU最多的函数和符号。
+perf annotate：#读取perf.data文件（由perf record创建）并显示带注释的代码，显示哪些代码路径上发生了性能事件。
+perf diff：#比较两个perf.data文件，并显示它们之间的差异性能分析报告。
+perf sched：#跟踪和分析调度器的性能信息，包括任务的运行时间和等待时间等。
+perf mem：#对内存访问进行性能分析，包括缓存命中率、页表查找等。
+perf ftrace：#使用内核的ftrace功能进行跟踪和分析，例如系统调用、中断和函数调用等。
+perf iostat：#显示磁盘I/O的性能指标，如读写速度、延迟等。
+perf kmem：#跟踪和分析内核内存的使用情况，包括分配和释放的次数、大小等。
+perf script：#读取perf.data文件（由perf record创建）并显示事件跟踪的输出记录。
+perf test：#运行性能测试和验证perf工具的功能和稳定性。
+perf version：#显示perf工具的版本信息。
+```
+
+### 示例
+
+```sh
+root@l:~#  perf stat -d gzip file1  #使用perf工具来统计gzip命令对文件file1进行压缩的命令。
+ Performance counter stats for 'gzip file1':
+              0.67 msec task-clock                #    0.551 CPUs utilized
+                 0      context-switches          #    0.000 /sec
+                 0      cpu-migrations            #    0.000 /sec
+                82      page-faults               #  121.574 K/sec
+         1,608,532      cycles                    #    2.385 GHz
+            41,723      stalled-cycles-frontend   #    2.59% frontend cycles idle
+           115,345      stalled-cycles-backend    #    7.17% backend cycles idle
+         1,319,809      instructions              #    0.82  insn per cycle
+                                                  #    0.09  stalled cycles per insn
+           255,678      branches                  #  379.072 M/sec
+     <not counted>      branch-misses                                                 (0.00%)
+     <not counted>      L1-dcache-loads                                               (0.00%)
+     <not counted>      L1-dcache-load-misses                                         (0.00%)
+   <not supported>      LLC-loads
+   <not supported>      LLC-load-misses
+
+       0.001223328 seconds time elapsed
+
+       0.001264000 seconds user
+       0.000000000 seconds sys
+
+Some events weren't counted. Try disabling the NMI watchdog:
+        echo 0 > /proc/sys/kernel/nmi_watchdog
+        perf stat ...
+        echo 1 > /proc/sys/kernel/nmi_watchdog
+```
+
+```sh
+root@l:~# perf list # 获取当前处理器和perf工具支持的PMC列表
+List of pre-defined events (to be used in -e):
+  branch-instructions OR branches                    [Hardware event]
+  branch-misses                                      [Hardware event]
+  cache-misses                                       [Hardware event]
+  cache-references                                   [Hardware event]
+  cpu-cycles OR cycles                               [Hardware event]
+  instructions                                       [Hardware event]
+[...]
+```
+
+```sh
+root@l:~# perf stat -e mem_load_retired.l3_hit -e mem_load_retired.l3_miss -a -I 1000
+#使用perf工具在Linux系统上监测内存访问的性能统计信息。
+#-e选项用于指定要监测的事件，mem_load_retired.l3_hit表示L3缓存命中的事件,mem_load_retired.l3_miss表示L3缓存未命中的事件。-a选项表示监测所有的进程，-I 1000表示每1000毫秒输出一次统计结果。
+# time counts unit events
+ 1.001228842 675,693 mem_load_retired.l3_hit 
+ 1.001228842 868,728 mem_load_retired.l3_miss 
+ 2.002185329 746,869 mem_load_retired.l3_hit 
+ 2.002185329 965,421 mem_load_retired.l3_miss 
+ 3.002952548 1,723,796 mem_load_retired.l3_hit 
+[...]
+```
+### 硬件采样
+
+```sh
+root@l:~# perf record -e mem_load_retired.l3_miss -c 50000 -a -g -- sleep 10
+[ perf record：Woken up 1 times to write data ]
+[ perf record：Captured and wrote 3.355 MB perf.data (342 samples) ]
+
+#使用perf工具在Linux系统上记录内存访问L3缓存未命中事件的性能数据。
+#-e mem_load_retired.l3_miss：指定要监测的事件为L3缓存未命中事件。
+#-c 50000：设置每个进程记录事件的次数为50000次。
+#-a：监测所有的进程。
+#-g：收集调用图(Callgraph)数据，以便获取函数调用关系。
+#-- sleep 10：运行sleep命令10秒。这里用来模拟进程运行的情况，perf会在sleep命令执行期间记录性能数据。
+```
+
+### 定时采样
+
+```sh
+[ perf record：Woken up 1 times to write data ]
+[ perf record：Captured and wrote 0.438 MB perf.data (651 samples) ]
+
+#使用perf工具在Linux系统上记录性能数据，具体参数含义如下：
+#-F 99：设置采样频率为每秒99次。这意味着perf将以每秒99次的频率对CPU进行采样，记录性能数据。
+#-a：监测所有的进程。
+#-g：收集调用图(Callgraph)数据，以便获取函数调用关系。
+#-- sleep 30：运行sleep命令30秒。这里用来模拟进程运行的情况，perf会在sleep命令执行期间记录性能数据。
+#通过这个命令，我们可以在一段时间内（这里是30秒）以较高的采样频率记录性能数据，包括函数调用图信息。这可以帮助进行更详细的性能分析和优化，并提供更准确的性能指标。
+
+
+root@l:~# perf report -n --stdio
+#使用perf工具在Linux系统上生成性能报告，并将结果打印到标准输出（stdio）。其中的参数含义如下：
+#-n：以不启用交互式模式的方式生成报告，直接打印到标准输出。
+#--stdio：将报告结果输出到标准输出。
+
+# To display the perf.data header info, please use --header/--header-only options.
+# Total Lost Samples：0
+# Samples：651  of event 'cycles'
+# Event count (approx.)：3360497157
+#
+# Children      Self       Samples  Command          Shared Object             Symbol                >
+# ........  ........  ............  ...............  ........................  ......................>
+#
+    11.83%     0.00%             0  swapper          [kernel.kallsyms]         [k] secondary_startup_>
+            |
+            ---secondary_startup_64_no_verify
+               |
+               |--6.94%--start_secondary
+               |          cpu_startup_entry
+               |          |
+               |           --6.79%--do_idle
+               |                     |
+               |                      --5.98%--cpuidle_idle_call
+[...]
+```
+
+#### 产生CPU火焰图
+
+```sh
+root@l:~#git clone https://github.com/brendangregg/FlameGraph
+root@l:~## cd FlameGraph
+root@l:~## perf record -F 49 -ag -- sleep 30
+root@l:~## perf script --header | ./stackcollapse-perf.pl | ./flamegraph.pl > flame1.svg
+
+#将perf工具生成的性能数据进行处理，并生成火焰图。具体流程如下：
+#perf script --header：读取perf记录的性能数据并输出到标准输出，同时包含文件头部信息。
+#| ./stackcollapse-perf.pl：将perf输出的数据进行堆叠折叠处理，以便生成火焰图所需的格式。
+#| ./flamegraph.pl：根据折叠处理后的数据，生成火焰图。
+#> flame1.svg：将生成的火焰图保存到名为flame1.svg的SVG文件中。
+```
+
+### 周期采样
+
+当perf(1)进行定时采样时，它试图使用基于PMC的硬件CPU周期溢出事件来触发不可屏蔽中断（NMI）以执行采样。然而，在云服务厂商中，许多实例类型没有启用PMCs。这可以使用dmesg(1)命令查看。
+
+```sh
+# dmesg | grep PMU
+[ 2.827349] Performance Events：unsupported p6 CPU model 85 no PMU driver, 
+software events only
+```
+
+在这些系统上，perf(1)会回退到基于hrtimer的软件中断。可以使用perf -v参数查看。
+
+```sh
+# perf record -F 99 -a -v
+Warning:
+The cycles event is not supported, trying to fall back to cpu-clock-ticks
+[...]
+```
+
+软件中断模式通常在大部分性能分析场景是足够的。但是一些内核代码路径没法进行软中断。
+
+### 事件统计与事件跟踪
+
+
+
+```sh
+root@l:~# perf stat -e sched:sched_process_exec -I 1000
+#用于统计调度事件的性能数据。
+#-e sched:sched_process_exec：这是perf命令的选项，用于指定要监测的事件。在此示例中，使用#sched_process_exec事件来跟踪进程的执行情况。
+#-I 1000：这是perf stat命令的选项，用于指定统计数据的间隔。这里将每隔1000毫秒（1秒）输出一次统计结果。
+
+#           time             counts unit events
+     1.002080217                  0      sched:sched_process_exec
+     2.008114896                  0      sched:sched_process_exec
+     3.010333987                  0      sched:sched_process_exec
+[...]
+```
+
+
+
+
+
+
+
+## BPF工具
+
+execsnoop：是一个用于跟踪系统中执行的进程和命令的工具。它可以显示每个进程的执行时间、命令参数等信息。常见的用途是用于分析系统中的进程调度和执行情况，例如查找可能导致性能问题的进程或命令。
+
+exitsnoop：用于监测进程的退出事件。它可以显示进程的退出状态码、退出时间等相关信息。常见的用途是用于分析和调试进程的退出原因，例如跟踪特定进程的异常退出情况或检测进程之间的依赖关系。
+
+runqlat：用于监测运行队列的延迟。它提供了关于任务等待处理的时间信息，帮助用户识别系统中可能存在的任务调度延迟问题。常见的用途是用于评估系统的响应性能和任务调度效率。
+
+runqlen：用于监测运行队列的长度。它可以显示运行队列中等待处理的任务数量，帮助用户评估系统的负载情况。常见的用途是用于监测系统的负载水平和任务分配情况。
+
+runqslower：用于监测运行队列中的慢任务。它显示了运行时间超过设定阈值的任务信息，帮助用户发现系统中的性能瓶颈。常见的用途是用于分析和优化系统的任务调度策略。
+
+cpudist：用于检测CPU利用率的分布情况。它提供了关于CPU使用情况的统计数据，帮助用户了解系统中不同CPU核心的负载情况。常见的用途是用于评估系统的CPU性能和识别CPU负载不均衡的问题。
+
+cpufreq：用于跟踪和调整CPU频率。它可以显示当前CPU频率以及频率变化的相关信息，帮助用户优化系统的能耗和性能。常见的用途是用于调整CPU频率以在功耗和性能之间取得平衡。
+
+profile：用于性能分析，可以生成进程级和系统级的性能数据报告。它提供了对CPU使用、内存使用和I/O行为等方面的详细分析，帮助用户识别和解决性能瓶颈问题。常见的用途是用于深入分析应用程序或系统的性能问题，并进行优化。
+
+offcputime：用于监测离线CPU时间。它可以检测到在系统中消耗大量离线CPU时间的进程，并提供相关的统计信息，帮助用户识别并解决这类问题。常见的用途是用于分析系统中离线CPU时间的使用情况，并优化相关的进程或任务。
+
+syscount：用于监测系统调用的次数和延迟。它提供了对系统调用的详细分析，帮助用户评估系统性能和优化应用程序的系统调用过程。常见的用途是用于跟踪系统调用的性能瓶颈和优化系统调用的效率。
+
+argdist and trace：工具用于分析系统调用的参数分布情况，trace工具用于跟踪系统调用的执行过程。它们可以帮助用户深入了解系统调用的使用情况和性能瓶颈。常见的用途是用于分析和优化特定系统调用的参数使用和执行效率。
+
+funccount：用于统计特定函数的调用次数。它可以帮助用户了解特定函数的使用情况和性能影响。常见的用途是用于分析和优化特定函数的调用频率和执行效率。
+
+softirqs：用于监测软中断的使用情况。它可以显示软中断的触发次数和延迟信息，帮助用户评估系统中软中断的性能开销。常见的用途是用于分析和优化软中断的使用和效率。
+
+hardirqs：用于监测硬中断的使用情况。它可以显示硬中断的触发次数和延迟信息，帮助用户评估系统中硬中断的性能开销。常见的用途是用于分析和优化硬中断的使用和效率。
+
+smpcalls：用于监测多处理器系统中的函数调用次数和延迟信息。它可以帮助用户了解多处理器系统中函数调用的分布情况和性能影响。常见的用途是用于分析和优化多处理器系统中函数调用的负载和效率。
+
+llcstat：用于监测最后级缓存（LLC）的使用情况。它提供了关于LLC的命中率、清除率等信息，帮助用户评估系统的缓存性能和优化内存访问模式。常见的用途是用于分析应用程序的缓存行为和检测缓存相关的瓶颈。
+
+
+
+# MEM内存
+
+## 内核日志
+
+
+
+
+
+## 内核统计信息
+
+
+
+
+
+
+
+## 硬件统计和硬件采样
+
+
+
+
+
+## BPF工具
+
+oomkill ：用于跟踪和记录内核中的 OOM（Out of Memory）杀进程事件。当系统内存不足时，内核会选择终止某些进程以释放内存资源，并通过 oomkill 工具记录这些事件。常见使用方法是查看 oomkill 记录以了解系统中哪些进程被终止。
+
+memleak：用于检测内核模块或驱动程序中的内存泄漏。它通过监视内核堆栈和分配的内存块之间的关系来识别未释放的内存。常见使用方法是在内核模块或驱动程序开发过程中运行 memleak 工具，以帮助发现和修复内存泄漏问题。
+
+mmapsnoop：用于监视和记录进程创建和销毁的内存映射操作。它可以跟踪进程打开、映射和关闭的文件、库和设备，以及相关的内存操作。常见使用方法是在调试和性能优化场景中使用 mmapsnoop 工具，以了解进程的内存映射情况。
+
+brkstack：用于跟踪和记录进程的堆布局和堆栈信息。它可以显示进程的堆起点、堆大小以及堆栈的布局情况。常见使用方法是在调试和分析场景中使用 brkstack 工具，以帮助了解进程的堆栈结构和内存使用情况。
+
+shmsnoop：用于监视和记录共享内存段的创建、连接和断开操作。它可以追踪进程之间的共享内存通信，并提供有关内存段的详细信息。常见使用方法是在调试和性能分析场景中使用 shmsnoop 工具，以了解进程之间的共享内存使用情况。
+
+faults：用于跟踪和记录进程的页面错误（Page Fault）事件。它可以监视进程的内存访问，并记录因页面错误而触发的异常情况。常见使用方法是在调试和优化场景中使用 faults 工具，以了解进程的内存访问模式和性能瓶颈。
+
+ffaults：用于追踪和记录文件系统页面错误（Filesystem Page Fault）事件。它可以监视文件系统的磁盘 IO 操作，并记录因页面错误而导致的异常情况。常见使用方法是在调试和性能分析场景中使用 ffaults 工具，以了解文件系统的磁盘 IO 行为和性能瓶颈。
+
+vmscan：用于监视和记录内核的页面回收（Page Reclaim）操作。它可以显示内核在内存压力情况下如何回收页面，并提供有关内存管理和页面置换的详细信息。常见使用方法是在调试和优化场景中使用 vmscan 工具，以了解内核的页面回收策略和性能影响。
+
+drsnoop：用于监视和记录内核的读写操作。它可以追踪进程访问的文件、设备等，并提供有关读写操作的详细信息。常见使用方法是在调试和性能分析场景中使用 drsnoop 工具，以了解进程的文件和设备访问行为。
+
+swapin：用于监视和记录内核的页面交换（Page Swap In）操作。它可以追踪内核在内存压力情况下将页面从磁盘交换到内存的过程，并提供有关页面交换的详细信息。常见使用方法是在调试和性能分析场景中使用 swapin 工具，以了解内核的页面交换策略和性能影响。
+
+hfaults：用于追踪和记录硬件页面错误（Hardware Page Fault）事件。它可以监视硬件引起的页面错误，并提供有关异常情况的详细信息。常见使用方法是在调试硬件相关问题和系统稳定性分析中使用 hfaults 工具，以帮助诊断硬件故障和异常情况。
+
+
+
+
 
 
 
@@ -264,7 +679,7 @@ awk + 选项 +'pattern模式{cation动作}'  ,支持正则表达式、自定义�
 
 取行awk 'NR==9' test 取出第九行的内容
 
-取列lsmod | awk -F:  '{print $2}'  以：设置分隔符，默认为空格或Tab位打印第二段(列) 	{} 全选
+取列lsmod | awk -F： '{print $2}'  以：设置分隔符，默认为空格或Tab位打印第二段(列) 	{} 全选
 
 ### 内置变量：
 
@@ -280,7 +695,7 @@ FILENAME：当前处理的文件名		ENVIRON：表示支持系统环境变量，
 
 ip a | awk 'NR<=9{print $2"@@"$1}' #匹配前九行打印第2段，第1段，并进行反序，中间加入@@字符串
 
-awk -F: -vOFS=@ '{print $1,$2}' /etc/passwd #将第一、二段的分隔符：替换为@
+awk -F：-vOFS=@ '{print $1,$2}' /etc/passwd #将第一、二段的分隔符：替换为@
 
 echo "7.7 3.8"|awk '{print ($1-$2)}' #进行减运算并得出结果
 
@@ -300,7 +715,7 @@ awk -F:‘$1==ENVIRON["USER"]’ /etc/passwd
 
 awk '/-rwx/{print}'  test >test1 打印包含“-rwx”字符的行
 
-awk -F: '{if($3>999 && $7 == "/bin/bash" || $7 == "/bin/sh")print}' /etc/passwd 使用if判断列是否符合
+awk -F：'{if($3>999 && $7 == "/bin/bash" || $7 == "/bin/sh")print}' /etc/passwd 使用if判断列是否符合
 
 ## 输入/出重定向
 
@@ -365,7 +780,7 @@ unzip -od /home/sunny myfile.zip #把myfile.zip文件解压到 /home/sunny/
 
 -o:不提示的情况下覆盖文件	-d:将文件解压缩到指定目录下
 
-## top ps 进程信息控制kill
+## ps 进程信息控制kill
 
 进程是个动态的概念，即正在进行的程序，程序是个实体
 
@@ -379,7 +794,7 @@ UID、GID、和selinux语境决定对文件系统的存取和访问权限
 
 通常从执行进程的用户来继承
 
-存在生命周期<img src="E:\Project\Textbook\linux云计算\assets\wps3-1682690115363-176.jpg" alt="img" style="zoom: 67%;" />
+存在生命周期<img src="E:\Project\Textbook\linux云计算\assets\wps3-1682690115363-176.jpg" alt="img" style="zoom：67%;" />
 
 task struct：linux内核储存进程信息的式数据结构格式
 
@@ -409,15 +824,9 @@ bg把后台暂停的进程放到后台运行			bg %2把后台编号为2的进程
 
 firefox  www.baidu.com  & 打开浏览器放到后台运行
 
-top是Linux下常用的性能分析工具，能够实时显示系统中各个进程的资源占用状况，类似于Windows的任务管理器
 
-top -p  2822(PID号)	#查询固定PID号
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps5-1682690115363-178.jpg" alt="img" style="zoom:50%;" /> 
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps6-1682690115363-179.jpg" alt="img" style="zoom:50%;" /> 
-
-![img](E:\Project\Textbook\linux云计算\assets\wps7-1682690115363-180.jpg) 
 
 ## at一次性任务、周而复始计划任务
 
@@ -425,7 +834,7 @@ echo `Ifconfig ens33` | at now+1 min
 
 -L：查看所有任务 	-c1：查看任务1详细信息		-d1：删除任务1
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps8-1682690115363-181.jpg" alt="img" style="zoom: 67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps9-1682690115363-182.jpg" alt="img" style="zoom: 67%;" /> 
+<img src="E:\Project\Textbook\linux云计算\assets\wps8-1682690115363-181.jpg" alt="img" style="zoom：67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps9-1682690115363-182.jpg" alt="img" style="zoom：67%;" /> 
 
 -l查看当前生效用户的任务列表		-e编辑当前生效用户的任务内容				-r删除当前生效用户的任务内容
 
@@ -496,19 +905,19 @@ tcpdump tcp -i eth1 -t -s 0 -c 100 and dst port ! 22 and src net 192.168.1.0/24 
 
 1、tcp、ip、icmp、arp、rarp、tcp、udp、icmp这些选项等都要放到第一个参数的位置，用来过滤数据报的类型
 
-2、-i eth1 : 只抓经过接口eth1的包
+2、-i eth1 ：只抓经过接口eth1的包
 
-3、-t : 不显示时间戳
+3、-t ：不显示时间戳
 
-4、-s 0 : 抓取数据包时默认抓取长度为68字节。加上-S 0 后可以抓到完整的数据包
+4、-s 0 ：抓取数据包时默认抓取长度为68字节。加上-S 0 后可以抓到完整的数据包
 
-5、-c 100 : 只抓取100个数据包
+5、-c 100 ：只抓取100个数据包
 
-6、dst port ! 22 : 不抓取目标端口是22的数据包
+6、dst port ! 22 ：不抓取目标端口是22的数据包
 
-7、src net 192.168.1.0/24 : 数据包的源网络地址为192.168.1.0/24
+7、src net 192.168.1.0/24 ：数据包的源网络地址为192.168.1.0/24
 
-8、-w ./target.cap : 保存成cap文件，方便用ethereal(即wireshark)分析
+8、-w ./target.cap ：保存成cap文件，方便用ethereal(即wireshark)分析
 
 ### Network、链路聚合
 
@@ -558,7 +967,7 @@ nmcli con add type team con-name xxx ifname xxx config JSON
 
 type  team 设备类型 ，con-nam 连接名，  ifname 接口名
 
-JSON 指定runner方式，格式： '{"runner": {"name": "METHOD"}}'
+JSON 指定runner方式，格式： '{"runner"：{"name"："METHOD"}}'
 
 METHOD ：	broadcast, roundrobin,activebackup, loadbalance, lacp
 
@@ -637,7 +1046,7 @@ Rpm -qa	查询所有安装过的包	 -ql	查看所有安装过的路径		-qf  bi
 
 -qi 查看安装包详细信息			 -e 钥匙 删除不匹配的钥匙		 -K 包名 查看该包需要的钥匙，显示 OK
 
-显示NOT OK (MISSING KEYS: (MD5) PGP#fd431d51) 中文版显示：不正确
+显示NOT OK (MISSING KEYS：(MD5) PGP#fd431d51) 中文版显示：不正确
 
 gpg -v 钥匙包  		//从系统上所有的钥匙包里面，找到需要的钥匙
 
@@ -887,7 +1296,7 @@ semanage fcontext：主要用在安全上下文方面 ：用于管理SElinux策�
 
 分配文件的大小：linux以块为单位，win上叫簇（4k为一单位）
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps14.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps15-1682690115364-187.jpg" alt="img" style="zoom: 67%;" /> 
+<img src="E:\Project\Textbook\linux云计算\assets\wps14.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps15-1682690115364-187.jpg" alt="img" style="zoom：67%;" /> 
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps16-1682690115364-188.jpg" alt="img" style="zoom:67%;" /> 
 
@@ -897,9 +1306,9 @@ mkfs.创建文件系统				-t xfs指定文件系统					-b 1024指定块的大�
 
 mount 文件系统挂载命令		umount 卸载命令
 
--r: readonly，只读挂载			-w: read and write, 读写挂载			-a：自动挂载所有支持自动挂载的设备
+-r：readonly，只读挂载			-w：read and write, 读写挂载			-a：自动挂载所有支持自动挂载的设备
 
--L 'LABEL': 以卷标指定挂载设备	-U 'UUID': 以UUID指定要挂载的设备	-B, --bind: 绑定目录到另一个目录上
+-L 'LABEL'：以卷标指定挂载设备	-U 'UUID'：以UUID指定要挂载的设备	-B, --bind：绑定目录到另一个目录上
 
 -o remount +挂载文件夹：重新挂载   ，ro：只读    rw:读写，	user/nouser：是否允许普通用户挂载此设备	
 
@@ -923,7 +1332,7 @@ mkfs.xfs -f /dev/sdb
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps17-1682690115364-189.jpg" alt="img" style="zoom:67%;" /> 
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps18-1682690115364-190.jpg" alt="img" style="zoom: 80%;" /> 
+<img src="E:\Project\Textbook\linux云计算\assets\wps18-1682690115364-190.jpg" alt="img" style="zoom：80%;" /> 
 
 Defaults,ro 只读（不能写）		df -Th显示磁盘使用情况		-T显示文件系统的形式	-h以人类可读方式显示
 
@@ -939,7 +1348,7 @@ PE的大小可以指定，默认为4MB。PE的大小一旦确定将不能改变�
 
 PV(Physical Volume)	物理卷		VG(Volume Group)	卷组			LV(Logical Volume)	逻辑卷
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps19-1682690115364-191.jpg" alt="img" style="zoom: 67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps20-1682690115364-192.jpg" alt="img" style="zoom: 67%;" /> 
+<img src="E:\Project\Textbook\linux云计算\assets\wps19-1682690115364-191.jpg" alt="img" style="zoom：67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps20-1682690115364-192.jpg" alt="img" style="zoom：67%;" /> 
 
 1、制作选择物理卷 fdisk t  8e (修改为linux LVM类型)
 
@@ -1081,7 +1490,7 @@ mdadm -G /dev/md0 -n4 -a /dev/sda5 将sda5加入到md0磁盘阵列
 
 reresize2fs /dev/md0 同步md0上所有磁盘的文件系统
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps26-1682690115365-198.jpg" alt="img" style="zoom: 50%;" /> 
+<img src="E:\Project\Textbook\linux云计算\assets\wps26-1682690115365-198.jpg" alt="img" style="zoom：50%;" /> 
 
 2048前面空间是放主引导分区
 
@@ -1093,7 +1502,7 @@ reresize2fs /dev/md0 同步md0上所有磁盘的文件系统
 
 新服务，在 /usr/lib/systemd/system 下新建服务脚本，`systemctl daemon-reload` #重新加载
 
-```
+```sh
 vim /usr/lib/systemd/system/zdy.service
 
 [Unit]
@@ -1114,7 +1523,7 @@ WantedBy=multi-user.target
 
 示例，配置文件主要放在/usr/lib/systemd/system目录，也可能在/etc/systemd/system目录
 
-```
+```sh
 $ systemctl cat sshd.service
 [Unit]
 Description=OpenSSH server daemon
@@ -1137,7 +1546,7 @@ WantedBy=multi-user.target
 
 ## [Unit] 启动顺序与依赖关系
 
-```
+```sh
 Description：当前服务的简单描述
 Documentation：指定 man 文档位置
  
@@ -1152,7 +1561,7 @@ Requires：表示"强依赖"关系，即如果该服务启动失败或异常退�
 
 ## [Service] 启动行为
 
-```
+```sh
 EnvironmentFile：许多软件都有自己的环境参数文件，该字段指定文件路径
 注意：/etc/profile 或者 /etc/profile.d/ 这些文件中配置的环境变量仅对通过 pam 登录的用户生效，而 systemd 是不读这些配置的。
 systemd 是所有进程的父进程或祖先进程，它的环境变量会被所有的子进程所继承，如果需要给 systemd 配置默认参数可以在 /etc/systemd/system.conf  和 /etc/systemd/user.conf 中设置。
@@ -1198,7 +1607,7 @@ RestartSec：表示 Systemd 重启服务之前，需要等待的秒数
 
 ## [Install]
 
-```html
+```sh
 WantedBy：表示该服务所在的 Target(服务组)
 ```
 
@@ -1451,7 +1860,7 @@ fi
 ```sh
 #! /bin/bash
 if [ $# -eq 0 ];then
-	echo "Usage: /tmp/userdb"
+	echo "Usage：/tmp/userdb"
 elif [ $1 == "/tmp/userdb" ];then
 	for a in、cat /tmp/userdb"
 	do
@@ -1497,7 +1906,7 @@ fi
 ## While循环语句
 
 ```sh
-while 条件  //While : 	//无限循环
+while 条件  //While ：	//无限循环
 do
 done
 ```
@@ -1559,7 +1968,7 @@ select 循环执行后会出现菜单项等待用户选择（不会自动循环�
 
 # 开机破密码
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps34-1682690115365-206.jpg" alt="img" style="zoom: 67%;" /> 
+<img src="E:\Project\Textbook\linux云计算\assets\wps34-1682690115365-206.jpg" alt="img" style="zoom：67%;" /> 
 
 Grub2里面有，菜单，核心，默认走第一个核心
 
@@ -1636,28 +2045,28 @@ R! echo `pwd`		(  ` ` 将命令输出结果（/etc/yum.repo.d/路径）)
 **按键**
 
 ```
-强制退出(不保存) : 普通模式下::q!
+强制退出(不保存) ：普通模式下::q!
 保存:	4.1 另存为:	:w 文件名			4.2 保存&退出:	:wq
 复制		5.1 复制当行到系统剪贴板:	"+yy 这个是真+			5.2 复制所选至系统剪贴板:	"+y
 ```
 
 ```
 8.1 删除所在光标下的#行:	#dd (#自然数)				8.2 删除所在光标上的#行:	#dk
-8.3 向下删除至底: dG						  		8.4 向上删除至顶: dgg
-撤销以及反撤销	9.1 撤销: 普通模式下 u				   9.2 反撤销: 普通模式下 Ctrl+r
+8.3 向下删除至底：dG						  		8.4 向上删除至顶：dgg
+撤销以及反撤销	9.1 撤销：普通模式下 u				   9.2 反撤销：普通模式下 Ctrl+r
 ```
 
 批量选择:
 
 ```
-选择+复制 普通模式下:	选择: v		复制: y		复制当前行至vim剪贴板:	yy
+选择+复制 普通模式下:	选择：v		复制：y		复制当前行至vim剪贴板:	yy
 ```
 
 黏贴:	
 ```
 6.1 系统剪贴板:	shift+ctrl+v				vim剪切板粘贴至下一行:	p
 普通模式下删除/剪切:	dd
-10.3 选中某个方格: Ctrl+v
+10.3 选中某个方格：Ctrl+v
 ```
 
 ```
@@ -1667,8 +2076,8 @@ R! echo `pwd`		(  ` ` 将命令输出结果（/etc/yum.repo.d/路径）)
 移动光标(上下左右)：
 
 ```
-向下: G		向上: gg						本行头：0或^ 本行尾：$
-迅速移动: ctrl+箭头(跳过空格)或Shift+箭头(跳过符号)
+向下：G		向上：gg						本行头：0或^ 本行尾：$
+迅速移动：ctrl+箭头(跳过空格)或Shift+箭头(跳过符号)
 移至顶部：gg 移至底部：G
 5gg或者5G：光标跳至第五行
 ```
@@ -1713,7 +2122,7 @@ Ctrl + v 		Shif + a		@		Esc			esc
 
  
 
-代码自动补全: ctrl + p
+代码自动补全：ctrl + p
 
 非编辑模式下查看man手册：shift +k
 
@@ -1741,9 +2150,9 @@ func SetTitle()
 	if expand("%:e") == 'sh'
 	call setline(1,"#!/bin/bash")
 	call setline(2,"#*******************************")
-	call setline(3,"#Author: liulengbo")
-	call setline(4,"#weixin: 13086119057")
-	call setline(5,"#Date: ".strftime("%Y-%m-%d"))
+	call setline(3,"#Author：liulengbo")
+	call setline(4,"#weixin：13086119057")
+	call setline(5,"#Date：".strftime("%Y-%m-%d"))
 	call setline(6,"#Description:	")
 	call setline(7,"#*******************************")
 	call setline(8,"")
