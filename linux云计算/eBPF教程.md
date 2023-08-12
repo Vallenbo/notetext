@@ -3,8 +3,8 @@
 使用aptitude进行安装：aptitude是一个交互式的软件包管理器，它可以更好地处理软件包之间的依赖关系。如果您还没有安装aptitude，请运行以下命令安装它。
 
 ```sh
-apt install aptitude -y
-aptitude install bcc-tools bpftrace -y
+apt-get install bpfcc-tools linux-headers-$(uname -r) -y //安装bcc
+apt-get install bpftrace -y //安装bpftrace
 ```
 
 1、验证bcc工具，[iovisor/bcc项目地址](https://github.com/iovisor/bcc)
@@ -27,13 +27,6 @@ bpftrace v0.14.0
 - 配套资源 https://github.com/brendangregg/bpf-perf-tools-book
 
 **其他方式**
-
-ubuntu 安装
-
-```sh
-apt install bpftrace -y
-apt install bpfcc-tools linux-headers-$(uname -r) -y //安装bcc工具
-```
 
 centos 安装
 
@@ -337,6 +330,8 @@ argdist -C 't:irq:irq_handler_entry():int:args->irq'
 
 # 第五章 bpftrace
 
+[bpftrace 官方文档](https://github.com/iovisor/bpftrace/blob/master/docs/reference_guide.md) | [bpftrace一行教程](https://github.com/iovisor/bpftrace/blob/master/docs/tutorial_one_liners_chinese.md)
+
 ## 用法
 
 命令：
@@ -355,32 +350,30 @@ bpftrace -e program
 bpftrace file.bt //.bt扩展名不是必需的，但有助于以后识别。
 ```
 
-bpf程序指定解释器：
-
-```sh
-#/usr/local/bin/bpftrace
-```
-
-该文件可以成为可执行的（chmod一个+x文件。bt），并像任何其他程序一样运行：
+该文件可以成为可执行的（chmod +x 文件.bt），并像任何其他程序一样运行：
 
 ```
 ./file.bt
 ```
 
-
-
-
-
-
-
-
+bpf程序指定解释器：
 
 ```sh
-bpftrace -e 'tracepoint:syscalls:sys_enter_execve {printf("%s -> %s\n",comm,str(args->filename))}'
+#/usr/local/bin/bpftrace //位置可能有变化
+```
+示例：
+```sh
+# 设置@ID变量，interval设置时间间隔，s时间单位，2秒
+bpftrace -e 'kprobe:vfs_read { @ID = pid ; } interval:s:2 { printf("ID:%d\n",@ID); } '
+
 #展示新进程的创建，以及参数信息
+bpftrace -e 'tracepoint:syscalls:sys_enter_execve {printf("%s -> %s\n",comm,str(args->filename))}'
+#或
 bpftrace -e 'tracepoint:syscalls:sys_enter_execve {join(args->argv)}'
 #展示进程的磁盘I/O尺寸
 bpftrace -e 'tracepoint:block:block_rq_issue {printf("%d %s %d\n",pid,comm,args->bytes)}'
+# 
+bpftrace -e 'kprobe:vfs_read { @start[pid] = nsecs } kretprobe:vfs_read /@start[pid]/ { @ns[comm] = nsecs - @start[pid]; delete(@start[pid])}
 ```
 
 - 探针格式：
@@ -394,13 +387,15 @@ BEGIN
 {
         printf("Hello world!\n");
 }
+
 END
 {
         printf("Game over!\n");
 }
+
 kprobe:vfs_read
 {
-        @start[tid] = nsecs;
+        @start[tid] = nsecs; //变量
 }
 
 kretprobe:vfs_read
@@ -420,11 +415,7 @@ kretprobe:vfs_read
 
 - 映射表变量：使用BPF映射表来存储对象，名字带有"@"前缀。它们可以用作全局存储，在不同动作之间传递数据。
 
-## 探测格式
-
-
-
-## 探针
+## 探测
 
 | 探针类型   | 缩写 | 描述                     |
 | ---------- | ---- | ------------------------ |
@@ -438,39 +429,44 @@ kretprobe:vfs_read
 | hardware   | h    | 硬件基于计数器的插装     |
 | profile    | p    | 对所有cpu进行定时采样    |
 | interval   | i    | 定时报告（来自一个CPU)   |
-| BEGIN      |      |                          |
-| END        |      |                          |
+| BEGIN      |      | bpftrace启动             |
+| END        |      | bpftrace退出             |
 
--  内核软件事件software[s]
+- 内核软件事件software[s]
 
-  - cpu-clock[cpu] CPU真实时间，默认采样间隔1000000
-
-  - task-clock CPU任务时间，默认采样间隔1000000
-
-  - page-faults[faults] 缺页中断，默认采样间隔100
-
-  - context-switches[cs] 上下文切换，默认采样间隔100
-
-  - 略…
+```
+cpu-clock[cpu] CPU真实时间，默认采样间隔1000000
+task-clock CPU任务时间，默认采样间隔1000000
+page-faults[faults] 缺页中断，默认采样间隔100
+context-switches[cs] 上下文切换，默认采样间隔100
+略…
+```
 
 - 硬件基于计数器的插桩 hardware[h]
 
 - 对全部CPU进行时间采样 profile[p]
-  - profile:[hz|s|ms|us]:rate；对于全部CPU激活
-
+  - ```
+    profile:[hz|s|ms|us]:rate；对于全部CPU激活
+    ```
+  
 - 周期性报告(从一个CPU上) interval[i]
-  - interval:[s:ms]:rate ;对于一个CPU
+
+```
+interval:[s:ms]:rate ;对于一个CPU
+```
 
 - BEGIN bpftrace启动
 
 - END bpftrace退出
 
-- ```sh
-  bpftrace -lv tracepoint:syscalls:sys_enter_read
-
+```sh
+bpftrace -lv tracepoint:syscalls:sys_enter_read
+```
 - bpftrace控制流
 
-  - 过滤器 probe /filter/ {action}
+```
+过滤器 probe /filter/ {action}
+```
 
 
   - 三元运算符 test ? true_statement : false_statement
@@ -481,25 +477,33 @@ kretprobe:vfs_read
 
 - bpftrace内置变量
 
-  - pid tid uid username
+```
+pid tid uid username								nsecs 时间戳 纳秒
+elapsed 时间戳，单位纳秒，字bpftrace启动开始计时		  cpu 处理器ID
+comm 进程名										  kstack ustack 调试栈信息
+func 被跟踪函数名字									probe 当前探针全名
+arg0…argN 跟踪点函数的输入参数0，参数N(N为下标)...		  args.参数名 使用跟踪点的入口参数
+retval 跟踪点返回值									ret: 表示函数的返回值
+curtask 内核task_struct地址							  cgroup
+1,...,N bpftrace程序的位置参数							
+```
 
-  - nsecs 时间戳 纳秒
-  - elapsed 时间错，单位纳秒，字bpftrace启动开始计时
-  - cpu 处理器ID
-  - comm 进程名
-  - kstack ustack 调试栈信息
-  - func 被跟踪函数名字
-  - probe 当前探针全名
-  - arg0…argN
-  - retval
-  - curtask 内核task_struct地址
-  - cgroup
-  - 1,...,N bpftrace程序的位置参数
+​    
+
+
+```sh
+# 用户态程序监控，位置，函数名，监控输出内容
+bpftrace -e 'uprobe:/home/eBPF/add:adds {printf("ID:%d\n",pid)}'
+# 监控函数的入口参数获取
+bpftrace -e 'uprobe:/home/eBPF/add:adds {printf("ID:%d,args0:%d\n",pid,arg0)}'
+
+
+```
 
 - bpftrace函数
 
 ```sh
-printf time str
+printf()打印 time()时间	str()字符串输出
 join #将多个字符串用空格进行连接并打印出来
 kstack ustack
 ksym usym #地址转换为字符串形式名字
@@ -513,9 +517,9 @@ system #执行shell命令
 count() sum(int n) avg(int n) min(int n) max(int n)
 stats(int n) #返回事假次数、平均值和总和
 hist(int n) #打印2的幂方的直方图
-lhist(int n,int min,int max,int step) #打印线性直方图
+lhist(int n,int min,int max,int step) #打印线性直方图,参数分别是value，最小值，最大值，步进值。
 delete(@m[key]) #删除key
-print(@m[,top[,div]]) #打印映射表，top指明只打印最高的top项目，div是一个整数分母，用来将数值整除后输出
+print(@m[,top[,div]])#打印映射表，top指明只打印最高的top项目，div是一个整数分母，用来将数值整除后输出
 bpftrace -e 'k:vfs_* {@[probe] = count();} END {print(@,5);clear(@);}'
 
 clear(@m) #删除映射表中全部的键
@@ -576,10 +580,10 @@ runqlat 10 1 # 运行10s，只打印1次。nsecs单位为微秒
 4、runqlen 采样CPU运队列的长度信息，可以统计有多少线程正在等待运行，并以直方图的方式输出。
 
 ```sh
-  runqlen -C 10 1
-  #-C 每个CPU输出一个直方图
-  #-O 运行队列占有率信息，运行队列不为0的时长百分比
-  #-T 输出时间戳信息
+runqlen -C 10 1
+#-C 每个CPU输出一个直方图
+#-O 运行队列占有率信息，运行队列不为0的时长百分比
+#-T 输出时间戳信息
 ```
 
 5、runqslower 可以列出运行队列中等待延迟超过阈值的线程名字，可以输出受延迟影响的进程名和对应的延时时长。
@@ -589,12 +593,9 @@ runqlat 10 1 # 运行10s，只打印1次。nsecs单位为微秒
 7、profile:定时采样调用栈信息并且汇报调用栈出现频率信息。默认以49Hz的频率同时采样所有的CPU的用户态和内核态的调用栈。
 
 ```sh
--U 仅输出用户态调用栈信息
--K 仅输出内核态调用栈
--a 在函数名称上加上标记(例如，在内核态函数加上"_[k]")
--d 在用户态和内核态调用栈之间加上分隔符
--f 以折叠方式输出
--p PID 仅跟踪给定的进程
+-U 仅输出用户态调用栈信息								-K 仅输出内核态调用栈
+-a 在函数名称上加上标记(例如，在内核态函数加上"_[k]")	 -d 在用户态和内核态调用栈之间加上分隔符
+-f 以折叠方式输出									  -p PID 仅跟踪给定的进程
 ```
 
 ```sh
@@ -608,12 +609,9 @@ bpftrace -e 'profile:hz:49 /pid/ { @samples[ustack,kstack,comm]=count();}'
 8、offcputime 用于统计线程阻塞和脱离CPU运行的时间，同时输出调用栈信息，以便理解阻塞原因。这个工具正好是profile工具的对立面；这两个工具结合起来覆盖了线程的全部生命周期：profile覆盖在CPU之上运行的分析，而offcputime则分析脱离CPU运行的时间
 
 ```sh
--U 仅输出用户态调用栈信息
--K 仅输出内核态调用栈
--u 仅包括用户态线程
--k 仅包括内核态线程
--f 以折叠方式输出
--p PID 仅跟踪给定的进程
+-U 仅输出用户态调用栈信息				-K 仅输出内核态调用栈
+-u 仅包括用户态线程					  -k 仅包括内核态线程
+-f 以折叠方式输出					   -p PID 仅跟踪给定的进程
 ```
 
 ```sh
@@ -713,8 +711,6 @@ VM扫描器       t:vmscan:*
 内存访问周期    PMC
 bpftrace -l 'usdt:/usr/lib64/libc-2.28.so:*'
 ```
-
-  
 
 - 内存分析策略
 
@@ -1445,11 +1441,12 @@ ttysnoop 1
 如果您正在寻找与eBPF相关的Go库，可以考虑使用以下一些流行的选择：
 
 1. **[cilium/ebpf](https://github.com/cilium/ebpf)**: 这是一个功能强大且广泛使用的eBPF Go库，由Cilium项目开发。它提供了对Linux内核中eBPF功能的全面封装，使您能够编写和加载eBPF程序以及与其进行交互。
+
+   [cilium-Go的标准库](https://pkg.go.dev/github.com/cilium/ebpf)
+
 2. **[iovisor/gobpf](https://github.com/iovisor/gobpf)**: 这个库提供了在Go语言中编写和加载eBPF程序所需的工具。它还包含用于解析bpftrace格式文件、处理内核数据结构等实用函数。
-3. **crazyboycjr/egpfbuilder**: 这个库允许您以更简单和直观的方式编写和构建eBPF程序。它提供高级API来生成各种类型的eBPF代码，并隐藏了底层细节。
-4. **NewRelic-OpenSource/go-ebpf**: 该项目旨在为Go开发人员提供一组易于使用且功能齐全的API，用于创建、加载和执行基于eBPF技术的网络过滤器和跟踪器。
 
-
+​	3.[ebpf & bcc 中文开发教程及手册](https://blog.cyru1s.com/posts/ebpf-bcc.html)
 
 # 报错
 
@@ -1502,7 +1499,8 @@ $ wget -O - http://ddebs.ubuntu.com/dbgsym-release-key.asc | sudo apt-key add -
 这里我们需要为 `bpftrace` 安装调试信息包
 
 ```bash
-$ sudo apt-get install bpftrace-dbgsym
+$ apt update
+$ apt-get install bpftrace-dbgsym -y
 ```
 
 4. 还可以安装对应的源码包
