@@ -170,6 +170,45 @@ nc（netcat）是一个网络工具，它可以在命令行下进行网络连接
 
 
 
+# sar工具
+
+[sar](https://link.zhihu.com/?target=http%3A//lovesoo.org/tag/sar)（System Activity Reporter系统活动情况报告）是目前 [Linux](https://link.zhihu.com/?target=http%3A//lovesoo.org/tag/linux) 上最为全面的系统[性能分析](https://link.zhihu.com/?target=http%3A//lovesoo.org/tag/%e6%80%a7%e8%83%bd%e5%88%86%e6%9e%90)工具之一，可以从多方面对系统的活动进行报告，包括：文件的读写情况、系统调用的使用情况、[磁盘](https://link.zhihu.com/?target=http%3A//lovesoo.org/tag/%e7%a3%81%e7%9b%98)[I/O](https://link.zhihu.com/?target=http%3A//lovesoo.org/tag/io)、[CPU](https://link.zhihu.com/?target=http%3A//lovesoo.org/tag/cpu)效率、[内存](https://link.zhihu.com/?target=http%3A//lovesoo.org/tag/%e5%86%85%e5%ad%98)使用状况、进程活动及IPC有关的活动等。
+
+```sh
+apt install searchandrescue -y 
+```
+
+## sar命令常用格式
+
+```sh
+sar [options] [-A] [-o file] [ <interval> [ <count> ] ]
+```
+
+其中：
+
+​	options 为命令行选项，
+
+​	-o file表示将命令结果以二进制格式存放在文件中，file 是文件名。
+
+​	interval为采样间隔，count为采样次数，默认值是1;
+
+​	t为采样间隔，n为采样次数，默认值是1；
+
+​	sar命令options常用选项如下：
+
+```sh
+-A：所有报告的总和									-u：输出CPU使用情况的统计信息
+-B：显示换页状态；									-d：输出每一个块设备的活动信息
+-v：输出inode、文件和其他内核表的统计信息			  -r：输出内存和交换空间的统计信息
+-b：显示I/O和传送速率的统计信息-R：输出内存页面的统计信息
+-y：终端设备活动情况
+-w：输出系统交换活动信息							  -e：设置显示报告的结束时间
+-f：从指定文件提取报告							   -i：设状态信息刷新的间隔时间
+-p：报告每个CPU的状态								-q：平均负载分析
+```
+
+
+
 # CPU工具
 
 ## 内核统计：
@@ -849,9 +888,13 @@ watch -n1  ls /srv/ 				watch每一秒监控一次 ls命令srv下输出结果
 ## ubuntu
 
 ```sh
- systemctl start systemd-networkd //开启 systemd-networkd服务
- netplan apply //重启网络服务
- vim 01-network-manager-all.yaml //修改网络配置文件
+systemctl start systemd-networkd //开启 systemd-networkd服务
+netplan apply //重启网络服务
+# ens33为要重启的网卡名称
+sudo ifdown ens33
+sudo ifup ens33
+
+vim 01-network-manager-all.yaml //修改网络配置文件
 ```
 
 
