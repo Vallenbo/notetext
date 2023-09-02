@@ -25,7 +25,7 @@ DockerCloud 官方提供的容器云服务，可以完成容器的部署与管�
 ●**Docker image**:镜像是只读的，镜像中包含有需要运行的文件。镜像用来创建container，-个镜像可以运行多个
 container;镜像可以通过Dockerfile创建，也可以从Docker hub/registry上下载
 ●**Docker container**:容器是Docker的运行组件，启动一个镜像就是一个容器，容器是一个隔离环境，多个容器之间不会相互影响，保证容器中的程序运行在一个相对安全的环境中
-●**Docker hub/registry**:共享和管理Docker镜像，用户可以上传或者下载上面的镜像，官方地址为https://registry.hub.docker.com/，也可以搭建自己私有的Docker registry
+●**Docker hub/registry**:共享和管理Docker镜像，用户可以上传或者下载上面的镜像，[Docker hub官方地址](https://hub.docker.com/search?q=golang)，也可以搭建自己私有的Docker registry
 
 不了解Linux内核的Cgroups技术，无法知道容器是如何做资源(CPU、 内存等)限制的
 
@@ -41,10 +41,6 @@ Cgroups不仅可以用于容器资源的的限制，还可以提供容器的资�
 
 Cgroups的工作目录/sys/fs/cgroup下包含了Cgroups的所有内容
 
-
-
-
-
 <img src="E:\Project\Textbook\linux云计算\assets\wps4-1682691150322-326.jpg" alt="img" style="zoom:50%;" /> 
 
 容器的本质是进程而不是一个完整操作系统
@@ -53,7 +49,7 @@ Cgroups的工作目录/sys/fs/cgroup下包含了Cgroups的所有内容
 
 # 安装docker-ce包社区版
 
-[官方文档]([Install Docker Engine on Ubuntu | Docker Documentation](https://docs.docker.com/engine/install/ubuntu/))
+[docker安装 官方文档](https://docs.docker.com/engine/install/ubuntu/)
 
 ## 一、在线安装Docker
 
@@ -93,7 +89,12 @@ OPTIONS='--selinux-enabled --log-driver=journald -H tcp://0.0.0.0:2375 -H unix:/
 
 ## **三、脚本安装**
 
-`curl -fsSL https://test.docker.com -o test-docker.sh `#运行docker便捷安装脚本
+#运行docker便捷安装脚本
+
+```sh
+$ curl -fsSL https://get.docker.com -o get-docker.sh
+$ sudo sh get-docker.sh
+```
 
 [Docker官方文档](https://docs.docker.com/engine/install/centos/ )
 
@@ -128,7 +129,7 @@ Docker镜像：是一个只读的Docker容器模板，包含启动容器所需�
 
 ## docker images镜像操作
 
-==man docker-images查看镜像==
+man docker-images查看镜像
 
 导出镜像docker save -o zi_redis.tar zi_redis:1.0镜像打包成tar文件（-o指定保存目录）
 
@@ -156,9 +157,15 @@ Docker镜像：是一个只读的Docker容器模板，包含启动容器所需�
 
 `docker image prune -a`删除所有无用镜像不光是临时镜像
 
+docker images prune -f删除所有name和tag为<none>的镜像
+
 -f is-official=true nginx出官方的镜像 						-f自动清理且强制删除镜像不进行提示确认
 
+```sh
 ll *.tar|awk '{print $NF}'|sed -r 's#(.*)#docker load -i \1#' |bash #批量导入镜像
+```
+
+
 
 # Dockerfile创建镜像
 
@@ -190,67 +197,104 @@ CMD mysql_safe	#运行命令
 
 `docker run -it --name c5 -p 9999:22 centos_sshd:1.0` #映射端口进入
 
-**## Dockerfile****关键字**	**[区分大小写]**
 
-|FROM   |指定父镜像  |指定dockerfile基于那个image构建 | FROM centos:7
 
-|MAINTAINER|作者信息 |用来标明这个dockerfile谁写的 | MAINTAINER lb <codelnb@qq.com>
 
-|LABEL |标签 |用来标明dockerfile的标签可以使用Label代替Maintainer 最终都是在docker image基本信息中可以查看 |LABEL version="l.0.0-rc3" LABEL author="yeasy@github" date="2020-01-01"
+## Docker build
 
-|RUN  |执行命令 |格式为 RUN <command＞（前者默认将在 shell 终端中运行命令，即／bin/sh -c，命令较长时可以使用＼来换行）或 RUN ["executable "，”paraml”，”param2”]
+**docker build** 命令用于使用 Dockerfile 创建镜像。
 
-RUN [“/bin/bash”，“-c”，echo hello”］#指定bash环境
+### 语法
 
-|ENTRYPOINT|入口 |镜像的默认入口命令，入口命令在启动容器时作为根命令执行，所有传入值作为该命令的参数
+```
+docker build [OPTIONS] PATH | URL | -
+```
 
-ENTRYPOINT ["nginx"]	#nginx命令
+**实例**
 
-CMD ["-g"，"daemon off;"]	#至附加参数
+使用当前目录的 Dockerfile 创建镜像，标签为 runoob/ubuntu:v1。
 
-|CMD  |容器启动命令 |指定启动容器时默认执行的命令，如果用户run创建容器时执行命令就会覆盖掉该命令
+```
+docker build -t runoob/ubuntu:v1 . 
+```
 
-|COPY |复制文件 |复制本地主机的 为Dockerfile所在目录的相对路径，文件或目录)为容器中的某路径;。目录路径不存在时，会自动创建 |COPY /media /sss
+使用URL **github.com/creack/docker-firefox** 的 Dockerfile 创建镜像。
 
-|ADD  |添加文件 |将本地的一个文件或目录拷贝到容器的某个目录里。为Dockerfile所在目录的相对路 径，它也可以是一个URL；如果为tar文件，会自动解压到/;路径下。可以是镜像内的绝对路径，或者相对于工作目录（WORKDIR）的相对路径 | ADD http://nginx.org/download/nginx-1.12.2.tar.gz .
+```
+docker build github.com/creack/docker-firefox
+```
 
-|ENV  |环境变量 |指定环境变量， 在镜像生成过程中会被后续RUN指令使用， 在镜像启动的容器中也会存在. 指令指定的环境变量在运行时可以被覆盖掉， 如docker run --env| ENV APP VERSION=l.0.0 	ENV APP_HOME=/usr/local/app 		ENV PATH /usr/local/mysql/bin:$PATH
+也可以通过 -f Dockerfile 文件的位置：
 
-|ARG  | 构建参数| 定义创建镜像过程中使用的变量|Docker 内置了一些镜像创建变量。用户可以直接使用而无须声明， 包括（不区分大小写） HTTP PROXY、 HTTPS PROXY、 FTP PROXY、 NO PROXY|ARG VERSION=9.3
+```
+$ docker build -f /path/to/a/Dockerfile .
+```
 
-|VOLUME | 定义外部可以挂载的数据卷 | 创建一个可以从本地主机或其他容器挂载的挂载点，一般用于存放数据库和需要保持的数据，启动容器的时候使用 -v 绑定 | VOLUME ["/emdia"] 
+在 Docker 守护进程执行 Dockerfile 中的指令前，首先会对 Dockerfile 进行语法检查，有语法错误时会返回：
 
-|EXPOSE | 暴露端口 |定义容器运行的时候监听的端口，启动容器的使用-p来绑定暴露端口 | EXPOSE 22 8080/udp
+```
+$ docker build -t test/myapp .
+Sending build context to Docker daemon 2.048 kB
+Error response from daemon: Unknown instruction: RUNCMD
+```
 
-|WORKDIR | 工作目录 |为后续的 RUN、 CMD、 ENTRYPOINT 指令配置工作目录 |WORKDIR /path/to/workdir
+### OPTIONS说明
 
-|USER   | 指定执行用户| 指定运行容器时的用户名或UID，后续的RUN也会指定用户.当服务不需要管理员权限时，可以通过该指令指定运行的用户。并且可以在之前创建所需要的用户 |(注：要临时获取管理员权限可以使用gosu，而不推荐sudo)RUN groupadd -r postgres && useradd -r -g postgres postgres| USER root
+- **--tag, -t:** 镜像的名字及标签，通常 name:tag 或者 name 格式；可以在一次构建中为一个镜像设置多个标签。
+- **-f :**指定要使用的Dockerfile路径；
+- **--force-rm :**设置镜像过程中删除中间容器；
+- **--build-arg=[] :**设置镜像创建时的变量；
+- **--cpu-shares :**设置 cpu 使用权重；
+- **--cpu-period :**限制 CPU CFS周期；
+- **--cpu-quota :**限制 CPU CFS配额；
+- **--cpuset-cpus :**指定使用的CPU id；
+- **--cpuset-mems :**指定使用的内存 id；
+- **--disable-content-trust :**忽略校验，默认开启；
+- **--isolation :**使用容器隔离技术；
+- **--label=[] :**设置镜像使用的元数据；
+- **-m :**设置内存最大值；
+- **--memory-swap :**设置Swap的最大值为内存+swap，"-1"表示不限swap；
+- **--no-cache :**创建镜像的过程不使用缓存；
+- **--pull :**尝试去更新镜像的新版本；
+- **--quiet, -q :**安静模式，成功后只输出镜像 ID；
+- **--rm :**设置镜像成功后删除中间容器；
+- **--shm-size :**设置/dev/shm的大小，默认值是64M；
+- **--ulimit :**Ulimit配置。
+- **--squash :**将 Dockerfile 中所有的操作压缩为一层。
+- **--network:** 默认 default。在构建期间设置RUN指令的网络模式
 
-|HEALTHCHECK| 健康检查 |指定监测当前容器的健康监测的命令基本上没用因为很多时候应用本身有健康监测机制 |
 
-|ONBUILD | 触发器 |当存在ONBUILD关键字的镜像作为基础镜像的时候 当执行FROM完成之后会执行 ONBUILD的命令但是不影响当前镜像用处也不怎么大 |
 
-ONBUILD ADD . / app/src ONBUILD RUN /usr / local/bin/python build --dir / app/src
+## Dockerfile关键字 （区分大小写）
 
-|STOPSIGNAL |发送信号量到宿主机	|指定所创建镜像启动的容器接收退出的信号值 | STOPSIGNAL signal
-
-|SHELL  |指定执行脚本的shell		|指定其他命令使用shell 时的默认shell 类型. (可以使用转义字符)默认值[“/bin/sh＂，”c” | SHELL [”executable”，”parameters”]
+| Dockerfile 指令 | 说明                                                         | 使用示例                                                     |
+| :-------------- | :----------------------------------------------------------- | ------------------------------------------------------------ |
+| FROM            | 指定基础镜像，用于后续的指令构建。                           | FROM centos:7                                                |
+| MAINTAINER      | 指定Dockerfile的作者/维护者。（已弃用，推荐使用LABEL指令）   | MAINTAINER lb codelnb@qq.com                                 |
+| LABEL           | 添加镜像的元数据，使用键值对的形式。                         | LABEL version="l.0.0-rc3" LABEL author="yeasy@github" date="2020-01-01" |
+| RUN             | 在构建过程中在镜像中执行命令。                               | 格式为 RUN <command＞（前者默认将在 shell 终端中运行命令，即／bin/sh -c，命令较长时可以使用＼来换行）或 RUN ["executable "，”paraml”，”param2”]，RUN [“/bin/bash”，“-c”，echo hello”］#指定bash环境 |
+| CMD             | 指定容器创建时的默认命令。（可以被覆盖）                     | CMD ["-g"，"daemon off;"]	#至附加参数                     |
+| ENTRYPOINT      | 设置容器创建时的主要命令。（不可被覆盖）                     | 镜像的默认入口命令，入口命令在启动容器时作为根命令执行，所有传入值作为该命令的参数，ENTRYPOINT ["nginx"]	#nginx命令 |
+| EXPOSE          | 声明容器运行时监听的特定网络端口。                           | EXPOSE 22 8080/udp                                           |
+| ENV             | 在容器内部设置环境变量。                                     | ENV APP VERSION=l.0.0 ，ENV APP_HOME=/usr/local/app ，ENV PATH /usr/local/mysql/bin:$PATH |
+| ADD             | 将文件、目录或远程URL复制到镜像中。                          | ADD http://nginx.org/download/nginx-1.12.2.tar.gz .          |
+| COPY            | 将文件或目录复制到镜像中。                                   | COPY /media /sss                                             |
+| VOLUME          | 为容器创建挂载点或声明卷。                                   | VOLUME ["/emdia"]                                            |
+| WORKDIR         | 设置后续指令的工作目录。                                     | WORKDIR /path/to/workdir                                     |
+| USER            | 指定后续指令的用户上下文。                                   | USER root                                                    |
+| ARG             | 定义在构建过程中传递给构建器的变量，可使用 "docker build" 命令设置。 | ARG VERSION=9.3                                              |
+| ONBUILD         | 当该镜像被用作另一个构建过程的基础时，添加触发器。           | ONBUILD ADD . / app/src ONBUILD RUN /usr / local/bin/python build --dir / app/src |
+| STOPSIGNAL      | 设置发送给容器以退出的系统调用信号。                         | STOPSIGNAL signal                                            |
+| HEALTHCHECK     | 定义周期性检查容器健康状态的命令。                           |                                                              |
+| SHELL           | 覆盖Docker中默认的shell，用于RUN、CMD和ENTRYPOINT指令。      | SHELL [”executable”，”parameters”]                           |
 
  
 
-使用.dockerignore文件
+## .dockerignore文件
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps14-1682691150323-336.jpg" alt="img" style="zoom: 67%;" /> 
 
- 
-
-Docker build的具体使用
-
-<img src="E:\Project\Textbook\linux云计算\assets\wps15-1682691150323-337.jpg" alt="img" style="zoom:67%;" /> 
-
-<img src="E:\Project\Textbook\linux云计算\assets\wps16-1682691150323-338.jpg" alt="img" style="zoom:67%;" /> 
-
-# 容器操作
+# docker容器操作
 
 **(ctrl +p +q退出不中止)**
 
@@ -288,11 +332,11 @@ docker run -d --restart=always ubuntu:latest ping www.docker.com
 
 --env-file=[]， 指定环境变量文件，文件格式为每行一个环境变量
 
- 
+
 
 `docker run -it --name=a1 centos:7.6 /bin/bash`创建且进入容器a1以/bin/bash环境运行（默认退出中断）
 
-`docker exec  -it a1 /bin/bash`进入容器
+`docker exec -it a1 /bin/bash`进入容器
 
 **过程创建容器过程：**
 
@@ -1541,17 +1585,24 @@ Docker Compose是一个编排多容器分布式部署的工具，提供命令集
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps33-1682691150324-355.jpg" alt="img" style="zoom: 33%;" /> 
 
-## Docker Compose安装使用
+## Docker-compose安装使用
 
 **一、安装Docker Compose	【需要梯子】**
 
 \# Compose目前已经完全支持Linux、Mac OS和Windows，在我们安装Compose之前，需要先安装Docker。下面我 们以编译好的二进制包方式安装在Linux系统中。 
 
-curl -L https://github.com/docker/compose/releases/download/1.22.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+```sh
+apt-get install docker-compose -y
+```
 
 *你可以也通过执行下面的命令，高速安装 Docker Compose。*v2.4.1版本号可替换
 
-curl -L https://get.daocloud.io/docker/compose/releases/download/v2.4.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+```sh
+$ curl -SL https://github.com/docker/compose/releases/download/v2.20.3/docker-compose-linux-x86_64 
+$ chmod +x docker-compose
+$ docker compose version
+$ Docker Compose version v2.20.3
+```
 
 \# 设置文件可执行权限 	chmod +x /usr/local/bin/docker-compose
 
@@ -1563,288 +1614,182 @@ curl -L https://get.daocloud.io/docker/compose/releases/download/v2.4.1/docker-c
 
 **三、 使用docker compose编排nginx+springboot项目**
 
-1. 创建docker-compose目录		mkdir ~/docker-compose	cd ~/docker-compose
+1. 创建docker-compose目录
+
+```sh
+mkdir ~/docker-compose
+cd ~/docker-compose
+```
+
 2. 编写 vim docker-compose.yml 文件
 
+```yaml
 version: '3'
-
 services:
-
  nginx:
-
  image: nginx	#指定镜像tag或者ID
-
  	restart: always #重启策略
-
  ports:	#映射端口号
-
-\- 80:80
-
+ - 80:80
   links:
-
-  \- app
-
+  - app
  volumes:		#目录映射
-
-  \- ./nginx/conf.d:/etc/nginx/conf.d
-
+  - /nginx/conf.d:/etc/nginx/conf.d
  app:				#第二个容器
-
  image: app
-
  expose:	#提供container之间的端口访问，不会暴露给主机使用
+   - "8080"	
+```
 
-   \- "8080"	
+docker compose up -d 
 
-## yaml文件关键字：
+docker-compose restart 重新启动
 
-version  指定 compose 文件的版本
-
-services 定义所有的 service 信息
-
-image   指定为镜像名称或镜像 ID(如果镜像在本地不存在，Compose 将会尝试拉取这个镜像)
-
-pid    跟主机系统共享进程命名空间。容器和宿主机系统之间可以通过进程 ID 来相互访问和操作
-
-ports   暴露端口信息
-
-command  覆盖容器启动后默认执行的命令：command: bundle exec thin -p 3000
-
-build：  #指定 Dockerfile 所在文件夹的路径
-
- context: ./dir #路径
-
- dockerfile: Dockerfile-alternate #指定编排文件
-
- args:
-
-  buildno: 1
-
-restart	 指定容器退出后的重启策略为始终重启，保持服务始终运行，推荐配置为 always 或者 unless-stopped
-
-depends_on:	#服务依赖容器，将会优先于服务创建并启动依赖，一般是mysql、redis等
-
-expose  	暴露端口，但不映射到宿主机，只被连接的服务访问
-
-extends:		#继承自当前yml文件或者其它文件中定义的服务，可以选择性的覆盖原有配置
-
- file: common.yml
-
- service: webapp		#service必须有，file可选。service是需要继承的服务，例如web、database
-
-environment:		#添加环境变量。可以是数组或者字典格式
-
- \- RACK_ENV=development
-
- \- SESSION_SECRET
-
-external_links:	#链接搭配docker-compose.yml文件或者Compose之外定义的服务，通常是提供共享或公共服务
-
- \- redis_1
-
- \- project_db_1:mysql	#注意：external_links链接的服务与当前服务必须是同一个网络环境
-
-environment    设置环境变量。可使用数组或字典两种格式
-
-depends_on    解决容器的依赖、启动先后的问题(服务不会等待依赖容器完全启动之后才启动)
-
-volumes:			 #数据卷所挂载路径设置，可以设置为宿主机路径或者数据卷名称
-
- \- /var/lib/mysql
-
- \- cache/:/tmp/cache
-
- \- ~/configs:/etc/configs/:ro
-
-volumes_from:	#挂载数据卷容器，挂载是容器。container:container_name格式仅支持version 2
-
- \- service_name
-
- \- service_name:ro
-
- \- container:container_name:rw
-
-links:			#链接到其他服务中的容器，别名将自动会在容器的/etc/hosts文件里创建相应记录
-
- \- db
-
- \- db:mysql
-
- \- redis
-
-external_links  #链接到docker-compose.yml外部的容器，甚至不是Compose管理的容器
-
-extra_hosts:		#添加主机名映射
-
- \- "somehost:162.242.195.82"
-
- \- "otherhost:50.31.209.229"
-
-将会在/etc/hosts创建记录：
-
-162.242.195.82  somehost
-
-50.31.209.229  otherhost
-
-cap_add  让容器拥有内核的某项能力
-
-cap_drop 去掉容器内核的某项能力
-
-cgroup_parent   指定父 cgroup 组，意味着将继承该组的资源限制
-
-container_name  指定容器名称。默认将会使用 项目名称_服务名称_序号 这样的格式
-
-devices  指定设备映射关系
-
-dns:		#自定义 DNS 服务器。可以是一个值，也可以是一个列表
-
- \- 8.8.8.8
-
- \- 9.9.9.9
-
-dns_search    配置 DNS 搜索域。可以是一个值，也可以是一个列表
-
-tmpfs   挂载一个 tmpfs文件系统到容器
-
-env_file 从文件中获取环境变量，可为单独的文件路径或列表(如有变量名称与environment指令冲突则>以后者为准)
-
-extra_hosts    类似 Docker 中的 --add-host 参数，指定额外的 host 名称映射信息
-
-healthcheck    通过命令检查容器是否健康运行
-
-logging  配置日志选项，目前支持三种日志驱动类型(json-file、syslog和none)
-
-network  设置网络模式
-
-net: "bridge"
-
-net: "none"
-
-net: "container:[name or id]"
-
-net: "host"
-
-networks 配置容器连接的网络
-
-secrets  存储敏感数据，例如 mysql 服务密码
-
-security_opt   指定容器模板标签（label）机制的默认属性（用户、角色、类型、级别等）
-
-stop_signal    设置另一个信号来停止容器。在默认情况下使用的是 SIGTERM 停止容器
-
-working_dir    指定容器中工作目录
-
-# docker-compose基本操作：
+## docker-compose基本操作：
 
 docker-compose来管理harbor。注意必须切换到docker-compose.yml同级目录下运行一下命令
 
-docker-compose stop/start/restart/up #停止/启动/重启/启动harbor
-
-选项：-h 帮助					-d 在后台运行服务容器
-
--f --file FILE指定Compose模板文件，默认为docker-compose.yml
-
--p --project-name NAME 指定项目名称，默认使用当前所在目录为项目名
-
--v，-version 打印版本并退出		--verbose  输出更多调试信息
-
---log-level LEVEL 定义日志等级(DEBUG，INFO，WARNING，ERROR，CRITICAL)
-
--no-color 不是有颜色来区分不同的服务的控制输出
-
--no-deps 不启动服务所链接的容器
-
---force-recreate 强制重新创建容器，不能与-no-recreate同时使用
-
-–no-recreate 如果容器已经存在，则不重新创建，不能与–force-recreate同时使用
-
-–no-build 不自动构建缺失的服务镜像
-
-–build 在启动容器前构建服务镜像
-
-–abort-on-container-exit 停止所有容器，如果任何一个容器被停止，不能与-d同时使用
-
--t，–timeout TIMEOUT 停止容器时候的超时（默认为10秒）
-
-–remove-orphans 删除服务中没有在compose文件中定义的容器
-
 子命令：
 
+```sh
+stop/start/restart/up #docker-compose 停止/启动/重启/构建、启动容器
 ps：列出所有运行容器 #docker-compose ps
-
 logs：查看服务日志输出	#docker-compose logs
-
 port：打印绑定的公共端口，下面命令可以输出 eureka 服务 8761 端口所绑定的公共端口
-
 docker-compose port eureka 8761
-
 build：构建或者重新构建服务 #docker-compose build
-
 start：启动指定服务已存在的容器 #docker-compose start eureka
-
 stop：停止已运行的服务的容器 #docker-compose stop eureka
-
 rm：删除指定服务的容器 #docker-compose rm eureka
-
-up：构建、启动容器 #docker-compose up
-
 kill：通过发送 SIGKILL 信号来停止指定服务的容器 #docker-compose kill eureka
-
 pull：下载服务镜像
-
 scale：设置指定服务运气容器的个数，以 service=num 形式指定docker-compose scale user=3 movie=3
-
 run：在一个服务上执行一个命令docker-compose run web bash
+```
+
+选项
+
+```sh
+-h 帮助					-d 在后台运行服务容器
+–build 在启动容器前构建服务镜像
+-f --file FILE指定Compose模板文件，默认为docker-compose.yml
+-p --project-name NAME 指定项目名称，默认使用当前所在目录为项目名
+-v，-version 打印版本并退出		--verbose  输出更多调试信息
+--log-level LEVEL 定义日志等级(DEBUG，INFO，WARNING，ERROR，CRITICAL)
+-no-color 不是有颜色来区分不同的服务的控制输出
+-no-deps 不启动服务所链接的容器
+--force-recreate 强制重新创建容器，不能与-no-recreate同时使用
+–no-recreate 如果容器已经存在，则不重新创建，不能与–force-recreate同时使用
+–no-build 不自动构建缺失的服务镜像
+–abort-on-container-exit 停止所有容器，如果任何一个容器被停止，不能与-d同时使用
+-t，–timeout TIMEOUT 停止容器时候的超时（默认为10秒）
+–remove-orphans 删除服务中没有在compose文件中定义的容器
+```
+
+## yaml文件关键字：
+
+```sh
+version  指定 compose 文件的版本 //最新版本，也是推荐使用版本
+services 定义所有的 service 信息
+image   指定为镜像名称或镜像 ID(如果镜像在本地不存在，Compose 将会尝试拉取这个镜像)
+pid    跟主机系统共享进程命名空间。容器和宿主机系统之间可以通过进程 ID 来相互访问和操作
+ports   暴露端口信息
+command  覆盖容器启动后默认执行的命令：command: bundle exec thin -p 3000
+build：  #指定 Dockerfile 所在文件夹的路径
+ context: ./dir #路径
+ dockerfile: Dockerfile-alternate #指定编排文件
+ args:
+  buildno: 1
+restart	 指定容器退出后的重启策略为始终重启，保持服务始终运行，推荐配置为 always 或者 unless-stopped
+depends_on:	#服务依赖容器，将会优先于服务创建并启动依赖，一般是mysql、redis等
+expose  	暴露端口，但不映射到宿主机，只被连接的服务访问
+extends:		#继承自当前yml文件或者其它文件中定义的服务，可以选择性的覆盖原有配置
+ file: common.yml
+ service: webapp		#service必须有，file可选。service是需要继承的服务，例如web、database
+environment:		#添加环境变量。可以是数组或者字典格式
+ \- RACK_ENV=development
+ \- SESSION_SECRET
+external_links:	#链接搭配docker-compose.yml文件或者Compose之外定义的服务，通常是提供共享或公共服务
+ \- redis_1
+ \- project_db_1:mysql	#注意：external_links链接的服务与当前服务必须是同一个网络环境
+environment    设置环境变量。可使用数组或字典两种格式
+depends_on    解决容器的依赖、启动先后的问题(服务不会等待依赖容器完全启动之后才启动)
+volumes:			 #数据卷所挂载路径设置，可以设置为宿主机路径或者数据卷名称
+ \- /var/lib/mysql
+ \- cache/:/tmp/cache
+ \- ~/configs:/etc/configs/:ro
+volumes_from:	#挂载数据卷容器，挂载是容器。container:container_name格式仅支持version 2
+ \- service_name
+ \- service_name:ro
+ \- container:container_name:rw
+links:			#链接到其他服务中的容器，别名将自动会在容器的/etc/hosts文件里创建相应记录
+ \- db
+ \- db:mysql
+ \- redis
+external_links  #链接到docker-compose.yml外部的容器，甚至不是Compose管理的容器
+extra_hosts:		#添加主机名映射
+ \- "somehost:162.242.195.82"
+ \- "otherhost:50.31.209.229"
+将会在/etc/hosts创建记录：
+162.242.195.82  somehost
+50.31.209.229  otherhost
+cap_add  让容器拥有内核的某项能力
+cap_drop 去掉容器内核的某项能力
+cgroup_parent   指定父 cgroup 组，意味着将继承该组的资源限制
+container_name  指定容器名称。默认将会使用 项目名称_服务名称_序号 这样的格式
+devices  指定设备映射关系
+dns:		#自定义 DNS 服务器。可以是一个值，也可以是一个列表
+ \- 8.8.8.8
+ \- 9.9.9.9
+dns_search    配置 DNS 搜索域。可以是一个值，也可以是一个列表
+tmpfs   挂载一个 tmpfs文件系统到容器
+env_file 从文件中获取环境变量，可为单独的文件路径或列表(如有变量名称与environment指令冲突则>以后者为准)
+extra_hosts    类似 Docker 中的 --add-host 参数，指定额外的 host 名称映射信息
+healthcheck    通过命令检查容器是否健康运行
+logging  配置日志选项，目前支持三种日志驱动类型(json-file、syslog和none)
+network  设置网络模式
+net: "bridge"
+net: "none"
+net: "container:[name or id]"
+net: "host"
+networks 配置容器连接的网络
+secrets  存储敏感数据，例如 mysql 服务密码
+security_opt   指定容器模板标签（label）机制的默认属性（用户、角色、类型、级别等）
+stop_signal    设置另一个信号来停止容器。在默认情况下使用的是 SIGTERM 停止容器
+working_dir    指定容器中工作目录
+```
+
+
 
 ## dcoker-compose案例
 
+```yml
 version: "3.3"
-
 services:
-
- wordpress:
-
-image: 10.0.0.3/library/wordpress:latest
-
-depends_on:
-
-\- db
-
-ports:
-
-\- 80
-
-restart: always
-
-environment:
-
-WORDPRESS_DB_HOST: db:3306
-
-WORDPRESS_DB_USER: wordpress
-
-WORDPRESS_DB_NAME: wordpress
-
-WORDPRESS_DB_PASSWORD: wordpress
-
- db:
-
-image: 10.0.0.3/library/mysql:5.6
-
-restart: always
-
-environment:
-
-MYSQL_ROOT_PASSWORD: wordpress#必须初始化
-
-MYSQL_DATABASE: wordpress
-
-MYSQL_USER: wordpress
-
-MYSQL_PASSWORD: wordpress
-
-volumes:
-
-db_data: {} 
+  wordpress:
+    image: 10.0.0.3/library/wordpress:latest
+    depends_on:
+      - db
+    ports:
+      - 80
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+  
+  db:
+    image: 10.0.0.3/library/mysql:5.6
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: wordpress#必须初始化
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    volumes:
+      - db_data: {}
+```
 
 # docker hub官方仓库登录
 

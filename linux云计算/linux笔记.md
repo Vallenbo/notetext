@@ -897,9 +897,38 @@ sudo ifup ens33
 vim 01-network-manager-all.yaml //修改网络配置文件
 ```
 
-
-
 ## centos
+
+### ifconfig
+
+启动 / 关闭指定网卡	
+
+```sh
+ifconfig ens33 up/down  #启动eth0网卡
+```
+
+为网卡配置多个ip地址
+
+```sh
+ifconfig ens33:1 192.168.0.2/24 #方式一
+ifconfig ens33 192.168.xxx.xxx network 255.255.255.0 broadcast 192.168.xxx.xxx #方式二
+```
+
+删除配置的临时ip地址
+
+```sh
+ip a del 192.168.0.2/24 dev ens33
+```
+
+启用或关闭arp协议
+
+```sh
+ifconfig ens33 arp/-arp   #启用 / 关闭
+```
+
+
+
+### 下载网络文件
 
 wget -O -r -p /etc/yum.repos.d/ali.repo http://mirrors.aliyun.com/repo/Centos-7.repo	下载阿里源
 
@@ -934,7 +963,9 @@ vim /etc/NetworkManager/system-connections/ens160.nmconnection rocky系统网卡
 
 lsof -i：22	通过端口号查看对应服务（ftp的端口）
 
-ss / netstat -tupln 查看网络状态(查看各类服务)				route 显示和设置linux系统的路由表
+ss / netstat -tupln 查看网络状态(查看各类服务)				
+
+### route 显示和设置linux系统的路由表
 
 route add –host 192.168.168.110 dev eth0				#添加到主机的路由
 
@@ -1065,7 +1096,7 @@ BONDING_OPTS="mode=6 miimon=100 updelay=600000 primary=eno1"	#模式和网卡
 
 bond模式起不来步骤：1、service NetworkManager stop 临时和永久关闭NetworkManager		2、reboot重启
 
-IP addr 查看网卡状态	ifdown 关闭网卡	ifup打开网卡		cat /proc/net/bonding/bond0 查看bond是否生效
+ip addr 查看网卡状态	ifdown 关闭网卡	ifup打开网卡		cat /proc/net/bonding/bond0 查看bond是否生效
 
 lspci|grep net 查看所有网卡型号参数		
 
@@ -1158,7 +1189,6 @@ deb-src https://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted univer
 
 deb https://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
 deb-src https://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
-
 ```
 
 ubuntu 20.04(focal) 配置如下

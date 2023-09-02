@@ -49,7 +49,7 @@ mget下载多个文件			mirror 下载文件夹		mput命令传输多个文件
 
 !pwd 调用终端命令			lls  显示本地文件列表	lpwd 查看本地当前位置
 
-last	或w	查看所有系统的登录记录
+last	或w	查看所有系统的登录规则
 
 ##  dropbear远程登陆工具
 
@@ -70,7 +70,7 @@ make PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp"
 make PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp" install
 mkdir /etc/dropbear/	#生成key文件存储目录
 dropbearkey -t rsa -f /etc/dropbear/dropbear_rsa_host_key	#-t生成的密钥，-f指定存放地
-dropbear -E -p 2222 #-E-将日志记录到stderr而不是syslog，-F前台输出信息
+dropbear -E -p 2222 #-E-将日志规则到stderr而不是syslog，-F前台输出信息
 ```
 
 ##  Rsync 文件拷贝命令
@@ -224,7 +224,7 @@ PPTP，Point to Point Tunneling Protocol，点对点隧道协议，这是一种�
 
 ```
 localip 192.168.127.11
-remoteip 192. 168.0.20-238,192.168.0.245
+remoteip 192. 168.0.20-238，192.168.0.245
 ```
 
 localip表示VPN服务器本地IP，可以设置为172.16.1.0/24网段，也可以设置为其他网段；
@@ -253,7 +253,7 @@ remoteip表示设置一个地址段供客户机连接使用
 
 C/S模式(客户端与服务端不在同一主机上）
 
-Dynamic Host Configuration Protocol动态主机配置协议,是TCP／IP协议簇中的一种，是一个局域网的网络协议，使用 UDP协议工作。
+Dynamic Host Configuration Protocol动态主机配置协议，是TCP／IP协议簇中的一种，是一个局域网的网络协议，使用 UDP协议工作。
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps10.jpg) 
 
@@ -309,7 +309,7 @@ netbios name = MYSERVER	在smb服务器的电脑名称，此设置需要启动nm
 
 passdb backend = tdbsam：Samba 用户的存储方式，smbpasswd 表示明文存储，tdbsam 表示密文存储
 
-log file = /var/log/samba/log.%I	设置Samba Server日志文件的存储位置以及日志文件名称。在文件名后加个宏%m（主机名），表示对每台访问Samba Server的机器都单独记录一个日志文件
+log file = /var/log/samba/log.%I	设置Samba Server日志文件的存储位置以及日志文件名称。在文件名后加个宏%m（主机名），表示对每台访问Samba Server的机器都单独规则一个日志文件
 
 samba配置中的宏定义:
 
@@ -321,7 +321,7 @@ samba配置中的宏定义:
 
 %S可登录的用户名
 
-log level=2 日志的详细程度，默认为0(不记录日志文件)
+log level=2 日志的详细程度，默认为0(不规则日志文件)
 
 deadtime = 0：服务器将自动关闭未连接会话的时间。单位是分钟，0代表Samba Server不自动切断任何连接
 
@@ -369,11 +369,11 @@ use_samba_home_dirs #允许本机访问远程samba根目录  	allow_rsync_anon_w
 
 rsync_disable_trans #允许daemon启动rsync
 
--R, --recursive：递归处理所有的文件及子目录。 				-t, --type=类型：设置指定类型的目标安全环境。
+-R， --recursive：递归处理所有的文件及子目录。 				-t， --type=类型：设置指定类型的目标安全环境。
 
--r, --role=角色：设置指定角色的目标安全环境。				-l, --range=范围：设置指定范围的目标安全环境
+-r， --role=角色：设置指定角色的目标安全环境。				-l， --range=范围：设置指定范围的目标安全环境
 
--h, --no-dereference：影响符号连接而非引用的文件。		-v, --verbose：为处理的所有文件显示诊断信息。 		-u, --user=用户：设置指定用户的目标安全环境。		--reference=参考文件：使用指定参考文件的安全环境，而非指定值
+-h， --no-dereference：影响符号连接而非引用的文件。		-v， --verbose：为处理的所有文件显示诊断信息。 		-u， --user=用户：设置指定用户的目标安全环境。		--reference=参考文件：使用指定参考文件的安全环境，而非指定值
 
 ###  Smb用户设置
 
@@ -403,7 +403,7 @@ cifs用于UNIX和windows间共享，而NFS用于UNIX和UNIX之间共享。NAS是
 
 需安装cifs-utils包
 
-一次性挂载：mount -o username=user1,password=123  //192.168.0.109/redhat  /media
+一次性挂载：mount -o username=user1，password=123  //192.168.0.109/redhat  /media
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps22.jpg) 
 
@@ -506,7 +506,7 @@ vim .message 	#以带有颜色的方式显示
 wu-ftp日志：默认启用
 
 ```sh
-xferlog_enable=YES 开启日志记录上传下载日志，默认启用	xferlog_std_format=YES 使用wu-ftp日志格式，默认启用
+xferlog_enable=YES 开启日志规则上传下载日志，默认启用	xferlog_std_format=YES 使用wu-ftp日志格式，默认启用
 xferlog_file=/var/log/xferlog 默认日志文件
 ```
 
@@ -689,7 +689,7 @@ service tftp
 
 NFS是基于内核的文件系统，可以将远程的计算机磁盘挂载到本地，读写文件像访问本地磁盘一样操作，可以共享彼此的文件。由于端口多，主要用于局域网使用
 
-原理：NFS本身的服务并没有提供数据传递的协议，而是通过使用RPC（远程过程调用 Remote Procedure Call）来实现。当NFS启动后，会随机的使用一些端口，NFS就会向RPC注册中心提交这些端口。RPC就会记录下这些端口，RPC会开启111端口。通过client端和sever端端口的连接来进行数据的传输。因此在启动nfs之前，首先要确保rpc服务启动
+原理：NFS本身的服务并没有提供数据传递的协议，而是通过使用RPC（远程过程调用 Remote Procedure Call）来实现。当NFS启动后，会随机的使用一些端口，NFS就会向RPC注册中心提交这些端口。RPC就会规则下这些端口，RPC会开启111端口。通过client端和sever端端口的连接来进行数据的传输。因此在启动nfs之前，首先要确保rpc服务启动
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps32.jpg" alt="img" style="zoom:67%;" /> 
 
@@ -725,7 +725,7 @@ showmount -e 192.168.0.22查看服务器22的共享文件夹
 
 mount -t nfs 192.168.0.109:/www  /public	指定挂载类型，nfs挂载文件umount命令)
 
-192.168.0.109：/www		/www		nfs		defaults,_netdev	0	0		#_netdev无网络不挂载
+192.168.0.109：/www		/www		nfs		defaults，_netdev	0	0		#_netdev无网络不挂载
 
 win10挂载NFS服务：程序-->启用windos功能-->NFS服务-->此电脑-->映射驱动器中添加nfs地址，和要共享的文件夹
 
@@ -843,7 +843,7 @@ InitiatorName=iqn.2003-01.com.redhat:rhel
 
 [root@linuxprobe ~]# iscsiadm -m node -T iqn.2003-01.org.linux-iscsi.linuxprobe. x8664:sn.d497c356ad80 -p 192.168.127.1 -l
 
-由于设备名重启后会改变，先格式化iSCSI硬盘得到UUID号, 再进性挂载
+由于设备名重启后会改变，先格式化iSCSI硬盘得到UUID号， 再进性挂载
 
 （如果忘记加_netdev字段重启后，客户端一直在找，无法正常启动，须umount再修改fstab文件）
 
@@ -973,16 +973,16 @@ recursion yes;				//允许递归查询
 logging {				//定义日志
 	channel my_file {   //定义channel名称
 	file "data/named.run";    //以文件形式存储日志
-	severity dynamic;  //存储日志的级别,一共7个级别从高到低分别是：crit,error,warning.notice,info(前面5个属于syslog);debug[level],dynami(后两个属于Bind8,9独有的级别)
+	severity dynamic;  //存储日志的级别，一共7个级别从高到低分别是：crit，error，warning.notice，info(前面5个属于syslog);debug[level]，dynami(后两个属于Bind8，9独有的级别)
 };
   category statistics { my_file; };   //定义bind系统中各子系统的日志
-  //将日志发给channel,可以发给多个channel,一个channel只能接受一个category
+  //将日志发给channel，可以发给多个channel，一个channel只能接受一个category
 };
 ```
 
 ```
-zone "." IN { //定义Dns的zone,"."代表根区域
-	type hint;	//定义zone的类型,根区域的类型就为hint
+zone "." IN { //定义Dns的zone，"."代表根区域
+	type hint;	//定义zone的类型，根区域的类型就为hint
 	file "named.ca";	//指定zone文件，默认已经生成
 };
 ```
@@ -1001,7 +1001,7 @@ Dig	 -t axtr redhat.com正向挖掘的redhat.com
 
 ##  添加dns从服务器
 
-1,在主服务器著配置文件里面添加一行
+1，在主服务器著配置文件里面添加一行
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps67.jpg" alt="img" style="zoom: 80%;" />Allow-transfer行		允许0.28主机当做从服务器
 
@@ -1027,7 +1027,7 @@ postfix是Wietse Venema在IBM的GPL协议之下开发的MTA（邮件传输代理
 
 Postfix试图更快、更容易管理、更安全，同时还与sendmail保持足够的兼容性，因此它是免费的
 
-postfix的产生是为了替代传统的sendmail。相较于sendmail,postfix在速度，性能和稳定性上都更胜一筹
+postfix的产生是为了替代传统的sendmail。相较于sendmail，postfix在速度，性能和稳定性上都更胜一筹
 
 现在主流邮件服务都在采用postfix. 当需要一个轻量级的的邮件服务器时，postfix也是一种选择<img src="E:\Project\Textbook\linux云计算\assets\wps70.jpg" alt="img" style="zoom: 67%;" />![img](E:\Project\Textbook\linux云计算\assets\wps71.jpg)
 
@@ -1041,7 +1041,7 @@ myorigin = $mydomain　 #将发信地址“@”后面的部分设置为域名（
 
 inet_interfaces = all　 #接受来自所有网络的请求 
 
-mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain　 #指定发给本地>邮件的域名
+mydestination = $myhostname， localhost.$mydomain， localhost， $mydomain　 #指定发给本地>邮件的域名
 
 mynetworks #设置可转发哪些主机的邮箱
 
@@ -1098,7 +1098,7 @@ echo "/usr/local/sbin/nginx" >>/etc/rc.local	开机启动服务的命令
 ```sh
 nginx -s quit //平稳关闭Nginx stop快速关闭，可能不保存相关信息 reload重载配置 reopen重新打开日志文件
 nginx -V 显示 //nginx 的版本，编译器版本和配置参数		nginx -t	//将检查配置文件的语法的正确性	
-nginx -?,-h //打开帮助信息		killall nginx //杀死所有nginx进程
+nginx -?，-h //打开帮助信息		killall nginx //杀死所有nginx进程
 ```
 
 **主配置文件**	vim /usr/local/nginx/conf/nginx.conf
@@ -1137,7 +1137,7 @@ upstream myserver; {  //负载均衡的服务器名字myserver
 	热备(mater挂了转backup)
 	server 127.0.0.1:8080;
 	server 192.168.100.138:8081 backup;  
-	加权轮询：跟据权重的大小分发给不同服务器不同数量的请求，权重越高分配越多,服务器的请求顺序为：ABBABB
+	加权轮询：跟据权重的大小分发给不同服务器不同数量的请求，权重越高分配越多，服务器的请求顺序为：ABBABB
  	server 192.168.100.138:8081 weight=1;
 	server 192.168.100.138:8080 weight=2;
 
@@ -1163,7 +1163,7 @@ server {	//多个服务时注意文件{}格式
 	root html;  #安装位置根目录/ngnix下
 #proxy_pass  http://192.168.100.138:8080;  #反向代理服务器端口
 #proxy_pass  http://myserver;	#负载均衡指向的服务器名字
-	index index.html;  #设置默认页		//autoindex  on;自动查找,列出反文件
+	index index.html;  #设置默认页		//autoindex  on;自动查找，列出反文件
 	deny 127.0.0.1;  #拒绝的ip
 	allow 172.18.5.54; #允许的ip	} 
 
@@ -1171,8 +1171,8 @@ server {	//多个服务时注意文件{}格式
 #location = / |~|~*|^~ { ＃ /通用匹配= 为严格匹配，~区分大小写，~*不区分大小写，^~模糊匹配
 location ~* \ . ( jpg | png | gif)$ {	#当访问以jpg结尾时直接走代理服务器8081端口，静态访问
 	proxy_pass	http://192.168.100.138:8081:
-	root     bb;		#nginx根目录下的文件夹, 	/bb	#绝对路径/下的文件夹
-	autoindex  on;	#自动查找,列出反文件	//index index.html; 设置默认页
+	root     bb;		#nginx根目录下的文件夹， 	/bb	#绝对路径/下的文件夹
+	autoindex  on;	#自动查找，列出反文件	//index index.html; 设置默认页
 }	}		}
 ```
 
@@ -1241,7 +1241,7 @@ if [ $A -eq 0 ];then   #如果nginx没有启动就启动nginx
 fi
 ```
 
-启动两台服务器nginx和service keepalived start启动服务		<--停止服务,测试
+启动两台服务器nginx和service keepalived start启动服务		<--停止服务，测试
 
 ###  Rewrite规则
 
@@ -1348,7 +1348,7 @@ require ip 192.168.2.6
 
 options indexes					#只对该目录生效
 
-order deny,allow
+order deny，allow
 
 deny from ilt.example.com			#拒绝该域的访问
 
@@ -1492,7 +1492,7 @@ Htpasswd -c /etc/httpd/htpasswd alex	#创建认证数据库且加入用户alex
 
 ###  代理服务器
 
-代理服务器：客户端想访问服务端搭建的所有站点,必须要能解析出该站点
+代理服务器：客户端想访问服务端搭建的所有站点，必须要能解析出该站点
 
 代理服务器能看到的站点，你通过代理服务器也许能看到
 
@@ -1510,7 +1510,7 @@ Htpasswd -c /etc/httpd/htpasswd alex	#创建认证数据库且加入用户alex
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps105.jpg)可以用localnet代替多网站，端口也可被代替
 
-![img](E:\Project\Textbook\linux云计算\assets\wps106.jpg) 允许test,拒绝全部除safe外
+![img](E:\Project\Textbook\linux云计算\assets\wps106.jpg) 允许test，拒绝全部除safe外
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps107.jpg) 
 
@@ -1567,7 +1567,7 @@ https://tomcat.apache.org/ 官网  Apache拓展服务		默认端口port：8080
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps116.jpg) ![img](E:\Project\Textbook\linux云计算\assets\wps117.jpg)
 
-##  1安装DHCP服务器,主配置文件/etc/dhcp/dhcpd.conf，让客户机去127.10服务器拿pxelinux文件
+##  1安装DHCP服务器，主配置文件/etc/dhcp/dhcpd.conf，让客户机去127.10服务器拿pxelinux文件
 
 ##  2安装tftp.x86_64 	 tftp-server.x86_64  xinetd.x86_64服务器(为客户机提供引导及驱动)
 
@@ -1657,7 +1657,7 @@ bootloader --location=mbr --driveorder=sda --append="crashkernel=auto rhgb quiet
 
 \# Note that any partitions you deleted are not expressed
 
-\# here so unless you clear all partitions first, this is
+\# here so unless you clear all partitions first， this is
 
 \# not guaranteed to work
 
@@ -1713,7 +1713,7 @@ repo --name="CentOS-6.6" --baseurl=http://192.168.4.150/centos/os/ --cost=100
 
 设置firewalld防火墙和selinux		setsebool -P ftpd_full_access on
 
-# 防火墙
+# firewalld防火墙
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps134.jpg" alt="img" style="zoom: 80%;" /> 
 
@@ -1761,25 +1761,51 @@ repo --name="CentOS-6.6" --baseurl=http://192.168.4.150/centos/os/ --cost=100
 
 # Iptables(只是一条命令)
 
-tables实不是真正的防火墙,我们可以把它理解成一个客户端代理,用户通过 iptables这个代理,将用户的安全设定执行到对应的安全框架中,
+tables实不是真正的防火墙，我们可以把它理解成一个客户端代理，用户通过 iptables这个代理，将用户的安全设定执行到对应的安全框架中，netfilter是防火墙真正的安全框架( framework)， netfilter位于内核空tables其实是一个命令行位于用户我们用这个工具操作真正的框架。				`包：iptables`
 
-netfilter.是防火墙真正的安全框架( framework), netfilter位于内核空tables其实是一个命令行位于用户我们用这个工具操作真正的框架。				包：iptables
+iptables 默认维护着 4 个表和 5 个链，所有的防火墙策略规则都被分别写入这些表与链中。
+
+“四表”是指 iptables 的功能，默认的 iptable s规则表有 filter 表（过滤规则表）、nat 表（地址转换规则表）、mangle（修改数据标记位规则表）、raw（跟踪数据表规则表）：
+
+> filter 表：控制数据包是否允许进出及转发，可以控制的链路有 INPUT、FORWARD 和 OUTPUT。
+> nat 表：控制数据包中地址转换，可以控制的链路有 PREROUTING、INPUT、OUTPUT 和 POSTROUTING。
+> mangle：修改数据包中的原数据，可以控制的链路有 PREROUTING、INPUT、OUTPUT、FORWARD 和 POSTROUTING。
+> raw：控制 nat 表中连接追踪机制的启用状况，可以控制的链路有 PREROUTING、OUTPUT。
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps136.jpg" alt="img" style="zoom:67%;" /> <img src="E:\Project\Textbook\linux云计算\assets\wps137.jpg" alt="img" style="zoom:67%;" /> <img src="E:\Project\Textbook\linux云计算\assets\wps138.jpg" alt="img" style="zoom:67%;" />
 
--P设置默认策略	-F清空规则链		-L查看规则链		-A在规则链的末尾加人新规则
+iptables [-t 表名] <-A增加|I插入|D删除|R丢弃> 链名 [设置规则的执行编号] [-i|o 网卡名称] [-p 协议类型] [-s 源ip|源子网] [--sport 源端口号] [-d 目的IP|目标子网] [--dport 目标端口号] [-j 动作]
 
--I + num，在规则链的头部加人新规则			-D + num，删除某一条规则
+iptables 命令常用的选项及功能
 
--s匹配来源地址IP/MASK,加叹号“!” 表示除这个IP外		-d匹配目标地址
+```sh
+-A在规则链的末尾加人新规则				-F清空规则链					-L查看规则链
+-I +num，在规则链的头部加新规则			-D +num，删除某一条规则		  -R 替换防火墙规则
+-Z	清空防火墙数据表统计信息			-P设置默认策略
+```
 
--i + 网卡名称，匹配从这块网卡流入的数据		-o + 网卡名称，匹配从这块网卡流出的数据
+iptables 命令常用匹配参数及功能
 
--P + 匹配协议，如TCP、UDP、ICMP
+```sh
+-p +匹配协议，如TCP、UDP、ICMP					[!]-p +匹配协议,！取反
+-s匹配来源地址IP/MASK，					    -d匹配目标地址
+-i +网卡名称，匹配从这块网卡流入的数据		      -o +网卡名称，匹配从这块网卡流出的数据
+--dport +num，匹配目标端口号					--sport +num，匹配来源端口号
+--src-range	匹配源地址范围						--dst-range	匹配目标地址范围
+--limit	四配数据表速率							--mac-source 匹配源MAC地址
+--stste	匹配状态（INVALID、ESTABLISHED、NEW、RELATED)
+--string	匹配应用层字串
+-n,--numeric 数字化显示ip和端口					--line-number查看规则行数
+```
 
---dport + num，匹配目标端口号				--sport + num，匹配来源端口号			--line-number查看规则行数
+iptables 命令触发动作及功能
 
-iptables [-t 表名] <-A增加|I插入|D删除|R丢弃> 链名 [规则编号] [-i|o 网卡名称] [-p 协议类型] [-s 源ip|源子网] [--sport 源端口号] [-d 目的IP|目标子网] [--dport 目标端口号] [-j 动作]
+| 触发动作   | 功 能          | 触发动作 | 功 能                        |
+| :--------- | :------------- | -------- | ---------------------------- |
+| ACCEPT     | 允许数据包通过 | REJECT   | 拒绝数据包通过               |
+| DROP       | 丢弃数据包     | LOG      | 将数据包信息规则 syslog 曰志 |
+| DNAT       | 目标地址转换   | SNAT     | 源地址转换                   |
+| MASQUERADE | 地址欺骗       | REDIRECT | 重定向                       |
 
 **1、查看当前iptables状态**
 
@@ -1787,27 +1813,27 @@ iptables -nL #默认查看filter表的状态，如果需要查看其他表的状
 
 iptables -nL --line-numbers --verbose #可以查看到规则行数包过滤的流量统计，访问次数
 
-**2、插入一条记录**
+**2、插入规则**
 
-iptables -A INPUT 1 -s 192.168.10.0/24 -p tcp --dport 22 -j  ACCEPT
+iptables -A INPUT -s 192.168.10.0/24 -p tcp --dport 22 -j  ACCEPT
 
-第一行追加一条规则将 INPUT设置为只允许指定网段主机访问本机的22端口，拒绝来自其他主机的流量
+#第一行追加一条规则将 INPUT设置为只允许指定网段主机访问本机的22端口，拒绝来自其他主机的流量
 
-iptables -I INPUT 1 -i lo -j ACCPET #在第一条的位置插入一条记录，接受所有来自lo网口的访问
+iptables -I INPUT 1 -i lo -j ACCEPT#在第一条的位置插入一条规则，接受所有来自lo网口的访问
 
-iptables -I INPUT 2 -s 192.168.1.0/24 -j ACCPET # 如果在INPUT中不指明在第几条插入，默认就是在第一条插入
+iptables -I INPUT 2 -s 192.168.1.0/24 -j ACCEPT#如果在INPUT中不指明在第几条插入，默认就是在第一条插入
 
-**3、追加一条记录**
+**3、修改规则**
 
-iptables -A INPUT -s 192.168.2.0/24 -j ACCEPT #在INPUT最后追加一条记录。
+iptables -R INPUT 6 -s 194.168.1.5 -j ACCEPT #在第 6 行规则的 DROP 修改为 ACCEPT
 
-**4、删除一条记录**
+**4、删除规则**
 
-iptables -D INPUT 7 #删除第7条记录
+iptables -D INPUT 7 #删除第7条规则
 
-iptables -P INPUT DROP		把 INPUT 规则链的默认策略设置为拒绝
+iptables -P INPUT DROP #把 INPUT 规则链的默认策略设置为拒绝
 
-iptables -I INPUT -p imcp -j ACCEPT	针对协议开放
+iptables -I INPUT -p imcp -j ACCEPT #针对协议开放
 
 **5、针对端口开放（需要指明协议）**
 
@@ -1835,21 +1861,27 @@ iptables-restore < /etc/sysconfig/iptables
 
 **11、对外建立的连接经过INPUT不拦截**
 
-iptables -I INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+iptables -I INPUT -m conntrack --ctstate RELATED，ESTABLISHED -j ACCEPT
 
-12、端口转发（本机8080转发到远程192.168.1.22:80）
+**12、端口转发**（本机8080转发到远程192.168.1.22:80）
 
 iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 8080 -j DNAT --to 192.168.1.22:80
 
 iptables -t nat -A POSTROUTING -j MASQUERADE
 
-echo 1 > /proc/sys/net/ipv4/ip_forward #需要打开网转发
+```sh
+echo 1 > /proc/sys/net/ipv4/ip_forward #需要打开ip转发
+```
 
 iptables -t filter FORWARD -d 192.168.1.22/32 -j ACCEPT #转发的FROWARD要允许双方的数据传输
 
-iptables -t filter FORWARD -s 192.168.1.22/32 -j ACCEPT
+**13、规则保存和备份**
 
-**13、service iptables save让配置的防火墙策略永久生效**
+service iptables save #让配置的防火墙策略永久生效
+
+iptables-save > /etc/sysconfig/iptables #保存在默认文件夹中（保存防火墙规则）
+
+iptables-restore < 文件名称 #批量导入Linux防火墙规则
 
 **14、自动获取当前网卡ip地址来做SNAT源端口**
 
@@ -1869,9 +1901,9 @@ Linux 系统中其实有两个层面的防火墙
 
 # KVM虚拟技术
 
-业务需求 举例：公司现有部分linux服务器利用率不高，为充分使用这些服务器，可以部署kvm,在物理机上部署多个业务系统。
+业务需求 举例：公司现有部分linux服务器利用率不高，为充分使用这些服务器，可以部署kvm，在物理机上部署多个业务系统。
 
-例如在运行的nginx服务器上部署kvm,然后再虚拟机上运行tomcat
+例如在运行的nginx服务器上部署kvm，然后再虚拟机上运行tomcat
 
 虚拟化就是把硬件资源从物理方式转变为逻辑方式，打破原有物理结构，使用户灵活管理这些资源，并且允许一台物理机上同时运行多个操作系统，以实现资源利用率最大化和灵活管理的技术
 
@@ -1923,7 +1955,7 @@ virt-manager打开可视化界面		Virsh虚拟化命令	--help			snapshot快照�
 创建一个名为gurobi的1个8核cpu，内存容量为512M的，硬盘容量为1TB
 
 ```sh
-[root@localhost ~]# virt-install --name=gurobi --memory=512,maxmemory=1024 --vcpus=1,maxvcpus=2 --os-type=linux --os-variant=rhel7 --location=/tmp/CentOS-7-x86_64-DVD-1708.iso --disk path=/kvm_data/gurobi.img,size=10 --bridge=br0 --graphics=none --console=pty,target_type=serial --extra-args=“console=tty0 console=ttyS0”
+[root@localhost ~]# virt-install --name=gurobi --memory=512，maxmemory=1024 --vcpus=1，maxvcpus=2 --os-type=linux --os-variant=rhel7 --location=/tmp/CentOS-7-x86_64-DVD-1708.iso --disk path=/kvm_data/gurobi.img，size=10 --bridge=br0 --graphics=none --console=pty，target_type=serial --extra-args=“console=tty0 console=ttyS0”
 ```
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps147.jpg) 

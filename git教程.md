@@ -2,39 +2,30 @@
 
 \#进入到需要上传的项目目录，右键选择Git Bash Here
 
- 
-
-`git init `# 第一步：初始化项目，然后会生成.git文件夹
-
-`git add .  `# 第二步：将当前目录加入到git（.代表全部）
-
-`git commit -m "first “`（提交的描述信息也就是提交的说明）# 第三步：git提交到本地版仓库，并注明提交的缘由
-
-`git remote add origin https://gitee.com/hui829/web-vue-project-exercise.git`
-
-\# 第四步：将文件上传到gitee中的master分支,-u代表第一次上传
-
-`git push -u origin master`
+```sh
+git init # 第一步：初始化项目，然后会生成.git文件夹
+git add .  # 第二步：将当前目录加入到git（.代表全部）
+git commit -m "first （提交的描述信息也就是提交的说明）" # 第三步：git提交到本地版仓库，并注明提交的缘由
+git remote add origin https://gitee.com/hui829/web-vue-project-exercise.git`
+# 第四步：将文件上传到gitee中的master分支,-u代表第一次上传
+git push -u origin master
+```
 
 注意：一般一个完整项目中只有第一级目录下会生成.git文件夹，如果上传的第二级目录的文件夹中有.git文件夹，则只会上传二级目录文件夹，而不会上传二级目录文件夹下的内容，如果上传的二级目录的文件夹中没有.git文件，则会上传二级目录文件夹下的内容（多级目录同理）
 
- 
+
 
 2.对于已有的仓库，且已经进行过一次或多次上传文件后，还需要更新代码至gitee
 
 \#进入到需要上传的项目目录，右键选择Git Bash Here
 
-
-
-`git status ` # 第一步：列出自己做出修改的文件，会列出你修改的文件以及新增的文件
-
-`git add . `# 第二步：将当前目录加入到git, .代表全部更新, 指定文件更新则点替换为指定文件名
-
-`git add test.txt `# 第二步-2：上传单个文件
-
-`git commit -m `"更新说明" # 第三步： 添加更新说明
-
-`git push origin master`  # 第四步： 执行更新操作
+```sh
+git status  # 第一步：列出自己做出修改的文件，会列出你修改的文件以及新增的文件
+git add . # 第二步：将当前目录加入到git, .代表全部更新, 指定文件更新则点替换为指定文件名
+git add test.txt # 第二步-2：上传单个文件
+git commit -m "更新说明" # 第三步： 添加更新说明
+git push origin master  # 第四步： 执行更新操作
+```
 
 
 
@@ -42,23 +33,22 @@
 
 进入到需要将克隆项目存放的目录，右键选择Git Bash Here
 
-
-
 `git clone https://gitee.com/gavinzhulei/vue-form-making.git `# xxx 代表g项目的克隆地址,仅需一步
 
 ![img](E:\Project\Textbook\assets\wps1.jpg) 
 
 问题原因：在码云创建的仓库有ReadMe文件，而本地没有，造成本地和远程的不同步
 
-报错解决：**one ：**
+报错解决：
+
+**one ：**
 
 本地没有ReadMe文件，那么就在本地生成一个：
 
-`**git pull --rebase origin master** `  本地生成ReadMe文件
-
-`**git push origin master**`
-
- 
+```sh
+git pull --rebase origin master // 本地生成ReadMe文件
+git push origin master
+```
 
 **two：**
 
@@ -66,9 +56,9 @@
 
 (这个命令在团队开发的时候最好不要用,否则可能会有生命危险)
 
- 
 
- 
+
+
 
 [1] Git技术:公司必备，-定要会
 
@@ -90,13 +80,13 @@
 
 [5]版本控制系统的分类:
 
-集中化的版本控制系统:
+
 
 ![img](E:\Project\Textbook\assets\wps2.jpg) 
 
 集中化的版本控制系统诸如CVS, SVN以及Perforce等，都有一个单-的集中管理的服务器,保存所有文件的修订版本, 而协同工作的人们都通过客户端连到这台服务器,取出最新的文件或者提交更新。多年以来,这已成为版本控制系统的标准做法,这种做法带来了许多好处,现在,每个人都可以在定程度上看到项目中的其他人正在做些什么。而管理员也可以轻松掌控每个开发者的权限，并且管理一个集中化的版本控制系统;要远比在各 个客户端上维护本地数据库来得轻松容易。
 
-事分两面，有好有坏。这么做最显而易见的缺点是中央服务器的单点故障。如果服务器宕机- -小时， 那么在这一-小时内， 谁都无法提交更新，也就
+事分两面，有好有坏。这么做最显而易见的缺点是中央服务器的单点故障。如果服务器宕机一小时， 那么在这一小时内， 谁都无法提交更新，也就
 
 无法协同工作。
 
@@ -106,7 +96,7 @@
 
  
 
-密分布式的版本控制系统
+**密分布式的版本控制系统**
 
 由于上面集中化版本控制系统的那些缺点，于是分布式版本控制系统面世了。
 
@@ -173,8 +163,8 @@
 `git config `//配置
 
 ```
-`--list `看所有用户
-`--global user.name "liu" user.email "2581210093@qq.com" ` \\\ 设置全局用户名liu和e-mail邮箱
+`--list ` \\查看所有用户
+`--global user.name "liu" user.email "2581210093@qq.com" ` \\ 设置全局用户名liu和e-mail邮箱
 ```
 
 
@@ -265,7 +255,7 @@ b 分支名 // 创建并切换到分支
 
 `git pull   `// 拉取，下拉指定主机的指定分支，并与本地的指定分支合并
 
-```
+```sh
 pull = fetch + merge 操作的合并
 ```
 
@@ -329,7 +319,7 @@ pull request请求按钮：
 
 执行之后会在linux用户主目录下的.gitconfig文件中多加 helper = store
 
-```
+```conf
 [user]
 	name = 用户名
 	email = 邮箱

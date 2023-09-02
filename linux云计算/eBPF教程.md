@@ -1,4 +1,4 @@
-# 安装使用
+# apt方式安装使用
 
 使用aptitude进行安装：aptitude是一个交互式的软件包管理器，它可以更好地处理软件包之间的依赖关系。如果您还没有安装aptitude，请运行以下命令安装它。
 
@@ -26,9 +26,7 @@ bpftrace v0.14.0
 
 - 配套资源 https://github.com/brendangregg/bpf-perf-tools-book
 
-**其他方式**
-
-centos 安装
+**centos 安装方式**
 
 ```sh
 curl https://repos.baslab.org/bpftools.repo --output /etc/yum.repos.d/bpftools.repo
@@ -53,7 +51,83 @@ opensnoop-bpfcc 2>/dev/null
 
 
 
+
+
+# soure方式安装使用
+
+## bcc
+
+22.04及最新版本安装方式
+
+```sh
+sudo apt install -y zip bison build-essential cmake flex git libedit-dev \
+  libllvm14 llvm-14-dev libclang-14-dev python3 zlib1g-dev libelf-dev libfl-dev python3-setuptools \
+  liblzma-dev libdebuginfod-dev arping netperf iperf
+```
+
+安装和编译方式
+
+```sh
+git clone https://github.com/iovisor/bcc.git
+mkdir bcc/build; cd bcc/build
+cmake ..
+make
+sudo make install
+cmake -DPYTHON_CMD=python3 .. # build python3 binding
+pushd src/python/
+make
+sudo make install
+popd
+```
+
+## bpftrace
+
+Ubuntu 19.04以及更新版本，安装方式
+
+```sh
+sudo apt-get install -y libbpfcc-dev
+```
+
+构建bpftrace
+
+```sh
+sudo apt-get update
+sudo apt-get install -y \
+  bison \
+  cmake \
+  flex \
+  g++ \
+  git \
+  libelf-dev \
+  zlib1g-dev \
+  libfl-dev \
+  systemtap-sdt-dev \
+  binutils-dev \
+  libcereal-dev \
+  llvm-dev \
+  llvm-runtime \
+  libclang-dev \
+  clang \
+  libpcap-dev \
+  libgtest-dev \
+  libgmock-dev \
+  asciidoctor \
+  libdw-dev \
+  pahole
+git clone https://github.com/iovisor/bpftrace --recurse-submodules
+mkdir bpftrace/build; cd bpftrace/build;
+../build-libs.sh
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make -j8
+sudo make install
+```
+
+bpftrace二进制文件将安装在/usr/local/bin/bpftrace和tools中 在/usr/local/share/bpftrace/tools中。可以使用 参数到cmake，其中默认值为。`-DCMAKE_INSTALL_PREFIX=/usr/local`
+
+
+
 # 第一章 引言
+
 BPF提供了一种在各种内核时间和应用程序事件发生时运行一段小程序的机制。由指令集、存储对象和辅助函数等几部分组成。应用领域分别是网络、可观测性和安全。
 跟踪(tracing)是基于事件记录。嗅探(snoop)、时间记录和跟踪，通常指的是一回事。
 采样(sampling)：通过获取全部观测量的子集来描绘目标的大致图像；这也被称为生成性能剖析样本或profiling。有一个BPF工具就叫profile，它基于计时器来对运行中的代码定时采样。
@@ -483,7 +557,7 @@ elapsed 时间戳，单位纳秒，字bpftrace启动开始计时		  cpu 处理�
 comm 进程名										  kstack ustack 调试栈信息
 func 被跟踪函数名字									probe 当前探针全名
 arg0…argN 跟踪点函数的输入参数0，参数N(N为下标)...		  args.参数名 使用跟踪点的入口参数
-retval 跟踪点返回值									ret: 表示函数的返回值
+retval 跟踪点函数返回值									ret: 表示函数的返回值
 curtask 内核task_struct地址							  cgroup
 1,...,N bpftrace程序的位置参数							
 ```
@@ -496,8 +570,6 @@ curtask 内核task_struct地址							  cgroup
 bpftrace -e 'uprobe:/home/eBPF/add:adds {printf("ID:%d\n",pid)}'
 # 监控函数的入口参数获取
 bpftrace -e 'uprobe:/home/eBPF/add:adds {printf("ID:%d,args0:%d\n",pid,arg0)}'
-
-
 ```
 
 - bpftrace函数

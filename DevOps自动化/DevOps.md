@@ -1,4 +1,24 @@
-# DevOps
+
+
+![image-20230823154815285](./assets/image-20230823154815285.png)
+
+配置低用gitee，外网好用github，企业用gitlab
+
+# 总体的概括
+
+CI持续集成Continuous Integration：
+
+- 持续集成是指开发者在代码的开发过程中，可以频繁的将代码部署集成到主干，并进程自动化测试
+
+CD持续交付Continuous Delivery
+
+- 持续交付指的是在持续集成的环境基础之上，将代码部署到预生产环境
+
+CD持续部署Continuous Deployment
+
+- 在持续交付的基础上，把部署到生产环境的过程自动化，持续部署和持续交付的区别就是最终部署到生产环境是自动化的。
+
+持续集成通过自动化构建、自动化测试以及自动化部署加上较高的集成频率.保证了开发系统中的问题能迅速被发现和修复，降低了集成失败的风险，使得系统在开发中始终保持在一个稳定健康的集成状态。jenkins是目前广泛应用的持续集成工具，本套课程记录我使用jenkins+Git配置持续集成环境的整个流程.
 
 #  一、DevOps介绍
 
@@ -148,11 +168,53 @@ https://git-scm.com/（傻瓜式安装）
 
 # 三、Build阶段工具
 
-构建Java项目的工具一般有两种选择，一个是Maven，一个是Gradle。
+构建Java项目的工具一般有两种选择，一个是Maven，一个是Gradle
 
 这里我们选择Maven作为项目的编译工具。
 
-具体安装Maven流程不做阐述，但是需要确保配置好Maven仓库私服以及JDK编译版本。
+[华为镜像 Jdk11下载地址 ](https://repo.huaweicloud.com/java/jdk/) | [Maven 下载地址](https://maven.apache.org/download.cgi) 
+
+```sh
+tar xzvf jdk-11.0.2_linux-x64_bin.tar.gz -C /usr/local/
+tar xzvf apache-maven-3.9.4-bin.tar.gz -C /usr/local/
+```
+
+maven的阿里云仓库地址，<mirror>内添加，conf/settings.xml
+
+```xml
+<mirror>
+    <id>nexus-aliyun</id>
+    <mirrorOf>*</mirrorOf>
+    <name>Nexus aliyun</name>
+    <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+</mirror>
+```
+
+maven的jdk8编译插件配置conf/settings.xml
+
+```xml
+<profile>
+    <id>jdk18</id>
+    <activation>
+        <activeByDefault>true</activeByDefault>
+        <jdk>1.8</jdk>
+    </activation>
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
+    </properties>
+</profile>
+```
+
+```xml
+  <activeProfiles>
+    <activeProfile>alwaysActiveProfile</activeProfile>
+    <activeProfile>jdk8</activeProfile>
+  </activeProfiles>
+```
+
+
 
 # 四、Operate阶段工具
 
@@ -183,12 +245,10 @@ https://git-scm.com/（傻瓜式安装）
 - 安装成功后，启动Docker并设置开机自启
 
   ```sh
-  # 启动Docker服务
-  systemctl start docker
-  # 设置开机自动启动
-  systemctl enable docker
+  systemctl start docker # 启动Docker服务
+  systemctl enable docker # 设置开机自动启动
   ```
-
+  
 - 测试安装成功
 
   ```sh
@@ -264,10 +324,14 @@ CI/CD可以理解为：
 
 ## 5.2 Jenkins安装
 
+[jenkins Tags | jenkins的docker镜像](https://hub.docker.com/r/jenkins/jenkins/tags)
+
 - 拉取Jenkins镜像
 
   ```sh
-  docker pull jenkins/jenkins  //这里是最新版本，推荐2.319稳定版本
+  docker pull jenkins/jenkins:lts-jdk11  //这里是最新版本
+  cd /usr/local
+  mkdir -p /usr/local/docker/jenkins_docker
   ```
 
 - 编写docker-compose.yml
@@ -276,7 +340,7 @@ CI/CD可以理解为：
   version: "3.1"
   services:
     jenkins:
-      image: jenkins/jenkins
+      image: jenkins/jenkins:2.414.1-lts-jdk11
       container_name: jenkins
       ports:
         - 8080:8080
@@ -299,10 +363,11 @@ CI/CD可以理解为：
   chmod -R a+w data/
   ```
 
-- 重新启动Jenkins容器后，由于Jenkins需要下载大量内容，但是由于默认下载地址下载速度较慢，需要重新设置下载地址为国内镜像站
+- 重新启动Jenkins容器后，由于Jenkins需要下载大量内容，但是由于默认下载地址下载速度较慢，需要重新设置下载地址为国内镜像站，[清华大学开源软件镜像站](https://mirrors.tuna.tsinghua.edu.cn/) > jenkins>updates 找到update-center.json文件复制路径
 
   ```sh
-  # 修改数据卷中的hudson.model.UpdateCenter.xml文件
+  # 修改数据卷中的data/hudson.model.UpdateCenter.xml文件
+  
   <?xml version='1.1' encoding='UTF-8'?>
   <sites>
     <site>
@@ -310,7 +375,7 @@ CI/CD可以理解为：
       <url>https://updates.jenkins.io/update-center.json</url>
     </site>
   </sites>
-  # 将下载地址替换为http://mirror.esuni.jp/jenkins/updates/update-center.json
+  # 将下载地址替换为https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json
   <?xml version='1.1' encoding='UTF-8'?>
   <sites>
     <site>
@@ -349,11 +414,13 @@ CI/CD可以理解为：
 
 - 下载完毕设置信息进入首页（可能会出现下载失败的插件）
 
-  |                                          |
-  | ---------------------------------------- |
+  |                                                              |
+  | ------------------------------------------------------------ |
   | ![image-20211124211635550](Pictures/image-20211124211635550.png) |
   | ![image-20211124211700999](Pictures/image-20211124211700999.png) |
-  | ![image-20211124211720836](Pictures/image-20211124211720836.png) |
+  | ![image-20211124211720836](Pictures/image-20211124211720836.png)\ |
+  
+  ![ssh配置](./assets/image-20230828092332703.png)
 
 
 ## 5.3 Jenkins入门配置
@@ -366,8 +433,8 @@ CI/CD可以理解为：
 
 - 构建Maven工程发布到GitLab（Gitee、Github均可）
 
-  |                GitLab查看项目                |
-  | :--------------------------------------: |
+  |                        GitLab查看项目                        |
+  | :----------------------------------------------------------: |
   | ![image-20211125195818670](Pictures/image-20211125195818670.png) |
 
 - Jenkins点击左侧导航新建任务
@@ -854,7 +921,7 @@ Docker官方提供了Registry镜像仓库，但是Registry的功能相对简陋�
 
 这里采用原生的方式安装Harbor。
 
-- 下载Harbor安装包：https://github.com/goharbor/harbor/releases/download/v2.3.4/harbor-offline-installer-v2.3.4.tgz
+- 下载[Harbor安装包](https://github.com/goharbor/harbor/releases/download/v2.3.4/harbor-offline-installer-v2.3.4.tgz)
 
 - 拖拽到Linux并解压：
 
