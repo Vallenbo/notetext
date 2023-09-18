@@ -243,11 +243,7 @@ openjdk：是开源社区开发的开源实现，yum list | grep openjdk查看jd
 
 `yum install java-1.8.0 -y` #进行安装
 
-
-
-# 数据库
-
-## NoSQL数据库
+# NoSQL数据库
 
 NoSQL（Not Only SQL），指的是非关系型的数据库。是对不同于传统的关系型数据库的数据库管理系统的统称。NoSQL用于超大规模数据的存储。这些类型的数据存储不需要固定的模式，无需多余操作就可以横向扩展
 
@@ -277,7 +273,7 @@ NoSQL（Not Only SQL），指的是非关系型的数据库。是对不同于传
 
 **例如：**低延迟数据访问比如以广告为目标的应用，高并发的 web 应用比如网络游戏（例如 Zynga）
 
-## MongoDB数据库
+# MongoDB数据库
 
 MongoDB是一个文档数据库，旨在简化开发和扩展。
 
@@ -391,7 +387,7 @@ pretty()使用：> db.log.find({uid:1000}).pretty()
 
 \> db.log.storageSize()   # 集合中数据压缩存储的大小
 
-## Memcached数据库
+# Memcached数据库
 
 Memcached 是一套开源的高性能分布式内存对象缓存系统，它将所有的数据都存储在内存中，因为在内存中会统一维护一张巨大的Hash表，所以支持任意存储类型的数据。很多网站通过使用Memcached提高网站的访问速度，尤其是对于大型的需要频繁访问数据的网站。使用C语言编写
 

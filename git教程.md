@@ -6,7 +6,7 @@
 git init # 第一步：初始化项目，然后会生成.git文件夹
 git add .  # 第二步：将当前目录加入到git（.代表全部）
 git commit -m "first （提交的描述信息也就是提交的说明）" # 第三步：git提交到本地版仓库，并注明提交的缘由
-git remote add origin https://gitee.com/hui829/web-vue-project-exercise.git`
+git remote add origin https://gitee.com/hui829/web-vue-project-exercise.git
 # 第四步：将文件上传到gitee中的master分支,-u代表第一次上传
 git push -u origin master
 ```
@@ -163,8 +163,8 @@ git push origin master
 `git config `//配置
 
 ```
-`--list ` \\查看所有用户
-`--global user.name "liu" user.email "2581210093@qq.com" ` \\ 设置全局用户名liu和e-mail邮箱
+--list \\查看所有用户
+--global user.name "liu" user.email "2581210093@qq.com" \\ 设置全局用户名liu和e-mail邮箱
 ```
 
 
@@ -173,7 +173,7 @@ git push origin master
 
 ```
 --oneline //一行简短进行展示
--pretty=oneline //美丽的方式：一行进行展示  
+-pretty=oneline //美丽的方式：一行进行展示
 ```
 
 ![img](E:\Project\Textbook\assets\wps7.jpg) 

@@ -116,10 +116,10 @@ bash      1234        root  cwd    DIR  253,0     4096   12 /mnt/sdb1_mount
 kill -9 1234
 ```
 
-iostat：监控系统输入/输出设备和CPU使用情况，可能需要用到的安装包 sysstat
+iostat：监控系统输入/输出设备和CPU使用情况，可能需要用到的安装包 apt install sysstat -y
 
 ```
--d：显示磁盘统计信息。			-x 1：显示详细的磁盘统计信息，包括平均等待时间和队列长度等。
+-d：显示磁盘统计信息。			-x 1：显示详细的拓展（磁盘）统计信息，包括平均等待时间和队列长度等。
 -k：以KB为单位显示统计信息。	   -m：以MB为单位显示统计信息。
 -t：显示时间戳。
 ```
@@ -168,11 +168,273 @@ nc（netcat）是一个网络工具，它可以在命令行下进行网络连接
 
 这些只是nc命令的一些基本用法示例，还有更多高级用法可以在 `man nc` 命令中查看。请注意，在实际使用中，请确保你遵守当地的法律法规，并且获得了系统管理员或网络拥有者的授权才能进行网络连接和端口扫描等操作。
 
+# 检查远程用户登陆状态、时间、ip地址等信息
+
+通过who命令查看在线远程登录的用户
+
+```
+[root@ftp local]# who
+root     pts/1        2011-11-09 13:49 (192.168.101.122)
+root     pts/2        2011-11-09 13:49 (192.168.101.122)
+[root@ftp local]# arp 192.168.101.122Address                  HWtype  HWaddress           Flags Mask            Iface
+localhost.168.192.in-ad  ether   00:22:71:dc:2e:0b   C                     eth0
+
+```
+
+能看到MAC地址，有了MAC地址就知道是谁了
+
+
+
+# /proc目录下的操作系统信息
+
+
+
+# strace
+
+
+
+# mpstat
+
+mpstat是 Multiprocessor Statistics的缩写，是实时系统监控工具。其报告与CPU的一些统计信息，这些信息存放在/proc/stat文件中。在多CPU系统里，其不但能查看所有CPU的平均状况信息，而且能够查看特定CPU的信息。
+
+mpstat [-P {cpu|ALL}] [internal [count]]
+
+其中，各参数含义如下：
+
+-P {cpu l ALL}  表示监控哪个CPU， cpu在[0,cpu个数-1]中取值
+ internal    相邻的两次采样的间隔时间
+ count   采样的次数，count只能和delay一起使用
+ 使用mpstat命令
+ 1.直接使用mpstat命令：当mpstat不带参数时，输出为从系统启动以来的平均值。
+
+2.使用mpstat -P ALL 5 2命令
+
+```undefined
+mpstat -P ALL 5 2
+```
+
+表示每5秒产生一个报告，总共产生2个。
+
+上图表示每5秒产生了2个关于处理器的统计数据报告，一共产生2个interval 的信息，然后再给出这2个interval的平均信息。默认时，输出是按照CPU 号排序。第一个行给出了从系统引导以来的所有活跃数据。接下来每行对应一个处理器的活跃状态。
+
+## 输出参数含义
+
+当没有参数时，mpstat则显示系统启动以后所有信息的平均值。有interval时，第一行的信息自系统启动以来的平均信息。从第二行开始，输出为前一个interval时间段的平均信息。
+
+输出各参数含义：
+
+```csharp
+参数  释义  从/proc/stat获得数据
+CPU 处理器ID   
+%usr    在internal时间段里，用户态的CPU时间（%），不包含 nice值为负进程    usr/total*100
+%nice   在internal时间段里，nice值为负进程的CPU时间（%）    nice/total*100
+%sys    在internal时间段里，核心时间（%）   system/total*100
+%iowait 在internal时间段里，硬盘IO等待时间（%）   iowait/total*100
+%irq    在internal时间段里，硬中断时间（%）  irq/total*100
+%soft   在internal时间段里，软中断时间（%）  softirq/total*100
+%steal  显示虚拟机管理器在服务另一个虚拟处理器时虚拟CPU处在非自愿等待下花费时间的百分比   steal/total*100
+%guest  显示运行虚拟处理器时CPU花费时间的百分比   guest/total*100
+%gnice      gnice/total*100
+%idle   在internal时间段里，CPU除去等待磁盘IO操作外的因为任何原因而空闲的时间闲置时间（%）    idle/total*100
+```
+
+CPU总的工作时间：
+
+```undefined
+total_cur = user + system + nice + idle + iowait + irq + softirq
+total_pre = pre_user + pre_system + pre_nice + pre_idle + pre_iowait + pre_irq + pre_softirq
+user = user_cur – user_pre
+total = total_cur - total_pre
+```
+
+其中_cur 表示当前值，_pre表示interval时间前的值。上表中的所有值可取到两位小数点。
+
+Note：
+
+1. vmstat和mpstat 命令的差别：mpstat 可以显示每个处理器的统计，而 vmstat 显示所有处理器的统计。因此，编写糟糕的应用程序（不使用多线程体系结构）可能会运行在一个多处理器机器上，而不使用所有处理器。从而导致一个 CPU 过载，而其他 CPU 却很空闲。通过 mpstat 可以轻松诊断这些类型的问题。
+2. vmstat中所有关于CPU的总结都适合mpstat。当您看到较低的 %idle 数字时，您知道出现了 CPU 不足的问题。当您看到较高的 %iowait 数字时，您知道在当前负载下 I/O 子系统出现了某些问题。
+
+
+
+
+
+# top
+
+Linux top 是一个在 Linux 和其他类 Unix 系统上常用的实时系统监控工具。它提供了一个动态的、交互式的实时视图，显示系统的整体性能信息以及正在运行的进程的相关信息。
+
+```sh
+top [-] [d delay] [q] [c] [S] [s] [i] [n] [b]
+参数说明：
+-d <秒数>：指定 top 命令的刷新时间间隔，单位为秒。			-n <次数>：指定 top 命令运行的次数后自动退出。
+-p <进程ID>：仅显示指定进程ID的信息。						-u <用户名>：仅显示指定用户名的进程信息。
+-H：在进程信息中显示线程详细信息。						   -i：不显示闲置（idle）或无用的进程。
+-b：以批处理（batch）模式运行，直接将结果输出到文件。		  -c：显示完整的命令行而不截断。
+-S：累计显示进程的 CPU 使用时间。
+```
+
+
+
+# pidstat 概述
+
+用于监控全部或指定进程的cpu、内存、线程、设备IO等系统资源的占用情况。pidstat首次运行时显示自系统启动开始的各项统计信息，之后运行pidstat将显示自上次运行该命令以后的统计信息。用户可以通过指定统计的次数和时间来获得所需的统计信息。
+
+**pidstat 安装**
+
+pidstat 是sysstat软件套件的一部分，sysstat包含很多监控linux系统状态的工具，它能够从大多数linux发行版的软件源中获得。
+
+```sh
+apt-get install sysstat -y
+yum install sysstat -y
+```
+
+## pidstat 示例
+
+pidstat 的用法：
+
+```css
+pidstat [ 选项 ] [ <时间间隔> ] [ <次数> ]
+```
+
+如下图：
+
+![img](https:////upload-images.jianshu.io/upload_images/2843224-8b6e338a330cd593.png?imageMogr2/auto-orient/strip|imageView2/2/w/758/format/webp)
+
+常用的参数：
+
+- -u：默认的参数，显示各个进程的cpu使用统计
+- -r：显示各个进程的内存使用统计
+- -d：显示各个进程的IO使用情况
+- -p：指定进程号
+- -w：显示每个进程的上下文切换情况
+- -t：显示选择任务的线程的统计信息外的额外信息
+- -T { TASK | CHILD | ALL }
+   这个选项指定了pidstat监控的。TASK表示报告独立的task，CHILD关键字表示报告进程下所有线程统计信息。ALL表示报告独立的task和task下面的所有线程。
+   注意：task和子线程的全局的统计信息和pidstat选项无关。这些统计信息不会对应到当前的统计间隔，这些统计信息只有在子线程kill或者完成的时候才会被收集。
+- -V：版本号
+- -h：在一行上显示了所有活动，这样其他程序可以容易解析。
+- -I：在SMP环境，表示任务的CPU使用率/内核数量
+- -l：显示命令名和所有参数
+
+## 示例一：查看所有进程的  CPU 使用情况（ -u -p ALL）
+
+```undefined
+pidstat
+pidstat -u -p ALL
+```
+
+pidstat 和 pidstat -u -p ALL 是等效的。
+pidstat 默认显示了所有进程的cpu使用率。
+
+![img](https:////upload-images.jianshu.io/upload_images/2843224-bee9066f2689e541.png?imageMogr2/auto-orient/strip|imageView2/2/w/803/format/webp)
+
+#### 详细说明
+
+- PID：进程ID
+- %usr：进程在用户空间占用cpu的百分比
+- %system：进程在内核空间占用cpu的百分比
+- %guest：进程在虚拟机占用cpu的百分比
+- %CPU：进程占用cpu的百分比
+- CPU：处理进程的cpu编号
+- Command：当前进程对应的命令
+
+## 示例二:  cpu使用情况统计(-u)
+
+```undefined
+pidstat -u
+```
+
+使用-u选项，pidstat将显示各活动进程的cpu使用统计，执行”pidstat -u”与单独执行”pidstat”的效果一样。
+
+## 示例三： 内存使用情况统计(-r)
+
+```undefined
+pidstat -r
+```
+
+使用-r选项，pidstat将显示各活动进程的内存使用统计：
+
+![img](https:////upload-images.jianshu.io/upload_images/2843224-dd469d8d55e58237.png?imageMogr2/auto-orient/strip|imageView2/2/w/807/format/webp)
+
+- PID：进程标识符
+- Minflt/s:任务每秒发生的次要错误，不需要从磁盘中加载页
+- Majflt/s:任务每秒发生的主要错误，需要从磁盘中加载页
+- VSZ：虚拟地址大小，虚拟内存的使用KB
+- RSS：常驻集合大小，非交换区五里内存使用KB
+- Command：task命令名
+
+## 示例四：显示各个进程的IO使用情况（-d）
+
+```undefined
+pidstat -d
+```
+
+![img](https:////upload-images.jianshu.io/upload_images/2843224-6ce7d9ed78be38a9.png?imageMogr2/auto-orient/strip|imageView2/2/w/670/format/webp)
+
+报告IO统计显示以下信息：
+
+- PID：进程id
+- kB_rd/s：每秒从磁盘读取的KB
+- kB_wr/s：每秒写入磁盘KB
+- kB_ccwr/s：任务取消的写入磁盘的KB。当任务截断脏的pagecache的时候会发生。
+- COMMAND:task的命令名
+
+## 示例五：显示每个进程的上下文切换情况（-w）
+
+```undefined
+pidstat -w -p 2831
+```
+
+![img](https:////upload-images.jianshu.io/upload_images/2843224-e49e80ecb5d6526a.png?imageMogr2/auto-orient/strip|imageView2/2/w/657/format/webp)
+
+- PID:进程id
+- Cswch/s:每秒主动任务上下文切换数量
+- Nvcswch/s:每秒被动任务上下文切换数量
+- Command:命令名
+
+## 示例六：显示选择任务的线程的统计信息外的额外信息 (-t)
+
+```undefined
+pidstat -t -p 2831
+```
+
+![img](https:////upload-images.jianshu.io/upload_images/2843224-d77a75f30696eab7.png?imageMogr2/auto-orient/strip|imageView2/2/w/799/format/webp)
+
+- TGID:主线程的表示
+- TID:线程id
+- %usr：进程在用户空间占用cpu的百分比
+- %system：进程在内核空间占用cpu的百分比
+- %guest：进程在虚拟机占用cpu的百分比
+- %CPU：进程占用cpu的百分比
+- CPU：处理进程的cpu编号
+- Command：当前进程对应的命令
+
+## 示例七：pidstat -T
+
+```undefined
+pidstat -T TASK
+pidstat -T CHILD
+pidstat -T ALL
+```
+
+TASK表示报告独立的task。
+CHILD关键字表示报告进程下所有线程统计信息。
+ALL表示报告独立的task和task下面的所有线程。
+
+> 注意：task和子线程的全局的统计信息和pidstat选项无关。这些统计信息不会对应到当前的统计间隔，这些统计信息只有在子线程kill或者完成的时候才会被收集。
+
+![img](https:////upload-images.jianshu.io/upload_images/2843224-8c8d8247678b6c91.png?imageMogr2/auto-orient/strip|imageView2/2/w/716/format/webp)
+
+- PID:进程id
+- Usr-ms:任务和子线程在用户级别使用的毫秒数
+- System-ms:任务和子线程在系统级别使用的毫秒数
+- Guest-ms:任务和子线程在虚拟机(running a virtual processor)使用的毫秒数
+- Command:命令名
+
 
 
 # sar工具
 
-[sar](https://link.zhihu.com/?target=http%3A//lovesoo.org/tag/sar)（System Activity Reporter系统活动情况报告）是目前 [Linux](https://link.zhihu.com/?target=http%3A//lovesoo.org/tag/linux) 上最为全面的系统[性能分析](https://link.zhihu.com/?target=http%3A//lovesoo.org/tag/%e6%80%a7%e8%83%bd%e5%88%86%e6%9e%90)工具之一，可以从多方面对系统的活动进行报告，包括：文件的读写情况、系统调用的使用情况、[磁盘](https://link.zhihu.com/?target=http%3A//lovesoo.org/tag/%e7%a3%81%e7%9b%98)[I/O](https://link.zhihu.com/?target=http%3A//lovesoo.org/tag/io)、[CPU](https://link.zhihu.com/?target=http%3A//lovesoo.org/tag/cpu)效率、[内存](https://link.zhihu.com/?target=http%3A//lovesoo.org/tag/%e5%86%85%e5%ad%98)使用状况、进程活动及IPC有关的活动等。
+[sar](https://link.zhihu.com/?target=http%3A//lovesoo.org/tag/sar)（System Activity Reporter系统活动情况报告）是目前linux上最为全面的系统性能分析工具之一，可以从多方面对系统的活动进行报告，包括：文件的读写情况、系统调用的使用情况、磁盘、I/O、CPU效率、内存使用状况、进程活动及IPC有关的活动等。
 
 ```sh
 apt install searchandrescue -y 
@@ -184,9 +446,7 @@ apt install searchandrescue -y
 sar [options] [-A] [-o file] [ <interval> [ <count> ] ]
 ```
 
-其中：
-
-​	options 为命令行选项，
+options 为命令行选项：
 
 ​	-o file表示将命令结果以二进制格式存放在文件中，file 是文件名。
 
@@ -209,96 +469,59 @@ sar [options] [-A] [-o file] [ <interval> [ <count> ] ]
 
 
 
-# CPU工具
 
-## 内核统计：
 
-1、`uptime` 用于查看系统的负载信息,运行时间
+# sysbench
+
+
+
+# sysctl
+
+**sysctl命令** 被用于在内核运行时动态地修改内核的运行参数，可用的内核参数在目录`/proc/sys`中。它包含一些TCP/ip堆栈和虚拟内存系统的高级选项， 这可以让有经验的管理员提高引人注目的系统性能。用sysctl可以读取设置超过五百个系统变量。
 
 ```sh
-$ uptime
- 00:34:10 up 6:29, 1 user, load average：20.29, 18.90, 18.70
+sysctl(选项)(参数)
+-n：打印值时不打印关键字；						-N：仅打印名称；
+-w：当改变sysctl设置时使用此项；				-p：从配置文件“/etc/sysctl.conf”加载内核参数设置；
+-a：打印当前所有可用的内核参数变量和值；		    -A：以表格方式打印当前所有可用的内核参数变量和值。
+
+[root@linuxcool ~]# sysctl dev.cdrom.debug		# 读取一个指定系统内核参数变量的值
+dev.cdrom.debug = 0
+
+[root@linuxcool ~]# sysctl -p /etc/sysctl.conf # 生效指定文件内参数
 ```
 
-## 负载平均值：
 
-1、`top`是Linux下常用的性能分析工具，能够实时显示系统中各个进程的资源占用状况，类似于Windows的任务管理器
 
-```sh
-top -p 2822(PID号)	#查询固定PID号
-$ top
-top - 02:25:43 up  6:37,  2 users,  load average：0.09, 0.04, 0.01
-Tasks：227 total,   1 running, 226 sleeping,   0 stopped,   0 zombie
-%Cpu(s)： 0.0 us,  3.2 sy,  0.0 ni, 96.8 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
-MiB Mem ：  1963.2 total,    761.0 free,    248.9 used,    953.3 buff/cache
-MiB Swap：  1788.0 total,   1788.0 free,      0.0 used.   1556.9 avail Mem
 
-    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
-   4486 root      20   0   10416   3864   3240 R   6.2   0.2   0:00.01 top
-      1 root      20   0  167740  12476   8812 S   0.0   0.6   0:01.10 systemd
-      2 root      20   0       0      0      0 S   0.0   0.0   0:00.02 kthreadd
-      3 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 rcu_gp
-      4 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 rcu_par_gp
-      5 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 slub_flushwq
-      6 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 netns
-[...]
-```
 
-第1行:系统时间、运行时间、登录终端数、系统负载(三个数值分别为1分钟、5分钟、15 分钟内的平均值，数值越小意味着负载越低)。
-第2行:进程总数、运行中的进程数、睡眠中的进程数、停止的进程数、僵死的进程数。
-第3行:用户占用资源百分比、系统内核占用资源百分比、改变过优先级的进程资源百分比、空闲的资源百分比等。
-第4行:物理内存总量、内存使用量、内存空闲量、作为内核缓存的内存量。
-第5行:虚拟内存总量、虛拟内存使用量、虛拟内存空闲量、已被提前加载的内存量。
+# perf
 
-2、`mpstat`（Multiprocessor Statistics）是实时系统监控工具，可查看多处理器状况。
+perf 命令(performance 的缩写)，是[Linux](https://link.zhihu.com/?target=https%3A//so.csdn.net/so/search%3Fq%3DLinux%26spm%3D1001.2101.3001.7020)系统提供的性能分析工具集，包含多种子工具，能够监测多种硬件及软件性能指标，包括cpu、内存、io等，这些可监测指标我们称为event。
+
+perf架构图
+
+<img src="./assets/image-20230917100432301.png" alt="image-20230917100432301" style="zoom: 33%;" />
+
+Perf List：查看当前系统支持的性能事件。
+
+利用perf剖析程序性能时，需要指定当前测试的性能时间。性能事件是指在处理器或操作系统中发生的，可能影响到程序性能的硬件事件或软件事件
 
 ```sh
-apt install sysstat -y
-```
-
-其报告与CPU的一些统计信息，这些信息存放在/proc/stat文件中。
-在多CPUs系统里，其不但能查看所有CPU的平均状况信息，而且能够查看特定CPU的信息。
-mpstat最大的特点是：可以查看多核心cpu中每个计算核心的统计数据；而类似工具vmstat只能查看系统整体cpu情况。
-
-```sh
-root@l:~# mpstat [-P {|ALL}] [internal [count]]
-参数 			解释
--P {|ALL} 	表示监控哪个CPU， cpu在[0,cpu个数-1]中取值
-internal 	相邻的两次采样的间隔时间、
-count 		采样的次数，count只能和delay一起使用
-当没有参数时，mpstat则显示系统启动以后所有信息的平均值。有interval时，第一行的信息自系统启动以来的平均信息。从第二行开始，输出为前一个interval时间段的平均信息。
-
-root@l:~# mpstat -P ALL 1  
-Linux 5.19.0-46-generic (l)     08/01/2023      _x86_64_        (2 CPU)
-02:27:36 AM  CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest  %gnice   %idle
-02:27:37 AM  all    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
-02:27:37 AM    0    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
-02:27:37 AM    1    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
-[...]
-```
-
-## 硬件统计
-
-`perf`：性能分析和跟踪工具，能够进行函数级与指令级的热点查找。
-
-```sh
-apt install linux-tools-common linux-tools-generic -y #安装包
-```
-
-Perf List：利用perf剖析程序性能时，需要指定当前测试的性能时间。性能事件是指在处理器或操作系统中发生的，可能影响到程序性能的硬件事件或软件事件
-
-```sh
-Perf top #实时显示系统/进程的性能统计信息
 -e：指定性能事件							   -d 选项用于启用perf工具的统计功能
--a：显示在所有CPU上的性能统计信息				  -C：显示在指定CPU上的性能统计信息
+-a：收集所有CPU上的性能统计信息				   -C：显示在指定CPU上的性能统计信息
 -p：指定进程PID								-t：指定线程TID
 -K：隐藏内核统计信息							 -U：隐藏用户空间的统计信息
 -s：指定待解析的符号信息
+```
 
-perf record：#运行一个命令并记录其性能数据到perf.data文件中。
-perf report：#读取perf.data文件（由perf record创建）并显示性能分析报告，展示函数和符号的耗时信息。
-perf stat：#运行一个命令并收集性能计数器的统计信息，例如CPU周期、缓存命中率等。
+```sh
 perf top：#显示当前系统的性能概况，包括使用CPU最多的函数和符号。
+perf record：#运行一个命令并记录其性能数据到perf.data文件中。 
+	-o 指定文件名
+perf report：#读取perf.data文件（由perf record创建）并显示性能分析报告，展示函数和符号的耗时信息。
+	-i 指定文件名		--stdio 显示到终端
+perf stat：#运行一个命令并收集性能计数器的统计信息，例如CPU周期、缓存命中率等。
 perf annotate：#读取perf.data文件（由perf record创建）并显示带注释的代码，显示哪些代码路径上发生了性能事件。
 perf diff：#比较两个perf.data文件，并显示它们之间的差异性能分析报告。
 perf sched：#跟踪和分析调度器的性能信息，包括任务的运行时间和等待时间等。
@@ -311,10 +534,22 @@ perf test：#运行性能测试和验证perf工具的功能和稳定性。
 perf version：#显示perf工具的版本信息。
 ```
 
-### 示例
+## 示例
 
 ```sh
-root@l:~#  perf stat -d gzip file1  #使用perf工具来统计gzip命令对文件file1进行压缩的命令。
+root@l:~# perf list # 获取当前处理器和perf工具支持的PMC列表
+List of pre-defined events (to be used in -e):
+  branch-instructions OR branches                    [Hardware event]
+  branch-misses                                      [Hardware event]
+  cache-misses                                       [Hardware event]
+  cache-references                                   [Hardware event]
+  cpu-cycles OR cycles                               [Hardware event]
+  instructions                                       [Hardware event]
+[...]
+```
+
+```sh
+root@l:~# perf stat -d gzip file1  #使用perf工具来统计gzip命令对文件file1进行压缩的命令。
  Performance counter stats for 'gzip file1':
               0.67 msec task-clock                #    0.551 CPUs utilized
                  0      context-switches          #    0.000 /sec
@@ -344,18 +579,6 @@ Some events weren't counted. Try disabling the NMI watchdog:
 ```
 
 ```sh
-root@l:~# perf list # 获取当前处理器和perf工具支持的PMC列表
-List of pre-defined events (to be used in -e):
-  branch-instructions OR branches                    [Hardware event]
-  branch-misses                                      [Hardware event]
-  cache-misses                                       [Hardware event]
-  cache-references                                   [Hardware event]
-  cpu-cycles OR cycles                               [Hardware event]
-  instructions                                       [Hardware event]
-[...]
-```
-
-```sh
 root@l:~# perf stat -e mem_load_retired.l3_hit -e mem_load_retired.l3_miss -a -I 1000
 #使用perf工具在Linux系统上监测内存访问的性能统计信息。
 #-e选项用于指定要监测的事件，mem_load_retired.l3_hit表示L3缓存命中的事件,mem_load_retired.l3_miss表示L3缓存未命中的事件。-a选项表示监测所有的进程，-I 1000表示每1000毫秒输出一次统计结果。
@@ -367,7 +590,8 @@ root@l:~# perf stat -e mem_load_retired.l3_hit -e mem_load_retired.l3_miss -a -I
  3.002952548 1,723,796 mem_load_retired.l3_hit 
 [...]
 ```
-### 硬件采样
+
+## 硬件采样
 
 ```sh
 root@l:~# perf record -e mem_load_retired.l3_miss -c 50000 -a -g -- sleep 10
@@ -382,7 +606,7 @@ root@l:~# perf record -e mem_load_retired.l3_miss -c 50000 -a -g -- sleep 10
 #-- sleep 10：运行sleep命令10秒。这里用来模拟进程运行的情况，perf会在sleep命令执行期间记录性能数据。
 ```
 
-### 定时采样
+## 定时采样
 
 ```sh
 [ perf record：Woken up 1 times to write data ]
@@ -422,7 +646,7 @@ root@l:~# perf report -n --stdio
 [...]
 ```
 
-#### 产生CPU火焰图
+### 产生CPU火焰图
 
 ```sh
 root@l:~#git clone https://github.com/brendangregg/FlameGraph
@@ -437,7 +661,7 @@ root@l:~## perf script --header | ./stackcollapse-perf.pl | ./flamegraph.pl > fl
 #> flame1.svg：将生成的火焰图保存到名为flame1.svg的SVG文件中。
 ```
 
-### 周期采样
+## 周期采样
 
 当perf(1)进行定时采样时，它试图使用基于PMC的硬件CPU周期溢出事件来触发不可屏蔽中断（NMI）以执行采样。然而，在云服务厂商中，许多实例类型没有启用PMCs。这可以使用dmesg(1)命令查看。
 
@@ -458,7 +682,7 @@ The cycles event is not supported, trying to fall back to cpu-clock-ticks
 
 软件中断模式通常在大部分性能分析场景是足够的。但是一些内核代码路径没法进行软中断。
 
-### 事件统计与事件跟踪
+## 事件统计与事件跟踪
 
 
 
@@ -477,93 +701,22 @@ root@l:~# perf stat -e sched:sched_process_exec -I 1000
 
 
 
+## 二进制可用安装
 
+[linux-5.4.tar.gz包](http://ftp.sjtu.edu.cn/sites/ftp.kernel.org/pub/linux/kernel/v5.x/linux-5.4.122.tar.gz) | 
 
+```sh
+tar -xzvf perf-*.tar.gz -C /usr/local/
+cd /usr/local/linux-6.5/tools/perf
+make WERROR=0 && make install WERROR=0
+./perf -v #验证
+```
 
+`perf`：性能分析和跟踪工具，能够进行函数级与指令级的热点查找。
 
-## BPF工具
-
-execsnoop：是一个用于跟踪系统中执行的进程和命令的工具。它可以显示每个进程的执行时间、命令参数等信息。常见的用途是用于分析系统中的进程调度和执行情况，例如查找可能导致性能问题的进程或命令。
-
-exitsnoop：用于监测进程的退出事件。它可以显示进程的退出状态码、退出时间等相关信息。常见的用途是用于分析和调试进程的退出原因，例如跟踪特定进程的异常退出情况或检测进程之间的依赖关系。
-
-runqlat：用于监测运行队列的延迟。它提供了关于任务等待处理的时间信息，帮助用户识别系统中可能存在的任务调度延迟问题。常见的用途是用于评估系统的响应性能和任务调度效率。
-
-runqlen：用于监测运行队列的长度。它可以显示运行队列中等待处理的任务数量，帮助用户评估系统的负载情况。常见的用途是用于监测系统的负载水平和任务分配情况。
-
-runqslower：用于监测运行队列中的慢任务。它显示了运行时间超过设定阈值的任务信息，帮助用户发现系统中的性能瓶颈。常见的用途是用于分析和优化系统的任务调度策略。
-
-cpudist：用于检测CPU利用率的分布情况。它提供了关于CPU使用情况的统计数据，帮助用户了解系统中不同CPU核心的负载情况。常见的用途是用于评估系统的CPU性能和识别CPU负载不均衡的问题。
-
-cpufreq：用于跟踪和调整CPU频率。它可以显示当前CPU频率以及频率变化的相关信息，帮助用户优化系统的能耗和性能。常见的用途是用于调整CPU频率以在功耗和性能之间取得平衡。
-
-profile：用于性能分析，可以生成进程级和系统级的性能数据报告。它提供了对CPU使用、内存使用和I/O行为等方面的详细分析，帮助用户识别和解决性能瓶颈问题。常见的用途是用于深入分析应用程序或系统的性能问题，并进行优化。
-
-offcputime：用于监测离线CPU时间。它可以检测到在系统中消耗大量离线CPU时间的进程，并提供相关的统计信息，帮助用户识别并解决这类问题。常见的用途是用于分析系统中离线CPU时间的使用情况，并优化相关的进程或任务。
-
-syscount：用于监测系统调用的次数和延迟。它提供了对系统调用的详细分析，帮助用户评估系统性能和优化应用程序的系统调用过程。常见的用途是用于跟踪系统调用的性能瓶颈和优化系统调用的效率。
-
-argdist and trace：工具用于分析系统调用的参数分布情况，trace工具用于跟踪系统调用的执行过程。它们可以帮助用户深入了解系统调用的使用情况和性能瓶颈。常见的用途是用于分析和优化特定系统调用的参数使用和执行效率。
-
-funccount：用于统计特定函数的调用次数。它可以帮助用户了解特定函数的使用情况和性能影响。常见的用途是用于分析和优化特定函数的调用频率和执行效率。
-
-softirqs：用于监测软中断的使用情况。它可以显示软中断的触发次数和延迟信息，帮助用户评估系统中软中断的性能开销。常见的用途是用于分析和优化软中断的使用和效率。
-
-hardirqs：用于监测硬中断的使用情况。它可以显示硬中断的触发次数和延迟信息，帮助用户评估系统中硬中断的性能开销。常见的用途是用于分析和优化硬中断的使用和效率。
-
-smpcalls：用于监测多处理器系统中的函数调用次数和延迟信息。它可以帮助用户了解多处理器系统中函数调用的分布情况和性能影响。常见的用途是用于分析和优化多处理器系统中函数调用的负载和效率。
-
-llcstat：用于监测最后级缓存（LLC）的使用情况。它提供了关于LLC的命中率、清除率等信息，帮助用户评估系统的缓存性能和优化内存访问模式。常见的用途是用于分析应用程序的缓存行为和检测缓存相关的瓶颈。
-
-
-
-# MEM内存
-
-## 内核日志
-
-
-
-
-
-## 内核统计信息
-
-
-
-
-
-
-
-## 硬件统计和硬件采样
-
-
-
-
-
-## BPF工具
-
-oomkill ：用于跟踪和记录内核中的 OOM（Out of Memory）杀进程事件。当系统内存不足时，内核会选择终止某些进程以释放内存资源，并通过 oomkill 工具记录这些事件。常见使用方法是查看 oomkill 记录以了解系统中哪些进程被终止。
-
-memleak：用于检测内核模块或驱动程序中的内存泄漏。它通过监视内核堆栈和分配的内存块之间的关系来识别未释放的内存。常见使用方法是在内核模块或驱动程序开发过程中运行 memleak 工具，以帮助发现和修复内存泄漏问题。
-
-mmapsnoop：用于监视和记录进程创建和销毁的内存映射操作。它可以跟踪进程打开、映射和关闭的文件、库和设备，以及相关的内存操作。常见使用方法是在调试和性能优化场景中使用 mmapsnoop 工具，以了解进程的内存映射情况。
-
-brkstack：用于跟踪和记录进程的堆布局和堆栈信息。它可以显示进程的堆起点、堆大小以及堆栈的布局情况。常见使用方法是在调试和分析场景中使用 brkstack 工具，以帮助了解进程的堆栈结构和内存使用情况。
-
-shmsnoop：用于监视和记录共享内存段的创建、连接和断开操作。它可以追踪进程之间的共享内存通信，并提供有关内存段的详细信息。常见使用方法是在调试和性能分析场景中使用 shmsnoop 工具，以了解进程之间的共享内存使用情况。
-
-faults：用于跟踪和记录进程的页面错误（Page Fault）事件。它可以监视进程的内存访问，并记录因页面错误而触发的异常情况。常见使用方法是在调试和优化场景中使用 faults 工具，以了解进程的内存访问模式和性能瓶颈。
-
-ffaults：用于追踪和记录文件系统页面错误（Filesystem Page Fault）事件。它可以监视文件系统的磁盘 IO 操作，并记录因页面错误而导致的异常情况。常见使用方法是在调试和性能分析场景中使用 ffaults 工具，以了解文件系统的磁盘 IO 行为和性能瓶颈。
-
-vmscan：用于监视和记录内核的页面回收（Page Reclaim）操作。它可以显示内核在内存压力情况下如何回收页面，并提供有关内存管理和页面置换的详细信息。常见使用方法是在调试和优化场景中使用 vmscan 工具，以了解内核的页面回收策略和性能影响。
-
-drsnoop：用于监视和记录内核的读写操作。它可以追踪进程访问的文件、设备等，并提供有关读写操作的详细信息。常见使用方法是在调试和性能分析场景中使用 drsnoop 工具，以了解进程的文件和设备访问行为。
-
-swapin：用于监视和记录内核的页面交换（Page Swap In）操作。它可以追踪内核在内存压力情况下将页面从磁盘交换到内存的过程，并提供有关页面交换的详细信息。常见使用方法是在调试和性能分析场景中使用 swapin 工具，以了解内核的页面交换策略和性能影响。
-
-hfaults：用于追踪和记录硬件页面错误（Hardware Page Fault）事件。它可以监视硬件引起的页面错误，并提供有关异常情况的详细信息。常见使用方法是在调试硬件相关问题和系统稳定性分析中使用 hfaults 工具，以帮助诊断硬件故障和异常情况。
-
-
+```sh
+apt install linux-tools-common linux-tools-generic -y #安装包
+```
 
 
 
@@ -873,7 +1026,25 @@ echo `Ifconfig ens33` | at now+1 min
 
 -L：查看所有任务 	-c1：查看任务1详细信息		-d1：删除任务1
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps8-1682690115363-181.jpg" alt="img" style="zoom：67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps9-1682690115363-182.jpg" alt="img" style="zoom：67%;" /> 
+```sh
+[root@linuxprobe ~]# at 23:30
+at > systemctl restart httpd
+at >  #此处请同时按下 Ctrl + D组合键来结束编写计划任务
+job 3 at Mon Apr 27 23:30:00 2017
+[root@linuxprobe ~]# at -l3 Mon Apr 27 23:30:00 2017 a root
+```
+
+crontab 周而复始的计划任务
+
+```
+crontab -eu [username]
+*  *  *  *  *  /bin/echo"hello"
+分 时 日 月  周
+例1: 30 21 * *            /bin/echo"hello"
+例2: 45 4 1,10,22 * *     (每月的1、10、22日的四点四十五分)
+例3: 0.30 18-23 * * *     (18-23时的零分和三十分)
+例4: */5 * * * *          (每隔五分钟) 
+```
 
 -l查看当前生效用户的任务列表		-e编辑当前生效用户的任务内容				-r删除当前生效用户的任务内容
 
@@ -882,6 +1053,12 @@ echo `Ifconfig ens33` | at now+1 min
 cat /var/log/cron日志文件			/var/spool/cron查看定时任务的文件夹			Crontab内每一行一个任务
 
 watch -n1  ls /srv/ 				watch每一秒监控一次 ls命令srv下输出结果
+
+| 参数             | 详解                                                         |
+| :--------------- | :----------------------------------------------------------- |
+| -n或–interval    | watch缺省每2秒运行一下程序，可以用-n或-interval来指定间隔的时间。 |
+| -d或–differences | 用 -d 或 –differences 选项,watch 会高亮显示变化的区域。而-d=cumulative选项会把变动过的地方(不管最近的那次有没有变动)都高亮显示出来。 |
+| -t 或 -no-title  | 会关闭watch命令在顶部的时间间隔,命令，当前时间的输出。       |
 
 # 网络管理工具
 
@@ -1295,7 +1472,7 @@ u(所有者)，g(所属组)，o(其他用户)，a(所有用户)		+（代表添�
 
 r（读取权限数字代表为4)，w（写入权限数字代表为2)，x（执行权限数字代表为1）
 
-chmod 更改文件或目录的权限			chmod	a+rwx  a			chmod 777 a	
+chmod 更改文件或目录的权限			chmod	a+rwx  a			chmod 777 a
 
 chown 更换文件所有者/更换文件所属组	chown 	root:bin 	/file
 
@@ -1684,360 +1861,7 @@ RestartSec：表示 Systemd 重启服务之前，需要等待的秒数
 WantedBy：表示该服务所在的 Target(服务组)
 ```
 
-# Shell编程
 
-shell是一个命令解释器，它在操作系统的最外层，负责直接与用户对话，把用户的输入解释给操作系统，并处理各种各样的操作系统的输出结果，输出屏幕返回给用户，/etc/shells可查看当前所有的shell类型
-
-shell脚本用途：1、有自动化运维常用命令，2、创建简单的应用程序，3、处理文本或文件，4、用于系统管理和故障排除
-
-shel脚本：包含一些命令或声明有一定格式的文本.sh文件
-
-格式要求首行 shebang机制
-
-\#bin/bash	#!/usr/bin/python		#!/usr/bin/perl
-
-检查脚本方式：sh -n不执行脚本，仅检查脚本中的语法问题		-v将执行过的脚本命令打到屏幕上
-
-运行脚本方式：1、bash / sh+脚本			  2、将脚本放入PATH命令对用的环境（echo $PATH查看）目录中
-
-  3、chmod+x执行脚本test.sh		4、./test.sh执行
-
-反斜杠  \  使后面的变量成为单纯的字符串
-
-单引号‘’忽略所有的命令和特殊字符，将其中的内容都作为了字符串来
-
-双引号“”可以使用特殊字符，包括', ", $, \,如果要忽略特殊字符，就可以利用\来转义，忽略特殊字符
-
-反引号  `` 和 $（）都是获取命令输出的结果，而后输出
-
-小括号（）开启子进程，即exit退出后父进程不受影响
-
-常量：即只读变量		readonly -p查看所有常量			常量赋值：readonly name=value
-
-函数：【function】函数名【()】{ 代码段；[return int]}
-
-## 变量
-
-执行顺序:`/etc/profile-->/etc/profile.d/*.shー->~/. bash_profile-->~/.bashrc-->/etc/bashrc`
-
-/etc/profile 或 /etc/bashrc系统级环境变量文件			 ~/.profile或~/.bashrc用户级环境变量文件
-
-【变量引用前加$，命令无法识别变量则加$】
-
-**自定义变量**：自己定义的变量，例如：a='ll' (即将命令输出的结果进行赋值)，echo "$a" (双引号保留原格式)
-
-**环境变量**：Linux系统已定义的变量，例如：$PATH, $HOME 等..., 这类变量我们可以直接使用
-
-env \ export \ declare -x	\printenv 显示当前环境变量
-
-export name=value		添加临时环境变量，变量声明、赋值
-
-alias  qstat='/bin/ps -Ao pid,tt,user,fname,rsz'	将环境变量进行别名，改名字
-
-unset删除指定临时环境变量（bash 刷新环境变量）
-
-永久命令删除，三步		1vim 进去删除	2刷新环境变量	3unalias 删除命令		source/ 	重新加载文件
-
-**参数变量**：$0脚本名，$1第一个参数，$2，$3，${10}...表示执行脚本后传递给脚本文件的第n个参数,花括号{}将一整体概括
-
-**特殊变量**：
-
-$?	执行脚本返回的值，0或非0值			$#   输入的参数个数		$$	查看当前进程PID号
-
-$@  所有参数		$*  所有的参数，全部参数为一个字符串		$RANDOM	产生随机数（0-32767）			 
-
-${#变量名} 表示变量的长度				 ${#变量名[@]} 表示数组的个数
-
-**特殊字符**：
-
-？至少匹配一次字符							*代表0或重复多个前面的字符
-
-；分号，连续运行命令							. 代表一定有一个任意字符
-
-\# 表示注释									.*就代表零个或多个任意长度的字符
-
-| 管道(将前一命令的标准输出传递到下一命令的标准输入)，正则表达式中表示或者		&将命令放到后台执行
-
-() 开启shell子进程，会继承父shell的变量			(()) 算术运算=-*/或比较大小<>
-
-[] 通配符和正则中表示匹配括号中的任意一个字符、条件测试表达式、数组中下标括号
-
-[[]] 双方括号字符串比较测试						{} 通配符扩展 abc{1,2,3}，将分割的多个子shell进行合并
-
-\>或<:将字符串转化为ASCll值然后比较其大小		=~：正则匹配，用来判断其左侧的参数是否符合右边的要求
-
-==：测试是否相等，相等为真，否则为假			！=：测试是否不等，不等为真，否则为假
-
--n：判断字符是否为空，空为真，不空为假			-z：判断字符是否为不空，不空为真，空则为假
-
-^[0-9]+$：以^开头数字[0-9]且+至少一个$结尾		\<...\> 这组符号在规则表达式中，被定义为"边界"的意思
-
-命令中的与或非：&& 与，前面执行成功才往后执行		||或，前面错误才执行后面		 !非，取判断的相反值
-
-判断中的与或非：&		|	！
-
-$(())或$[]可以进算数运算	``不可以
-
-**判断**：<= 小于等于(需要双括号),如:(("$a" <= "$b"))  		>= 大于等于(需要双括号),如:(("$a" >= "$b"))
-
-大于 -gt (greater than)					小于 -lt (less than)			大于或等于 -ge (greater than or equal)
-
-小于或等于 -le (less than or equal)		不相等 -ne （not equal）	相等 -eq （equal）
-
-**shell脚本内的特殊命令**：
-
-echo $-：查看当前set环境功能		$-代表的是当前Bash的运行选项，这些Bash选项控制着Bash运行时的行为
-
-h，hash进行查看：缓存使用命令的路径及使用次数
-
-i，interactive-comments：交互式的shell环境
-
-m，monitor：打开监控模式，可以通过job control来控制进程的停止、继续、后台或者前台执行
-
-B，braceexpand：{}开启大括号拓展
-
-H，history：开启历史命令
-
-set：显示所有变量及函数，用来定制shell环境			set +h删除hash功能		set --清空所有
-
-**参数**
-
--u：引用一个没有设置的变量时，显示错误信息，等同set -o nounset
-
--e：如果一个命令返回值非0退出状态值（失败）就退出，等同set -o errexit
-
--x：执行命令时，输出该命令和参数
-
--o：查看当前set命令生效的设置选项
-
-sleep命令：休眠时间，默认为秒1
-
-shift	命令：是shell脚本中使位置参数左移的命令，后可加左移位数，默认为1
-
-break语句：（跳出循环）
-
-在for、while、until等循环语句中，用于跳出当前所在的循环体，执行循环体后的语句
-
-continue语句：（跳出本次循环）
-
-在for、while、until等循环语句中，用于跳出循环体内余下的语句，重新判断条件以便执行下一次循环
-
-let 命令是 BASH 中数字运算工具，用于执行一个或多个表达式（let 进行赋值，数字或字符\字符串）
-
-help let查看系统支持的算数运算
-
-test命令是 Shell 内置命令，用于检查某个条件是否成立，它可以进行数值、字符和文件三个方面的测试	hele test查看帮助
-
-expr命令进行算术运算，格式比较严格		a=`expr 1 \* 4`		a=`expr $a \* 4`
-
-exit 1函数退出当前程序
-
-三目运算符：`a=$([ "$b" == 5 ] && echo "$c" || echo "$d")`
-
-<img src="E:\Project\Textbook\linux云计算\assets\wps27-1682690115365-199.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps28-1682690115365-200.jpg" alt="img" style="zoom:67%;" /> 
-
-## For循环
-
-for的一些用法		例：for i in “file1” “file2” “file3”
-
-| in /boot/*                       | in /etc/*.conf                 | in {1…10}            | in $( ls )                               |
-| -------------------------------- | ------------------------------ | -------------------- | ---------------------------------------- |
-| in $(< file)	in $(seq 5 -1 1) | in $(seq -w 10) -->等宽的01-10 | in $(cat /srv/grade) | in “$@” -->取所有位置参数，可简写为for i |
-
-
-```sh
-function printInfo (){
-	echo -n "Your choice is "
-}
-```
-
-
-```sh
-for a in {10..15}
-do
-	printInfo;		#使用函数
-done	
-```
-
-## If判断语句
-
-[ ]&& ----快捷if				`[ "$?" == 0 ] && echo "success" >>/tmp/install.log`
-
-**单分支if语句**
-
-```sh
-if	判断条件; then
-	输出结果命令
-fi
-```
-
-```sh
-if ! (ping -c4 -i0.1 192.168.0.22 &>/dev/null) ; then 
-	echo "host22 is down" #如果ping22号主机成功的话，会输出host22 is down
-fi
-```
-
-**双分支if语句**					
-
-```sh
-if 判断条件; then
-	输出结果命令1	
-else
-	输出结果命令2
-fi
-```
-
-```sh
-for a in {1..10}
-do
-	if  ! (ping -c4 -i0.1 192.168.0.$a &>/dev/null) ; then
-		echo "host$a is down" &>>/ tmp/down
-	else
-		echo "host$a is up" &>>/tmp/up
-	fi
-done
-```
-
-**多分支if语句**
-
-```sh
-if 	判断条件1; then
-	输出结果命令1
-elif	判断条件2; then
-	输出结果命令2
-elif	判断条件3; then
-	输出结果命令3
-else
-	输出结果命令2
-fi
-```
-
-```sh
-if [ "$?" == 0 ] | [ "$?" == 1 ];then	#多个判断条件
-	echo "welcome to joinlabs!
-elif [ "$1" == "redhat" ] ; then
-	echo "this is redhat classroom"
-else
-	echo "byebye"
-fi
-```
-
-例18、将zhubajie. sunwukong. tangseng重定向到/tmp/userdb中
-创建一个添加用户脚本。在本机上创建一 个脚本,名为/tmp/user.sh, 此脚本能实现为本机系统创建本地用户,
-并且这些用户的用户名来自一个包含用户列表的文件(userdb) .同时满足以下要求:
-此脚本要求提供一 个参数，此参数就是包含用户列表的文件
-如果没有提供参数，此脚本应该给出下面的提示信息Usage:/tmp/userdb, 然后退出并返回相应的值
-如果提供一 个不存在的文件名，此脚本应该给出下面的提示信息Input file not found, 然后退出并返回相应的值
-此脚本需要为用户设置密码，密码为redhat,且都为非交互式登录shell
-
-```sh
-#! /bin/bash
-if [ $# -eq 0 ];then
-	echo "Usage：/tmp/userdb"
-elif [ $1 == "/tmp/userdb" ];then
-	for a in、cat /tmp/userdb"
-	do
-		useradd -s /sbin/nologin $a;
-		echo redhat| passwd -- stdin $a;
-	done
-else
-	echo "Input file not found"
-fi 
-```
-
-## Read语句
-
-read能够和用户进行交互式的读取数据,要保证脚本能够根据用户的反馈数据进行下一步操作
-
-| read                 | 参数                                                    |                      |
-| -------------------- | ------------------------------------------------------- | -------------------- |
-| -p：(提示语)提示输入 | -n：(限制字符个数)计数输入                              | -t(等待时间)计时输入 |
-| -s：(不回显)隐藏输入 | -d：delimiter，读到指定字符即退出，例：-dp，读到q即退出 |                      |
-
-读文件：每次read命令都会读取文件的“一行”内容。当文本没有可读的行时，read命令将以非零状态退出
-
-name是个变量，Read语句一般是和if语句连用的
-
-```sh
-while read line
-do
-	if [[ $line =~ "/sbin/nologin" ]];then
-	echo "$line"
-	fi
-done < /etc/passwd
-```
-
-```sh
-read -dq -s -p "please input YES or NO：" -t 10 -n3 a
-if [[ $a =~ ^[Yy][Ee][Ss]$ ]];then		#模糊匹配
-	echo "yes"
-fi
-```
-
-
-
-## While循环语句
-
-```sh
-while 条件  //While ：	//无限循环
-do
-done
-```
-
-```sh
-count=1							
-cat /etc/passwd | while read a
-do
- 	echo "$count  $a"
-	let count++
-done
-```
-
-
-
-## Case语句
-
-<img src="E:\Project\Textbook\linux云计算\assets\wps31-1682690115365-203.jpg" alt="img" style="zoom:67%;" />
-
-```sh
-read -n 1 -p "Do you want to cont inue [Y/N]?" answer
-case $answer in
-	Y)
-		echo " fine , continue"
-	;;
-	N)
-		echo " ok, goodbye"
-	;;
-	*)
-		echo "error choice"
-esac
-```
-
-```sh
-case $l in 
-	joinlabs)
-		echo "welcome to joinlabs !"
-	;;
-	redhat)
-		echo "this is redhat class room'
-	;;
-	*)
-		echo " byebye'
-esac
-```
-
- 
-
-## select语句
-
-```sh
-select variable in list 		select name in ylt yyy lll ttt
-do								do
-	循环体命令				    	echo $name
-done							done
-```
-
-select 循环执行后会出现菜单项等待用户选择（不会自动循环所有变量列表），而用户输入的只能是菜单项前面的数字序号，每输入一次对应的序号就会执行一次循环，直到变量后面对应列表取完为止
 
 # 开机破密码
 
