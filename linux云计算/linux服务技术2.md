@@ -594,7 +594,7 @@ vim /etc/php.ini	修改上传值大小
 
 ## ansible 架构图
 
-Ansible：			Ansible核心程序
+Ansible：				Ansible核心程序
 
 HostInventory：	记录由Ansible管理的主机信息，包括端口、密码、ip等
 
@@ -633,63 +633,41 @@ timeout = 60				#设置SSH连接的超时时间，单位为秒
 log_path=/var/log/ansible.log#ansible日志的文件（默认不记录日志）
 ```
 
-> ubuntu22版本不稳定，建议18版本
-
 ## ansible 常用命令及参数
 
 ansible临时命令执行工具，常用于临时命令的执行
 
 基本用法：ansible <host-pattern> [-f forks] [-m module_name] [-a args]
 
+```
 ansible *web -m command -a 'ls / ' -u root -k	对所有配置清单内主机基于-k验证
-
 all：表示所有Inventory中的所有主机
-
 `*`：通配符ansible “*” -m ping
 
 或关系ansible 'webserver:dbserver' -m ping #执行在web组并且在dbserver组中的主机
-
 与关系ansible 'webserver:&dbserver‘ -m ping
-
 非逻辑ansible 'webserver:!dbserver' -m ping  【注意此处只能使用单引号！】
 
 -m 	#执行模块的名字，默认使用 command 模块可以不写-m command
-
 -a	#模块的参数
-
 -u alex #远程用户，默认为 root 用户
-
 --list	 #查看有哪些主机组
-
 -k	#ask for SSH password。登录密码，提示输入SSH密码而不是假设基于密钥的验证
-
 --ask-su-pass 	#ask for su password。su切换密码
-
 -K	#ask for sudo password。提示密码使用sudo，sudo表示提权操作
-
 --ask-vault-pass #ask for vault password。假设我们设定了加密的密码，则用该选项进行访问
-
 -B SECONDS	#后台运行超时时间
-
 -C	#模拟运行环境并进行预运行，可以进行查错测试
-
 -c CONNECTION 	#连接类型使用
-
 -f FORKS 		#并行任务数，默认为5
-
 -i INVENTORY 	#指定主机清单的路径，默认为/etc/ansible/hosts
-
 -o	#压缩输出，尝试将所有结果在一行输出，一般针对收集工具使用
-
 -S #用 su 命令		-s #用 sudo 命令
-
 -R SU_USER 	#指定 su 的用户，默认为 root 用户
-
 -U SUDO_USER	#指定 sudo 的用户，默认为 root 用户
-
 -T TIMEOUT	#指定 ssh 默认超时时间，默认为10s，也可在配置文件中修改
-
 -v 	#查看详细信息，同时支持-vvv可查看更详细信息
+```
 
 ansible-doc		模块功能查看工具
 
@@ -893,73 +871,42 @@ ansible web -m setup -a 'filter="vcpus"' --tree /tmp/facts筛选的信息发送�
 
 playbook 是 ansible 用于配置，部署，和管理被控节点的剧本
 
+```yaml
 ---				#ansible-playbook格式：-后多空格		注意平级关系
-
-\- hosts: web		#主机清单		支持ansible *web通配符系列，支持逻辑运算符：，&，！
-
+- hosts: web		#主机清单		支持ansible *web通配符系列，支持逻辑运算符：，&，！
  remote_user: root	#被控端执行用户
-
  vars: 
-
-   \-  pkname: httpd#可对多个变量进行赋值
-
+   -  pkname: httpd#可对多个变量进行赋值
  vars_files: 
-
-   \- vars.yml		#指定变量存放文件
-
+   - vars.yml		#指定变量存放文件
  tasks:			#任务集合
-
-   \- name: install httpd package	#任务名称，一个任务对应一个模块
-
+   - name: install httpd package	#任务名称，一个任务对应一个模块
 ​     yum：name=httpd			#使用模块,执行命令
-
-\- name: install package
-
+- name: install package
  yum：name={{ pkname }}	 #定义变量{{ pkname }}	（变量命名规则与c语言类似）
-
-​    \- name: 'shutdown redhad flavored systems'
-
+​    - name: 'shutdown redhad flavored systems'
 ​     cp: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
-
 ​     when: ansible_os_family == "Centos"	#when条件语句，当符合centos的条件时执才行该任务模块
-
-​    \- name: unstall web packages
-
+​    - name: unstall web packages
 ​     yum: name={{ item }} state=absent	#固定变量名“item”
-
 ​     with_items:						#with_items	循环：迭代元素列表，需要重复执行的任务
-
-​     \- httpd		#迭代元素
-
-​     \- php
-
-​    \- name: add some users				#迭代嵌套子变量
-
+​     - httpd		#迭代元素
+​     - php
+​    - name: add some users				#迭代嵌套子变量
 ​     user: name={{ item.name }} group={{ item.group }} state=present	#引入迭代列表的元素
-
 ​     with_items:
-
-​       \- { name: 'u1', group: 'g1' }		#迭代字典
-
-​       \- { name: 'u2', group: 'g2' }
-
+​       - { name: 'u1', group: 'g1' }		#迭代字典
+​       - { name: 'u2', group: 'g2' }
  notify: service		 #通知器：可通知多个触发器handlers
-
  tags: conf			 #一个标签可对应多个任务模块，使用方法如下红色区
-
  sudo_user: wang		 #sudo为wang		#sudo: yes#默认sudo为root
-
  #如果命令或脚本的退出码不为零，可以使用如下方式替代
-
  shell : /usr/bin/yum || /bin/true
-
  ignore_errors: True	#使用ignore_errors来忽略错误信息
-
  handlers: 			#触发器：当脚本运行前面的notify则会执行该触发器，可设置多个任务模块
-
-\- name: service
-
+- name: service
   service: name=httpd state=restarted
+```
 
 ansible-playbook -C sss.yml	预加载脚本，检测
 
@@ -1483,17 +1430,17 @@ ELK是Elasticsearch、Logstash、Kibana开源软件的集合，对外是作为�
 
 它是一个开源分布式搜索引擎，提供收集、分析、存储数据三大功能。为了保证搜索服务的高可用性，需要一个集群
 
-## 介绍
+### 介绍
 
 Elasticsearch（ES）是一个基于Lucene构建的开源、分布式、RESTful接口的全文搜索引擎。Elasticsearch还是一个分布式文档数据库，其中每个字段均可被索引，而且每个字段的数据均可被搜索，ES能够横向扩展至数以百计的服务器存储以及处理PB级的数据。可以在极短的时间内存储、搜索和分析大量的数据。通常作为具有复杂搜索场景情况下的核心发动机。
 
-## Elasticsearch能做什么
+### Elasticsearch能做什么
 
 1. 当你经营一家网上商店，你可以让你的客户搜索你卖的商品。在这种情况下，你可以使用ElasticSearch来存储你的整个产品目录和库存信息，为客户提供精准搜索，可以为客户推荐相关商品。
 2. 当你想收集日志或者交易数据的时候，需要分析和挖掘这些数据，寻找趋势，进行统计，总结，或发现异常。在这种情况下，你可以使用Logstash或者其他工具来进行收集数据，当这引起数据存储到ElasticsSearch中。你可以搜索和汇总这些数据，找到任何你感兴趣的信息。
 3. 对于程序员来说，比较有名的案例是GitHub，GitHub的搜索是基于ElasticSearch构建的，在github.com/search页面，你可以搜索项目、用户、issue、pull request，还有代码。共有40~50个索引库，分别用于索引网站需要跟踪的各种数据。虽然只索引项目的主分支（master），但这个数据量依然巨大，包括20亿个索引文档，30TB的索引文件。
 
-## Elasticsearch基本概念
+### Elasticsearch基本概念
 
 Near Realtime(NRT) 几乎实时
 
@@ -2110,33 +2057,23 @@ systemctl stop firewalld && setenforce 0
 
 rpm -ivh http://repo.zabbix.com/zabbix/4.0/rhel/7/x86_64/zabbix-release-4.0-2.el7.noarch.rpm && yum repolist
 
+```
 if [ -e /etc/yum.repos.d/zabbix.repo ];then
-
 ​	echo "已存在"
-
 ​	yum -y install zabbix-server-mysql zabbix-web-mysql zabbix-agent mariadb mariadb-server
-
 ​	else
-
 ​	echo "不存在"
-
 ​	exit
-
 fi
 
 systemctl start mariadb
 
- 
-
 if [ $? -eq 0 ];then
-
 ​	echo "service is started"
-
 ​	else
-
 ​	echo "service not started"
-
 fi
+```
 
 #数据库的操作
 
