@@ -6,11 +6,7 @@ Docker是一种容器技术，解决软件跨环境迁移的问题
 
 Docker是一个开源的应用容器引擎	(c/s模式)构建Paas层的应用
 
-基于Go语言实现
-
-可以让开发者打包应用(及依赖包)到一个可移植的容器中然后发布到其他liunx机器实现虚拟化
-
-容器完全使用虚拟化沙箱机制，相互之间不会有任何接口
+基于Go语言实现。可以让开发者打包应用(及依赖包)到一个可移植的容器中然后发布到其他liunx机器实现虚拟化。容器完全使用虚拟化沙箱机制，相互之间不会有任何接口
 
 Docker引擎 包括支持在桌面系统或云平台安装 Docker，以及为企业提供简单安全弹性的容器集群编排和管理，17.3版本后分为CE社区版和EE企业版
 
@@ -67,7 +63,7 @@ yum-config-manager  --add-repo https://download.docker.com/linux/centos/docker-c
 yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
 ```
 
-配置镜像加速器`vim /etc/docker/daemon.json`
+**配置镜像加速器 vim /etc/docker/daemon.json**
 
 ```sh
 {"registry-mirrors": ["https://ustc-edu-cn.mirror.aliyuncs.com","https://docker.mirrors.ustc.edu.cn"]}
@@ -129,17 +125,21 @@ Docker镜像：是一个只读的Docker容器模板，包含启动容器所需�
 
 ## docker images镜像操作
 
-man docker-images查看镜像
+查看镜像`man docker-images`
 
-导出镜像docker save -o zi_redis.tar zi_redis:1.0镜像打包成tar文件（-o指定保存目录）
+从容器导出镜像，镜像打包成tar文件（-o指定保存目录）`docker save -o zi_redis.tar zi_redis:1.0`
 
-导入镜像docker load<zi_redis.tar压缩文件还原成镜像文件
+镜像保存成一个文件`docker save 0fdf2b4c26d3 > hangge_server.tar`
+
+导入镜像docker load < zi_redis.tar压缩文件还原成镜像文件
 
 注: 数据卷目录不能被制作成自制镜像的一部分
 
 上传镜像docker push test:latest 上传本地的test :latest镜像
 
 获取镜像docker pull redis:3.2拉取相应镜像版本(默认latest最新版)	-a获取仓库中的所有镜像
+
+
 
 查看镜像docker images查看本地镜像						-a列出所有（包括临时文件）镜像文件
 
@@ -163,6 +163,18 @@ docker images prune -f删除所有name和tag为<none>的镜像
 
 ```sh
 ll *.tar|awk '{print $NF}'|sed -r 's#(.*)#docker load -i \1#' |bash #批量导入镜像
+```
+
+
+
+## docker image拉取拉取不同架构的镜像
+
+<img src="./assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2JpZWxhaXd1eWFuZzE5OTk=,size_16,color_FFFFFF,t_70.png" alt="在这里插入图片描述" style="zoom: 50%;" />
+
+在docker中运行拉取镜像命令，直接粘贴我们刚复制的pull命令然后输入一个@在粘贴digest的值。代码如下
+
+```sh
+docker pull k8smx/kube-controller-manager:v1.20.7@sha256:b7d7a3945c3689bff125769372bd0ac99d4980719a463108038d5d9d7084dcda
 ```
 
 
@@ -676,6 +688,10 @@ docker network inspect network
 
 注：1、目录必须是绝对路径	2、容器内被映射目录没有则会创建，有且目录下有文件则会清空	3、可以挂载多个数据卷	
 
+==容器卷挂载和目录挂载的区别==
+
+容器卷挂载不修改容器内数据，目录挂载覆盖容器内数据
+
 **数据卷类型type**
 
 1、volume普通数据卷，默认映射到主机/var/lib/docker/volumes路径下
@@ -685,6 +701,15 @@ docker network inspect network
 3、tmpfs临时数据卷，只存在于内存中
 
 **使用参数**：
+
+```sh
+[root@izoq008ryseuupz docker]# docker volume help
+	create      Create a volume
+  inspect     Display detailed information on one or more volumes
+  ls          List volumes
+  prune       Remove all unused local volumes
+  rm          Remove one or more volumes
+```
 
 -v，--volume=[]，给容器挂载存储卷，挂载到容器的某个目录
 
@@ -702,34 +727,56 @@ docker run -it --name=c1 -v /media:/media : ro -v /media:/sss centos:latest  bas
 docker volume create test //建立本地数据卷
 ```
 
-docker volume inspect（查看详细信息）ls(列出已有数据卷）prune（清理未使用数据卷）rm(删除数据卷）
-
-绑定数据卷	src/source主机挂载点		target/destination/dst映射文件夹	ro/readonly指定数据卷只可读
+绑定数据卷
 
 ```sh
-//创建容器c1挂载类型bind将主机目录/media绑定到容器/sss以只读的形式
 docker run -id  --name c1 --mount type=bind，source=/media，target=/sss，readonly  ubuntu bash
+//创建容器c1挂载类型bind将主机目录/media绑定到容器/sss以只读的形式
+//src/source主机挂载点		target/destination/dst映射文件夹	ro/readonly指定数据卷只可读
 ```
 
-## 数据卷容器
+显示数据卷具体内容
+```sh
+[root@izoq008ryseuupz _data]# docker volume inspect centos-volume
+[
+    {
+        "CreatedAt": "2020-11-25T17:30:06+08:00",
+        "Driver": "local",
+        "Labels": {},
+        "Mountpoint": "/var/lib/docker/volumes/centos-volume/_data",
+        "Name": "centos-volume",
+        "Options": {},
+        "Scope": "local"
+    }
+]
+```
+
+
+
+## 容器使用数据卷
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps28-1682691150324-350.jpg" alt="img" style="zoom:50%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps29-1682691150324-351.jpg" alt="img" style="zoom:50%;" /> 
 
 创建数据卷容器（默认映主机/var/lib/docker/volumes/）
 
-`docker run -it --name=c1  -v :/sss centos:latest /bin/bash`创建c1数据卷容器
-
-`docker run -it --name=c2 --volumes-from c1 centos:latest`容器c2映射/sss目录
+```sh
+docker run -it --name=c1  -v :/sss centos:latest /bin/bash #创建c1数据卷容器
+docker run -it --name=c2 --volumes-from c1 centos:latest #容器c2映射/sss目录
+```
 
 使用--volumes-from参数所挂载数据卷的容器并不需要在运行状态
 
 删除容器后，数据卷并不会消失， docker rm -v 可删除容器挂载的数据卷 
 
-备份`docker run -it --name=c3 --volumes-from c1 -v $(pwd):/backup centos tar cvf /backup/backup.tar /sss`
+```sh
+docker run -it --name=c3 --volumes-from c1 -v $(pwd):/backup centos tar cvf /backup/backup.tar /sss #备份
+```
 
 创建c3将c1的数据卷/sss挂载到c3，再将主机当前目录映射到/backup，进入容器后将数据卷/sss打包成tar
 
-恢复`docker run –name c4 --volumes-from c3 -v $(pwd) :/backup c3 tar xvf /backup/backup.tar`
+```sh
+docker run –name c4 --volumes-from c3 -v $(pwd) :/backup c3 tar xvf /backup/backup.tar # 恢复
+```
 
 创建c4，挂载c3数据卷到容器，映射主机当前目录到c4，使用tar解压backup.tar备份文件到当前c4目录
 
@@ -748,24 +795,20 @@ container，创建的容器不会创建自己的网卡，配置自己的IP，而
 
 创建docker network create -d bridge lll创建网络定义驱动类型为bridge
 
-```
+```sh
 #创建subnet子网，ip地址范围为5网段，网关为5.1
 docker network create --subnet=192.168.5.0/24 --ip-range=192.168.5.0/24 --gateway=192.168.5.1 xd_net
 ```
 
-`[root@server ~]#docker inspect -f '{{.State.Pid}}' ce3271024189`   #查找指定容器的pid号
-
+```sh
+[root@server ~]#docker inspect -f '{{.State.Pid}}' ce3271024189  #查找指定容器的pid号
 1337
-
-`[root@server ~]#mkdir /var/run/netns` 创建命名空间
-
-`[root@server ~]#ln -s /proc/1337/ns/net  /var/run/netns/rancher-server`  #建立软链接
-
-`[root@server ~]#ip netns list` #查看所有network namespace
-
+[root@server ~]#mkdir /var/run/netns # 创建命名空间
+[root@server ~]#ln -s /proc/1337/ns/net  /var/run/netns/rancher-server  #建立软链接
+[root@server ~]#ip netns list #查看所有network namespace
 rancher-server
-
-`[root@server ~]#ip netns exec rancher-server ip a ` #查看容器内ip
+[root@server ~]#ip netns exec rancher-server ip a #查看容器内ip
+```
 
 查看docker network ls查看网络
 
@@ -821,7 +864,7 @@ Portainer是一个轻量级的管理UI，可让您轻松管理不同的Docker环
 
 ### 一、下载Portainer镜像
 
-```
+```sh
 docker pull portainer/portainer
 ```
 
