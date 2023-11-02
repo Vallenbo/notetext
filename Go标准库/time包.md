@@ -1,4 +1,6 @@
-# time包
+
+
+# 时间函数
 
 时间和日期是我们编程中经常会用到的，本文主要介绍了 Go 语言内置的 time 包的基本用法。time 包提供了一些关于时间显示和测量用的函数。time 包中日历的计算采用的是公历，不考虑润秒。
 
@@ -122,7 +124,7 @@ const (
 
 例如：`time.Duration`表示1纳秒，`time.Second`表示1秒。
 
-### 时间操作
+## 时间运算操作
 
 ### Add
 
@@ -188,6 +190,31 @@ func tickDemo() {
 	}
 }
 ```
+
+定时执行  
+
+```Go
+tm := time.NewTimer(3 * time.Second)
+<-tm.C //阻塞3秒钟
+//do something
+tm.Stop()
+
+//或者用：
+<-time.After(3 * time.Second) //阻塞3秒钟
+```
+
+周期执行  
+
+```Go
+tk := time.NewTicker(1 * time.Second)
+for i := 0; i < 10; i++ {
+    <-tk.C //阻塞1秒钟
+    //do something
+}
+tk.Stop()
+```
+
+
 
 ## 时间格式化
 
@@ -272,3 +299,6 @@ func parseDemo() { // parseDemo 解析时间
 	fmt.Println(timeObj.Sub(now))
 }
 ```
+
+
+

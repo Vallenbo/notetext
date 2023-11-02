@@ -182,9 +182,9 @@ r.GET("/someProtoBuf", func(c *gin.Context) {
 
 # 获取参数
 
-## 获取querystring参数
+## 通过URL获取携带参数
 
-`querystring`指的是URL中`?`后面携带的参数，
+`querystring`参数指的是URL中`?`后面携带的参数，
 
 例如：`/user/search?username=小王子&address=沙河`。 获取请求的querystring参数的方法如下：
 
@@ -201,24 +201,7 @@ r.GET("/someProtoBuf", func(c *gin.Context) {
 	})
 ```
 
-## 获取表单form参数
-
-当前端请求的数据通过form表单提交时，例如向`/user/search`发送一个POST请求，获取请求数据的方式如下：
-
-```go
-	r.POST("/login", func(c *gin.Context) {
-		//username := c.DefaultPostForm("username", "小王子")// DefaultPostForm取不到值时会返回指定的默认值
-		username := c.PostForm("username")
-		password := c.PostForm("password")
-		c.JSON(http.StatusOK, gin.H{
-			"message":  "ok",
-			"username": username,
-			"password": password,
-		})
-	})
-```
-
-## 获取url参数
+## 获取URL路径传递参数
 
 请求的参数通过URL路径传递，例如：`/user/search/小王子/沙河`。 获取请求URL路径中的参数的方式如下。
 
@@ -230,6 +213,25 @@ r.GET("/user/search/:username/:address", func(c *gin.Context) { // http:///user/
 			"message":  "ok",
 			"username": username,
 			"address":  address,
+		})
+	})
+```
+
+##
+
+## 通过POST请求获取参数
+
+表单form参数，当前端请求的数据通过form表单提交时，例如向`/user/search`发送一个``POST`请求，获取请求数据的方式如下：
+
+```go
+	r.POST("/login", func(c *gin.Context) {
+		//username := c.DefaultPostForm("username", "小王子")// DefaultPostForm取不到值时会返回指定的默认值
+		username := c.PostForm("username")
+		password := c.PostForm("password")
+		c.JSON(http.StatusOK, gin.H{
+			"message":  "ok",
+			"username": username,
+			"password": password,
 		})
 	})
 ```
@@ -311,9 +313,10 @@ type Login struct {// Binding from JSON
 
 区别
 
+```go
 c.ShouldBind()  //发生错误，会继续向下执行，错误自行处理
-
 c.Bind() //发生错误，会停止执行
+```
 
 
 
@@ -341,7 +344,7 @@ c.Bind() //发生错误，会停止执行
 	})
 
 	r.POST("/upload", func(c *gin.Context) { //接收url：/upload 的 post请求
-		file, err := c.FormFile("f1") // 单个文件
+		file, err := c.FormFile("f1") // 单个文件，f1：前端请求name字段名
 		if err != nil {               //传输有错误
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -458,7 +461,7 @@ Gin框架中的路由使用的是[httprouter](https://github.com/julienschmidt/h
 
 Gin框架允许开发者在处理请求的过程中，加入用户自己的钩子（Hook）函数。这个钩子函数就叫中间件，中间件适合处理一些公共的业务逻辑，比如登录认证、权限校验、数据分页、记录日志、耗时统计等。
 
-![image-20230405172542079](E:\Project\Textbook\Golang常用服务手册\assets\image-20230405172542079.png)![image-20230405172552434](E:\Project\Textbook\Golang常用服务手册\assets\image-20230405172552434.png)
+<img src="E:\Project\Textbook\Golang常用服务手册\assets\image-20230405172542079.png" alt="image-20230405172542079" style="zoom:50%;" /><img src="E:\Project\Textbook\Golang常用服务手册\assets\image-20230405172552434.png" alt="image-20230405172552434" style="zoom:50%;" />
 
 ## 定义中间件
 
@@ -501,7 +504,6 @@ func (w bodyLogWriter) Write(b []byte) (int, error) { // Write 写入响应体�
 func ginBodyLogMiddleware(c *gin.Context) {
 	blw := &bodyLogWriter{body: bytes.NewBuffer([]byte{}), ResponseWriter: c.Writer}
 	c.Writer = blw // 使用我们自定义的类型替换默认的
-
 	c.Next() // 执行业务逻辑
 
 	fmt.Println("Response body: " + blw.body.String()) // 事后按需记录返回的响应

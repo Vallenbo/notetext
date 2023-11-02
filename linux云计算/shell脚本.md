@@ -114,7 +114,7 @@ $(())或$[]可以进算数运算	``不可以
 
 大于 -gt (greater than)					小于 -lt (less than)			大于或等于 -ge (greater than or equal)
 
-小于或等于 -le (less than or equal)		不相等 -ne （not equal）	相等 -eq （equal）
+小于或等于 -le (less than or equal)		不相等 -ne （not equal）		相等 -eq （equal）
 
 ## shell脚本内的特殊命令：
 

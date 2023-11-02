@@ -1097,8 +1097,10 @@ echo "/usr/local/sbin/nginx" >>/etc/rc.local	开机启动服务的命令
 
 ```sh
 nginx -s quit //平稳关闭Nginx stop快速关闭，可能不保存相关信息 reload重载配置 reopen重新打开日志文件
-nginx -V 显示 //nginx 的版本，编译器版本和配置参数		nginx -t	//将检查配置文件的语法的正确性	
-nginx -?，-h //打开帮助信息		killall nginx //杀死所有nginx进程
+nginx -V 显示 //nginx 的版本，编译器版本和配置参数		
+nginx -t	//将检查配置文件的语法的正确性	
+nginx -?，-h //打开帮助信息		
+killall nginx //杀死所有nginx进程
 ```
 
 **主配置文件**	vim /usr/local/nginx/conf/nginx.conf
@@ -1173,7 +1175,8 @@ location ~* \ . ( jpg | png | gif)$ {	#当访问以jpg结尾时直接走代理�
 	proxy_pass	http://192.168.100.138:8081:
 	root     bb;		#nginx根目录下的文件夹， 	/bb	#绝对路径/下的文件夹
 	autoindex  on;	#自动查找，列出反文件	//index index.html; 设置默认页
-}	}		}
+}	
+}		}
 ```
 
 
@@ -1200,7 +1203,6 @@ vrrp_script chk_http_port {
   interval 2              #检测脚本执行的间隔，单位是秒
   weight -2               #执行脚本后权重变化
 }
-
 
 vrrp_instance VI_1 { #vrrp 虚拟ip配置
   state MASTER       # 指定keepalived的角色，MASTER为主	//BACKUP为备
