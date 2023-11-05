@@ -990,6 +990,8 @@ echo "redhat" | passwd -- stdin alex 将密码redhat添加到alex账户
 
 tac	/ rev		从下至上 / 从右至左 输出文件内容
 
+basename
+
 less 分页查看
 
 head / tail	显示文件前 / 后几行	-n 指定文本显示的行数		-c 指定文本显示的字符数
@@ -1209,9 +1211,10 @@ tar -xvf test.tar 解压tar文件
 tar -xf node-v12.18.1-linux-x64.tar.xz 解压xz格式压缩包
 
 ```
--z 使用gzip压缩(.gz后缀压缩包)
--j 使用bzip2压缩（压缩的更小,当时间更长）.bz2后缀压缩包（-k 可保留源文件）	-C指定解压地址
--c 创建/压缩	-x 释放/解压缩		-f 指定压缩文件名字		-v 显示提示信息		-tf 查询内容
+-z 使用gzip压缩/解压(.gz后缀压缩包)
+-j 使用bzip2压缩/解压（压缩的更小,当时间更长）.bz2后缀压缩包（-k 可保留源文件）	
+-C 指定解压地址		-c 创建/压缩	-x 释放/解压缩
+-f 指定压缩文件名字		-v 显示提示信息		-tf 查询内容
 ```
 
 zip /srv/file.zip  * 将当前文件压缩成file.zip文件		-sf查看压缩包里面的内容	-r表示递归压缩子目录下所有文件

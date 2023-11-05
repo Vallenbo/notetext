@@ -1097,13 +1097,15 @@ echo "/usr/local/sbin/nginx" >>/etc/rc.local	开机启动服务的命令
 
 ```sh
 nginx -s quit //平稳关闭Nginx stop快速关闭，可能不保存相关信息 reload重载配置 reopen重新打开日志文件
-nginx -V 显示 //nginx 的版本，编译器版本和配置参数		
-nginx -t	//将检查配置文件的语法的正确性	
-nginx -?，-h //打开帮助信息		
+nginx -V 显示 //nginx 的版本，编译器版本和配置参数
+nginx -t	//将检查配置文件的语法的正确性
+nginx -?，-h //打开帮助信息
 killall nginx //杀死所有nginx进程
 ```
 
-**主配置文件**	vim /usr/local/nginx/conf/nginx.conf
+**主配置文件**
+
+vim /usr/local/nginx/conf/nginx.conf
 
 \####### 每个指令必须有分号结束。#################
 
@@ -1258,6 +1260,95 @@ rewrite  ^(.*)$  /index.html break; 会把所有的请求都重定向到 /index.
 ![img](E:\Project\Textbook\linux云计算\assets\wps75.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps76.jpg)![img](E:\Project\Textbook\linux云计算\assets\wps77.jpg) 
 
 使用If判断
+
+
+
+### nginx 配置vue3前后端项目
+
+nginx.conf文件内容
+
+```conf
+user root;
+worker_processes auto;
+pid /run/nginx.pid;
+
+events {
+        worker_connections 768;
+        multi_accept on;
+}
+
+http {
+        sendfile on;
+        tcp_nopush on;
+        tcp_nodelay on;
+        keepalive_timeout 65;
+        types_hash_max_size 2048;
+
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+
+        access_log /var/log/nginx/access.log;
+        error_log /var/log/nginx/error.log;
+
+        gzip on;
+        gzip_disable "msie6";
+
+        include /etc/nginx/conf.d/*.conf;
+        include /etc/nginx/sites-enabled/*;
+
+    # 虚拟主机
+    server {
+        listen       80; # 监听地址以及端口
+        server_name  192.168.0.27; # 外部可以访问的域名
+        root   /var/www/html/dist/ ; # 本地项目地址
+        index  index.html ; # 入口文件默认类型,可以接收index、index.html、index.htm文件
+
+        #charset utf-8; # 默认字符集
+        #access_log  logs/localhost.access.log  access;
+
+        # 路由
+        location /ok/ {
+					  client_max_body_size 600M; //客户端 上传文件大小限制
+            client_body_buffer_size 600M;
+
+            proxy_connect_timeout 120s; //客户端连接时长设置 ，配合文件上传使用
+            proxy_read_timeout 120s;
+
+            proxy_pass http://192.168.0.41:80/ ; //需要指定端口号
+            root   /var/www/html/dist/ ; # 访问根目录 nginx-1.21.0\html
+            index  index.html ; # 入口文件,可以接收index、index.html、index.htm文件
+            proxy_set_header   Host             $host;        # 传递域名
+            proxy_set_header   X-Real-IP        $remote_addr; # 传递ip
+            proxy_set_header   X-Scheme         $scheme;      # 传递协议
+            proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+        }
+    }
+}
+```
+
+
+
+#### 注意点（后端接口配置）：
+
+如果你的配置出现404了，这个时候你可以对照检查下面的问题是不是你遇到的。
+
+1. proxy_pass 地址后面要不要加“/”,这个取决于匹配的 /api/ 作不作为你uri的一部分，如果 /api/ 是其中一部分,则不需要带上“/”；
+   反之带上。加了“/”相当于是绝对根路径，nginx 不会把location 中匹配的路径 /api/ 带上。
+
+   ##### [举个列子]：
+
+   ```如果你的配置跟上面一样，同时请求a.html页面：
+    请求地址原本是这样： http://192.168.1.1/api/a.html;
+    如果配置是这样：proxy_pass http://192.168.1.1/;（后端接口地址）
+    那么请求接口地址应该变成这样： http://192.168.1.1/a.html 
+   ```
+
+2. proxy_pass的地址记得在hosts文件做ip映射，建议直接使用域名对应的ip地址。
+
+3. location 中 ~ （区分大小写）与 ~* （不区分大小写）标识均为正则匹配。
+   如果你不确定，请在location后面加上 location ~* /api/ { }这样的配置（目的：不区分“api”三个字母的大小写）。
+
+
 
 ##  Apache服务
 

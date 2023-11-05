@@ -356,14 +356,13 @@ func main() {
 	fName := "MyFile.gz"
 	fi, err := os.Open(fName)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v, Can't open %s: error: %s\n", os.Args[0], fName,
-			err)
+		fmt.Fprintf(os.Stderr, "%v, Can't open %s: error: %s\n", os.Args[0], fName, err)
 		os.Exit(1)
 	}
 	defer fi.Close()
-    
+
 	fz, err := gzip.NewReader(fi)
-    var r *bufio.Reader
+  var r *bufio.Reader
 	if err != nil {
 		r = bufio.NewReader(fi)
 	} else {

@@ -15,9 +15,15 @@
 ```vue
 import { createRouter } from 'vue-router'
 
-const router = createRouter({ // 创建路由
-    // ……
+const router = createRouter({  // 创建路由
+    history: createWebHistory(), 
+	  routes: [{
+        path: "/", name: "home", component: App
+    }, {
+        path: "/index", name: "index", component: index
+    },]
 })
+
 export default router // 暴露出去
 ```
 
@@ -51,32 +57,27 @@ app.mount('#app') //3、挂载
 ```
 import { createRouter, createWebHistory } from 'vue-router'
 
-const router = createRouter({
-    history: createWebHistory() // 使用 history 模式路由
-    // ……
+const router = createRouter({  // 创建路由
+    history: createWebHistory(), // 使用 history 模式路由
+	  routes: [{
+        path: "/", name: "home", component: App
+    }, {
+        path: "/index", name: "index", component: index
+    },]
 })
 
 export default router
 ```
 
-规定路由模式：`hash 模式路由`
-```
-import { createRouter, createWebHashHistory } from 'vue-router'
 
-const router = createRouter({
-    history: createWebHashHistory() // 使用 history 模式路由
-    // ……
-})
-
-export default router
-```
 
 ### 10.1.3：使用路由规则
+
 `routes`配置路由规则：
 -   `path`：路由分配的`URL`
 -   `name`：当路由指向此页面时显示的名字
 -   `component`：路由调用这个页面时加载的组件
--   ``redirect`：`来重定向另一个地址
+-   `redirect`：来重定向另一个地址
 
 使用路由规则
 ```vue
@@ -144,7 +145,7 @@ div.blog {
     <router-link to="/blog">博客</router-link>
     
     <hr>
-    <router-view/> <!--路由试图，路由切换组件展示的地方-->
+    <router-view/> <!--路由试图，切换路由时要展示组件的地方-->
 </template>
 ```
 
@@ -169,10 +170,6 @@ let routes = [
         path: '/home',
         component: HomeView
     },
-    {
-        path: '/blog',
-        component: () => import('@/views/BlogHomeView.vue')
-    }
 ]
   
 const router = createRouter({
@@ -216,7 +213,6 @@ App.vue【添加重定向路由链接】
 
 ```vue
 import { createRouter, createWebHistory } from 'vue-router'
-
 import HomeView from '@/views/HomeView.vue'
 import SchoolHomeView from '@/views/SchoolHomeView.vue.vue'
 import MathView from '@/views/MathView.vue'
@@ -231,8 +227,7 @@ let routes = [
         path: '/school',
         name: 'school',
         component: SchoolHomeView,
-        //  嵌套路由，下面要展示的组件需要在父级路由的组件中（router-view）进行展示
-        children: [
+        children: [	//  嵌套路由，下面要展示的组件需要在父级路由的组件中（router-view）进行展示
             {
                 path: 'english', // 嵌套路由中的 path 前面不要加 /
                 name: 'school-english',
@@ -290,9 +285,7 @@ export default router
         <router-link to="/school/math">数学</router-link>
       
         <hr>
-          
-				<!-- 该组件中自己的路由视图 -->
-        <router-view />
+        <router-view />	<!-- 该组件中自己的路由视图 -->
     </div>
 </template>
 
@@ -312,10 +305,10 @@ MathView.vue【嵌套路由中用到的组件】
 
 ## 10.4：路径参数
 1.  很多时候，我们需要将给定匹配模式的路由映射到同一个组件，例如：想渲染不同博客的内容，其实只是渲染到同一个组件上，只是博客的编号不同而已
-2.  在`Vue Router`中，可以在路径中使用一个动态字段来实现，我们称之为“路径参数” ，语法如：`path: '/_url_/_:__param_'`
+2.  在`Vue Router`中，可以在路径中使用一个动态字段来实现，我们称之为“路径参数” ，语法如：`path: '/_url_/_:_param_'`
 3.  在展示的组件中访问路径参数
-    a.  在选项式 API`JS`中采用`this.$route.params`来访问，试图模板上采用`$route.params`来访问
-    b.  在组合式 API 中，需要`import { useRoute } from 'vue-router'`，`JS`和视图模板上通过`useRoute().params`来访问
+    a.  在**选项式 API** 中，采用`this.$route.params`来访问，试图模板上采用`$route.params`来访问
+    b.  在**组合式 API **中，需要`import { useRoute } from 'vue-router'`，`JS`和视图模板上通过`useRoute().params`来访问
     c.  还可以通过在路由规则上添加`props: true`，将路由参数传递给组件的`props`中
 
 路由模块【新增路径传参】
@@ -340,7 +333,7 @@ let routes = [
         path: '/blog-content/:id',  // 路径传参
         name: 'blog-content',
         component: BlogContentView,
-        props: true  // 将路径参数传递到展示组件的 props 中
+        props: true  // 同意，将路径参数传递到展示组件的 props 中
     }
 ]
 
@@ -389,7 +382,7 @@ export default router
 <script setup> //BlogContentView.vue
 import { useRoute } from 'vue-router'
 
-const routeObj = useRoute() // 获取的跳转的路由对象
+const routeObj = useRoute() // 获取路由路径参数对象
 const propsData = defineProps(['id'])
 
 function showRouteParams() {
@@ -398,6 +391,18 @@ function showRouteParams() {
     console.log(propsData.id) // 在 props 取出路由路径参数
 }
 </script>
+
+<template>
+    <div class="blog-content">
+        博客详情界面
+        <ul>
+            <li>{{ $route.params }}</li>
+            <li>{{ $route.params.id }}</li>
+            <li>{{ id }}</li>
+        </ul>
+        <button @click="showRouteParams">在 JS 中获取路由路径参数</button>
+    </div>
+</template>
 
 <script> // BlogContentView.vue
 export default {
@@ -414,17 +419,19 @@ export default {
 ```
 
 ## 10.5：声明式与编程式导航
-### 10.5.1：导航到不同的位置
+### 10.5.1：push()导航到不同的路径地址
+
 声明式 `<router-link :to="...">`
 
 编程式【选项式】`this.$router.push(...)`
 			【组合式】`useRouter().push(...)`
 
-描述
+**描述**
 会向`history`栈添加一个新的记录，所以，当用户点击浏览器后退按钮时，会回到之前的`URL`
 
-提示：
+**提示**：
 编程式的`router.push(...)`的语法
+
 1.  其的参数可以是一个字符串路径，或者一个描述地址的对象
 2.  如果参数是描述地址的对象的话，其对象中`path`和`params`不能同时使用
 
@@ -434,12 +441,10 @@ this.$router.push('/home') // 简单的字符串地址
 this.$router.push({ path : '/home' }) // 路径地址对象 path（路由地址）
 this.$router.push({ name : 'home' }) // 路径地址对象 name（路由名称）
 
-
 // --------------------- 嵌套路由 -------------------------
 this.$router.push('/school/english') // 简单的字符串地址
 this.$router.push({ path : '/school/english' }) // 路径地址对象 path（路由地址）
 this.$router.push({ name : 'schoo-english' }) // 路径地址对象 name（路由名称）
-
 
 // --------------------- 路径传参 -------------------------
 const id_one = 110
@@ -481,13 +486,13 @@ router.push({ name : 'blog-content' , params: { id_three } }) // 路径地址对
 **声明式**
 
 ```vue
-<router-link :to="..." replace>
+<router-link :to="..." replace> //替换当前路径下的vue,即更改router路径
 ```
 
 **编程式**
 
 【选项式】`this.$router.replace(...)`
-作用类似于`push(...)`唯一不同的是：它在导航时不会向`history`添加新记录，只是取代了当前的条目
+	作用类似于`push(...)`唯一不同的是：它在导航时不会向`history`添加新记录，只是取代了当前的条目
 
 【组合式】`useRouter().replace(...)`
 
@@ -565,8 +570,6 @@ router.go(100)
 2.  可设置导航守卫来检测用户是否登录，如果已登录，则进入后台页，如果未登录，则强制进入登录页，如图
 ![Pasted image 20230417223901](assets/Pasted image 20230417223901.png)
 
-
-
 ### 10.6.1：全局前置守卫
 
 每次发生路由的导航跳转时，都会触发全局前置守卫，因此，在全局前置守卫中，程序员可以对每个路由进行访问权限的控制
@@ -586,7 +589,7 @@ router.go(100)
 ![Pasted image 20230417223941](assets/Pasted image 20230417223941.png)
 
 ```vue
-// 注册全局前置守卫
+// 注册全局前置守卫 // main.js文件
 // to：将要访问的路由信息对象
 // from：将要离开的路由信息对象
 router.beforeEach((to, from, next) => {
