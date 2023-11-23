@@ -2,8 +2,6 @@
 
 Go语言内置的`net/http`包提供了HTTP客户端和服务端的实现。
 
-Go语言内置的`net/http`包十分的优秀，提供了HTTP客户端和服务端的实现。
-
 ### HTTP协议
 
 超文本传输协议（HTTP，HyperText Transfer Protocol)是互联网上应用最为广泛的一种网络传输协议，所有的WWW文件都必须遵守这个标准。设计HTTP最初的目的是为了提供一种发布和接收HTML页面的方法。
@@ -119,7 +117,6 @@ func handleFunc(conn net.Conn) {
 		cnt, err = conn.Write([]byte(upperData))
 		fmt.Println("Client  <====== Server, 长度:", cnt, "，数据:", upperData)
 	}
-
 	
 	_ = conn.Close() //关闭连接
 }
@@ -153,7 +150,7 @@ http响应格式也分为4部分：
 2. 第二部分：响应头
 
    1. Content-Type : application/json
-   2. Server: Apache 
+   2. Server: Apache
    3. Data : Mon, 12 Sep ...
    4. ....
 
@@ -204,6 +201,7 @@ func main() {
 		return
 	}
 	defer resp.Body.Close()
+  
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Printf("read from resp.Body failed, err:%v\n", err)
@@ -279,6 +277,7 @@ func main() {
 		return
 	}
 	defer resp.Body.Close()
+  
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Printf("get resp failed, err:%v\n", err)

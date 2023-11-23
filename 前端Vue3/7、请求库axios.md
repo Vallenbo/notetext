@@ -1,5 +1,5 @@
 `Axios`是一个基于`promise`网络请求库，作用于`node.js`和浏览器中
-`Axios`在服务端它使用原生`node.js``http`模块，而在客户端（浏览端）则使用 `XMLHttpRequests`
+`Axios`在服务端它使用原生`node.js`的http模块，而在客户端（浏览端）则使用 `XMLHttpRequests`
 `Axios`可以拦截请求和响应、转换请求和响应数据、取消请求、自动转换`JSON`数据
 `Axios`安装方式：`npm install axios`
 
@@ -151,7 +151,7 @@ request.post(
 
 ## 12.4：响应数据
 发送请求后通过`.then(_response_ => {})`来获取服务器响应的数据
-`response`响应式结构：
+**response响应式结构**：
 1.  `data`：服务器提供的响应【最重要】
 2.  `status`：来自服务器响应的 HTTP 状态码，成功为`200`，请求地址不存在为`404`，服务器异常为`500`，请求方式错误为`405`……
 3.  `statusText`：来自服务器响应的 HTTP 状态信息

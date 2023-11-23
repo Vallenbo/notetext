@@ -1,3 +1,5 @@
+# 介绍
+
 etcd是一个开源、高可用的分布式key-value键值数据库，可以用于配置共享和服务注册和发现.
 类似的项目有Zookeeper和consul，提供Restful的接口，使用简单，基于raft算法的强一致性，高可用的服务存储目录。
 [etcd安装地址](go.etcd.io/etcd/client/v3)

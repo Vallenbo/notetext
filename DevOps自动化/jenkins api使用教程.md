@@ -1,1 +1,0 @@
-[gojenkins-Go接口文档](https://pkg.go.dev/github.com/bndr/gojenkins@v1.1.0#Jenkins.GetJob)
