@@ -2063,3 +2063,39 @@ virt-manager打开可视化界面		Virsh虚拟化命令	--help			snapshot快照�
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps148.jpg) 
 
+
+
+# JAVA
+
+[Archived OpenJDK GA Releases (java.net)](https://jdk.java.net/archive/)
+
+1、tar解压文件
+
+```go
+tar -zxvf openjdk-17.tar.gz -C /usr/local/
+```
+
+2、编辑/etc/profile文件
+
+vi /etc/profile
+
+```go
+# Java Environment
+
+export JAVA_HOME=/usr/local/jdk-17.0.8
+export PATH=$JAVA_HOME/bin:$PATH
+export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+```
+
+3、使环境变量生效
+
+```go
+source /etc/profile
+```
+
+4、查看java版本
+
+```go
+java --version
+```
+

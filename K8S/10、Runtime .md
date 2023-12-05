@@ -7,7 +7,7 @@
 
 > 本文主要分析OCI，CRI，runc，containerd，cri-containerd，dockershim等组件说明及调用关系。
 
-# [1. 概述](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/runtime.md#1-概述)
+# 1. 概述
 
 各个组件调用关系图如下：
 
@@ -15,7 +15,7 @@
 
 > 图片来源：https://www.jianshu.com/p/62e71584d1cb
 
-# [2. ](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/runtime.md#2-ociopen-container-initiative)[OCI（Open Container Initiative）](https://opencontainers.org/about/overview/)
+# 2. OCI（Open Container Initiative）
 
 OCI（Open Container Initiative）即开放的容器运行时`规范`，目的在于定义一个容器运行时及镜像的相关标准和规范，其中包括
 
@@ -24,7 +24,7 @@ OCI（Open Container Initiative）即开放的容器运行时`规范`，目的�
 
 实现OCI标准的容器运行时有`runc`，`kata`等。
 
-# [3. ](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/runtime.md#3-runc)[RunC](https://github.com/opencontainers/runc)
+# 3.  RunC
 
 `runc(run container)`是一个基于OCI标准实现的一个轻量级容器运行工具，用来创建和运行容器。而Containerd是用来维持通过runc创建的容器的运行状态。即runc用来创建和运行容器，containerd作为常驻进程用来管理容器。
 
@@ -63,15 +63,15 @@ COMMANDS:
 
 
 
-# [4. ](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/runtime.md#4-containerd)[Containerd](https://github.com/containerd/containerd)
+# 4. Containerd
 
 `containerd（container daemon）`是一个daemon进程用来管理和运行容器，可以用来拉取/推送镜像和管理容器的存储和网络。其中可以调用runc来创建和运行容器。
 
-## [4.1. containerd的架构图](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/runtime.md#41-containerd的架构图)
+## 4.1. containerd的架构图
 
 [![img](https://camo.githubusercontent.com/5a6e4b902a211b147fe67e5b6b6f6e028fc91720067b1209cdbc4a5fe1f137c3/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313633303633343534322f61727469636c652f6b756265726e657465732f636f6e7461696e6572642f636f6e7461696e6572642d617263682e706e67)](https://camo.githubusercontent.com/5a6e4b902a211b147fe67e5b6b6f6e028fc91720067b1209cdbc4a5fe1f137c3/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313633303633343534322f61727469636c652f6b756265726e657465732f636f6e7461696e6572642f636f6e7461696e6572642d617263682e706e67)
 
-## [4.2. docker与containerd、runc的关系图](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/runtime.md#42-docker与containerdrunc的关系图)
+## 4.2. docker与containerd、runc的关系图
 
 [![img](https://camo.githubusercontent.com/d1a3dd5f01dfb0785deed4fc403e78908ab0491a689705969a0dfddc2ffeb2df/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313633313834373632352f61727469636c652f6b756265726e657465732f636f6e7461696e6572642f636f6e7461696e65722d65636f73797374656d2d646f636b65722e64726177696f2e706e67)](https://camo.githubusercontent.com/d1a3dd5f01dfb0785deed4fc403e78908ab0491a689705969a0dfddc2ffeb2df/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313633313834373632352f61727469636c652f6b756265726e657465732f636f6e7461696e6572642f636f6e7461696e65722d65636f73797374656d2d646f636b65722e64726177696f2e706e67)
 
@@ -79,19 +79,19 @@ COMMANDS:
 
 [![img](https://camo.githubusercontent.com/c4e0ff9d8110327bfac70abfa78b568e7526690526bfec8c001b8fb046d518c8/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313633313835343230312f61727469636c652f6b756265726e657465732f636f6e7461696e6572642f636f6e7461696e6572642d7368696d2e706e67)](https://camo.githubusercontent.com/c4e0ff9d8110327bfac70abfa78b568e7526690526bfec8c001b8fb046d518c8/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313633313835343230312f61727469636c652f6b756265726e657465732f636f6e7461696e6572642f636f6e7461696e6572642d7368696d2e706e67)
 
-# [5. CRI（](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/runtime.md#5-cricontainer-runtime-interface-)[Container Runtime Interface](https://github.com/kubernetes/kubernetes/blob/242a97307b34076d5d8f5bbeb154fa4d97c9ef1d/docs/devel/container-runtime-interface.md) ）
+# 5. CRI（Container Runtime Interface)
 
 **CRI即容器运行时接口，主要用来定义k8s与容器运行时的API调用**，kubelet通过CRI来调用容器运行时，只要实现了CRI接口的容器运行时就可以对接到k8s的kubelet组件。
 
 [![img](https://camo.githubusercontent.com/edc9b03119d9c5d7883a34fbcd4ef7f8909db67933b844c8ce040bb30b665a78/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313633313834393736342f61727469636c652f6b756265726e657465732f636f6e7461696e6572642f6b7562656c65742d6372692e706e67)](https://camo.githubusercontent.com/edc9b03119d9c5d7883a34fbcd4ef7f8909db67933b844c8ce040bb30b665a78/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313633313834393736342f61727469636c652f6b756265726e657465732f636f6e7461696e6572642f6b7562656c65742d6372692e706e67)
 
-## [5.1. docker与k8s调用containerd的关系图](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/runtime.md#51-docker与k8s调用containerd的关系图)
+## 5.1. docker与k8s调用containerd的关系图
 
 [![img](https://camo.githubusercontent.com/a6aec3127edcf22aa94e9a86358d21df00a280e97015fd7a83191b240a4495f2/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313633313834373632352f61727469636c652f6b756265726e657465732f636f6e7461696e6572642f636f6e7461696e65722d65636f73797374656d2e64726177696f2e706e67)](https://camo.githubusercontent.com/a6aec3127edcf22aa94e9a86358d21df00a280e97015fd7a83191b240a4495f2/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313633313834373632352f61727469636c652f6b756265726e657465732f636f6e7461696e6572642f636f6e7461696e65722d65636f73797374656d2e64726177696f2e706e67)
 
-## [5.2. ](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/runtime.md#52-cri-api)[cri-api](https://github.com/kubernetes/cri-api/blob/master/pkg/apis/runtime/v1/api.proto)
+## 5.2. cri-api
 
-### [5.2.1. runtime service](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/runtime.md#521-runtime-service)
+### 5.2.1. runtime service
 
 ```
 // Runtime service defines the public APIs for remote container runtimes
@@ -177,7 +177,7 @@ service RuntimeService {
 
 
 
-### [5.2.2. image service](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/runtime.md#522-image-service)
+### 5.2.2. image service
 
 ```
 // ImageService defines the public APIs for managing images.
@@ -201,11 +201,11 @@ service ImageService {
 
 
 
-## [5.3. cri-containerd](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/runtime.md#53-cri-containerd)
+## 5.3. cri-containerd
 
 [![img](https://camo.githubusercontent.com/14a1a5c66f58da578775caea4bf67ef7aa93a461b8c84901a0fae7ae891c4a99/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313633313834393230332f61727469636c652f6b756265726e657465732f636f6e7461696e6572642f6372692d706c7567696e2d6172636869746563747572652e706e67)](https://camo.githubusercontent.com/14a1a5c66f58da578775caea4bf67ef7aa93a461b8c84901a0fae7ae891c4a99/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313633313834393230332f61727469636c652f6b756265726e657465732f636f6e7461696e6572642f6372692d706c7567696e2d6172636869746563747572652e706e67)
 
-### [5.3.1. CRI Plugin调用流程](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/runtime.md#531-cri-plugin调用流程)
+### 5.3.1. CRI Plugin调用流程
 
 1. kubelet调用CRI插件，通过CRI Runtime Service接口创建pod
 2. cri通过CNI接口创建和配置pod的network namespace
@@ -215,7 +215,7 @@ service ImageService {
 
 > 具体参考：https://github.com/containerd/cri/blob/release/1.4/docs/architecture.md
 
-### [5.3.2. k8s对runtime调用的演进](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/runtime.md#532-k8s对runtime调用的演进)
+### 5.3.2. k8s对runtime调用的演进
 
 由原来通过dockershim调用docker再调用containerd，直接变成通过cri-containerd调用containerd，从而减少了一层docker调用逻辑。
 
@@ -223,7 +223,7 @@ service ImageService {
 
 > 具体参考：https://github.com/containerd/cri/blob/release/1.4/docs/proposal.md
 
-## [5.4. ](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/runtime.md#54-dockershim)[Dockershim](https://github.com/kubernetes/kubernetes/tree/master/pkg/kubelet/dockershim)
+## 5.4. Dockershim
 
 在旧版本的k8s中，由于docker没有实现CRI接口，因此增加一个Dockershim来实现k8s对docker的调用。（shim：垫片，一般用来表示对第三方组件API调用的适配插件，例如k8s使用Dockershim来实现对docker接口的适配调用）
 
@@ -234,7 +234,7 @@ cri-o与containerd类似，用来实现容器的管理，可替换containerd的�
 # Containerd
 # 安装Containerd
 
-# [1. Ubuntu安装containerd](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/containerd/install-containerd.md#1-ubuntu安装containerd)
+# 1. Ubuntu安装containerd
 
 以下以Ubuntu为例
 
@@ -243,7 +243,7 @@ cri-o与containerd类似，用来实现容器的管理，可替换containerd的�
 > - `containerd`: apt-get install -y containerd.io
 > - `docker`: apt-get install docker-ce docker-ce-cli containerd.io
 
-## [1. 卸载旧版本](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/containerd/install-containerd.md#1-卸载旧版本)
+## 1. 卸载旧版本
 
 ```
  sudo apt-get remove docker docker-engine docker.io containerd runc
@@ -260,7 +260,7 @@ cri-o与containerd类似，用来实现容器的管理，可替换containerd的�
 
 
 
-## [2. 准备包环境](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/containerd/install-containerd.md#2-准备包环境)
+## 2. 准备包环境
 
 1、更新apt，允许使用https。
 
@@ -294,7 +294,7 @@ echo \
 
 
 
-## [3. 安装containerd](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/containerd/install-containerd.md#3-安装containerd)
+## 3. 安装containerd
 
 ```
 # 安装containerd
@@ -322,7 +322,7 @@ apt-cache madison containerd
 
 
 
-## [4. 修改配置](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/containerd/install-containerd.md#4-修改配置)
+## 4. 修改配置
 
 在 Linux 上，containerd 的默认 CRI 套接字是 `/run/containerd/containerd.sock`。
 
@@ -355,7 +355,7 @@ systemctl restart containerd
 
 
 
-# [2. 离线二进制安装containerd](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/containerd/install-containerd.md#2-离线二进制安装containerd)
+# 2. 离线二进制安装containerd
 
 把`containerd`、`runc`、`cni-plugins`、`nerdctl`二进制下载到本地，再上传到对应服务器，解压文件到对应目录，修改containerd配置文件，启动containerd。
 
@@ -425,7 +425,7 @@ systemctl restart contaienrd
 
 
 
-# [3. Containerd配置代理](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/containerd/install-containerd.md#3-containerd配置代理)
+# 3. Containerd配置代理
 
 由于节点到k8s官方仓库网络不通，或者设备处于内网，可以通过配置http_proxy代理的方式来拉取镜像。
 
@@ -471,7 +471,7 @@ systemctl restart containerd
 # Kata Container
 # kata容器简介
 
-# [Kata-container简介](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/kata/kata-container.md#kata-container简介)
+# Kata-container简介
 
 kata-container通过轻量型虚拟机技术构建一个安全的容器运行时，表现像容器一样，但通硬件虚拟化技术提供强隔离，作为第二层的安全防护。
 
@@ -482,7 +482,7 @@ kata-container通过轻量型虚拟机技术构建一个安全的容器运行时
 - 性能：兼容虚拟机的安全和容器的轻量特点。
 - 简单：使用标准的接口。
 
-# [1. kata-container架构](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/kata/kata-container.md#1-kata-container架构)
+# 1. kata-container架构
 
 [![img](./assets/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313536333336323033302f61727469636c652f6b6174612d636f6e7461696e65722f617263685f6469616772616d2e6a7067.jpeg)](https://camo.githubusercontent.com/2f75e3465fd4cc5fbac8270bd70e066506a5e249da87908cfb5d738a3d0dc38b/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313536333336323033302f61727469636c652f6b6174612d636f6e7461696e65722f617263685f6469616772616d2e6a7067)
 
@@ -490,13 +490,13 @@ kata-container通过轻量型虚拟机技术构建一个安全的容器运行时
 
 [![img](https://camo.githubusercontent.com/0538ef2ebf7aa2c455548a357368dd9d75ac52dacdffe51a0eaeba11d6520ac2/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313536333336323033322f61727469636c652f6b6174612d636f6e7461696e65722f747261646974696f6e616c76736b6174612e6a7067)](https://camo.githubusercontent.com/0538ef2ebf7aa2c455548a357368dd9d75ac52dacdffe51a0eaeba11d6520ac2/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313536333336323033322f61727469636c652f6b6174612d636f6e7461696e65722f747261646974696f6e616c76736b6174612e6a7067)
 
-# [2. ](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/kata/kata-container.md#2-kata-runtime)[kata-runtime](https://github.com/kata-containers/runtime)
+# 2. kata-runtime
 
 [Kata Containers runtime (`kata-runtime`)](https://github.com/kata-containers/runtime)通过`QEMU*/KVM`技术创建了一种轻量型的虚拟机，兼容 [OCI](https://github.com/opencontainers) [runtime specification](https://github.com/opencontainers/runtime-spec) 标准，支持[Kubernetes* Container Runtime Interface (CRI)](https://github.com/kubernetes/community/blob/master/contributors/devel/container-runtime-interface.md)接口，可替换[CRI shim runtime (runc)](https://github.com/opencontainers/runc) 通过k8s来创建pod或容器。
 
 [![img](./assets/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313536333336323032392f61727469636c652f6b6174612d636f6e7461696e65722f646f636b65722d6b6174612e706e67.png)](https://camo.githubusercontent.com/657e6c2b81070d3ba8bbd4d2d8530434d8140235cf01a0735edf73df2e0b60de/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313536333336323032392f61727469636c652f6b6174612d636f6e7461696e65722f646f636b65722d6b6174612e706e67)
 
-# [3. shim](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/kata/kata-container.md#3-shim)
+# 3. shim
 
 `shim`类似Docker的 `containerd-shim` 或CRI-O的 `conmon`，主要用来监控和回收容器的进程，`kata-shim`需要处理所有的容器的IO流(`stdout`, `stdin` and `stderr`)和转发相关信号。
 
@@ -504,7 +504,7 @@ kata-container通过轻量型虚拟机技术构建一个安全的容器运行时
 
 [![img](./assets/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313536333336323033302f61727469636c652f6b6174612d636f6e7461696e65722f7368696d76322e737667.svg+xml)](https://camo.githubusercontent.com/926506d8d6ee59ae0515db4661c05be12e369313d1a544362a117975d46037b0/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313536333336323033302f61727469636c652f6b6174612d636f6e7461696e65722f7368696d76322e737667)
 
-# [4. ](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/kata/kata-container.md#4-kata-agent)[kata-agent](https://github.com/kata-containers/agent)
+# 4. [kata-agent
 
 在虚拟机内`kata-agent`作为一个daemon进程运行，并拉起容器的进程。kata-agent使用VIRTIO或VSOCK接口（QEMU在主机上暴露的socket文件）在guest虚拟机中运行gRPC服务器。kata-runtime通过grpc协议与kata-agent通信，向kata-agent发送管理容器的命令。该协议还用于容器和管理引擎（例如Docker Engine）之间传送I / O流（stdout，stderr，stdin）。
 
@@ -512,23 +512,23 @@ kata-container通过轻量型虚拟机技术构建一个安全的容器运行时
 
 `kata-agent`使用[`libcontainer`](https://github.com/opencontainers/runc/tree/master/libcontainer) 来管理容器的生命周期，复用了[`runc`](https://github.com/opencontainers/runc)的部分代码。
 
-# [5. kata-proxy](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/kata/kata-container.md#5-kata-proxy)
+# 5. kata-proxy
 
 `kata-proxy`提供了 `kata-shim` 和 `kata-runtime` 与VM中的`kata-agent`通信的方式，其中通信方式是使用`virtio-serial`或`vsock`，默认是使用`virtio-serial`。
 
-# [6. Hypervisor](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/kata/kata-container.md#6-hypervisor)
+# 6. Hypervisor
 
 kata-container通过[QEMU](http://www.qemu-project.org/)/[KVM](http://www.linux-kvm.org/page/Main_Page)来创建虚拟机给容器运行，可以支持多种hypervisors。
 
 [![img](./assets/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313536333336323032382f61727469636c652f6b6174612d636f6e7461696e65722f71656d752e706e67.png)](https://camo.githubusercontent.com/1da2ad34c5706d60a5fe1900d5b8ac49a4874c5f6bf5f245d8ff1a17f7ea8864/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f647178746e3069636b2f696d6167652f75706c6f61642f76313536333336323032382f61727469636c652f6b6174612d636f6e7461696e65722f71656d752e706e67)
 
-# [7. QEMU/KVM](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/kata/kata-container.md#7-qemukvm)
+# 7. QEMU/KVM
 
 > 待补充
 
 # kata配置
 
-# [1. 配置文件路径](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/kata/kata-container-conf.md#1-配置文件路径)
+# 1. 配置文件路径
 
 默认的配置文件位于`/usr/share/defaults/kata-containers/configuration.toml`，如果`/etc/kata-containers/configuration.toml`的配置文件存在，则会替代默认的配置文件。
 
@@ -550,7 +550,7 @@ kata-runtime --kata-config=/some/where/configuration.toml ...
 
 
 
-# [2. kata-env](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/kata/kata-container-conf.md#2-kata-env)
+# 2. kata-env
 
 查看runtime使用到的环境参数，
 
@@ -641,7 +641,7 @@ kata-runtime kata-env
 
 
 
-# [3. configuration.toml](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/kata/kata-container-conf.md#3-configurationtoml)
+# 3. configuration.toml
 
 ```
 # Copyright (c) 2017-2019 Intel Corporation
@@ -1048,7 +1048,7 @@ experimental=[]
 # GPU
 # nvidia-device-plugin介绍
 
-# [1. 简介](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/gpu/nvidia-device-plugin.md#1-简介)
+# 1. 简介
 
 NVIDIA device plugin 通过k8s daemonset的方式部署到每个k8s的node节点上，实现了[Kubernetes device plugin](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/resource-management/device-plugin.md)的接口。
 
@@ -1058,23 +1058,23 @@ NVIDIA device plugin 通过k8s daemonset的方式部署到每个k8s的node节点
 - 跟踪GPU的健康情况
 - 使在k8s的节点可以运行GPU容器
 
-# [2. 要求](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/gpu/nvidia-device-plugin.md#2-要求)
+# 2. 要求
 
 - NVIDIA drivers ~= 384.81
 - nvidia-docker version > 2.0 (see how to [install](https://github.com/NVIDIA/nvidia-docker) and it's [prerequisites](https://github.com/nvidia/nvidia-docker/wiki/Installation-(version-2.0)#prerequisites))
 - docker configured with nvidia as the [default runtime](https://github.com/NVIDIA/nvidia-docker/wiki/Advanced-topics#default-runtime).
 - Kubernetes version >= 1.10
 
-# [3. 使用](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/gpu/nvidia-device-plugin.md#3-使用)
+# 3. 使用
 
-## [3.1. 安装NVIDIA drivers和nvidia-docker](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/gpu/nvidia-device-plugin.md#31-安装nvidia-drivers和nvidia-docker)
+## 3.1. 安装NVIDIA drivers和nvidia-docker
 
 提供GPU节点的机器，准备工作如下
 
 1. 安装NVIDIA drivers ~= 384.81
 2. 安装nvidia-docker version > 2.0
 
-## [3.2. 配置docker runtime](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/gpu/nvidia-device-plugin.md#32-配置docker-runtime)
+## 3.2. 配置docker runtime
 
 配置nvidia runtime作为GPU节点的默认runtime。
 
@@ -1094,7 +1094,7 @@ NVIDIA device plugin 通过k8s daemonset的方式部署到每个k8s的node节点
 
 
 
-## [3.3. 部署nvidia-device-plugin](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/gpu/nvidia-device-plugin.md#33-部署nvidia-device-plugin)
+## 3.3. 部署nvidia-device-plugin
 
 ```
 $ kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/1.0.0-beta4/nvidia-device-plugin.yml
@@ -1170,7 +1170,7 @@ spec:
 
 
 
-## [3.4. 运行GPU任务](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/gpu/nvidia-device-plugin.md#34-运行gpu任务)
+## 3.4. 运行GPU任务
 
 创建一个GPU的pod，pod的资源类型指定为`nvidia.com/gpu`。
 
@@ -1195,11 +1195,11 @@ spec:
 
 
 
-# [4. 构建和运行nvidia-device-plugin](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/gpu/nvidia-device-plugin.md#4-构建和运行nvidia-device-plugin)
+# 4. 构建和运行nvidia-device-plugin
 
-## [4.1. docker方式](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/gpu/nvidia-device-plugin.md#41-docker方式)
+## 4.1. docker方式
 
-### [4.1.1. 编译](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/gpu/nvidia-device-plugin.md#411-编译)
+### 4.1.1. 编译
 
 - 直接拉取dockerhub的镜像
 
@@ -1227,7 +1227,7 @@ $ docker build -t nvidia/k8s-device-plugin:1.0.0-beta4 .
 
 
 
-### [4.1.2. 运行](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/gpu/nvidia-device-plugin.md#412-运行)
+### 4.1.2. 运行
 
 - docker本地运行
 
@@ -1245,9 +1245,9 @@ $ kubectl create -f nvidia-device-plugin.yml
 
 
 
-## [4.2. 非docker方式](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/gpu/nvidia-device-plugin.md#42-非docker方式)
+## 4.2. 非docker方式
 
-### [4.2.1. 编译](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/gpu/nvidia-device-plugin.md#421-编译)
+### 4.2.1. 编译
 
 ```
 $ C_INCLUDE_PATH=/usr/local/cuda/include LIBRARY_PATH=/usr/local/cuda/lib64 go build
@@ -1255,7 +1255,7 @@ $ C_INCLUDE_PATH=/usr/local/cuda/include LIBRARY_PATH=/usr/local/cuda/lib64 go b
 
 
 
-### [4.2.2. 本地运行](https://github.com/huweihuang/kubernetes-notes/blob/master/runtime/gpu/nvidia-device-plugin.md#422-本地运行)
+### 4.2.2. 本地运行
 
 ```
 $ ./k8s-device-plugin

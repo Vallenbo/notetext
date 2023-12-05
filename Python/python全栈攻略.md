@@ -1194,3 +1194,22 @@ pip3 config set global.index-url https://mirrors.aliyun.com/pypi/simple/	#永久
 pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple package --trusted-host mirrors.aliyun.com
 
 \#临时使用清华大学开源软件镜像站
+
+
+
+pip3 download flask #下载flask依赖库，到本级路径
+
+# 编译安装
+
+3. 解压源码包
+
+​	root@master ~# tar -xf Python-3.7.0.tar.xz
+
+4. 编译安装
+root@master ~# ./configure --prefix=/usr/local/python3.7
+root@master ~# make
+root@master ~# make install
+5. 设置软连接
+root@master ~# ln -fs /usr/local/python3.7/bin/python3 /usr/bin/python3
+root@master ~# ln -fs /usr/local/python3.7/bin/pip3 /usr/bin/pip3
+

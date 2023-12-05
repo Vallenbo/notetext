@@ -361,9 +361,9 @@ There are three types of resources in etcd
 
 **Permissions**:权限分为只读、只写、可读写三种权限，权限即对指定目录或key的读写权限。
 
-# [3. ETCD访问控制](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-auth-and-security.md#3-etcd访问控制)
+# 3. ETCD访问控制
 
-## [3.1. 访问控制相关命令](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-auth-and-security.md#31-访问控制相关命令)
+## 3.1. 访问控制相关命令
 
 ```
 NAME:
@@ -388,7 +388,7 @@ GLOBAL OPTIONS:
 
 
 
-## [3.2. user相关命令](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-auth-and-security.md#32-user相关命令)
+## 3.2. user相关命令
 
 ```
 [root@localhost etcd]# etcdctl user --help
@@ -412,27 +412,27 @@ OPTIONS:
 
 
 
-## [3.2.1. 添加root用户并设置密码](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-auth-and-security.md#321-添加root用户并设置密码)
+添加root用户并设置密码
 
 etcdctl --endpoints [http://172.16.22.36:2379](http://172.16.22.36:2379/) user add root
 
-## [3.2.2. 添加非root用户并设置密码](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-auth-and-security.md#322-添加非root用户并设置密码)
+添加非root用户并设置密码
 
 etcdctl --endpoints [http://172.16.22.36:2379](http://172.16.22.36:2379/) --username root:123 user add huwh
 
-## [3.2.3. 查看当前所有用户](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-auth-and-security.md#323-查看当前所有用户)
+查看当前所有用户
 
 etcdctl --endpoints [http://172.16.22.36:2379](http://172.16.22.36:2379/) --username root:123 user list
 
-## [3.2.4. 将用户添加到对应角色](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-auth-and-security.md#324-将用户添加到对应角色)
+将用户添加到对应角色
 
 etcdctl --endpoints [http://172.16.22.36:2379](http://172.16.22.36:2379/) --username root:123 user grant --roles test1 phpor
 
-## [3.2.5. 查看用户拥有哪些角色](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-auth-and-security.md#325-查看用户拥有哪些角色)
+查看用户拥有哪些角色
 
 etcdctl --endpoints [http://172.16.22.36:2379](http://172.16.22.36:2379/) --username root:123 user get phpor
 
-## [3.3. role相关命令](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-auth-and-security.md#33-role相关命令)
+## 3.3. role相关命令
 
 ```
 [root@localhost etcd]# etcdctl role --help
@@ -455,15 +455,15 @@ OPTIONS:
 
 
 
-## [3.3.1. 添加角色](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-auth-and-security.md#331-添加角色)
+添加角色
 
 etcdctl --endpoints [http://172.16.22.36:2379](http://172.16.22.36:2379/) --username root:2379 role add test1
 
-## [3.3.2. 查看所有角色](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-auth-and-security.md#332-查看所有角色)
+查看所有角色
 
 etcdctl --endpoints [http://172.16.22.36:2379](http://172.16.22.36:2379/) --username root:123 role list
 
-## [3.3.3. 给角色分配权限](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-auth-and-security.md#333-给角色分配权限)
+给角色分配权限
 
 ```
 [root@localhost etcd]# etcdctl role grant --help
@@ -484,11 +484,11 @@ OPTIONS:
 
 2、包括目录和子目录或文件 etcdctl --endpoints [http://172.16.22.36:2379](http://172.16.22.36:2379/) --username root:123 role grant --readwrite --path /test1/* test1
 
-## [3.3.4. 查看角色所拥有的权限](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-auth-and-security.md#334-查看角色所拥有的权限)
+查看角色所拥有的权限
 
 etcdctl --endpoints [http://172.16.22.36:2379](http://172.16.22.36:2379/) --username root:2379 role get test1
 
-## [3.4. auth相关操作](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-auth-and-security.md#34-auth相关操作)
+## 3.4. auth相关操作
 
 ```
 [root@localhost etcd]# etcdctl auth --help
@@ -507,11 +507,11 @@ OPTIONS:
 
 
 
-## [3.4.1. 开启认证](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-auth-and-security.md#341-开启认证)
+开启认证
 
 etcdctl --endpoints [http://172.16.22.36:2379](http://172.16.22.36:2379/) auth enable
 
-# [4. 访问控制设置步骤](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-auth-and-security.md#4-访问控制设置步骤)
+# 4. 访问控制设置步骤
 
 | 顺序 | 步骤                                     | 命令                                                         |
 | ---- | ---------------------------------------- | ------------------------------------------------------------ |
@@ -522,7 +522,7 @@ etcdctl --endpoints [http://172.16.22.36:2379](http://172.16.22.36:2379/) auth e
 | 5    | 给角色授权（只读、只写、可读写）         | etcdctl --endpoints http://: –username root: role grant --readwrite --path |
 | 6    | 给用户分配角色（即分配了角色对应的权限） | etcdctl --endpoints http://: –username root: user grant --roles |
 
-# [5. 访问认证的API调用](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-auth-and-security.md#5-访问认证的api调用)
+# 5. 访问认证的API调用
 
 
 
@@ -532,7 +532,7 @@ etcdctl --endpoints [http://172.16.22.36:2379](http://172.16.22.36:2379/) auth e
 
 > `etcdctl`的`v3`版本与`v2`版本使用命令有所不同，本文介绍`etcdctl v3`版本的命令工具的使用方式。
 
-# [1. etcdctl的安装](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v3.md#1-etcdctl的安装)
+# 1. etcdctl的安装
 
 `etcdctl`的二进制文件可以在 [github.com/coreos/etcd/releases](https://github.com/coreos/etcd/releases) 选择对应的版本下载，例如可以执行以下`install_etcdctl.sh`的脚本，修改其中的版本信息。
 
@@ -555,7 +555,7 @@ cp etcdctl /usr/local/bin/
 
 
 
-# [2. etcdctl V3](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v3.md#2-etcdctl-v3)
+# 2. etcdctl V3
 
 使用`etcdctl`v3的版本时，需设置环境变量`ETCDCTL_API=3`。
 
@@ -672,9 +672,9 @@ OPTIONS:
 
 
 
-# [3. etcdctl 常用命令](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v3.md#3-etcdctl-常用命令)
+# 3. etcdctl 常用命令
 
-## [3.1. 指定etcd集群](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v3.md#31-指定etcd集群)
+## 3.1. 指定etcd集群
 
 ```
 HOST_1=10.240.0.17
@@ -718,7 +718,7 @@ ectl <command>
 
 
 
-## [3.2. 增删改查](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v3.md#32-增删改查)
+## 3.2. 增删改查
 
 **1、增**
 
@@ -770,7 +770,7 @@ etcdctl --endpoints=$ENDPOINTS del k --prefix
 
 
 
-## [3.3. 集群状态](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v3.md#33-集群状态)
+## 3.3. 集群状态
 
 集群状态主要是`etcdctl endpoint status` 和`etcdctl endpoint health`两条命令。
 
@@ -794,7 +794,7 @@ etcdctl --endpoints=$ENDPOINTS endpoint health
 
 
 
-## [3.4. 集群成员](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v3.md#34-集群成员)
+## 3.4. 集群成员
 
 跟集群成员相关的命令如下：
 
@@ -821,7 +821,7 @@ etcdctl --endpoints=http://172.16.5.4:12379 member list -w table
 
 
 
-# [4. etcdctl get](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v3.md#4-etcdctl-get)
+# 4. etcdctl get
 
 使用`etcdctl {command} --help`可以查看具体命令的帮助信息。
 
@@ -861,65 +861,65 @@ GLOBAL OPTIONS:
 
 # etcdctl命令工具-V2
 
-# [1. etcdctl介绍](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#1-etcdctl介绍)
+# 1. etcdctl介绍
 
 etcdctl是一个命令行的客户端，它提供了一下简洁的命令，可理解为命令工具集，可以方便我们在对服务进行测试或者手动修改数据库内容。etcdctl与其他xxxctl的命令原理及操作类似（例如kubectl，systemctl）。
 
 用法：etcdctl [global options] command [command options][args...]
 
-# [2. Etcd常用命令](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#2-etcd常用命令)
+# 2. Etcd常用命令
 
-## [2.1. 数据库操作命令](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#21-数据库操作命令)
+## 2.1. 数据库操作命令
 
 etcd 在键的组织上采用了层次化的空间结构（类似于文件系统中目录的概念），数据库操作围绕对键值和目录的 CRUD [增删改查]（符合 REST 风格的一套操作：Create, Read, Update, Delete）完整生命周期的管理。
 
 具体的命令选项参数可以通过 etcdctl command --help来获取相关帮助。
 
-## [2.1.1. 对象为键值](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#211-对象为键值)
+## 2.1.1. 对象为键值
 
-1. ### [set[增:无论是否存在\]:etcdctl set key value](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#set增无论是否存在etcdctl-set-key-value)
+1. ### [set[增:无论是否存在\]:etcdctl set key value
 
-2. ### [mk[增:必须不存在\]:etcdctl mk key value](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#mk增必须不存在etcdctl-mk-key-value)
+2. ### [mk[增:必须不存在\]:etcdctl mk key value
 
-3. ### [rm[删\]:etcdctl rm key](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#rm删etcdctl-rm-key)
+3. ### [rm[删\]:etcdctl rm key
 
-4. ### [update[改\]:etcdctl update key value](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#update改etcdctl-update-key-value)
+4. ### [update[改\]:etcdctl update key value
 
-5. ### [get[查\]:etcdctl get key](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#get查etcdctl-get-key)
+5. ### [get[查\]:etcdctl get key
 
-## [2.1.2. 对象为目录](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#212-对象为目录)
+## 2.1.2. 对象为目录
 
-1. ### [setdir[增:无论是否存在\]:etcdctl setdir dir](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#setdir增无论是否存在etcdctl-setdir-dir)
+1. ### [setdir[增:无论是否存在\]:etcdctl setdir dir
 
-2. ### [mkdir[增:必须不存在\]: etcdctl mkdir dir](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#mkdir增必须不存在-etcdctl-mkdir-dir)
+2. ### [mkdir[增:必须不存在\]: etcdctl mkdir dir
 
-3. ### [rmdir[删\]:etcdctl rmdir dir](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#rmdir删etcdctl-rmdir-dir)
+3. ### [rmdir[删\]:etcdctl rmdir dir
 
-4. ### [updatedir[改\]:etcdctl updatedir dir](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#updatedir改etcdctl-updatedir-dir)
+4. ### [updatedir[改\]:etcdctl updatedir dir
 
-5. ### [ls[查\]:etcdclt ls](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#ls查etcdclt-ls)
+5. ### [ls[查\]:etcdclt ls
 
-## [2.2. 非数据库操作命令](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#22-非数据库操作命令)
+## [2.2. 非数据库操作命令
 
-1. ### [backup[备份 etcd 的数据\]](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#backup备份-etcd-的数据)
+1. ### [backup[备份 etcd 的数据\]
 
    etcdctl backup
 
-2. ### [watch[监测一个键值的变化，一旦键值发生更新，就会输出最新的值并退出\]](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#watch监测一个键值的变化一旦键值发生更新就会输出最新的值并退出)
+2. ### [watch[监测一个键值的变化，一旦键值发生更新，就会输出最新的值并退出\]
 
    etcdctl watch key
 
-3. ### [exec-watch[监测一个键值的变化，一旦键值发生更新，就执行给定命令\]](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#exec-watch监测一个键值的变化一旦键值发生更新就执行给定命令)
+3. ### [exec-watch[监测一个键值的变化，一旦键值发生更新，就执行给定命令\]
 
    etcdctl exec-watch key --sh -c "ls"
 
-4. ### [member[通过 list、add、remove、update 命令列出、添加、删除 、更新etcd 实例到 etcd 集群中\]](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#member通过-listaddremoveupdate-命令列出添加删除-更新etcd-实例到-etcd-集群中)
+4. ### [member[通过 list、add、remove、update 命令列出、添加、删除 、更新etcd 实例到 etcd 集群中\]
 
    etcdctl member list；etcdctl member add 实例；etcdctl member remove 实例；etcdctl member update 实例。
 
-5. ### [etcdctl cluster-health[检查集群健康状态\]](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#etcdctl-cluster-health检查集群健康状态)
+5. ### [etcdctl cluster-health[检查集群健康状态\]
 
-## [2.3. 常用配置参数](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcdctl/etcdctl-v2.md#23-常用配置参数)
+## [2.3. 常用配置参数]
 
 设置配置文件，默认为/etc/etcd/etcd.conf。
 
@@ -946,7 +946,7 @@ etcd 在键的组织上采用了层次化的空间结构（类似于文件系统
 
 # Etcd中的k8s数据
 
-# [1. 读取数据key](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/k8s-etcd-data.md#1-读取数据key)
+# [1. 读取数据key]
 
 使用以下命令列出所有的key。
 
@@ -975,9 +975,9 @@ alias ectl='ETCDCTL_API=3 etcdctl --endpoints=<etcd-ip-1>:2379,<etcd-ip-2>:2379,
 
 
 
-# [2. 集群数据](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/k8s-etcd-data.md#2-集群数据)
+# [2. 集群数据]
 
-## [2.1. node](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/k8s-etcd-data.md#21-node)
+## [2.1. node]
 
 ```
 /registry/minions/<node-ip-1>
@@ -1000,11 +1000,11 @@ alias ectl='ETCDCTL_API=3 etcdctl --endpoints=<etcd-ip-1>:2379,<etcd-ip-2>:2379,
 
 
 
-# [3. k8s对象数据](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/k8s-etcd-data.md#3-k8s对象数据)
+# [3. k8s对象数据]
 
 k8s对象数据的格式
 
-## [3.1. namespace](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/k8s-etcd-data.md#31-namespace)
+## [3.1. namespace]
 
 ```
 /registry/namespaces/default
@@ -1016,7 +1016,7 @@ k8s对象数据的格式
 
 
 
-## [3.2. namespace级别对象](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/k8s-etcd-data.md#32-namespace级别对象)
+## [3.2. namespace级别对象
 
 ```
 /registry/{resource}/{namespace}/{resource_name}
@@ -1064,7 +1064,7 @@ k8s对象数据的格式
 
 
 
-# [4. 读取数据value](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/k8s-etcd-data.md#4-读取数据value)
+# [4. 读取数据value]
 
 由于k8s默认etcd中的数据是通过protobuf格式存储，因此看到的key和value的值是一串字符串。
 
@@ -1133,12 +1133,12 @@ value是值可以通过安装[etcdhelper](https://github.com/openshift/origin/tr
 
 
 
-# [5. 注意事项](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/k8s-etcd-data.md#5-注意事项)
+# [5. 注意事项]
 
 - 由于k8s的etcd数据为了性能考虑，默认通过`protobuf`格式存储，不要通过手动的方式去修改或添加k8s数据。
 - 不推荐使用json格式存储etcd数据，如果需要json格式，可以使用`--storage-media-type=application/json`参数存储，参考：[kubernetes/kubernetes#44670](https://github.com/kubernetes/kubernetes/issues/44670)
 
-# [6. 快捷命令](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/k8s-etcd-data.md#6-快捷命令)
+# [6. 快捷命令]
 
 由于etcdctl的命令需要添加很多认证参数和endpoints的参数，因此可以使用别名的方式来简化命令。
 
@@ -1152,7 +1152,7 @@ alias ehelper='etcdhelper -key /etc/kubernetes/pki/apiserver-etcd-client.key -ce
 
 
 
-## [6.1. etcdhelper的使用](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/k8s-etcd-data.md#61-etcdhelper的使用)
+## [6.1. etcdhelper的使用]
 
 `etcdhelper`文档参考：https://github.com/openshift/origin/tree/master/tools/etcdhelper
 
@@ -1183,7 +1183,7 @@ $ ehelper get <key>
 
 
 
-# [7. RBAC](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/k8s-etcd-data.md#7-rbac)
+# [7. RBAC]
 
 附RBAC相关的key。
 
@@ -1352,7 +1352,7 @@ $ ehelper get <key>
 
 > 本文主要介绍etcd-operator的部署及使用
 
-# [1. 部署RBAC](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-operator-usage.md#1-部署rbac)
+# [1. 部署RBAC]
 
 下载[create_role.sh](https://github.com/coreos/etcd-operator/blob/master/example/rbac/create_role.sh)、[cluster-role-binding-template.yaml](https://github.com/coreos/etcd-operator/blob/master/example/rbac/cluster-role-binding-template.yaml)、[cluster-role-template.yaml](https://github.com/coreos/etcd-operator/blob/master/example/rbac/cluster-role-template.yaml)
 
@@ -1394,7 +1394,7 @@ clusterrolebinding.rbac.authorization.k8s.io/etcd-operator created
 
 
 
-## [1.1. create_role.sh 脚本](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-operator-usage.md#11-create_rolesh-脚本)
+## [1.1. create_role.sh 脚本]
 
 create_role.sh有三个入参，可以指定--namespace参数，该参数与etcd-operator部署的namespace应一致。默认为default。
 
@@ -1530,7 +1530,7 @@ rules:
 
 
 
-# [2. 部署etcd-operator](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-operator-usage.md#2-部署etcd-operator)
+# [2. 部署etcd-operator]
 
 ```
 kubectl create -f etcd-operator.yaml
@@ -1603,7 +1603,7 @@ time="2020-08-01T13:02:18Z" level=info msg="Event(v1.ObjectReference{Kind:\"Endp
 
 以上内容表示etcd-operator运行正常。
 
-# [3. 部署etcd集群](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-operator-usage.md#3-部署etcd集群)
+# [3. 部署etcd集群]
 
 ```
 kubectl create -f etcd-cluster.yaml
@@ -1647,7 +1647,7 @@ default-etcd-cluster-ttfh5fj92b   1/1     Running   0          2m29s
 
 
 
-# [4. 访问etcd集群](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-operator-usage.md#4-访问etcd集群)
+# [4. 访问etcd集群]
 
 查看service
 
@@ -1679,7 +1679,7 @@ bar
 
 
 
-# [5. 销毁etcd-operator](https://github.com/huweihuang/kubernetes-notes/blob/master/etcd/etcd-operator-usage.md#5-销毁etcd-operator)
+# [5. 销毁etcd-operator]
 
 ```
 kubectl delete -f example/deployment.yaml

@@ -50,7 +50,7 @@ cursor.close()  *#**关闭游标*
 
 connection.close()  *#**关闭连接*
 
- 
+
 
  
 
@@ -66,7 +66,7 @@ GET相对POST不安全，参数直接暴露在URL上，用来传递敏感信息
 
 安装：pip install requests
 
- 
+
 
 XPath,全称XML Path Language,即XML路径语言，它是一门在XML文档中查找信息的语言。
 
@@ -74,7 +74,7 @@ XPath,全称XML Path Language,即XML路径语言，它是一门在XML文档中�
 
 做相应的信息抽取。
 
- 
+
 
  
 
