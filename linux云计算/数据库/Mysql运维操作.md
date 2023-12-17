@@ -487,7 +487,6 @@ grant all privileges on xd_db.* to 'user'@'%' identified by 'redhat'
 
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root' WITH GRANT OPTION;
 
-
 create user 'xiandian'@'localhost' identified by 'xd_paas'; 创建一个xiandian用户在本地授权密码xd_paas
 create user '[用户名称]'@'%' identified by '[用户密码]';	//创建用户
 create user Luigi@localhost identified by "redhat";		//增加管理员账户Luigi及密码redhat

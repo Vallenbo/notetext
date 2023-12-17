@@ -322,7 +322,7 @@ lsof：查看进程打开的文件或文件打开的进程，也可用于查看�
 如果存在输出，则说明有进程正在使用该目录，需要先结束这些进程对该目录的占用。例如，输出可能类似如下：
 
 ```sh
-#lsof | grep /mnt/sdb1_mount #查看正在使用文件的进程
+# lsof | grep /mnt/sdb1_mount #查看正在使用文件的进程
 COMMAND     PID        USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
 bash      1234        root  cwd    DIR  253,0     4096   12 /mnt/sdb1_mount
 ```
@@ -338,7 +338,7 @@ kill -9 1234
 iostat：监控系统输入/输出设备和CPU使用情况，可能需要用到的安装包 apt install sysstat -y
 
 ```
--d：显示磁盘统计信息。			-x 1：显示详细的拓展（磁盘）统计信息，包括平均等待时间和队列长度等。
+-d：显示磁盘统计信息。					-x 1：显示详细的拓展（磁盘）统计信息，包括平均等待时间和队列长度等。
 -k：以KB为单位显示统计信息。	   -m：以MB为单位显示统计信息。
 -t：显示时间戳。
 ```
@@ -354,7 +354,7 @@ $time ls #统计ls命令执行所需总时间
 
 real	0m0.002s #真实时间
 user	0m0.001s #用户态时间
-sys	0m0.000s	 #内核态时间
+sys	  0m0.000s	 #内核态时间
 ```
 
 # nc
@@ -506,10 +506,6 @@ Note：
 1. vmstat和mpstat 命令的差别：mpstat 可以显示每个处理器的统计，而 vmstat 显示所有处理器的统计。因此，编写糟糕的应用程序（不使用多线程体系结构）可能会运行在一个多处理器机器上，而不使用所有处理器。从而导致一个 CPU 过载，而其他 CPU 却很空闲。通过 mpstat 可以轻松诊断这些类型的问题。
 2. vmstat中所有关于CPU的总结都适合mpstat。当您看到较低的 %idle 数字时，您知道出现了 CPU 不足的问题。当您看到较高的 %iowait 数字时，您知道在当前负载下 I/O 子系统出现了某些问题。
 
-
-
-
-
 # top
 
 Linux top 是一个在 Linux 和其他类 Unix 系统上常用的实时系统监控工具。它提供了一个动态的、交互式的实时视图，显示系统的整体性能信息以及正在运行的进程的相关信息。
@@ -518,9 +514,9 @@ Linux top 是一个在 Linux 和其他类 Unix 系统上常用的实时系统监
 top [-] [d delay] [q] [c] [S] [s] [i] [n] [b]
 参数说明：
 -d <秒数>：指定 top 命令的刷新时间间隔，单位为秒。			-n <次数>：指定 top 命令运行的次数后自动退出。
--p <进程ID>：仅显示指定进程ID的信息。						-u <用户名>：仅显示指定用户名的进程信息。
--H：在进程信息中显示线程详细信息。						   -i：不显示闲置（idle）或无用的进程。
--b：以批处理（batch）模式运行，直接将结果输出到文件。		  -c：显示完整的命令行而不截断。
+-p <进程ID>：仅显示指定进程ID的信息。									-u <用户名>：仅显示指定用户名的进程信息。
+-H：在进程信息中显示线程详细信息。						   			 -i：不显示闲置（idle）或无用的进程。
+-b：以批处理（batch）模式运行，直接将结果输出到文件。		-c：显示完整的命令行而不截断。
 -S：累计显示进程的 CPU 使用时间。
 ```
 
@@ -1322,12 +1318,19 @@ watch -n1  ls /srv/ 				watch每一秒监控一次 ls命令srv下输出结果
 ```sh
 systemctl start systemd-networkd //开启 systemd-networkd服务
 netplan apply //重启网络服务
+
+sudo dhclient //重新获取IP地址
+sudo service networking restart	 //重启网络服务
+sudo ifconfig eth0 down  // 关闭网络
+
 # ens33为要重启的网卡名称
 sudo ifdown ens33
 sudo ifup ens33
 
-vim 01-network-manager-all.yaml //修改网络配置文件
+vim /etc/netplan/01-network-manager-all.yaml //修改网络配置文件
 ```
+
+
 
 ## centos
 
@@ -1396,18 +1399,13 @@ $ curl -b cookies.txt https://www.google.com
 $ curl -c cookies.txt https://www.google.com
 上面命令将服务器的 HTTP 回应所设置 Cookie 写入文本文件cookies.txt。
 
--d
 -d参数用于发送 POST 请求的数据体。
-
-
-$ curl -d'login=emma＆password=123'-X POST https://google.com/login
+$ curl -d'login=emma＆password=123' -X POST https://google.com/login
 # 或者
 $ curl -d 'login=emma' -d 'password=123' -X POST  https://google.com/login
 使用-d参数以后，HTTP 请求会自动加上标头Content-Type : application/x-www-form-urlencoded。并且会自动将请求转为 POST 方法，因此可以省略-X POST。
 
 -d参数可以读取本地文本文件的数据，向服务器发送。
-
-
 $ curl -d '@data.txt' https://google.com/login
 上面命令读取data.txt文件的内容，作为数据体向服务器发送。
 
@@ -1418,50 +1416,34 @@ $ curl -d '@data.txt' https://google.com/login
 $ curl --data-urlencode 'comment=hello world' https://google.com/login
 上面代码中，发送的数据hello world之间有一个空格，需要进行 URL 编码。
 
--e
 -e参数用来设置 HTTP 的标头Referer，表示请求的来源。
-
-
 curl -e 'https://google.com?q=example' https://www.example.com
 上面命令将Referer标头设为https://google.com?q=example。
 
 -H参数可以通过直接添加标头Referer，达到同样效果。
-
-
 curl -H 'Referer: https://google.com?q=example' https://www.example.com
--F
+
 -F参数用来向服务器上传二进制文件。
-
-
 $ curl -F 'file=@photo.png' https://google.com/profile
 上面命令会给 HTTP 请求加上标头Content-Type: multipart/form-data，然后将文件photo.png作为file字段上传。
 
 -F参数可以指定 MIME 类型。
-
-
 $ curl -F 'file=@photo.png;type=image/png' https://google.com/profile
 上面命令指定 MIME 类型为image/png，否则 curl 会把 MIME 类型设为application/octet-stream。
 
 -F参数也可以指定文件名。
-
-
 $ curl -F 'file=@photo.png;filename=me.png' https://google.com/profile
 上面命令中，原始文件名为photo.png，但是服务器接收到的文件名为me.png。
 
--G
 -G参数用来构造 URL 的查询字符串。
-
-
 $ curl -G -d 'q=kitties' -d 'count=20' https://google.com/search
 上面命令会发出一个 GET 请求，实际请求的 URL 为https://google.com/search?q=kitties&count=20。如果省略--G，会发出一个 POST 请求。
 
 如果数据需要 URL 编码，可以结合--data--urlencode参数。
 
-
 $ curl -G --data-urlencode 'comment=hello world' https://www.example.com
 -H
 -H参数添加 HTTP 请求的标头。
-
 
 $ curl -H 'Accept-Language: en-US' https://google.com
 上面命令添加 HTTP 标头Accept-Language: en-US。
@@ -1474,114 +1456,86 @@ $ curl -H 'Accept-Language: en-US' -H 'Secret-Message: xyzzy' https://google.com
 $ curl -d '{"login": "emma", "pass": "123"}' -H 'Content-Type: application/json' https://google.com/login
 上面命令添加 HTTP 请求的标头是Content-Type: application/json，然后用-d参数发送 JSON 数据。
 
--i
+
 -i参数打印出服务器回应的 HTTP 标头。
-
-
 $ curl -i https://www.example.com
 上面命令收到服务器回应后，先输出服务器回应的标头，然后空一行，再输出网页的源码。
 
--I
+
 -I参数向服务器发出 HEAD 请求，然会将服务器返回的 HTTP 标头打印出来。
-
-
 $ curl -I https://www.example.com
 上面命令输出服务器对 HEAD 请求的回应。
 
 --head参数等同于-I。
-
-
 $ curl --head https://www.example.com
--k
+
 -k参数指定跳过 SSL 检测。
-
-
 $ curl -k https://www.example.com
 上面命令不会检查服务器的 SSL 证书是否正确。
 
--L
+
 -L参数会让 HTTP 请求跟随服务器的重定向。curl 默认不跟随重定向。
-
-
 $ curl -L -d 'tweet=hi' https://api.twitter.com/tweet
---limit-rate
+
+
 --limit-rate用来限制 HTTP 请求和回应的带宽，模拟慢网速的环境。
-
-
 $ curl --limit-rate 200k https://google.com
 上面命令将带宽限制在每秒 200K 字节。
 
--o
+
 -o参数将服务器的回应保存成文件，等同于wget命令。
-
-
 $ curl -o example.html https://www.example.com
 上面命令将www.example.com保存成example.html。
 
--O
+
 -O参数将服务器回应保存成文件，并将 URL 的最后部分当作文件名。
-
-
 $ curl -O https://www.example.com/foo/bar.html
 上面命令将服务器回应保存成文件，文件名为bar.html。
 
--s
+
 -s参数将不输出错误和进度信息。
 $ curl -s https://www.example.com
 上面命令一旦发生错误，不会显示错误信息。不发生错误的话，会正常显示运行结果。
 如果想让 curl 不产生任何输出，可以使用下面的命令。
 $ curl -s -o /dev/null https://google.com
 
--S
+
 -S参数指定只输出错误信息，通常与-s一起使用。
-
-
 $ curl -s -o /dev/null https://google.com
 上面命令没有任何输出，除非发生错误。
 
--u
+
 -u参数用来设置服务器认证的用户名和密码。
-
-
 $ curl -u 'bob:12345' https://google.com/login
 上面命令设置用户名为bob，密码为12345，然后将其转为 HTTP 标头Authorization: Basic Ym9iOjEyMzQ1。
 
 curl 能够识别 URL 里面的用户名和密码。
 
-
 $ curl https://bob:12345@google.com/login
 上面命令能够识别 URL 里面的用户名和密码，将其转为上个例子里面的 HTTP 标头。
-
 
 $ curl -u 'bob' https://google.com/login
 上面命令只设置了用户名，执行后，curl 会提示用户输入密码。
 
--v
+
 -v参数输出通信的整个过程，用于调试。
-
-
 $ curl -v https://www.example.com
+
 --trace参数也可以用于调试，还会输出原始的二进制数据。
-
-
 $ curl --trace - https://www.example.com
--x
+
+
 -x参数指定 HTTP 请求的代理。
-
-
 $ curl -x socks5://james:cats@myproxy.com:8080 https://www.example.com
 上面命令指定 HTTP 请求通过myproxy.com:8080的 socks5 代理发出。
 
 如果没有指定代理协议，默认为 HTTP。
 
-
 $ curl -x james:cats@myproxy.com:8080 https://www.example.com
 上面命令中，请求的代理使用 HTTP 协议。
 
--X
+
 -X参数指定 HTTP 请求的方法。
-
-
 $ curl -X POST https://www.example.com
 上面命令对https://www.example.com发出 POST 请求。
 ```
@@ -1708,7 +1662,7 @@ Teamdctl team1 state			查看虚拟链路聚合网卡详细信息
 
 nmcli conn state team0
 
- 
+
 
 nmtui网卡编辑器				nm-connection-editor网络连接编辑工具
 

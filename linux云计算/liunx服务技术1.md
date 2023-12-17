@@ -265,7 +265,14 @@ Dynamic Host Configuration Protocol动态主机配置协议，是TCP／IP协议�
 
 ![img](E:\Project\Textbook\linux云计算\assets\wps10.jpg) 
 
-安装包:dhcp		服务名：dhcpd	端口port：67	主配置文件及模板文件地址：/etc/dhcp/dhcpd.conf
+安装包:
+
+```go
+yum install dhcp -y
+apt-get install isc-dhcp-server -y
+```
+
+服务名：dhcpd	端口port：67	主配置文件及模板文件地址：/etc/dhcp/dhcpd.conf
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps11.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps12.jpg" alt="img" style="zoom:67%;" /> 
 
@@ -676,19 +683,19 @@ TFTP（Trivial File Transfer Protocol）	只能从文件服务器上获得或写
 
 vim 配置文件/etc/xinetd.d/tftp
 
-service tftp
-
 ```
-{	socket_type	= dgram
-​    protocol		= udp
-​    wait			= yes
-​    user			= root
-​    server		= /usr/sbin/in.tftpd
-​    server_args	= -s /var/lib/tftpboot	#服务器根目录，共享文件夹
-​    disable		= no					#禁用服务
-​    per_source	= 11
-​    cps			= 100 2
-​    flags		= IPv4				}
+service tftp {
+	socket_type	= dgram
+	protocol	= udp
+	wait			= yes
+	user			= root
+	server		= /usr/sbin/in.tftpd
+	server_args	= -s /var/lib/tftpboot	#服务器根目录，共享文件夹
+	disable		= no					#禁用服务
+	per_source = 11
+	cps			= 100 2
+	flags		= IPv4
+}
 ```
 
 
@@ -697,15 +704,28 @@ service tftp
 
 NFS是基于内核的文件系统，可以将远程的计算机磁盘挂载到本地，读写文件像访问本地磁盘一样操作，可以共享彼此的文件。由于端口多，主要用于局域网使用
 
-原理：NFS本身的服务并没有提供数据传递的协议，而是通过使用RPC（远程过程调用 Remote Procedure Call）来实现。当NFS启动后，会随机的使用一些端口，NFS就会向RPC注册中心提交这些端口。RPC就会规则下这些端口，RPC会开启111端口。通过client端和sever端端口的连接来进行数据的传输。因此在启动nfs之前，首先要确保rpc服务启动
+**原理**：NFS本身的服务并没有提供数据传递的协议，而是通过使用RPC（远程过程调用 Remote Procedure Call）来实现。
+
+当NFS启动后，会随机的使用一些端口，NFS就会向RPC注册中心提交这些端口。RPC就会规则下这些端口，RPC会开启111端口。通过client端和sever端端口的连接来进行数据的传输。
+
+因此在启动nfs之前，首先要确保rpc服务启动
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps32.jpg" alt="img" style="zoom:67%;" /> 
 
-守护进程，连带进程rpc-bind、nfs-server		端口prot：111		包：nfs-utils（包含服务端与客户端相关工具）
+守护进程，连带进程rpc-bind、nfs-server			端口prot：111		
+
+软件包：
+
+```sh
+yum install nfs-utils rpcbind-y # centos系统	（包含服务端与客户端相关工具）	
+apt install nfs-kernel-server -y #debian系统
+```
 
 编辑主配置文件：/etc/exports				#可有多个文件夹、网段
 
-/public		192.168.0.0/24(rw，sync)	#默认只读ro，默认客户机所有用户映射成服务端nfsnobody用户
+```go
+/public		192.168.0.0/24(rw,sync)	#默认只读ro，默认客户机所有用户映射成服务端nfsnobody用户
+```
 
 \#当开启映射条件后，默认拒绝匿名用户
 
@@ -727,19 +747,77 @@ exportfs：管理NFS共享文件系统列表			-au临时关闭所有共享
 
 -a：打开取消所有目录共享	-r：重载配置文件	-u：取消一个或多个目录的共享		-v：输出共享的目录详细信息
 
-### 使用
+### nfs三种挂载方式及命令
 
-showmount -e 192.168.0.22查看服务器22的共享文件夹
+1、**手动挂载（临时挂载）**： 使用 `mount` 命令可以手动挂载NFS共享目录到本地系统。例如：
 
-mount -t nfs 192.168.0.109:/www  /public	指定挂载类型，nfs挂载文件umount命令)
+```
+mount -t nfs 192.168.0.109:/www  /public						# 指定挂载类型，nfs挂载文件,（/public目录需本地存在）
+192.168.0.109:/www		/www		nfs		defaults，_netdev	0	0		# _netdev无网络不挂载
+```
 
-192.168.0.109：/www		/www		nfs		defaults，_netdev	0	0		#_netdev无网络不挂载
+```go
+showmount -e 192.168.0.22	# 查看服务器22的共享文件夹
+					-a	显示本机挂载的文件资源的情况NFS资源的情况
+```
 
-win10挂载NFS服务：程序-->启用windos功能-->NFS服务-->此电脑-->映射驱动器中添加nfs地址，和要共享的文件夹
+2、**开机自动挂载**： 在 `/etc/fstab` 文件中添加NFS挂载信息，这样可以在系统启动时自动挂载。编辑 `/etc/fstab` 文件，添加类似以下的行：
 
-nfs_export_all_ro #将本机的NFS共享设置成只读		nfs_export_all_rw #将本机的NFS共享设置成可读可写
+```
+serverIP:/remote_dir /local_dir nfs defaults 0 0
+```
+
+3、**autofs挂载（自动挂载）**： 使用autofs可以实现按需自动挂载NFS共享目录。首先安装autofs软件包：
+
+```
+sudo apt install autofs -y
+```
+
+然后编辑 `/etc/auto.master` 文件，在末尾添加一行以指定NFS挂载点：
+
+```
+/-  /etc/auto.nfs
+```
+
+创建一个新的文件 `/etc/auto.nfs` 并添加NFS挂载信息，例如：
+
+```
+share    -fstype=nfs,rw    server:/remote_dir
+```
+
+启动 autofs 服务：
+
+```
+sudo systemctl start autofs
+```
+
+### win10挂载NFS服务
+
+```go
+程序-->启用windos功能-->NFS服务-->此电脑-->映射驱动器中添加nfs地址，和要共享的文件夹
+```
+
+nfs_export_all_ro #将本机的NFS共享设置成只读
+
+nfs_export_all_rw #将本机的NFS共享设置成可读可写
 
 use_nfs_home_dirs #将远程NFS的家目录共享到本机
+
+### NFS的相关文件：
+
+**主要配置文件**：/etc/exports
+这是 NFS 的主要配置文件了。该文件是空白的，有的系统可能不存在这个文件，主要手动建立。NFS的配置一般只在这个文件中配置即可。
+
+**NFS 文件系统维护指令**：/usr/sbin/exportfs
+这个是维护 NFS 分享资源的指令，可以利用这个指令重新分享 /etc/exports 变更的目录资源、将 NFS Server 分享的目录卸除或重新分享。
+
+**分享资源的登录档**：/var/lib/nfs/tab
+在 NFS 服务器的登录文件都放置到 /var/lib/nfs/ 目录里面，在该目录下有两个比较重要的登录档， 一个是 etab ，主要记录了 NFS 所分享出来的目录的完整权限设定值；另一个 xtab 则记录曾经链接到此 NFS 服务器的相关客户端数据。
+
+**客户端查询服务器分享资源的指令**：/usr/sbin/showmount
+这是另一个重要的 NFS 指令。exportfs 是用在 NFS Server 端，而 showmount 则主要用在 Client 端。showmount 可以用来察看 NFS 分享出来的目录资源。
+
+
 
 ##  iscsi网络存储服务(类似samba可跨系统)
 
@@ -919,41 +997,7 @@ NOPASSWD	不需要密码就能使用
 
 将useradd和userdel的命令赋予给TEST
 
-##  网络自动挂载 Autofs服务	
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps51.jpg" alt="img" style="zoom:67%;" /> 
-
-安装包：autofs包	相对路径法
-
-<img src="E:\Project\Textbook\linux云计算\assets\wps52.jpg" alt="img" style="zoom:67%;" /> 
-
-当用户到达挂载文件夹内，通过特定的触发器访问到物理或网络资源设备
-
-触发器：是一个虚拟文件夹，用来触发对应的挂载路径
-
-选项	-fstype= nfs（iso9660，samba）
-
-soft软资源，除硬盘是硬资源，其他全是软资源		Intr可中断地挂载 	--timeout超时时间5秒（主配置文件）
-
-<img src="E:\Project\Textbook\linux云计算\assets\wps53.jpg" alt="img" style="zoom:67%;" /> 
-
-vim /etc/sudoers		sudo命令文件
-
-<img src="E:\Project\Textbook\linux云计算\assets\wps54.jpg" alt="img" style="zoom:67%;" /> 
-
-zhubajie用户能够在任何地方使用useradd和userdel命令
-
-sudo -l	查看用户所有特权
-
-NOPASSWD	不需要密码就能使用
-
-%wheel行	这个组在任何地方都不需要命令
-
-<img src="E:\Project\Textbook\linux云计算\assets\wps55.jpg" alt="img" style="zoom:67%;" /> 
-
-将useradd和userdel的命令赋予给TEST
-
- 
 
 #  DNS服务器（域名解析系统）
 
@@ -1201,7 +1245,7 @@ location ~* \ . ( jpg | png | gif)$ {	#当访问以jpg结尾时直接走代理�
 
 (3)在两台服务器yum install keepalived.x86_64		主配置：vim /etc/keepalived.conf
 
-Copy vi keepalived.conf
+vi keepalived.conf
 
 keepalived.conf:
 

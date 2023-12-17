@@ -48,7 +48,7 @@ Go语言内置的`net/http`包提供了HTTP客户端和服务端的实现。
 
 启动tcp的server案例，使用postman发起http请求，查看http请求头信息：
 
-```sh
+```go
 import (
 	"fmt"
 	"net"
@@ -162,153 +162,114 @@ http响应格式也分为4部分：
 
    1. 通常是返回json数据
 
+## HTTP服务端
 
-
-## HTTP客户端
-
-### 基本的HTTP/HTTPS请求
-
-Get、Head、Post和PostForm函数发出HTTP/HTTPS请求。
+go中http服务器分两个部分`w http.ResponseWriter`, `r *http.Request`
 
 ```go
-resp, err := http.Get("http://example.com/")
-resp, err := http.Post("http://example.com/upload", "image/jpeg", &buf)
-resp, err := http.PostForm("http://example.com/form",
-	url.Values{"key": {"Value"}, "id": {"123"}})
-```
-
-程序在使用完response后必须关闭回复的主体。
-
-```go
-resp, err := http.Get("http://example.com/")
-if err != nil {
-	// handle error
+type ResponseWriter interface {
+    Header() Header
+    Write([]byte) (int, error)
+    WriteHeader(statusCode int)
 }
-defer resp.Body.Close()
-body, err := ioutil.ReadAll(resp.Body)
-// ...
 ```
 
-### GET请求示例
+```go
+type Request struct {
+    Method           string
+    URL              *url.URL
+    Proto            string
+    ProtoMajor       int
+    ProtoMinor       int
+    Header           Header
+    Body             io.ReadCloser
+    GetBody          func() (io.ReadCloser, error)
+    ContentLength    int64
+    TransferEncoding []string
+    Close            bool
+    Host             string
+    Form             url.Values
+    PostForm         url.Values
+    MultipartForm    *multipart.Form
+    Trailer          Header
+    RemoteAddr       string
+    RequestURI       string
+    TLS              *tls.ConnectionState
+    Cancel           <-chan struct{}
+    Response         *Response
+    ctx              context.Context
+}
+```
 
-使用`net/http`包编写一个简单的发送HTTP请求的Client端，代码如下：
+**Request**重要字段介绍：
+
+Body：只能读取一次，意味着你读了别人就不能读了;别人读了你就不能读了;
+
+GetBody：原则上是可以多次读取，但是在原生的http.Request里面，这个是 nil在读取到 body 之后，我们就可以用于反序列化。
+
+比如说将ison格式的字符串转化为一个对象等
 
 ```go
+	body := make([]byte, lens)
+	r.Body.Read(body)         //将请求体读到Body中
+	getBody, _ := r.GetBody() // GetBody()函数可以对body进行多次读取
+	getBody.Read(body)
+```
+
+
+
+### 默认的Server
+
+ListenAndServe使用指定的监听地址和处理器启动一个HTTP服务端。处理器参数通常是nil，这表示采用包变量DefaultServeMux作为处理器。
+
+Handle和HandleFunc函数可以向DefaultServeMux添加处理器。
+
+```go
+http.Handle("/foo", fooHandler)
+http.HandleFunc("/bar", func(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+})
+log.Fatal(http.ListenAndServe(":8080", nil))
+```
+
+### 默认的Server---示例
+
+使用Go语言中的`net/http`包来编写一个简单的接收HTTP请求的Server端示例，`net/http`包是对net包的进一步封装，专门用来处理HTTP协议的数据。具体的代码如下：
+
+```go
+// http server
+func sayHello(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Hello 沙河！")
+}
+
 func main() {
-	resp, err := http.Get("https://www.liwenzhou.com/")
+	http.HandleFunc("/", sayHello)
+	err := http.ListenAndServe(":9090", nil)
 	if err != nil {
-		fmt.Printf("get failed, err:%v\n", err)
+		fmt.Printf("http server failed, err:%v\n", err)
 		return
 	}
-	defer resp.Body.Close()
-  
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Printf("read from resp.Body failed, err:%v\n", err)
-		return
-	}
-	fmt.Print(string(body))
 }
 ```
 
-将上面的代码保存之后编译成可执行文件，执行之后就能在终端打印`liwenzhou.com`网站首页的内容了，我们的浏览器其实就是一个发送和接收HTTP协议数据的客户端，我们平时通过浏览器访问网页其实就是从网站的服务器接收HTTP数据，然后浏览器会按照HTML、CSS等规则将网页渲染展示出来。
+将上面的代码编译之后执行，打开你电脑上的浏览器在地址栏输入`127.0.0.1:9090`回车，此时就能够看到如下页面了。
 
-### 带参数的GET请求示例
+<img src="assets/image-20230424180141729.png" alt="image-20230424180141729" style="zoom: 33%;" />
 
-关于GET请求的参数需要使用Go语言内置的`net/url`这个标准库来处理。
+### 自定义Server
+
+要管理服务端的行为，可以创建一个自定义的Server：
 
 ```go
-func main() {
-	apiUrl := "http://127.0.0.1:9090/get"
-	// URL param
-	data := url.Values{}
-	data.Set("name", "小王子")
-	data.Set("age", "18")
-	u, err := url.ParseRequestURI(apiUrl)
-	if err != nil {
-		fmt.Printf("parse url requestUrl failed, err:%v\n", err)
-	}
-	u.RawQuery = data.Encode() // URL encode
-	fmt.Println(u.String())
-	resp, err := http.Get(u.String())
-	if err != nil {
-		fmt.Printf("post failed, err:%v\n", err)
-		return
-	}
-	defer resp.Body.Close()
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Printf("get resp failed, err:%v\n", err)
-		return
-	}
-	fmt.Println(string(b))
+s := &http.Server{
+	Addr:           ":8080",
+	Handler:        myHandler,
+	ReadTimeout:    10 * time.Second,
+	WriteTimeout:   10 * time.Second,
+	MaxHeaderBytes: 1 << 20,
 }
+log.Fatal(s.ListenAndServe())
 ```
-
-对应的Server端HandlerFunc如下：
-
-```go
-func getHandler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	data := r.URL.Query()
-	fmt.Println(data.Get("name"))
-	fmt.Println(data.Get("age"))
-	answer := `{"status": "ok"}`
-	w.Write([]byte(answer))
-}
-```
-
-### Post请求示例
-
-上面演示了使用`net/http`包发送`GET`请求的示例，发送`POST`请求的示例代码如下：
-
-```go
-func main() {
-	url := "http://127.0.0.1:9090/post"
-	// 表单数据
-	//contentType := "application/x-www-form-urlencoded"
-	//data := "name=小王子&age=18"
-	// json
-	contentType := "application/json"
-	data := `{"name":"小王子","age":18}`
-	resp, err := http.Post(url, contentType, strings.NewReader(data))
-	if err != nil {
-		fmt.Printf("post failed, err:%v\n", err)
-		return
-	}
-	defer resp.Body.Close()
-  
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Printf("get resp failed, err:%v\n", err)
-		return
-	}
-	fmt.Println(string(b))
-}
-```
-
-对应的Server端HandlerFunc如下：
-
-```go
-func postHandler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	// 1. 请求类型是application/x-www-form-urlencoded时解析form数据
-	r.ParseForm()
-	fmt.Println(r.PostForm) // 打印form数据
-	fmt.Println(r.PostForm.Get("name"), r.PostForm.Get("age"))
-	// 2. 请求类型是application/json时从r.Body读取数据
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		fmt.Printf("read request.Body failed, err:%v\n", err)
-		return
-	}
-	fmt.Println(string(b))
-	answer := `{"status": "ok"}`
-	w.Write([]byte(answer))
-}
-```
-
-
 
 ### 获取请求 URL
 
@@ -316,7 +277,7 @@ Request 结构中的 URL 字段用于表示请求行中包含的 URL，改字段
 
 #### type [URL](https://github.com/golang/go/blob/master/src/net/url/url.go?name=release#230)
 
-```
+```go
 type URL struct {
     Scheme   string
     Opaque   string    // 编码后的不透明数据
@@ -330,13 +291,13 @@ type URL struct {
 
 URL类型代表一个解析后的URL（或者说，一个URL参照）。URL基本格式如下：
 
-```
+```go
 scheme://[userinfo@]host/path[?query][#fragment]
 ```
 
 scheme后不是冒号加双斜线的URL被解释为如下格式：
 
-```
+```go
 scheme:opaque[?query][#fragment]
 ```
 
@@ -551,84 +512,6 @@ fmt.Fprintln(w, r.MultipartForm) //打印表单数据
 
 将请求正文解析为多部分/表单数据。
 
-
-
-### 客户端响应
-
-1、HTTP 处理程序使用 ResponseWriter 接口来构造 HTTP 响应。
-
-```go
-type ResponseWriter interface {
-    Header() Header
-    Write([]byte) (int, error)
-    WriteHeader(statusCode int)
-}
-
-func (ResponseWriter) Write([]byte) (int, error) //写入将数据作为 HTTP 回复的一部分写入连接。
-```
-
-2、给客户端响应 JSON 格式的数据
-
-```go
-	w.Header().Set("Content-Type", "application/json") //设置响应头中内容的类型
-	user := User{
-		ID:       1,
-		Username: "admin",
-		Password: "123456",
-	}
-
-	json, _ := json.Marshal(user) //将 user 转换为 json 格式
-	w.Write(json)
-```
-
-响应报文中的内容
-
-> HTTP/1.1 200 OK
->
-> **Content-Type: application/json**
->
-> Date: Fri, 10 Aug 2018 01:58:02 GMT
->
-> Content-Length: 47
-
-3、客户端重定向
-
-```go
-w.Header().Set("Location", "https:www.baidu.com") //以下操作必须要在 WriteHeader 之前进行
-w.WriteHeader(302)
-```
-
-响应报文中的内容
-
-> HTTP/1.1 302 Found
->
-> **Location: https:www.baidu.c**om
->
-> Date: Fri, 10 Aug 2018 01:45:04 GMT
->
-> Content-Length: 0
->
-> **Content-Type: text/plain; charset=utf-8**
-
-
-
-### 自定义Client
-
-要管理HTTP客户端的头域、重定向策略和其他设置，创建一个Client：
-
-```go
-client := &http.Client{
-	CheckRedirect: redirectPolicyFunc,
-}
-resp, err := client.Get("http://example.com")
-// ...
-req, err := http.NewRequest("GET", "http://example.com", nil)
-// ...
-req.Header.Add("If-None-Match", `W/"wyzzy"`)
-resp, err := client.Do(req)
-// ...
-```
-
 ### 自定义Transport
 
 要管理代理、TLS配置、keep-alive、压缩和其他设置，创建一个Transport：
@@ -711,58 +594,231 @@ t.ExecuteTemplate(w, "hello2.html", "我要在 hello2.html 中显示")
 
 
 
-## 服务端
 
-### 默认的Server
 
-ListenAndServe使用指定的监听地址和处理器启动一个HTTP服务端。处理器参数通常是nil，这表示采用包变量DefaultServeMux作为处理器。
+## HTTP客户端
 
-Handle和HandleFunc函数可以向DefaultServeMux添加处理器。
+### 基本的HTTP/HTTPS请求
+
+Get、Head、Post和PostForm函数发出HTTP/HTTPS请求。
 
 ```go
-http.Handle("/foo", fooHandler)
-http.HandleFunc("/bar", func(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
-})
-log.Fatal(http.ListenAndServe(":8080", nil))
+resp, err := http.Get("http://example.com/")
+resp, err := http.Post("http://example.com/upload", "image/jpeg", &buf)
+resp, err := http.PostForm("http://example.com/form",url.Values{"key": {"Value"}, "id": {"123"}})
 ```
 
-### 默认的Server示例
-
-使用Go语言中的`net/http`包来编写一个简单的接收HTTP请求的Server端示例，`net/http`包是对net包的进一步封装，专门用来处理HTTP协议的数据。具体的代码如下：
+程序在使用完response后必须关闭回复的主体。
 
 ```go
-// http server
-
-func sayHello(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Hello 沙河！")
+resp, err := http.Get("http://example.com/")
+if err != nil {
+	// handle error
 }
+defer resp.Body.Close()
+body, err := ioutil.ReadAll(resp.Body)
+// ...
+```
 
+### GET请求示例
+
+使用`net/http`包编写一个简单的发送HTTP请求的Client端，代码如下：
+
+```go
 func main() {
-	http.HandleFunc("/", sayHello)
-	err := http.ListenAndServe(":9090", nil)
+	resp, err := http.Get("https://www.liwenzhou.com/")
 	if err != nil {
-		fmt.Printf("http server failed, err:%v\n", err)
+		fmt.Printf("get failed, err:%v\n", err)
 		return
 	}
+	defer resp.Body.Close()
+  
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Printf("read from resp.Body failed, err:%v\n", err)
+		return
+	}
+	fmt.Print(string(body))
 }
 ```
 
-将上面的代码编译之后执行，打开你电脑上的浏览器在地址栏输入`127.0.0.1:9090`回车，此时就能够看到如下页面了。
+将上面的代码保存之后编译成可执行文件，执行之后就能在终端打印`liwenzhou.com`网站首页的内容了，我们的浏览器其实就是一个发送和接收HTTP协议数据的客户端，我们平时通过浏览器访问网页其实就是从网站的服务器接收HTTP数据，然后浏览器会按照HTML、CSS等规则将网页渲染展示出来。
 
-<img src="assets/image-20230424180141729.png" alt="image-20230424180141729" style="zoom: 33%;" />
+### 带参数的GET请求示例
 
-### 自定义Server
-
-要管理服务端的行为，可以创建一个自定义的Server：
+关于GET请求的参数需要使用Go语言内置的`net/url`这个标准库来处理。
 
 ```go
-s := &http.Server{
-	Addr:           ":8080",
-	Handler:        myHandler,
-	ReadTimeout:    10 * time.Second,
-	WriteTimeout:   10 * time.Second,
-	MaxHeaderBytes: 1 << 20,
+func main() {
+	apiUrl := "http://127.0.0.1:9090/get"
+	// URL param
+	data := url.Values{}
+	data.Set("name", "小王子")
+	data.Set("age", "18")
+	u, err := url.ParseRequestURI(apiUrl)
+	if err != nil {
+		fmt.Printf("parse url requestUrl failed, err:%v\n", err)
+	}
+	u.RawQuery = data.Encode() // URL encode
+	fmt.Println(u.String())
+	resp, err := http.Get(u.String())
+	if err != nil {
+		fmt.Printf("post failed, err:%v\n", err)
+		return
+	}
+	defer resp.Body.Close()
+  
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Printf("get resp failed, err:%v\n", err)
+		return
+	}
+	fmt.Println(string(b))
 }
-log.Fatal(s.ListenAndServe())
 ```
+
+对应的Server端HandlerFunc如下：
+
+```go
+func getHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	data := r.URL.Query()
+	fmt.Println(data.Get("name"))
+	fmt.Println(data.Get("age"))
+	answer := `{"status": "ok"}`
+	w.Write([]byte(answer))
+}
+```
+
+### Post请求示例
+
+上面演示了使用`net/http`包发送`GET`请求的示例，发送`POST`请求的示例代码如下：
+
+```go
+func main() {
+	url := "http://127.0.0.1:9090/post"
+	// 表单数据
+	//contentType := "application/x-www-form-urlencoded"
+	//data := "name=小王子&age=18"
+	// json
+	contentType := "application/json"
+	data := `{"name":"小王子","age":18}`
+	resp, err := http.Post(url, contentType, strings.NewReader(data))
+	if err != nil {
+		fmt.Printf("post failed, err:%v\n", err)
+		return
+	}
+	defer resp.Body.Close()
+  
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Printf("get resp failed, err:%v\n", err)
+		return
+	}
+	fmt.Println(string(b))
+}
+```
+
+对应的Server端HandlerFunc如下：
+
+```go
+func postHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	// 1. 请求类型是application/x-www-form-urlencoded时解析form数据
+	r.ParseForm()
+	fmt.Println(r.PostForm) // 打印form数据
+	fmt.Println(r.PostForm.Get("name"), r.PostForm.Get("age"))
+	// 2. 请求类型是application/json时从r.Body读取数据
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Printf("read request.Body failed, err:%v\n", err)
+		return
+	}
+	fmt.Println(string(b))
+	answer := `{"status": "ok"}`
+	w.Write([]byte(answer))
+}
+```
+
+
+
+
+
+### 客户端响应
+
+1、HTTP 处理程序使用 ResponseWriter 接口来构造 HTTP 响应。
+
+```go
+type ResponseWriter interface {
+    Header() Header
+    Write([]byte) (int, error)
+    WriteHeader(statusCode int)
+}
+
+func (ResponseWriter) Write([]byte) (int, error) //写入将数据作为 HTTP 回复的一部分写入连接。
+```
+
+2、给客户端响应 JSON 格式的数据
+
+```go
+	w.Header().Set("Content-Type", "application/json") //设置响应头中内容的类型
+	user := User{
+		ID:       1,
+		Username: "admin",
+		Password: "123456",
+	}
+
+	json, _ := json.Marshal(user) //将 user 转换为 json 格式
+	w.Write(json)
+```
+
+响应报文中的内容
+
+> HTTP/1.1 200 OK
+>
+> **Content-Type: application/json**
+>
+> Date: Fri, 10 Aug 2018 01:58:02 GMT
+>
+> Content-Length: 47
+
+3、客户端重定向
+
+```go
+w.Header().Set("Location", "https:www.baidu.com") //以下操作必须要在 WriteHeader 之前进行
+w.WriteHeader(302)
+```
+
+响应报文中的内容
+
+> HTTP/1.1 302 Found
+>
+> **Location: https:www.baidu.c**om
+>
+> Date: Fri, 10 Aug 2018 01:45:04 GMT
+>
+> Content-Length: 0
+>
+> **Content-Type: text/plain; charset=utf-8**
+
+
+
+### 自定义Client
+
+要管理HTTP客户端的头域、重定向策略和其他设置，创建一个Client：
+
+```go
+client := &http.Client{
+	CheckRedirect: redirectPolicyFunc,
+}
+resp, err := client.Get("http://example.com")
+// ...
+req, err := http.NewRequest("GET", "http://example.com", nil)
+// ...
+req.Header.Add("If-None-Match", `W/"wyzzy"`)
+resp, err := client.Do(req)
+// ...
+```
+
+
+
