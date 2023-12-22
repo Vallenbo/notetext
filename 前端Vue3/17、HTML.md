@@ -49,14 +49,14 @@
 ```
 <h1> to <h6>  定义 HTML 标题
 <p>	          定义一个段落
-<br>	      定义简单的折行
-<hr>	      定义水平线
+<br>	      	定义简单的折行
+<hr>	      	定义水平线
 <!--...-->	  定义一个注释
 ```
 
 文本标签:
 ```
-del 定义被删除文本。
+del 定义被删除文本
 i   定义斜体文本
 ins 定义被插入文本
 sub 下标文字
@@ -77,7 +77,6 @@ iframe 嵌套外部网页
 img    展示图像
 area   标签定义图像映射内部的区域: https://www.runoob.com/try/try.php?filename=tryhtml_areamap
 a      链接标签
-
 ul     定义一个无序列表
 ol     定义一个有序列表
 li		 定义一个列表项

@@ -1374,7 +1374,7 @@ wget -O -r -p /etc/yum.repos.d/ali.repo http://mirrors.aliyun.com/repo/Centos-7.
 curl -u admin:12345 http://192.168.2.5:3000	#-u指定admin用户名密码12345和指定端口进行登陆
 
 ```sh
-# -A参数指定客户端的用户代理标头，即User-Agent。curl 的默认用户代理字符串是curl/[version]。
+# -A参数指定客户端的用户代理标头，即User-Agent。curl 的默认用户代理字符串是curl/[version]
 $ curl -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36' https://google.com
 # 上面命令将User-Agent改成 Chrome 浏览器。
 
@@ -1778,22 +1778,18 @@ service yum-updatesd stop	#停止yum自动更新服务		chkconfig yum-updatesd o
 mv /etc/apt/sources.list /etc/apt/sources.list.bak && vi /etc/apt/sources.list
 ```
 
-ubuntu 18.04(bionic) 配置如下
+ubuntu 22.04(bionic) 配置如下
 ```bash
-deb https://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
-deb-src https://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
-
-deb https://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
-deb-src https://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
-
-deb https://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
-deb-src https://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
-
-# deb https://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
-# deb-src https://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
-
-deb https://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
-deb-src https://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ jammy main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ jammy main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ jammy-security main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ jammy-security main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ jammy-updates main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ jammy-updates main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ jammy-proposed main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ jammy-proposed main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse
 ```
 
 ubuntu 20.04(focal) 配置如下
