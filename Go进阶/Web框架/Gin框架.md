@@ -1,7 +1,8 @@
 # Gin框架介绍及使用
 
-`Gin`是一个用Go语言编写的web框架。它是一个类似于`martini`但拥有更好性能的API框架, 由于使用了`httprouter`，速度提高了近40倍。 如果你是性能和高效的追求者, 你会爱上`Gin`。
-Go世界里最流行的Web框架，[Github](https://github.com/gin-gonic/gin)上有`32K+`star。 基于[httprouter](https://github.com/julienschmidt/httprouter)开发的Web框架。 [中文文档](https://gin-gonic.com/zh-cn/docs/)齐全，简单易用的轻量级框架。
+`Gin`是一个用Go语言编写的web框架。它是一个拥有更好性能的API框架, 由于使用了`httprouter`，速度提高了近40倍。 如果你是性能和高效的追求者, 你会爱上`Gin`。
+Go世界里最流行的Web框架，[Github](https://github.com/gin-gonic/gin)上有`32K+`star。 基于[httprouter](https://github.com/julienschmidt/httprouter)开发的Web框架。 [中文文档示例](https://gin-gonic.com/zh-cn/docs/examples/)齐全，简单易用的轻量级框架。
+
 下载并安装`Gin`:
 
 ```bash
@@ -10,15 +11,8 @@ go get -u github.com/gin-gonic/gin
 
 # Gin渲染
 
-## HTML渲染
+## 自定义模板函数渲染
 
-我们首先定义一个存放模板文件的`templates`文件夹，然后在其内部按照业务分别定义一个`posts`文件夹和一个`users`文件夹。 `posts.html`和`users.html`文件的内容如下：
-Gin框架中使用`gin.Default().LoadHTMLGlob()`或者`gin.Default().LoadHTMLFiles()`方法进行HTML模板渲染。
-
-```
-r.LoadHTMLGlob("templates/*")
-```
-## 自定义模板函数
 定义一个不转义相应内容的`safe`模板函数如下：
 
 ```go
@@ -29,7 +23,153 @@ r.LoadHTMLGlob("templates/*")
 	})
 ```
 
+## HTML渲染和模板应引用
+
+我们首先定义一个存放模板文件的`templates`文件夹，然后在其内部按照业务分别定义一个`posts`文件夹和一个`users`文件夹。 `posts.html`和`users.html`文件的内容如下：
+Gin框架中使用`gin.Default().LoadHTMLGlob()`或者`gin.Default().LoadHTMLFiles()`方法进行HTML模板渲染。
+
+```go
+//加载templates目录下所有 HTML 文件，并将结果与 HTML 渲染器相关联
+r.LoadHTMLGlob("templates/*") 
+//加载templates目录下所有目录和 HTML 文件
+r.LoadHTMLGlob("templates/**") 
+//加载 HTML 文件切片，并将结果与 HTML 渲染器相关联。
+r.LoadHTMLFiles("templates/posts/index.html", "templates/users/index.html")
+```
+当不同目录下出现同文件名时，我们应该如何应引用html模板？
+
+定义模板的时候需要通过 define 定义html模板名称
+
+<img src="./assets/image-20231226084056265.png" alt="image-20231226084056265" style="zoom:33%;" />
+
+```go
+{{define "posts/index.html"}}
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <title>posts/index</title>
+</head>
+<body>
+{{.title}}
+</body>
+</html>
+{{end}}
+```
+
+gin中使用
+
+```go
+r.GET("templates/list.html", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "posts/list.html", gin.H{
+			"title": "posts/list.html",
+		})
+	})
+```
+
+
+
+## JSON渲染
+
+```go
+	r.GET("/someJSON", func(c *gin.Context) { // 方式一：自己拼接JSON
+		c.JSON(http.StatusOK, gin.H{"message": "Hello world!"}) // gin.H 是map[string]interface{}的缩写
+	}) 
+	r.GET("/moreJSON", func(c *gin.Context) { // 方法二：使用结构体
+		var msg struct {
+			Name    string `json:"user"`
+			Message string
+			Age     int
+		}
+		msg.Name = "小王子"
+		msg.Message = "Hello world!"
+		msg.Age = 18
+		c.JSON(http.StatusOK, msg)
+	})
+```
+
+## XML渲染
+
+注意需要使用具名的结构体类型。
+
+```go
+	r.GET("/someXML", func(c *gin.Context) { // 方式一：自己拼接JSON
+		c.XML(http.StatusOK, gin.H{"message": "Hello world!"})
+	})
+	r.GET("/moreXML", func(c *gin.Context) { // 方法二：使用结构体
+		type MessageRecord struct {
+			Name    string
+			Message string
+			Age     int
+		}
+		var msg MessageRecord
+		msg.Name = "小王子"
+		msg.Message = "Hello world!"
+		msg.Age = 18
+		c.XML(http.StatusOK, msg)
+	})
+```
+
+## YMAL渲染
+
+```go
+r.GET("/someYAML", func(c *gin.Context) {
+	c.YAML(http.StatusOK, gin.H{"message": "ok", "status": http.StatusOK})
+})
+```
+
+## Protobuf渲染
+
+```go
+r.GET("/someProtoBuf", func(c *gin.Context) {
+	reps := []int64{int64(1), int64(2)}
+	label := "test"
+	data := &protoexample.Test{ // protobuf 的具体定义写在 testdata/protoexample 文件中。
+		Label: &label,
+		Reps:  reps,
+	}
+	// 请注意，数据在响应中变为二进制数据
+	c.ProtoBuf(http.StatusOK, data) // 将输出被 protoexample.Test protobuf 序列化了的数据
+})
+```
+
+## PureJSON渲染
+
+通常，JSON 使用 unicode 替换特殊 HTML 字符，例如 < 变为 \ u003c。如果要按字面对这些字符进行编码，则可以使用 PureJSON。
+
+```go
+	r.GET("/json", func(c *gin.Context) {	// 提供 unicode 实体
+		c.JSON(200, gin.H{
+			"html": "<b> Hello, world!</b>",
+		})
+	})
+
+	r.GET("/pureJson", func(c *gin.Context) {	// 提供字面字符
+		c.PureJSON(200, gin.H{
+			"html": "<b> Hello, world!</b>",
+		})
+	})
+```
+
+测试：
+
+```go
+$ curl 127.0.0.1:8080/json
+{"html":"\u003cb\u003e Hello, world!\u003c/b\u003e"}
+普通json 会将< > 特殊字符转为 unicode
+
+$ curl 127.0.0.1:8080/pureJson
+{"html":"<b> Hello, world!</b>"}
+```
+
+pureJson 将会保留特殊字符
+
+
+
 ## 静态文件处理
+
 当我们渲染的HTML文件中引用了静态文件时，我们只需要按照以下方式在渲染页面前调用`gin.Static`方法即可。自动在static目录下寻找
 
 ```go
@@ -115,72 +255,63 @@ func getCurrentPath() string {
 }
 ```
 
-## JSON渲染
+# validator表单验证
+
+对binding内字段的限制，和对传入数据的字段和类型进行验证。
+
+[go-playground/validator](https://github.com/go-playground/validator)：包验证器根据标签对结构体和单个字段进行值验证规则。
 
 ```go
-	r.GET("/someJSON", func(c *gin.Context) { // 方式一：自己拼接JSON
-		c.JSON(http.StatusOK, gin.H{"message": "Hello world!"}) // gin.H 是map[string]interface{}的缩写
-	}) 
-	r.GET("/moreJSON", func(c *gin.Context) { // 方法二：使用结构体
-		var msg struct {
-			Name    string `json:"user"`
-			Message string
-			Age     int
-		}
-		msg.Name = "小王子"
-		msg.Message = "Hello world!"
-		msg.Age = 18
-		c.JSON(http.StatusOK, msg)
-	})
+type Login struct {// Binding from JSON
+  // binding:约束，required必填项 , min字符段最短为3
+  User     string `form:"user" json:"user" binding:"required,min=3,max=8"` 
+	Password string `form:"password" json:"password" binding:"required"`
+}
+
+type SignUpParam struct { //注册
+	Age        uint   `json:"age" binding:"gte=1,lte=130"` //validator 字段内容
+	Name       string `json:"name" binding:"required"`
+	Email      string `json:"email" binding:"required, email"`
+	Password   string `json:"password" binding:"required"`
+	RePassword string `json:"re_password" binding:"required,eqfield=Password"` //eqfield与指定字段约束一样
+}
 ```
 
-## XML渲染
-
-注意需要使用具名的结构体类型。
+[validator翻译和自定义错误](https://github.com/go-playground/validator/blob/master/_examples/translations/main.go)：定义中文报错提示
 
 ```go
-	r.GET("/someXML", func(c *gin.Context) { // 方式一：自己拼接JSON
-		c.XML(http.StatusOK, gin.H{"message": "Hello world!"})
-	})
-	r.GET("/moreXML", func(c *gin.Context) { // 方法二：使用结构体
-		type MessageRecord struct {
-			Name    string
-			Message string
-			Age     int
-		}
-		var msg MessageRecord
-		msg.Name = "小王子"
-		msg.Message = "Hello world!"
-		msg.Age = 18
-		c.XML(http.StatusOK, msg)
-	})
+import (
+	"fmt"
+
+	"github.com/go-playground/locales/en"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
+	en_translations "github.com/go-playground/validator/v10/translations/en" //validator的翻译器
+)
+
+func main() {
+	// NOTE: ommitting allot of error checking for brevity
+	en := en.New()
+	uni = ut.New(en, en)
+
+	// this is usually know or extracted from http 'Accept-Language' header
+	// also see uni.FindTranslator(...)
+	trans, _ := uni.GetTranslator("en")
+
+	validate = validator.New()
+	en_translations.RegisterDefaultTranslations(validate, trans)
+
+	translateAll(trans)
+	translateIndividual(trans)
+	translateOverride(trans) // yep you can specify your own in whatever locale you want!
+}
 ```
 
-## YMAL渲染
 
-```go
-r.GET("/someYAML", func(c *gin.Context) {
-	c.YAML(http.StatusOK, gin.H{"message": "ok", "status": http.StatusOK})
-})
-```
-
-## protobuf渲染
-
-```go
-r.GET("/someProtoBuf", func(c *gin.Context) {
-	reps := []int64{int64(1), int64(2)}
-	label := "test"
-	// protobuf 的具体定义写在 testdata/protoexample 文件中。
-	data := &protoexample.Test{
-		Label: &label,
-		Reps:  reps,
-	}
-	// 请注意，数据在响应中变为二进制数据
-	c.ProtoBuf(http.StatusOK, data) // 将输出被 protoexample.Test protobuf 序列化了的数据
-})
-```
 
 # 获取参数
+
+从路径中获取参数
 
 ## 通过URL获取携带参数
 
@@ -245,24 +376,21 @@ r.POST("/json", func(c *gin.Context) { // 注意：下面为了举例子方便�
 	b, _ := c.GetRawData()  // 从c.Request.Body读取请求数据
 	var m map[string]interface{} // 定义map或结构体
 	_ = json.Unmarshal(b, &m) // 反序列化
-
 	c.JSON(http.StatusOK, m)
 })
 ```
 
 更便利的获取请求参数的方式，参见下面的 **参数绑定** 小节。
 
-## 进阶---参数绑定
+
+
+## 参数绑定
 
 为了能够更方便的获取请求相关参数，提高开发效率，我们可以基于请求的`Content-Type`识别请求数据类型并利用反射机制自动提取请求中`QueryString`、`form表单`、`JSON`、`XML`等参数到结构体中。
 
 下面的示例代码演示了`.ShouldBind()`强大的功能，它能够基于请求自动提取`JSON`、`form表单`和`QueryString`类型的数据，并把值绑定到指定的结构体对象。
 
 ```go
-type Login struct {// Binding from JSON
-	User     string `form:"user" json:"user" binding:"required"`
-	Password string `form:"password" json:"password" binding:"required"`
-}
 	// 绑定JSON的示例 ({"user": "q1mi", "password": "123456"})
 	router.POST("/loginJSON", func(c *gin.Context) {
 		var login Login
@@ -433,7 +561,6 @@ r.NoRoute(func(c *gin.Context) {
 		userGroup.GET("/index", func(c *gin.Context) {...})
 		userGroup.GET("/login", func(c *gin.Context) {...})
 		userGroup.POST("/login", func(c *gin.Context) {...})
-
 	}
 ```
 
@@ -597,6 +724,27 @@ shopGroup := r.Group("/shop", StatCost()) //写法1
     ...
 }
 ```
+
+
+
+## c.Abort()中间件中止
+
+在Gin框架中，`c.Abort()`是一个常用的方法，用于中止当前请求的处理流程，并立即返回响应给客户端。当调用`c.Abort()`时，Gin会停止执行后续的中间件和处理函数，并直接返回响应。
+
+```go
+r.GET("/hello", func(c *gin.Context) {
+		if someCondition {	// 检查某个条件，如果不满足则中止请求处理
+			c.Abort()
+			return
+		}
+
+		c.JSON(200, gin.H{	// 处理请求
+			"message": "Hello, Gin!",
+		})
+})
+```
+
+
 
 ## 中间件注意事项
 

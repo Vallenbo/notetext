@@ -1,12 +1,67 @@
-## net/http介绍
+# net/http包
 
 Go语言内置的`net/http`包提供了HTTP客户端和服务端的实现。
+Socket是BSD UNIX的进程通信机制，通常也称作”套接字”，用于描述IP地址和端口，是一个通信链的句柄。Socket可以理解为TCP/IP网络的API，它定义了许多函数或例程，程序员可以用它们来开发TCP/IP网络上的应用程序。电脑上运行的应用程序通常通过”套接字”向网络发出请求或者应答网络请求。
 
-### HTTP协议
+# Socket图解
+
+Socket编程是在应用层与TCP/IP协议族通信的中间软件抽象层。在设计模式中，Socket其实就是一个门面模式，它把复杂的TCP/IP协议族隐藏在Socket后面，对用户来说只需要调用Socket规定的相关函数，让Socket去组织符合指定的协议数据然后进行通信。
+
+<img src="assets/image-20230424113247931.png" alt="image-20230424113247931" style="zoom:67%;" />
+
+<img src="assets/image-20230424113301308.png" alt="image-20230424113301308" style="zoom:67%;" />
+
+# TCP通信
+
+## TCP协议
+
+TCP/IP(Transmission Control Protocol/Internet Protocol) 即传输控制协议/网间协议，是一种面向连接（连接导向）的、可靠的、基于字节流的传输层（Transport layer）通信协议，因为是面向连接的协议，数据像水流一样传输，会存在黏包问题。
+
+## TCP服务端
+
+​	##一个TCP服务端可以同时连接很多个客户端，例如世界各地的用户使用自己电脑上的浏览器访问淘宝网。因为Go语言中创建多个goroutine实现并发非常方便和高效，所以我们可以每建立一次链接就创建一个goroutine去处理。
+
+> TCP服务端程序的处理流程：
+>
+> 1、监听端口 2、接收客户端请求建立链接	3、创建goroutine处理链接。
+
+> TCP客户端进行TCP通信的流程如下：
+>
+> 1、建立与服务端的链接	2、进行数据收发	3、关闭链接
+
+
+## “粘包”现象：
+客户端分10次发送的数据，在服务端并没有成功的输出10次，而是多条数据“粘”到了一起。
+为什么会出现粘包：主要原因就是tcp数据传递模式是流模式，在保持长连接的时候可以进行多次的收和发。
+
+###“粘包”可发生在发送端也可发生在接收端
+由Nagle算法造成的发送端的粘包：Nagle算法是一种改善网络传输效率的算法。简单来说就是当我们提交一段数据给TCP发送时，TCP并不立刻发送此段数据，而是等待一小段时间看看在等待期间是否还有要发送的数据，若有则会一次把这两段数据发送出去。
+接收端接收不及时造成的接收端粘包：TCP会把接收到的数据存在自己的缓冲区中，然后通知应用层取数据。当应用层由于某些原因不能及时的把TCP的数据取出来，就会造成TCP缓冲区中存放了几段数据。
+
+## 解决办法：
+出现”粘包”的关键在于接收方不确定将要传输的数据包的大小，因此我们可以对数据包进行封包和拆包的操作。
+封包：封包就是给一段数据加上包头，这样一来数据包就分为包头和包体两部分内容了(过滤非法包时封包会加入”包尾”内容)。包头部分的长度是固定的，并且它存储了包体的长度，根据包头长度固定以及包头中含有包体长度的变量就能正确的拆分出一个完整的数据包。
+我们可以自己定义一个协议，比如数据包的前4个字节为包头，里面存储的是发送的数据的长度。
+定义的proto包的Decode和Encode函数处理数据
+其中包含大端和小端的知识
+
+# UDP通信
+
+UDP协议（User Datagram Protocol）中文名称是用户数据报协议，是OSI（Open System Interconnection，开放式系统互联）参考模型中一种无连接的传输层协议，不需要建立连接就能直接进行数据发送和接收，属于不可靠的、没有时序的通信，但是UDP协议的实时性比较好，通常用于视频直播相关领域。
+
+
+
+
+
+# HTTP协议
 
 超文本传输协议（HTTP，HyperText Transfer Protocol)是互联网上应用最为广泛的一种网络传输协议，所有的WWW文件都必须遵守这个标准。设计HTTP最初的目的是为了提供一种发布和接收HTML页面的方法。
 
-## http请求报文格式
+HTTP协议：超文本传输协议（HTTP，HyperText Transfer Protocol)是互联网上应用最为广泛的一种网络传输协议，所有的WWW文件都必须遵守这个标准。设计HTTP最初的目的是为了提供一种发布和接收HTML页面的方法。
+
+Go语言内置的net/http包提供了HTTP客户端和服务端的实现。
+
+# http请求报文格式
 
 ![1586155308860](assets/1586155308860.png)
 
@@ -122,7 +177,7 @@ func handleFunc(conn net.Conn) {
 }
 ```
 
-## http响应消息格式
+# http响应消息格式
 
 ![1586158776960](assets/1586158776960.png)
 
@@ -162,9 +217,9 @@ http响应格式也分为4部分：
 
    1. 通常是返回json数据
 
-## HTTP服务端
+# HTTP服务端
 
-go中http服务器分两个部分`w http.ResponseWriter`, `r *http.Request`
+http包中重要结构体说明：分两个部分`w http.ResponseWriter`, `r *http.Request`
 
 ```go
 type ResponseWriter interface {
@@ -218,7 +273,7 @@ GetBody：原则上是可以多次读取，但是在原生的http.Request里面�
 
 
 
-### 默认的Server
+## 创建Server端
 
 ListenAndServe使用指定的监听地址和处理器启动一个HTTP服务端。处理器参数通常是nil，这表示采用包变量DefaultServeMux作为处理器。
 
@@ -232,7 +287,7 @@ http.HandleFunc("/bar", func(w http.ResponseWriter, r *http.Request) {
 log.Fatal(http.ListenAndServe(":8080", nil))
 ```
 
-### 默认的Server---示例
+示例文件如下：
 
 使用Go语言中的`net/http`包来编写一个简单的接收HTTP请求的Server端示例，`net/http`包是对net包的进一步封装，专门用来处理HTTP协议的数据。具体的代码如下：
 
@@ -256,7 +311,7 @@ func main() {
 
 <img src="assets/image-20230424180141729.png" alt="image-20230424180141729" style="zoom: 33%;" />
 
-### 自定义Server
+## 自定义的Server端
 
 要管理服务端的行为，可以创建一个自定义的Server：
 
@@ -271,11 +326,13 @@ s := &http.Server{
 log.Fatal(s.ListenAndServe())
 ```
 
-### 获取请求 URL
+## 参数获取
+
+### 获取请求 URL中的参数
 
 Request 结构中的 URL 字段用于表示请求行中包含的 URL，改字段是一个指向url.URL 结构的指针
 
-#### type [URL](https://github.com/golang/go/blob/master/src/net/url/url.go?name=release#230)
+#### type [URL]字段
 
 ```go
 type URL struct {
@@ -443,7 +500,7 @@ func handler(w http.ResponseWriter, r *http.Request) {//获取内容的长度
 
 下面我们就通过 net/http 库中的 Request 结构的字段以及方法获取**请求 URL 后面**的请求参数以及 **form 表单**中提交的请求参数
 
-####  **Form 字段** 
+####  **Form 字段**
 
 1)  **url.Values** 类型，Form 是解析好的表单数据，包括 URL 字段的 query参数和 POST 或 PUT 的表单数据。
 
@@ -512,7 +569,7 @@ fmt.Fprintln(w, r.MultipartForm) //打印表单数据
 
 将请求正文解析为多部分/表单数据。
 
-### 自定义Transport
+## 自定义header头中Transport内容
 
 要管理代理、TLS配置、keep-alive、压缩和其他设置，创建一个Transport：
 
@@ -529,19 +586,39 @@ Client和Transport类型都可以安全的被多个goroutine同时使用。出�
 
 
 
+## http/template包
+
+html/template包实现了数据驱动的模板，用于生成可防止代码注入的安全的HTML内容。它提供了和text/template包相同的接口，Go语言中输出HTML的场景都应使用html/template这个包。
+
+### Go语言的模板引擎
+
+Go语言内置了文本模板引擎text/template和用于HTML文档的html/template。它们的作用机制可以简单归纳如下：
+模板文件通常定义为.tmpl和.tpl为后缀（也可以使用其他的后缀），必须使用UTF8编码。
+模板文件中使用{{和}}包裹和标识需要传入的数据。
+传给模板这样的数据就可以通过点号（.）来访问，如果数据是复杂类型的数据，可以通过{ { .FieldName }}来访问它的字段。
+除{{和}}包裹的内容外，其他内容均不做修改原样输出。
+
+### 模板与渲染
+
+在一些前后端不分离的Web架构中，我们通常需要在后端将一些数据渲染到HTML文档中，从而实现动态的网页（网页的布局和样式大致一样，但展示的内容并不一样）效果。
+我们这里说的模板可以理解为事先定义好的HTML文档文件，模板渲染的作用机制可以简单理解为文本替换操作–使用相应的数据去替换HTML文档中事先准备好的标记。
+很多编程语言的Web框架中都使用各种模板引擎，比如Python语言中Flask框架中使用的jinja2模板引擎。
+
 ### template模板引擎响应
 
 Go 为我们提供了 **text/template** 库和 **html/template** 库这两个模板引擎，模板引擎通过将数据和模板组合在一起生成最终的 HTML，而处理器负责调用模板引擎并将引擎生成的 HTMl 返回给客户端。
 
 Go 的模板都是文本文档（其中 Web 应用的模板通常都是 HTML），它们都嵌入了一些称为**动作**的指令。从模板引擎的角度来说，模板就是嵌入了动作的文本（这些文本通常包含在模板文件里面），而模板引擎则通过分析并执行这些文本来生成出另外一些文本。
 
-#### HelloWorld模板
+Go语言模板引擎的使用可以分为三部分：定义模板文件、解析模板文件和模板渲染.
+
+#### 定义HelloWorld模板
 
 使用 Go 的 Web 模板引擎需要以下两个步骤:
 
-(1) 对文本格式的模板源进行语法分析，创建一个经过语法分析的模板结构，其中模板源既可以是一个字符串，也可以是模板文件中包含的内容。
+(1) 、对文本格式的模板源进行语法分析，创建一个经过语法分析的模板结构，其中模板源既可以是一个字符串，也可以是模板文件中包含的内容。
 
-(2 )执行经过语法分析的模板，将 ResponseWriter 和模板所需的动态数据传递给模板引擎，被调用的模板引擎会把经过语法分析的模板和传入的数据结合起来，生成出最终的 HTML，并将这些 HTML 传递给 ResponseWriter。
+(2)、经过语法分析的模板，将 ResponseWriter 和模板所需的动态数据传递给模板引擎，被调用的模板引擎会把经过语法分析的模板和传入的数据结合起来，生成出最终的 HTML，并将这些 HTML 传递给 ResponseWriter。
 
 ```go
 func ParseFiles(filenames ...string) (*Template, error)
@@ -563,12 +640,33 @@ t, _ = t.ParseFiles("hello.html")
 t, _ := template.ParseGlob("*.html") //通过该函数可以通过指定一个规则一次性传入多个模板文件
 ```
 
+#### 解析模板文件
+
+上面定义好了模板文件之后，可以使用下面的常用方法去解析模板文件，得到模板对象：
+
+```go
+func (t *Template) Parse(src string) (*Template, error)
+func ParseFiles(filenames ...string) (*Template, error)
+func ParseGlob(pattern string) (*Template, error)
+```
+
+当然，你也可以使用func New(name string) *Template函数创建一个名为name的模板，然后对其调用上面的方法去解析模板字符串或模板文件。
+
 #### 解析模板错误
 
 在解析模板时都没有对错误进行处理，Go 提供了一个 Must 函数专门用来处理这个错误。Must 函数可以包裹起一个函数，被包裹的函数会返回一个指向模板的指针和一个错误，如果错误不是 nil，那么 Must 函数将产生一个 panic。
 
 ```go
 t := template.Must(template.ParseFiles("hello.html"))
+```
+
+#### 模板渲染
+
+渲染模板简单来说就是使用数据去填充模板，当然实际上可能会复杂很多。
+
+```go
+func (t *Template) Execute(wr io.Writer, data interface{}) error
+func (t *Template) ExecuteTemplate(wr io.Writer, name string, data interface{}) error
 ```
 
 
@@ -596,9 +694,143 @@ t.ExecuteTemplate(w, "hello2.html", "我要在 hello2.html 中显示")
 
 
 
-## HTTP客户端
+### 模板语法
 
-### 基本的HTTP/HTTPS请求
+{{.}}
+模板语法都包含在{{和}}中间，其中{{.}}中的点表示当前对象。
+当我们传入一个结构体对象时，我们可以根据.来访问结构体的对应字段。
+当我们传入的变量是map时，也可以在模板文件中通过.根据key来取值。
+
+#### 注释
+
+{{/* a comment */}}
+注释，执行时会忽略。可以多行。注释不能嵌套，并且必须紧贴分界符始止。
+
+#### pipeline
+
+pipeline是指产生数据的操作。比如{{.}}、{{.Name}}等。Go的模板语法中支持使用管道符号|链接多个命令，用法和unix下的管道类似：|前面的命令会将运算结果(或返回值)传递给后一个命令的最后一个位置。
+注意：并不是只有使用了|才是pipeline。Go的模板语法中，pipeline的概念是传递数据，只要能产生数据的，都是pipeline。
+
+##### **变量**
+
+我们还可以在模板中声明变量，用来保存传入模板的数据或其他语句生成的结果。具体语法如下：
+$obj := {{.}}，其中$obj是变量的名字，在后续的代码中就可以使用该变量了。
+
+##### **移除空格**
+
+有时候我们在使用模板语法的时候会不可避免的引入一下空格或者换行符，这样模板最终渲染出来的内容可能就和我们想的不一样，这个时候可以使用{{-语法去除模板内容左侧的所有空白符号， 使用-}}去除模板内容右侧的所有空白符号。
+**例如**：{{- .Name -}}，注意：-要紧挨{{和}}，同时与模板值之间需要使用空格分隔。
+
+##### **条件判断**
+
+Go模板语法中的条件判断有以下几种:
+
+```
+{{if pipeline}} T1 {{end}}
+{{if pipeline}} T1 {{else}} T0 {{end}}
+{{if pipeline}} T1 {{else if pipeline}} T0 {{end}}
+```
+
+##### **range**
+
+Go的模板语法中使用range关键字进行遍历，有以下两种写法，其中pipeline的值必须是数组、切片、字典或者通道。
+{{range pipeline}} T1 {{end}}
+如果pipeline的值其长度为0，不会有任何输出
+{{range pipeline}} T1 {{else}} T0 {{end}}
+如果pipeline的值其长度为0，则会执行T0。
+
+##### with
+
+{{with pipeline}} T1 {{end}}
+如果pipeline为empty不产生输出，否则将dot设为pipeline的值并执行T1。不修改外面的dot。
+{{with pipeline}} T1 {{else}} T0 {{end}}
+如果pipeline为empty，不改变dot并执行T0，否则dot设为pipeline的值并执行T1。
+
+##### 预定义函数
+
+执行模板时，函数从两个函数字典中查找：首先是模板函数字典，然后是全局函数字典。一般不在模板内定义函数，而是使用Funcs方法添加函数到模板里。
+
+##### 全局函数
+
+预定义的**全局函数**如下：
+`and函数`返回它的第一个empty参数或者最后一个参数；
+    就是说"and x y"等价于"if x then y else x"；所有参数都会执行；
+`or`返回第一个非empty参数或者最后一个参数；
+    亦即"or x y"等价于"if x then x else y"；所有参数都会执行；
+`not`返回它的单个参数的布尔值的否定
+`len`返回它的参数的整数类型长度
+`index`执行结果为第一个参数以剩下的参数为索引/键指向的值；
+	如"index x 1 2 3"返回x[1][2][3]的值；每个被索引的主体必须是数组、切片或者字典。
+`print`即fmt.Sprint	，printf即fmt.Sprintf	，println即fmt.Sprintln
+`html`返回与其参数的文本表示形式等效的转义HTML。
+    这个函数在html/template中不可用。
+`urlquery`以适合嵌入到网址查询中的形式返回其参数的文本表示的转义值。
+    这个函数在html/template中不可用。
+`js`返回与其参数的文本表示形式等效的转义JavaScript。
+`call`执行结果是调用第一个参数的返回值，该参数必须是函数类型，其余参数作为调用该函数的参数；
+	如"call .X.Y 1 2"等价于go语言里的dot.X.Y(1, 2)；
+    其中Y是函数类型的字段或者字典的值，或者其他类似情况；
+    call的第一个参数的执行结果必须是函数类型的值（和预定义函数如print明显不同）；
+    该函数类型值必须有1到2个返回值，如果有2个则后一个必须是error接口类型；
+    如果有2个返回值的方法返回的error非nil，模板执行会中断并返回给调用模板执行者该错误；
+`比较函数`布尔函数会将任何类型的零值视为假，其余视为真。
+
+| 符号 | 含义                     | 符号 | 含义                     |
+| ---- | ------------------------ | ---- | ------------------------ |
+| eq   | 如果arg1 == arg2则返回真 | ne   | 如果arg1 != arg2则返回真 |
+| lt   | 如果arg1 < arg2则返回真  | le   | 如果arg1 <= arg2则返回真 |
+| gt   | 如果arg1 > arg2则返回真  | ge   | 如果arg1 >= arg2则返回真 |
+
+为了简化多参数相等检测，eq（只有eq）可以接受2个或更多个参数，它会将第一个参数和其余参数依次比较，
+{{eq arg1 arg2 arg3}}
+比较函数只适用于基本类型（或重定义的基本类型，如”type Celsius float32”）。但是，整数和浮点数不能互相比较。
+
+#### 自定义函数
+
+Go的模板支持自定义函数。
+
+```go
+func New(name string) *Template{}  ，//定义模板文件
+func (t *Template) Funcs(funcMap FuncMap) *Template  ，//嵌入模板函数
+```
+
+
+
+#### 嵌套template
+
+我们可以在template中嵌套其他的template。这个template可以是单独的文件，也可以是通过define定义的template。
+
+#### block
+
+{{block "name" pipeline}} T1 {{end}}
+block是定义模板{{define "name"}} T1 {{end}}和执行{{template "name" pipeline}}缩写，典型的用法是定义一组根模板，然后通过在其中重新定义块模板进行自定义。
+
+​	#如果我们的模板名称冲突了，例如不同业务线下都定义了一个index.tmpl模板，我们可以通过下面两种方法来解决。
+
+在模板文件开头使用{{define 模板名}}语句显式的为模板命名，默认使用文件名。
+可以把模板文件存放在templates文件夹下面的不同目录中，然后使用template.ParseGlob("templates/**/*.tmpl")解析模板。
+
+#### 修改默认的标识符
+
+Go标准库的模板引擎使用的花括号{{和}}作为标识，而许多前端框架（如Vue和 AngularJS）也使用{{和}}作为标识符，所以当我们同时使用Go语言模板引擎和以上前端框架时就会出现冲突，这个时候我们需要修改标识符，修改前端的或者修改Go语言的。这里演示如何修改Go语言模板引擎默认的标识符：
+
+```go
+template.New("test").Delims("{[", "]}").ParseFiles("./t.tmpl")
+```
+
+## text模板与html模板的区别
+
+html/template针对的是需要返回HTML内容的场景，在模板渲染过程中会对一些有风险的内容进行转义（如用户评论中有xss注入），以此来防范跨站脚本攻击。
+
+
+
+# HTTP客户端
+
+客户端请求方式：
+
+<img src="assets/image-20230424113406294.png" alt="image-20230424113406294" style="zoom: 67%;" />
+
+## 基本的HTTP/HTTPS请求
 
 Get、Head、Post和PostForm函数发出HTTP/HTTPS请求。
 
@@ -620,7 +852,7 @@ body, err := ioutil.ReadAll(resp.Body)
 // ...
 ```
 
-### GET请求示例
+## GET请求示例
 
 使用`net/http`包编写一个简单的发送HTTP请求的Client端，代码如下：
 
@@ -644,7 +876,7 @@ func main() {
 
 将上面的代码保存之后编译成可执行文件，执行之后就能在终端打印`liwenzhou.com`网站首页的内容了，我们的浏览器其实就是一个发送和接收HTTP协议数据的客户端，我们平时通过浏览器访问网页其实就是从网站的服务器接收HTTP数据，然后浏览器会按照HTML、CSS等规则将网页渲染展示出来。
 
-### 带参数的GET请求示例
+## 带参数的GET请求示例
 
 关于GET请求的参数需要使用Go语言内置的`net/url`这个标准库来处理。
 
@@ -690,7 +922,7 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-### Post请求示例
+## Post请求示例
 
 上面演示了使用`net/http`包发送`GET`请求的示例，发送`POST`请求的示例代码如下：
 
@@ -744,7 +976,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 
 
 
-### 客户端响应
+## 客户端响应
 
 1、HTTP 处理程序使用 ResponseWriter 接口来构造 HTTP 响应。
 
@@ -803,7 +1035,7 @@ w.WriteHeader(302)
 
 
 
-### 自定义Client
+## 自定义Client
 
 要管理HTTP客户端的头域、重定向策略和其他设置，创建一个Client：
 
@@ -819,6 +1051,14 @@ req.Header.Add("If-None-Match", `W/"wyzzy"`)
 resp, err := client.Do(req)
 // ...
 ```
+
+
+
+
+
+
+
+
 
 
 

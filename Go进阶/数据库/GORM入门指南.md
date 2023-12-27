@@ -1,4 +1,4 @@
-**GORM**
+# GORM
 
 <img src="E:\Project\Textbook\Golang常用服务手册\assets\wps1.jpg" alt="img" style="zoom:50%;" /> 
 
@@ -21,11 +21,60 @@ gorm是一个使用Go语言编写的ORM框架。能直接使用代码操作数�
 #  连接MySQL
 
 ```go
+// 连接数据库时需要传递参数
+// 参考 https://github.com/go-sql-driver/mysql#dsn-data-source-name 获取详情
 dsn := "root:123456@tcp(192.168.4.6:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
 db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 ```
 
 **注意：**想要正确的处理 `time.Time` ，您需要带上 `parseTime` 参数， ([更多参数](https://github.com/go-sql-driver/mysql#parameters)) 要支持完整的 UTF-8 编码，需要将 `charset=utf8` 更改为 `charset=utf8mb4` 查看 [此文章](https://mathiasbynens.be/notes/mysql-utf8mb4) 获取详情
+
+MySQL 驱动程序提供了 [一些高级配置](https://github.com/go-gorm/mysql) 可以在初始化过程中使用，例如：
+
+```go
+db, err := gorm.Open(mysql.New(mysql.Config{
+  DSN: "gorm:gorm@tcp(127.0.0.1:3306)/gorm?charset=utf8&parseTime=True&loc=Local", // DSN data source name
+  DefaultStringSize: 256, // string 类型字段的默认长度
+  DisableDatetimePrecision: true, // 禁用 datetime 精度，MySQL 5.6 之前的数据库不支持
+  DontSupportRenameIndex: true, // 重命名索引时采用删除并新建的方式，MySQL 5.7 之前的数据库和 MariaDB 不支持重命名索引
+  DontSupportRenameColumn: true, // 用 `change` 重命名列，MySQL 8 之前的数据库和 MariaDB 不支持重命名列
+  SkipInitializeWithVersion: false, // 根据当前 MySQL 版本自动配置
+}), &gorm.Config{})
+```
+
+### 自定义驱动
+
+GORM 允许通过 `DriverName` 选项自定义 MySQL 驱动，例如：
+
+```go
+import (
+  _ "example.com/my_mysql_driver"
+  "gorm.io/driver/mysql"
+  "gorm.io/gorm"
+)
+
+db, err := gorm.Open(mysql.New(mysql.Config{
+  DriverName: "my_mysql_driver",
+  DSN: "gorm:gorm@tcp(localhost:9910)/gorm?charset=utf8&parseTime=True&loc=Local", // data source name, 详情参考：https://github.com/go-sql-driver/mysql#dsn-data-source-name
+}), &gorm.Config{})
+```
+
+### 现有的数据库连接
+
+GORM 允许通过一个现有的数据库连接来初始化 `*gorm.DB`
+
+```go
+import (
+  "database/sql"
+  "gorm.io/driver/mysql"
+  "gorm.io/gorm"
+)
+
+sqlDB, err := sql.Open("mysql", "mydb_dsn")
+gormDB, err := gorm.Open(mysql.New(mysql.Config{
+  Conn: sqlDB,
+}), &gorm.Config{})
+```
 
 # 连接PostgreSQL
 
@@ -70,6 +119,7 @@ type Product struct {
 	Code  string
 	Price uint
 }
+
 func main(){
 	dsn := "root:123456@tcp(192.168.4.5:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -159,39 +209,39 @@ type User struct {
 
 ### 支持的结构体标记（Struct tags）
 
-| 结构体标记（Tag） |                           描述                           |
-| :---------------: | :------------------------------------------------------: |
-|      Column       |                         指定列名                         |
-|       Type        |                      指定列数据类型                      |
-|       Size        |                  指定列大小, 默认值255                   |
-|    PRIMARY_KEY    |                      将列指定为主键                      |
-|      UNIQUE       |                      将列指定为唯一                      |
-|      DEFAULT      |                       指定列默认值                       |
-|     PRECISION     |                        指定列精度                        |
-|     NOT NULL      |                    将列指定为非 NULL                     |
-|  AUTO_INCREMENT   |                   指定列是否为自增类型                   |
-|       INDEX       | 创建具有或不带名称的索引, 如果多个索引同名则创建复合索引 |
-|   UNIQUE_INDEX    |         和 `INDEX` 类似，只不过创建的是唯一索引          |
-|     EMBEDDED      |                     将结构设置为嵌入                     |
-|  EMBEDDED_PREFIX  |                    设置嵌入结构的前缀                    |
-|         -         |                        忽略此字段                        |
+| 结构体标记（Tag） | 描述                                                     |
+| :---------------- | -------------------------------------------------------- |
+| Column            | 指定列名                                                 |
+| Type              | 指定列数据类型                                           |
+| Size              | 指定列大小, 默认值255                                    |
+| PRIMARY_KEY       | 将列指定为主键                                           |
+| UNIQUE            | 将列指定为唯一                                           |
+| DEFAULT           | 指定列默认值                                             |
+| PRECISION         | 指定列精度                                               |
+| NOT NULL          | 将列指定为非 NULL                                        |
+| AUTO_INCREMENT    | 指定列是否为自增类型                                     |
+| INDEX             | 创建具有或不带名称的索引, 如果多个索引同名则创建复合索引 |
+| UNIQUE_INDEX      | 和 `INDEX` 类似，只不过创建的是唯一索引                  |
+| EMBEDDED          | 将结构设置为嵌入                                         |
+| EMBEDDED_PREFIX   | 设置嵌入结构的前缀                                       |
+| -                 | 忽略此字段                                               |
 
 ### 关联相关标记（tags）
 
-|        结构体标记（Tag）         |                描述                |
-| :------------------------------: | :--------------------------------: |
-|            MANY2MANY             |             指定连接表             |
-|            FOREIGNKEY            |              设置外键              |
-|      ASSOCIATION_FOREIGNKEY      |            设置关联外键            |
-|           POLYMORPHIC            |            指定多态类型            |
-|        POLYMORPHIC_VALUE         |             指定多态值             |
-|       JOINTABLE_FOREIGNKEY       |          指定连接表的外键          |
-| ASSOCIATION_JOINTABLE_FOREIGNKEY |        指定连接表的关联外键        |
-|        SAVE_ASSOCIATIONS         |    是否自动完成 save 的相关操作    |
-|      ASSOCIATION_AUTOUPDATE      |   是否自动完成 update 的相关操作   |
-|      ASSOCIATION_AUTOCREATE      |   是否自动完成 create 的相关操作   |
-|    ASSOCIATION_SAVE_REFERENCE    | 是否自动完成引用的 save 的相关操作 |
-|             PRELOAD              |    是否自动完成预加载的相关操作    |
+| 结构体标记（Tag）                | 描述                               |
+| :------------------------------- | :--------------------------------- |
+| MANY2MANY                        | 指定连接表                         |
+| FOREIGNKEY                       | 设置外键                           |
+| ASSOCIATION_FOREIGNKEY           | 设置关联外键                       |
+| POLYMORPHIC                      | 指定多态类型                       |
+| POLYMORPHIC_VALUE                | 指定多态值                         |
+| JOINTABLE_FOREIGNKEY             | 指定连接表的外键                   |
+| ASSOCIATION_JOINTABLE_FOREIGNKEY | 指定连接表的关联外键               |
+| SAVE_ASSOCIATIONS                | 是否自动完成 save 的相关操作       |
+| ASSOCIATION_AUTOUPDATE           | 是否自动完成 update 的相关操作     |
+| ASSOCIATION_AUTOCREATE           | 是否自动完成 create 的相关操作     |
+| ASSOCIATION_SAVE_REFERENCE       | 是否自动完成引用的 save 的相关操作 |
+| PRELOAD                          | 是否自动完成预加载的相关操作       |
 
 # 主键、表名、列名的约定
 
