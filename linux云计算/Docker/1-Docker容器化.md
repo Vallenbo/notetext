@@ -1,4 +1,6 @@
-Docker是一种容器技术，解决软件跨环境迁移的问题
+# Docker
+
+[Docker官方文档](https://docs.docker.com/engine/install/centos/ )，Docker是一种容器技术，解决软件跨环境迁移的问题
 
 优势; 更快速的交付和部署	更高效的资源利用	更轻松的迁移和扩展	更简单的更新管理
 
@@ -43,13 +45,17 @@ Cgroups的工作目录/sys/fs/cgroup下包含了Cgroups的所有内容
 
 
 
-# 安装docker-ce包社区版
+# Docker-ce包社区版安装
 
 [docker安装 官方文档](https://docs.docker.com/engine/install/ubuntu/)
 
 ## 一、在线安装Docker
 
-1: 安装必要的一些系统工具	`yum install -y yum-utils`
+1: 安装必要的一些系统工具	
+
+```sh
+yum install -y yum-utils
+```
 
 2: 添加软件源信息
 
@@ -66,7 +72,9 @@ yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-co
 **配置镜像加速器 vim /etc/docker/daemon.json**
 
 ```sh
-{"registry-mirrors": ["https://ustc-edu-cn.mirror.aliyuncs.com","https://docker.mirrors.ustc.edu.cn"]}
+{
+"registry-mirrors": ["https://registry.docker-cn.com","https://docker.mirrors.ustc.edu.cn"]
+}
 ```
 
 `systemctl daemon-reload && systemctl restart docker`	#重新加载配置文件及服务
@@ -92,8 +100,6 @@ $ curl -fsSL https://get.docker.com -o get-docker.sh
 $ sudo sh get-docker.sh
 ```
 
-[Docker官方文档](https://docs.docker.com/engine/install/centos/ )
-
 卸载docker
 
 •  检查安装的docker			`yum list installed | grep docker`
@@ -103,6 +109,43 @@ $ sudo sh get-docker.sh
 •  卸载docker					`yum -y remove docker 名称`
 
 •  删除镜像或者容器等等		`rm -rf docker路径`
+
+
+
+# ubuntu安装docker
+
+步骤 1：添加Docker官方的GPG密钥
+
+```bash
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+```
+
+步骤 2：添加Docker的稳定版存储库
+
+```bash
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+```
+
+步骤 3：安装Docker Engine
+
+```bash
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+```
+
+步骤 4：验证Docker安装
+
+```bash
+sudo docker --version
+```
+
+步骤 5：将当前用户添加到docker组（可选）
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+
 
 # image镜像操作
 
@@ -339,7 +382,9 @@ always，在容器退出时总是重启容器
 
 unless-stopped，容器退出时总是重启容器(不考虑在Docker守护进程启动前就停止的容器
 
+```sh
 docker run -d --restart=always ubuntu:latest ping www.docker.com
+```
 
 运行一个在后台不断执行的容器，同时带有命令，程序被终止后还能重启继续跑，还能用控制台管理
 

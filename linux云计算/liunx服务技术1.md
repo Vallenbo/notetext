@@ -712,7 +712,11 @@ NFS是基于内核的文件系统，可以将远程的计算机磁盘挂载到�
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps32.jpg" alt="img" style="zoom:67%;" /> 
 
-守护进程，连带进程rpc-bind、nfs-server			端口prot：111		
+守护进程，连带进程rpc-bind、nfs-server			端口prot：111
+
+```sh
+service nfs-server status
+```
 
 软件包：
 

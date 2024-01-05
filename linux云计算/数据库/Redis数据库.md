@@ -36,19 +36,18 @@ string 类型是 Redis 最基本的数据类型，string 类型的值最大能�
 
 ## 实例
 
+```go
 redis 127.0.0.1:6379>set runoob "hello world"
-
 127.0.0.1:6379> get runoob
+```
 
- 
+
 
 Redis 的 **SET** 和 **GET** 命令。键为 runoob，对应的值为 "hello world"。
 
 **注意：**一个键最大能存储 512MB。
 
- 
 
- 
 
 # Hash（哈希）
 

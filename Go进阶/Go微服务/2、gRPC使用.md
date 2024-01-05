@@ -136,10 +136,9 @@ D:\Program Files\protoc-25.1-win64\bin
 
 **下载go依赖包**
 
-google接管后的新版本
+google接管后的新版本，下面为必须安装的依赖
 
 ```shell
-// 都需要安装的依赖
 go get github.com/golang/protobuf/proto
 go get google.golang.org/grpc
 go install github.com/golang/protobuf/protoc-gen-go
@@ -192,7 +191,7 @@ message People { // 消息体可以嵌套
 go 语言中编译命令：
 
 ```go
-protoc -I . --go_out=plugins=grpc:. .\*.proto     // 生成xxx.pb.go 文件。
+protoc -I . --go_out=plugins=grpc:. ./*.proto     // 生成xxx.pb.go 文件。
 ```
 
 - -I：-IPATH, --proto_path=PATH, 指定proto文件搜索的路径, 如果有多个路径 可以多次使用-I 来指定, 如果不指定默认为当前目录
@@ -966,6 +965,14 @@ func (HelloServer1) SayHello(ctx context.Context, request *hello_grpc.HelloReque
 	}, nil
 }
 ```
+
+
+
+# 动态获取可用端口号
+
+
+
+
 
 
 
