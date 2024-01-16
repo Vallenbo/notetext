@@ -1,6 +1,8 @@
-# Ansible批量控制工具
+# Ansible自动换工具
 
-## 特点
+Ansible是一种自动化工具，用于管理和配置计算机系统。它采用声明性语言来描述系统配置，通过SSH协议远程管理系统，并使用模块化的方式来完成各种任务，如软件安装、配置文件管理、服务启停等。
+
+# 特点
 
 1. 一款基于ssh远程通讯新型的自动化运维工具
 2. 配置简单、功能强大、扩展性强，实现批量系统配置，程序部署，运行命令
@@ -10,21 +12,20 @@
 6. 轻量级，无需在客户端安装agent，更新时，只需在操作机上进行一次更新即可
 7. 提供一个功能强大、操作性强的Web管理界面和REST API接口——AWX平台
 
-## 架构图
+# 架构图
 
-Ansible：			Ansible核心程序
+| 模块              | 功能                                                         |
+| ----------------- | ------------------------------------------------------------ |
+| Ansible           | Ansible核心程序                                              |
+| HostInventory     | 记录由Ansible管理的主机信息，包括端口、密码、ip等            |
+| Playbooks         | "剧本”YAML格式文件，多个任务定义在一个文件中，定义主机需要调用哪些模块来完成的功能 |
+| CoreModules       | 核心模块，主要操作是通过调用核心模块来完成管理任务           |
+| CustomModules     | 自定义模块，完成核心模块无法完成的功能，支持多种语言         |
+| ConnectionPlugins | 连接插件，Ansible和Host通信使用                              |
 
-HostInventory：	记录由Ansible管理的主机信息，包括端口、密码、ip等
 
-Playbooks：		"剧本”YAML格式文件，多个任务定义在一个文件中，定义主机需要调用哪些模块来完成的功能
 
-CoreModules：	核心模块，主要操作是通过调用核心模块来完成管理任务
-
-CustomModules：	自定义模块，完成核心模块无法完成的功能，支持多种语言
-
-ConnectionPlugins：连接插件，Ansible和Host通信使用
-
-## 任务执行模式及过程
+# 任务执行模式及过程
 
 **ad-hoc模式(点对点模式)**
 
@@ -36,7 +37,30 @@ ConnectionPlugins：连接插件，Ansible和Host通信使用
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps8-1682690463420-258.jpg" alt="img" style="zoom:67%;" /> 
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps9-1682690463420-259.jpg" alt="img" style="zoom:67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps10-1682690463421-260.jpg" alt="img" style="zoom:67%;" /> 
+
+
+## ansible 命令执行过程
+
+1.加载自己的配置文件，默认/etc/ansible/ansible.cfg
+2.查找对应的主机配置文件,找到要执行的主机或者组
+3.加载自己对应的模块文件，如command
+4.ansible将模块或命令 生成临时python脚本传输至远程服务器
+5.对应执行用户的家目录的.ansible/tmp/XXX/XXX.PY文件
+6.给文件+x执行权限
+7.执行并返回结果
+8.删除临时py文件, sleep 0退出
+
+## 配置文件
+
+包名: ansible
+配置文件目录: /etc/ansible/
+	/etc/ansible/ansible.cfg  主配置文件,配置ansible工作特性(一般无需修改)
+	/etc/ansible/hosts            主机清单(将被管理的主机放到此文件)
+	/etc/ansible/roles/            存放角色的目录
+执行文件目录: /usr/bin/
+Lib库依赖目录: /usr/lib/pythonX.X/site-packages/ ansible/
+Help文档目录: /usr/share/doc/ansible -X.X.X/
+Man文档目录: /usr/share/man/man1/
 
 主配置文件/etc/ansible/ansible.cfg，常用参数：
 
@@ -51,14 +75,24 @@ timeout = 60				#设置SSH连接的超时时间，单位为秒
 log_path=/var/log/ansible.log#ansible日志的文件（默认不记录日志）
 ```
 
-## 常用命令及参数
+# 常用命令及参数
+
+    /usr/bin/ansible          主程序，临时命令执行工具
+    /usr/bin/ansible-doc      查看配置文档，模块功能查看工具
+    /usr/bin/ansible-galaxy   下载/上传优秀代码或Roles模块的官网平台
+    /usr/bin/ansible-playbook 定制自动化任务，编排剧本工具
+    /usr/bin/ansible-pull     远程执行命令的工具
+    /usr/bin/ansible-vault    文件加密工具
+    /usr/bin/ansible-console  基于Console界面与用户交互的执行工具
+------------------------------------------------
+## ansible命令
 
 ansible临时命令执行工具，常用于临时命令的执行
 
 基本用法：ansible <host-pattern清单> [-m module模块] [-a args模块参数]
 
 ```sh
-ansible *web -m command -a 'ls / ' -u root -k	#对所有配置清单内主机基于-k验证
+ansible *web -m command -a 'ls / ' -u root -k	#命令示例。对所有配置清单内主机基于-k验证
 -i “xx” #指定主机清单的路径，默认为/etc/ansible/hosts
 -m 	#执行模块的名字，默认使用 command 模块可以不写-m command
 -a	#模块参数
@@ -78,8 +112,15 @@ ansible *web -m command -a 'ls / ' -u root -k	#对所有配置清单内主机基
 --ask-su-pass 	#ask for su password。su切换密码
 -K	#ask for sudo password。提示密码使用sudo，sudo表示提权操作
 --ask-vault-pass #ask for vault password。假设我们设定了加密的密码，则用该选项进行访问
+```
 
-通配符：
+```sh
+ansible -i ./hosts remote -m ping //连接其他服务器
+```
+
+**通配符**：
+
+```sh
 all：表示所有Inventory中的所有主机
 *：通配符ansible “*” -m ping
 或关系ansible 'webserver:dbserver' -m ping #执行在web组并且在dbserver组中的主机
@@ -89,12 +130,16 @@ all：表示所有Inventory中的所有主机
 
 
 
+## ansible-playbook
+
+ansible-playbook，定制自动化的任务集编排工具
+
 ```sh
-ansible-playbook	定制自动化的任务集编排工具
-		ansible-playbook <filename.yml>  ... [options]
-					-C #预执行yaml检测		--syntax-check #检查语法		-v --v显示过程（-vvv更详细 ）
-					--list-hosts /tags 列出运行任务的主机 / 标签 		--limit 列出执行的主机
+ansible-playbook <filename.yml>  ... [options]
+	-C #预执行yaml检测		--syntax-check #检查语法		-v --v显示过程（-vvv更详细 ）
+	--list-hosts /tags 列出运行任务的主机 / 标签 		--limit 列出执行的主机
 ```
+## 其他命令工具
 
 ```sh
 ansible-doc # 模块功能查看工具
@@ -114,7 +159,7 @@ ansible-console # 基于Linux Consoble界面可与用户交互的命令执行工
 
 
 
-## 常用模块
+# 常用模块
 
 ```sh
 command模块		# 默认模块可以直接在远程主机上执行命令，并将结果返回本主机
@@ -213,7 +258,7 @@ setup模块	#用于收集被控端系统信息，是通过调用facts组件来�
 
 
 
-## Ansible-playbook剧本
+# Ansible-playbook剧本
 
 playbook 是 ansible 用于配置，部署，和管理被控节点的剧本
 
@@ -303,7 +348,7 @@ server{
 
 
 
-## 角色订制：roles剧本文件
+# 角色订制：roles剧本文件
 
 实际上分解playbook而后结构化地组织，比较灵活。roles 能够根据层次型结构自动装载变量文件、tasks以及handlers等
 

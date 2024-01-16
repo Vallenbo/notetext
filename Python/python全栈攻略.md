@@ -1183,9 +1183,9 @@ curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py  # 下载安装脚本
 
 yum install python3-pip -y	# linux安装pip
 
- 
 
-python get-pip.py   # 运行安装脚本
+
+python get-pip.py   #运行安装脚本
 
 pip3 list --outdated #pip检查哪些包需要更新
 
@@ -1205,23 +1205,45 @@ pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple package --trusted-host 
 
 
 
+## 离线依赖包安装
+
+[Python库 搜索](https://pypi.org/)
+
 pip3 download flask #下载flask依赖库，到本级路径
 
 pip3 install pocketsphinx-0.1.15-cp39-cp39-win_amd64.whl #python3安装本地whl
 
 
 
-# 编译安装
+# 升级Python 编译安装
 
-3. 解压源码包
+[Python Release Python 3.12.1 下载](https://www.python.org/downloads/release/python-3121/)
 
-​	root@master ~# tar -xf Python-3.7.0.tar.xz
+1、解压源码包
 
-4. 编译安装
-root@master ~# ./configure --prefix=/usr/local/python3.7
+```sh
+root@master ~# tar -xf Python-3.12.0.tar.xz
+```
+
+2、编译安装
+
+```sh
+root@master ~# ./configure
 root@master ~# make
 root@master ~# make install
-5. 设置软连接
-root@master ~# ln -fs /usr/local/python3.7/bin/python3 /usr/bin/python3
-root@master ~# ln -fs /usr/local/python3.7/bin/pip3 /usr/bin/pip3
+```
 
+
+
+注意：
+
+​	这将安装新的Python版本并将其设置为系统的默认Python。如果你不想更改系统的默认Python，你可以在配置步骤中使用`--prefix`选项指定一个安装位置，然后将该位置添加到你的PATH环境变量中。
+
+```bash
+./configure --prefix=/path/to/install
+make
+sudo make install
+export PATH=/path/to/install/bin:$PATH
+```
+
+这样，你就可以通过指定的路径访问新安装的Python版本，而不会影响系统的默认Python。

@@ -1,6 +1,8 @@
 # 什么是consul
 
-[Consul 中文文档 - Consul 中文文档 (gitbook.io)](https://kingfree.gitbook.io/consul/)
+[Consul 使用中文文档 - Consul 中文文档 (gitbook.io)](https://kingfree.gitbook.io/consul/)
+
+[Consul | HashiCorp Developer开发者手册](https://developer.hashicorp.com/consul)
 
 Consul是服务网格（service mesh）的一种解决方案，`Consul`是有**服务发现**，**配置**和**分段 **功能的全功能**控制平面**。这些功能可以根据需要单独使用，也可以一起使用以构建完整的服务网格。`Consul`需要一个数据平面，并支持代理和本机集成模型。`Consul`附带了一个简单的内置代理，因此开箱即用，但也支持`Envoy`等第三方代理集成。
 
@@ -331,7 +333,7 @@ n3    192.168.137.81:8301    alive   client  1.1.0  2         dc1  <default>
 
 因为刚才是后台启动的，也看不到日志情况，可以通过下面的方式查看
 
-```bash
+```sh
 docker logs d2806ac2b7e1 // 后面的这个id就是容器的id，可以通过 docker -ps -l 查看
 ```
 
@@ -354,7 +356,7 @@ docker logs d2806ac2b7e1 // 后面的这个id就是容器的id，可以通过 do
 
 现在服务端启动了，接下来应该要启动一个客户端去连接这个服务端，这里有个问题，我怎么知道我启动这个服务端的IP地址和端口号，docker提供了可以直接执行容器内Consul命令的方式。
 
-```python
+```sh
 docker exec d2806ac2b7e1 consul members
 Node      Address          Status  Type    Build  Protocol  DC   Segment
 server-1  172.17.0.2:8301  alive   server  1.9.1  2         dc1  <all>
@@ -362,14 +364,14 @@ server-1  172.17.0.2:8301  alive   server  1.9.1  2         dc1  <all>
 
 当然你也可以直接进去到容器内部,进去容器内部，使用的是exec命令
 
-```bash
+```sh
 docker exec -it d2806ac2b7e1 /bin/sh
 consul members
 ```
 
 docker执行容器内支持的命令方式为：
 
-```bash
+```sh
 docker exec <container_id> consul members
 ```
 
@@ -395,14 +397,14 @@ docker run  --name=test-1 consul agent -node=client-1 -join=172.17.0.2
 
 通过再次在容器中执行`consul Members`命令来检查客户端是否已加入
 
-```bash
+```sh
 docker exec d2806ac2b7e1 consul members
 ```
 
 发现已经变成两个了，并且状态都是可用状态
 
-```python
-docker exec d2806ac2b7e1 consul members
+```sh
+$ docker exec d2806ac2b7e1 consul members
 Node      Address          Status  Type    Build  Protocol  DC   Segment
 server-1  172.17.0.2:8301  alive   server  1.9.1  2         dc1  <all>
 client-1  172.17.0.3:8301  alive   client  1.9.1  2         dc1  <default>
@@ -582,7 +584,17 @@ consul做健康检查的必须是**Script、HTTP、TCP、TTL**中的一种。
 
 
 
-# go注册consul服务
+# 使用Go-SDK注册consul服务
+
+[Consul HTTP API 的官方 Go 客户端 API文档](https://developer.hashicorp.com/consul/api-docs/libraries-and-sdks)
+
+安装consul库
+
+```go
+go get "github.com/hashicorp/consul/api"
+```
+
+[api 包 - github.com/hashicorp/consul/api - Go 包](https://pkg.go.dev/github.com/hashicorp/consul/api#section-readme)
 
 ```go
 package main
@@ -672,56 +684,7 @@ func main() {
 
 
 
-# gRPC使用Consul健康检查协议
-
-[grpc/doc/health-checking.md 在 master ·GRPC/GRPC (github.com)](https://github.com/grpc/grpc/blob/master/doc/health-checking.md)
-
-健康检查用于检测服务端能否正常处理rpc请求，客户端对服务端的健康检查可以点对点进行，也可以通过某些控制系统（如负载平衡）进行。客户端可以根据服务端返回的状态执行对应的策略。
-
-因为GRPC服务可以用于简单的客户端到服务端场景和其他控制系统（如负载平衡）的健康检查，所以gRPC健康检查协议借助了gRPC服务来实现。使用GRPC服务来实现健康检查有以下好处：
-
-1. 执行健康检查的格式与普通rpc相同，
-2. 具有丰富的语义，例如每个服务的健康状态，
-3. 能够重用所有现有的计费、配额基础设施等，因此服务器可以完全控制健康检查服务的访问。
-
-## gRPC中健康检查服务定义
-
-因为gRPC健康检查协议是通过gRPC服务实现的，我们首先看下这个服务的定义：
-
-```protobuf
-syntax = "proto3";
-
-package grpc.health.v1;
-
-message HealthCheckRequest {
-  string service = 1;
-}
-
-message HealthCheckResponse {
-  enum ServingStatus {
-    UNKNOWN = 0;
-    SERVING = 1;
-    NOT_SERVING = 2;
-  }
-  ServingStatus status = 1;
-}
-
-service Health {
-  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
-}
-```
-
-客户端可以通过调用Check方法（需要设置截止时）查询服务器的运行状况，客户端可以通过设置服务名称来检查对应服务的健康状况。服务名称的格式建议为package_names.ServiceName，例如grpc.health.v1.Health。
-
-服务端要注册所有服务并设置各个服务的状态，包括空服务名称及其状态。对于接收到的每个请求，如果在配置列表中找到了对应服务，需要根据当前服务情况返回SERVING或NOT_SERVING的状态。如果在配置列表没找到对应服务，则返回NOT_FOUND状态。
-
-服务端应使用空字符串作为整体健康状态的键，以便对特定服务不感兴趣的客户端可以通过空请求查询服务的状态。服务端可以只对服务名称进行精确匹配也可以实现更复杂的匹配方式。
-
-如果一次rpc调用在一段时间后都没有收到响应，可以认为服务端挂了，需要执行应对服务端挂掉情况的策略。
-
-客户端可以调用Watch方法来使用基于stream方式的健康检查。服务器会立即发回一条代表当前服务状态的消息。只要服务的状态发生变化，就会发送一条新消息。
-
-# grpc使用Vonsul整体步骤
+## grpc使用Consul整体步骤
 
 1.  创建 proto文件 ， 指定 rpc 服务
 2.  启动 consul 服务发现  consul agent -dev
@@ -734,7 +697,7 @@ service Health {
     2. 使用consul对象，从consul 上获取健康的 服务。
     3. 再访问服务 （grpc远程调用）
 
-## grpc使用Consul注册服务
+### grpc使用Consul注册服务
 
 服务端注册consul服务和使用Consul健康检查，代码如下
 
@@ -770,7 +733,7 @@ func main(){
 
 
 
-## grpc使用Consul服务发现
+### grpc使用Consul服务发现
 
 客户端查询consul服务和使用Consul服务，代码如下
 
@@ -807,7 +770,7 @@ func main()  {
 }
 ```
 
-## grpc使用Consul注销服务
+### grpc使用Consul注销服务
 
 ```go
 func main(){
@@ -819,3 +782,51 @@ func main(){
 
 
 
+## gRPC使用Consul健康检查协议
+
+[grpc/doc/health-checking.md 在 master ·GRPC/GRPC (github.com)](https://github.com/grpc/grpc/blob/master/doc/health-checking.md)
+
+健康检查用于检测服务端能否正常处理rpc请求，客户端对服务端的健康检查可以点对点进行，也可以通过某些控制系统（如负载平衡）进行。客户端可以根据服务端返回的状态执行对应的策略。
+
+因为GRPC服务可以用于简单的客户端到服务端场景和其他控制系统（如负载平衡）的健康检查，所以gRPC健康检查协议借助了gRPC服务来实现。使用GRPC服务来实现健康检查有以下好处：
+
+1. 执行健康检查的格式与普通rpc相同，
+2. 具有丰富的语义，例如每个服务的健康状态，
+3. 能够重用所有现有的计费、配额基础设施等，因此服务器可以完全控制健康检查服务的访问。
+
+### gRPC中健康检查服务定义
+
+因为gRPC健康检查协议是通过gRPC服务实现的，我们首先看下这个服务的定义：
+
+```protobuf
+syntax = "proto3";
+
+package grpc.health.v1;
+
+message HealthCheckRequest {
+  string service = 1;
+}
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+  }
+  ServingStatus status = 1;
+}
+
+service Health {
+  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+}
+```
+
+客户端可以通过调用Check方法（需要设置截止时）查询服务器的运行状况，客户端可以通过设置服务名称来检查对应服务的健康状况。服务名称的格式建议为package_names.ServiceName，例如grpc.health.v1.Health。
+
+服务端要注册所有服务并设置各个服务的状态，包括空服务名称及其状态。对于接收到的每个请求，如果在配置列表中找到了对应服务，需要根据当前服务情况返回SERVING或NOT_SERVING的状态。如果在配置列表没找到对应服务，则返回NOT_FOUND状态。
+
+服务端应使用空字符串作为整体健康状态的键，以便对特定服务不感兴趣的客户端可以通过空请求查询服务的状态。服务端可以只对服务名称进行精确匹配也可以实现更复杂的匹配方式。
+
+如果一次rpc调用在一段时间后都没有收到响应，可以认为服务端挂了，需要执行应对服务端挂掉情况的策略。
+
+客户端可以调用Watch方法来使用基于stream方式的健康检查。服务器会立即发回一条代表当前服务状态的消息。只要服务的状态发生变化，就会发送一条新消息。

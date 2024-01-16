@@ -755,26 +755,28 @@ exportfs：管理NFS共享文件系统列表			-au临时关闭所有共享
 
 1、**手动挂载（临时挂载）**： 使用 `mount` 命令可以手动挂载NFS共享目录到本地系统。例如：
 
-```
+```sh
 mount -t nfs 192.168.0.109:/www  /public						# 指定挂载类型，nfs挂载文件,（/public目录需本地存在）
 192.168.0.109:/www		/www		nfs		defaults，_netdev	0	0		# _netdev无网络不挂载
 ```
 
-```go
+```sh
 showmount -e 192.168.0.22	# 查看服务器22的共享文件夹
 					-a	显示本机挂载的文件资源的情况NFS资源的情况
 ```
 
-2、**开机自动挂载**： 在 `/etc/fstab` 文件中添加NFS挂载信息，这样可以在系统启动时自动挂载。编辑 `/etc/fstab` 文件，添加类似以下的行：
+2、**开机自动挂载**： 在 `/etc/fstab` 文件中添加NFS挂载信息，这样可以在系统启动时自动挂载。
 
-```
+编辑 `/etc/fstab` 文件，添加类似以下的行：
+
+```sh
 serverIP:/remote_dir /local_dir nfs defaults 0 0
 ```
 
 3、**autofs挂载（自动挂载）**： 使用autofs可以实现按需自动挂载NFS共享目录。首先安装autofs软件包：
 
-```
-sudo apt install autofs -y
+```sh
+apt install autofs -y
 ```
 
 然后编辑 `/etc/auto.master` 文件，在末尾添加一行以指定NFS挂载点：
@@ -1778,13 +1780,13 @@ network --onboot yes --device eth0 --bootproto dhcp  --noipv6
 
 \# 指定开机自启，网络接口eth0 ，dhcp获取网络地址，ipv6 禁用
 
- 
+
 
 rootpw  --iscrypted $6$ZOGP2tA0PI/6SI/X$MlC5bJyXfP9TBN5/0vwoc6dqAqIijOQthEbAZUnIXft85Tj9n4sKWB2PfxrsVfkZ2ibqX63apu8ElmdEvBo9o/  
 
 \# root 加密密码，使用grub-crypt 生成的字符串替代
 
- 
+
 
 reboot     # 配置完毕后，重启内核
 
@@ -1800,7 +1802,7 @@ bootloader --location=mbr --driveorder=sda --append="crashkernel=auto rhgb quiet
 
 \# 定义bootloader，grub安装mbr ，安装在sda磁盘
 
- 
+
 
 \# The following is the partition information you requested
 
@@ -1816,7 +1818,7 @@ text           # 纯文本格式安装显示
 
 zerombr          # 对磁盘进行初始化
 
- 
+
 
 part /boot --fstype=ext4 --asprimary --size=2000 # 分区信息 ，定义boot分区 ，格式为ext4 ，大小为2G
 
@@ -1824,7 +1826,7 @@ part swap --size=4096     # 分区信息 ，定义swap分区 ，大小为4G
 
 part pv.008003 --size=80000 # 分区信息 ，定义lv分区 pv.008003，大小为80G
 
- 
+
 
 volgroup vg0 --pesize=8192 pv.008003  # 分区信息 ，在lv分区pv.008003定义vg0卷组 ，pe大小为8M
 
@@ -1836,7 +1838,7 @@ logvol /var --fstype=ext4 --name=/var --vgname=vg0 --size=20000
 
 logvol /home --fstype=ext4 --name=/home --vgname=vg0 --size=12000
 
- 
+
 
 repo --name="CentOS-6.6" --baseurl=http://192.168.4.150/centos/os/ --cost=100 
 
@@ -2113,23 +2115,22 @@ virt-manager打开可视化界面		Virsh虚拟化命令	--help			snapshot快照�
 
 
 
-# JAVA
+# JAVA环境配置
 
 [Archived OpenJDK GA Releases (java.net)](https://jdk.java.net/archive/)
 
 1、tar解压文件
 
-```go
+```sh
 tar -zxvf openjdk-17.tar.gz -C /usr/local/
+unzip jdk-17.0.8.zip
 ```
 
-2、编辑/etc/profile文件
+2、编辑/etc/profile文件，配置环境变量
 
-vi /etc/profile
-
-```go
+```sh
+$ vi /etc/profile
 # Java Environment
-
 export JAVA_HOME=/usr/local/jdk-17.0.8
 export PATH=$JAVA_HOME/bin:$PATH
 export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
@@ -2137,13 +2138,13 @@ export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 
 3、使环境变量生效
 
-```go
+```sh
 source /etc/profile
 ```
 
 4、查看java版本
 
-```go
-java --version
+```sh
+java -version
 ```
 

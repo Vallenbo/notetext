@@ -16,8 +16,6 @@ Micro是一个专注于简化分布式系统开发的微服务生态系统。由
 
 其他各种库和服务可以在**github.com/micro**找到。
 
-我们主要使用的框架也是go-micro，在使用之前我们先来了解一下**服务发现**是个什么东西？有什么作用？
-
 
 
 # Go-micro CLI脚手架安装
@@ -41,14 +39,15 @@ go-micro new service helloworld
 
 ```sh
 cd helloworld
-make proto tidy
+make proto tidy # Makefile文件内的操作 go get -u
 go-micro run
 ```
 
 最后，我们可以调用服务。
 
 ```sh
-go-micro call helloworld Helloworld.Call '{"name": "John"}'
+$ go-micro call helloworld Helloworld.Call
+'{"name": "John"}'
 ```
 
 
@@ -95,7 +94,7 @@ message Response {
 生成代码
 
 ```sh
-protoc --proto_path=. --micro_out=. --go_out=. greeter.proto
+protoc --proto_path=. --micro_out=. --go_out=. .\*.proto
 ```
 
 您的输出结果应为：
@@ -141,6 +140,26 @@ client := proto.NewGreeterService("greeter", service.Client())
 ```sh
 protoc --plugin=protoc-gen-go=$GOPATH/bin/protoc-gen-go --plugin=protoc-gen-micro=$GOPATH/bin/protoc-gen-micro --proto_path=. --micro_out=. --go_out=. greeter.proto
 ```
+
+
+
+## go-micro注册服务
+
+
+
+```go
+	// Register consul
+    consulReg:= consul.NewRegistry(func(options *registry.Options) {
+        options.Addrs =[]string{"x.x.x.x:8500"}
+    })
+	srv := micro.NewService(
+		micro.Name(service),
+		micro.Version(version),
+		micro.Registry(consulReg), // 注册Consul
+	)
+```
+
+
 
 
 
@@ -392,7 +411,7 @@ func main() {
 	service.Init()                                                                    // 初始化服务
 	t1.RegisterT1Handler(service.Server(), new(handler.T1))                           // 注册服务
 	micro.RegisterSubscriber("go.micro.srv.t1", service.Server(), new(subscriber.T1)) // 注册一个发布器
-	micro.RegisterSubscriber("go.micro.srv.t1", service.Server(), subscriber.Handler)// 注册一个函数到发布器
+	micro.RegisterSubscriber("go.micro.srv.t1", service.Server(), subscriber.Handler) // 注册一个函数到发布器
 	if err := service.Run(); err != nil { // 运行服务
 		log.Fatal(err)
 	}
