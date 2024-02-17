@@ -31,6 +31,8 @@ en_US.UTF-8
 
 echo export EDITOR=vim >> /etc/profile.d/env.sh解决vimu无颜色问题
 
+export PATH=$JAVA_HOME/bin:$PATH 环境变量添加
+
 开机自启文件	/etc/rc.d/rc.local		chmod _+x rc.local添加执行权限	bc 计算器
 
 hostnamectl  set-hostname computer设置永久主机名		whereis ssh查看服务配置文件夹
@@ -980,6 +982,25 @@ apt install linux-tools-common linux-tools-generic -y #安装包
 ```
 
 
+
+# 修改系统默认版本命令
+
+要修改 `pip` 默认使用的 Python 版本，可以使用以下命令：
+
+```sh
+$ sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1
+$ sudo update-alternatives --install /usr/bin/pip pip /usr/local/bin/pip3.12 1
+```
+
+以上命令将 `/usr/bin/python` 和 `/usr/bin/pip` 两个命令的默认路径分别指向 Python 3.12 版本和对应版本的 `pip` 命令。
+
+执行完上述命令后，你可以通过以下命令验证是否已成功修改 `pip` 的默认 Python 版本：
+
+```sh
+$ pip -V
+```
+
+如果输出的版本号与你选择的 Python 版本相同，则说明已成功修改默认版本。
 
 
 

@@ -423,7 +423,7 @@ MyCLI ：一个支持自动补全和语法高亮的 MySQL/MariaDB 客户端  //`
 
 -u, --user=name         #指定用户名		-p, --password          #指定密码
 
--h, --host=name         #指定主机名		-P, --port            		#指定端口
+-h, --host=name         #指定主机名		-P, --port            	#指定端口
 
 ```sql
 [root@localhost ~]# mysql -uroot -p123456 #登录
@@ -527,7 +527,7 @@ mysql> source d:/onlinedb sql;
 
 ```sql
 \G格式化输出(文本式，竖立显示)			\s查看服务器端信息
-\c结束命令输入操作						\q退出当前sq|命令行模式				\h查看帮助
+\c结束命令输入操作							\q退出当前sq|命令行模式				\h查看帮助
 ```
 
 # 数据库操作

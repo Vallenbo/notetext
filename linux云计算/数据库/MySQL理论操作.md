@@ -129,7 +129,7 @@ CREATE TABLE 表名(
 用来查询数据库中表的记录。语法：
 
 ```mysql
-SELECT		字段列表
+SELECT	字段列表
 FROM		表名字段
 WHERE		条件列表
 GROUP BY	分组字段列表

@@ -108,10 +108,10 @@ iscsid is sleeping.
 
 ```sh
 # cat -n sleepers.bt
-1 tracepoint:syscalls:sys_enter_nanosleep
-2 {
-3   printf("%s is sleeping.\n", comm);
-4 }
+tracepoint:syscalls:sys_enter_nanosleep
+{
+   printf("%s is sleeping.\n", comm);
+}
 ```
 
 运行sleepers.bt：
@@ -127,12 +127,12 @@ iscsid is sleeping.
 也可以使其可执行以独立运行。首先在顶部添加解释器行（`#!`） 使用安装的bpftrace的路径（/usr/local/bin是默认值）或`env`的路径 （通常只是`/usr/bin/env`），后面跟着`bpftrace`（所以它会在`$PATH`中找到bpftrace）：
 
 ```sh
-1 #!/usr/local/bin/bpftrace
-2
-3 tracepoint:syscalls:sys_enter_nanosleep
-4 {
-5   printf("%s is sleeping.\n", comm);
-6 }
+#!/usr/local/bin/bpftrace
+
+tracepoint:syscalls:sys_enter_nanosleep
+{
+   printf("%s is sleeping.\n", comm);
+}
 ```
 
 然后使其可执行：

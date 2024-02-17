@@ -1904,7 +1904,7 @@ repo --name="CentOS-6.6" --baseurl=http://192.168.4.150/centos/os/ --cost=100
 
 保存文件后，输入命令sysctl -p生效
 
- 
+
 
 添加富规则firewall-cmd --add-rich-rule “rule family=ipv4 source address=192.168.0.33 port port=3260 protocol=tcp accrpt(允许)/reject(拒绝)/drop(丢弃)”
 

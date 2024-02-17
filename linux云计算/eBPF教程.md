@@ -3,18 +3,14 @@
 使用aptitude进行安装：aptitude是一个交互式的软件包管理器，它可以更好地处理软件包之间的依赖关系。如果您还没有安装aptitude，请运行以下命令安装它。
 
 ```sh
-apt-get install bpfcc-tools linux-headers-$(uname -r) -y //安装bcc
-apt-get install bpftrace -y //安装bpftrace
+apt-get install bpfcc-tools linux-headers-$(uname -r) -y //1-安装bcc
+apt-get install bpftrace -y //2-安装bpftrace
 ```
 
 1、验证bcc工具，[iovisor/bcc项目地址](https://github.com/iovisor/bcc)
 
 ```sh
-root@l:~# biolatency.bt
-/usr/sbin/biolatency.bt:17-19: WARNING: blk_account_io_start is not traceable (either non-existing, inlined, or marked as "notrace"); attaching to it will likely fail
-/usr/sbin/biolatency.bt:22-24: WARNING: blk_account_io_done is not traceable (either non-existing, inlined, or marked as "notrace"); attaching to it will likely fail
-Attaching 4 probes...
-ERROR: Could not resolve symbol: /proc/self/exe:BEGIN_trigger
+root@l:~# opensnoop-bpfcc
 ```
 
 2、验证bpftrace工具，[iovisor/bpftrace项目地址](https://github.com/iovisor/bpftrace)
@@ -30,7 +26,7 @@ bpftrace v0.14.0
 
 ```sh
 curl https://repos.baslab.org/bpftools.repo --output /etc/yum.repos.d/bpftools.repo
-yum install bpftrace bpftrace-tools bpftrace-doc bcc-static bcc-tools bpftool
+yum install bpftrace bpftrace-tools bpftrace-doc bcc-static bcc-tools bpftool -y
 ```
 
 - bcc安装完成工具在/usr/share/bcc/tools
@@ -48,8 +44,6 @@ opensnoop-bpfcc 2>/dev/null
 ```
 
 如果你想在`bpftrace`或`bcc`工具中完全关闭警告，那可能需要修改这些工具的源代码或配置，但这通常不推荐，因为警告通常有其存在的原因。
-
-
 
 
 
@@ -135,7 +129,7 @@ BPF提供了一种在各种内核时间和应用程序事件发生时运行一�
 BCC(BPF编辑器集合，BPF Compiler Collection)是最早用于开发BPF跟踪程序的高级框架。它提供了一个编写内核BPF程序的C语言环境，同时还提供了其他高级语言环境来实现用户端接口。
 bpftrace是一个新近出现的前端，它提供了专门用于创建BPF工具的高级语言支持。
 
-```shell
+```sh
 bpftrace -e 'tracepoint:syscalls:sys_enter_open { printf("%s %s\n",comm,str(args->filename)); }'
 
 bpftrace -l 'tracepoint:syscalls:sys_enter_open*'
@@ -210,7 +204,7 @@ bpftrace -v /usr/share/bpftrace/tools/biolatency.bt
 
     - 当不再需要kprobes时，原始的字节内容会被复制回目标地址上，这样这些指令就回到了它们的初始状态。
 
-    - ```
+    - ```sh
     bpftrace -e 'kprobe:vfs_* {@[probe]=count();}'
 	
 	- uprobes：用户态程序动态插桩。uprobes可以在用户态程序的函数入口、特定偏移处，以及函数返回处进行插桩。
@@ -219,7 +213,7 @@ bpftrace -v /usr/share/bpftrace/tools/biolatency.bt
 	- 过程：和kprobes类似。将一个快速断点指令插入目标指令处，该指令将执行转交给uprobes处理函数。当不再需要uprobes时，目标指令会恢复为原来的样子。
 	
 	  ```sh
-	  perf top 
+	  perf top
 	  find / -name 'libc-2.17.so'
 	  
 	  #/usr/lib64/libc-2.17.so
@@ -246,7 +240,9 @@ bpftrace -v /usr/share/bpftrace/tools/biolatency.bt
 	
 	    - > RCU(Read-Copy Update)机制：首先将需要修改的内容复制出一份副本，然后在副本上进行修改操作。在写者进行修改操作的过程中，旧数据没有做任何更新，不会产生读写竞争，因此依然可以被读者并行访问。当写者修改完成后，写者直接将新数据内存地址替换掉旧数据的内存地址，由于内存地址替换操作是原子的，因此可以保证读写不会产生冲突。内存地址替换后，原有读者访问旧数据，新的读者将访问新数据。当原有读者访问完旧数据，进入静默期后，旧数据将被写者删除回收。当然，通常写者只进行更新、删除指针操作，旧数据内存的回收由另一个线程完成。
 	
-	  - bpftrace -e 'tracepoint:sched:sched_process_exec {printf("exec by %s\n",comm);}'
+	  - ```sh
+	    bpftrace -e 'tracepoint:sched:sched_process_exec {printf("exec by %s\n",comm);}'
+	    ```
 	
 	- USDT:用户预定义静态跟踪提供了一个用户空间版的跟踪点机制。需要被添加到源代码并编译到最终的二进制文件中，在插桩点留下nop指令，在ELF notes段中存放元数据。
 	
@@ -375,7 +371,7 @@ bpftrace -v /usr/share/bpftrace/tools/biolatency.bt
 
 ```sh
 #arg2是do_sys_open()函数的第二个参数,打印文件名
-trace 'do_sys_open "%s",arg2' 
+trace 'do_sys_open "%s",arg2'
 #跟踪内核函数do_sys_open(),并打印返回值
 trace 'r::do_sys_open "ret: %d", retval'
 #跟踪do_nanosleep()，并且打印用户态的调用栈
@@ -559,10 +555,10 @@ func 被跟踪函数名字									probe 当前探针全名
 arg0…argN 跟踪点函数的输入参数0，参数N(N为下标)...		  args.参数名 使用跟踪点的入口参数
 retval 跟踪点函数返回值									ret: 表示函数的返回值
 curtask 内核task_struct地址							  cgroup
-1,...,N bpftrace程序的位置参数							
+1,...,N bpftrace程序的位置参数
 ```
 
-​    
+
 
 
 ```sh
@@ -681,7 +677,7 @@ bpftrace -e 'profile:hz:49 /pid/ { @samples[ustack,kstack,comm]=count();}'
 8、offcputime 用于统计线程阻塞和脱离CPU运行的时间，同时输出调用栈信息，以便理解阻塞原因。这个工具正好是profile工具的对立面；这两个工具结合起来覆盖了线程的全部生命周期：profile覆盖在CPU之上运行的分析，而offcputime则分析脱离CPU运行的时间
 
 ```sh
--U 仅输出用户态调用栈信息				-K 仅输出内核态调用栈
+-U 仅输出用户态调用栈信息			-K 仅输出内核态调用栈
 -u 仅包括用户态线程					  -k 仅包括内核态线程
 -f 以折叠方式输出					   -p PID 仅跟踪给定的进程
 ```
@@ -1678,7 +1674,7 @@ ttysnoop 1
 
 2. **[iovisor/gobpf](https://github.com/iovisor/gobpf)**: 这个库提供了在Go语言中编写和加载eBPF程序所需的工具。它还包含用于解析bpftrace格式文件、处理内核数据结构等实用函数。
 
-​	3.[ebpf & bcc 中文开发教程及手册](https://blog.cyru1s.com/posts/ebpf-bcc.html)
+3. [ebpf & bcc 中文开发教程及手册](https://blog.cyru1s.com/posts/ebpf-bcc.html)
 
 # 报错
 
@@ -1756,3 +1752,12 @@ TIME(ms)   PID   ARGS
 27087      18605 git status -z -uall
 27087      18605 git status -z -uall
 ```
+
+
+
+
+
+# 查询内核中的跟踪点
+
+**`/sys/kernel/debug/tracing/events`**
+

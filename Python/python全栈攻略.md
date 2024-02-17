@@ -580,7 +580,7 @@ print('我的名字是%s岁，今年%d岁了' % (b, a + 1))	#当输出多个不�
 
 print('我的名字是%s岁，今年%s岁了' % (b, a))	#%s能格式化输出字符串，即变量输输入什么，%s就输出什么
 
- 
+
 
 \# format()格式化函数
 
@@ -602,7 +602,7 @@ print(f'我的名字{b},我的学号是{d}')
 
 print(type(num1)) #输出num1的数据类型type
 
- 
+
 
 input('提示信息\n') # 这个函数和print函数非常类似
 
@@ -620,7 +620,7 @@ lambda函数：
 
 语法：lambda  参数：表达式(返回值)			#直接打印lambda表达式，输出的是此lambda的内存地址
 
-1、 参数可有可无，参数为1、可变参数*args时，默认输出元组	
+1、 参数可有可无，参数为1、可变参数*args时，默认输出元组
 
 2、不定长可变参数**args时，默认输出字典
 
@@ -767,7 +767,7 @@ mode: 可选，文件打开模式(1、'r'读取（默认）、不存在则报错
 
 4、'a'打开文件用于写入，如果文件存在则指针在末尾追加、5、'b'二进制模式、6、't'文本模式（默认）、
 
-7、'+'打开用于更新（读取与写入）)，'w+'对文件先写后读(w先清空文件所以什么内容都没有)			
+7、'+'打开用于更新（读取与写入）)，'w+'对文件先写后读(w先清空文件所以什么内容都没有)
 
 encoding: 默认为二进制字符集，一般使用utf-8
 
@@ -815,7 +815,7 @@ file.truncate([size])从当前指针位置截取 size 个字符进行保留其�
 
 python中各种容器类型数据都是对象
 
- 
+
 
 pickle二进制序列化模块
 
@@ -829,7 +829,7 @@ load()文件反序列化，在一个文件中读取序列化的数据，并且�
 
 json文本序列化模块(JavaScript Object Notation)
 
-可以把一些符合转换的python数据对象，转为j son格式的数据
+可以把一些符合转换的python数据对象，转为json格式的数据
 
 JSON在js语言中是一个对象的表示方法，和Python中字典的定义规则和语法几乎一样
 
@@ -1197,7 +1197,7 @@ pip3 uninstall SomePackage #卸载包
 
 pip3 search SomePackage #搜索包
 
-pip3 config set global.index-url https://mirrors.aliyun.com/pypi/simple/	#永久安装ali源
+pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple	#永久安装源，清华的镜像源每五分钟更新一次，大而全
 
 pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple package --trusted-host mirrors.aliyun.com
 
@@ -1232,8 +1232,6 @@ root@master ~# ./configure
 root@master ~# make
 root@master ~# make install
 ```
-
-
 
 注意：
 
