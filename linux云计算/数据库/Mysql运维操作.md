@@ -395,12 +395,6 @@ mycat start#启动			mycat stop#停止			mycat restart#重启
 
 
 
-
-
-
-
-
-
 # 开始
 
 数据库管理系统分	Oracle	MySQL---开发相同---Mariadb
@@ -487,12 +481,41 @@ grant all privileges on xd_db.* to 'user'@'%' identified by 'redhat'
 
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root' WITH GRANT OPTION;
 
+# 5.6 版本：
+update mysql.user set password=password('123456') where User="root" and Host = "localhost";
+set password for root@localhost = password('123456');
+
+
+# 5.7 以上版本，password 字段被设置为了authentication_string，因此更新命令为：
+update mysql.user set authentication_string=password('123456') 
+where User="root" and Host="localhost";
+
+
+# 8.0 以上的版本，以上的命令都不支持，有以下两个命令可用
+alter user 'root'@'localhost' identified by 'root';
+set password for root@localhost = '123456';
+
+
 create user 'xiandian'@'localhost' identified by 'xd_paas'; 创建一个xiandian用户在本地授权密码xd_paas
 create user '[用户名称]'@'%' identified by '[用户密码]';	//创建用户
 create user Luigi@localhost identified by "redhat";		//增加管理员账户Luigi及密码redhat
 
 SELECT HOST,USER,PASSWORD FROM user WHERE USER="luke";
 ```
+
+
+
+**外界无法访问mysql主机，解决方法1**
+
+一般情况下，我们只需要去修改/etc/mysql/my.cnf配置文件即可，将my.cnf配置文件中的bind-address=127.0.0.1改成bind-address=0.0.0.0，并且把skip-networking注释掉即可；
+
+```sh
+port            = 3306
+bind-address            = 0.0.0.0
+mysqlx-bind-address     = 0.0.0.0
+```
+
+
 
 ## 查询luck主机名称、账户名称以及经过加密的密码值信息
 
@@ -503,7 +526,7 @@ mysql -uroot -p XXX < /home/renwole.sql	//导入数据库
 ```
 
 ```sh
-[root@rhel ~]#mysql_secure_installation	//更改超级用户管理权限
+[root@rhel ~]# mysql_secure_installation	//更改超级用户管理权限
 Enter current password for root (enter for none): 当前数据库密码为空，直接按回车键
 Set root password? [Y/n]				设置root用户密码
 Remove anonymous users? [Y/n] y		删除匿名用户可登录数据库？
@@ -515,13 +538,7 @@ Reload privilege tables now?			现在重新加载权限表？
 MariaDB [(none)]> flush privileges #使配置生效
 ```
 
-# 导入数据库
 
-```sql
-mysql> create database onlinedb;
-mysql> use onlinedb;
-mysql> source d:/onlinedb sql;
-```
 
 # sql语句中的快捷键
 
@@ -534,25 +551,38 @@ mysql> source d:/onlinedb sql;
 
 ```sql
 use xxx	//使用数据库
-show databases;								//查看数据库
-show create database xxx;					//查看数据库详细信息
+show databases;							//查看数据库
+show create database xxx;		//查看数据库详细信息
 show engines								//查看数据库引擎
 create database （if not exists ） 表名；	//创建数据库（如果不存在则创建）
 alter database xxx;							//修改数据库
 alter database xxx character set utf8; 		//修改数据库编码的命令
 drop database xxx;							//删除数据库
 exit	//推出数据库命令
-
-
-mysqldump -u root -p linuxprobe > /root/linuxprobeDB.dump	//mysqldump命令用于备份数据库
-mysql -u root -p linuxprobe < /root/linuxprobeDB.dump	//mysql命令用于导入数据库
 ```
+
+## 导入/导出数据库
+
+```sh
+#导出数据库文件，mysqldump命令用于备份数据库
+mysqldump -u root -p linuxprobe > /root/linuxprobeDB.sql
+
+#导入数据库文件-1，mysql命令用于导入数据库
+mysql -u root -p linuxprobe < /root/linuxprobeDB.sql
+#导入数据库文件-2
+mysql> create database onlinedb;
+mysql> use onlinedb;
+mysql> source d:/onlinedb sql;
+```
+
+
 
 # 数据库模式
 
+```sh
 creat schema <模式名> authorization <用户名>
-
 create schema test authorization U1
+```
 
 
 
@@ -578,13 +608,13 @@ restrict(限制)表示如果该模式中已经定义了下属的数据库对象�
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps1-1682771292878-1.jpg" alt="img" style="zoom: 67%;" /> 
 
- 
+
 
 数值类型：
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps2-1682771292878-3.jpg" alt="img" style="zoom:67%;" /> 
 
- 
+
 
 日期和时间类型：
 
@@ -614,7 +644,7 @@ restrict(限制)表示如果该模式中已经定义了下属的数据库对象�
 
 1、表中每一行都应该有可以唯一 标识自己的一-列， 用于记录两条记录不能重复，任意两行都不具有相同的主键值
 
-2、 应该总是定义主键虽然并不总是都需要主键，但大多数数据库设计人员都应保证他们创建的每个表具有一个主键，以便于以后的数据操纵和管理。
+2、应该总是定义主键虽然并不总是都需要主键，但大多数数据库设计人员都应保证他们创建的每个表具有一个主键，以便于以后的数据操纵和管理。
 
 
 
@@ -698,7 +728,7 @@ truncate xxx	清空数据表所有记录；
 
 ```sql
 drop table xxx1,xxx2，		//删除多个数据表
-drop index 索引名 on 表名	//删除索引
+drop index 索引名 on 表名 //删除索引
 drop function fnXXX			//删除函数
 drop procedure psXXX		//删除储存过程
 show databases tables  (注意加s)	//查询展示数据库查询展示数据表
@@ -798,8 +828,8 @@ update 表名 set name = 'squirrel' where owner = 'Diane'	//修改更新修改�
 
 ```sql
 delect from 表名 where name = 'squirrel'	//删除数据表中记录where添加条件
-TRUNCATE TABLE tablename;	//删除所有数据，保留表结构，不能撤消还原。
-DROP TABLE table_name ; //删除指定数据库
+TRUNCATE TABLE tablename;			//删除所有数据，保留表结构，不能撤消还原。
+DROP TABLE table_name ; 			//删除指定数据库
 ```
 
 

@@ -1,3 +1,5 @@
+<img src="./assets/v2-dce6faf4e4d8e25947116ca934579c11_1440w.webp" alt="img" style="zoom: 25%;" />
+
 # apt方式安装使用
 
 使用aptitude进行安装：aptitude是一个交互式的软件包管理器，它可以更好地处理软件包之间的依赖关系。如果您还没有安装aptitude，请运行以下命令安装它。
@@ -32,6 +34,12 @@ yum install bpftrace bpftrace-tools bpftrace-doc bcc-static bcc-tools bpftool -y
 - bcc安装完成工具在/usr/share/bcc/tools
 - bpftrace地址/usr/share/bpftrace/tools
 - export PATH=$PATH:/usr/share/bcc/tools:/usr/share/bpftrace/tools
+
+
+
+3、libbpf 使用api文档
+
+[LIBBPF API — libbpf 文档](https://libbpf.readthedocs.io/en/latest/api.html)
 
 ## 隐藏警告信息
 
