@@ -35,7 +35,7 @@ git push origin master  # 第四步： 执行更新操作
 
 `git clone https://gitee.com/gavinzhulei/vue-form-making.git `# xxx 代表g项目的克隆地址,仅需一步
 
-![img](E:\Project\Textbook\assets\wps1.jpg) 
+![img](E:\Project\notetext\assets\wps1.jpg) 
 
 问题原因：在码云创建的仓库有ReadMe文件，而本地没有，造成本地和远程的不同步
 
@@ -82,7 +82,7 @@ git push origin master
 
 
 
-![img](E:\Project\Textbook\assets\wps2.jpg) 
+![img](E:\Project\notetext\assets\wps2.jpg) 
 
 集中化的版本控制系统诸如CVS, SVN以及Perforce等，都有一个单-的集中管理的服务器,保存所有文件的修订版本, 而协同工作的人们都通过客户端连到这台服务器,取出最新的文件或者提交更新。多年以来,这已成为版本控制系统的标准做法,这种做法带来了许多好处,现在,每个人都可以在定程度上看到项目中的其他人正在做些什么。而管理员也可以轻松掌控每个开发者的权限，并且管理一个集中化的版本控制系统;要远比在各 个客户端上维护本地数据库来得轻松容易。
 
@@ -102,7 +102,7 @@ git push origin master
 
 在这类系统中，像Git, BitKeeper等客户端并不只提取最新版本的文件快照，而是把代码仓库完整地镜像下来。
 
-![img](E:\Project\Textbook\assets\wps3.jpg) 
+![img](E:\Project\notetext\assets\wps3.jpg) 
 
  
 
@@ -110,7 +110,7 @@ git push origin master
 
 
 
-<img src="E:\Project\Textbook\assets\wps4.jpg" alt="img" style="zoom:50%;" /> 
+<img src="E:\Project\notetext\assets\wps4.jpg" alt="img" style="zoom:50%;" /> 
 
 [1]代码托管中心是干嘛的呢?
 
@@ -122,11 +122,11 @@ git push origin master
 
 (1) 团队内部协作
 
-![img](E:\Project\Textbook\assets\wps5.jpg) 
+![img](E:\Project\notetext\assets\wps5.jpg) 
 
 (2) 跨团队协作
 
-![img](E:\Project\Textbook\assets\wps6.jpg) 
+![img](E:\Project\notetext\assets\wps6.jpg) 
 
 [2]托管中心种类:
 
@@ -176,13 +176,13 @@ git push origin master
 -pretty=oneline //美丽的方式：一行进行展示
 ```
 
-![img](E:\Project\Textbook\assets\wps7.jpg) 
+![img](E:\Project\notetext\assets\wps7.jpg) 
 
 `git reflog` //分支等引用变更记录管理
 
 {2}：指回到这个历史版本需要走多少步
 
-![img](E:\Project\Textbook\assets\wps8.jpg) 
+![img](E:\Project\notetext\assets\wps8.jpg) 
 
 `git reset --hard 53b88b0` //跳到指定索引位置，
 
@@ -201,7 +201,7 @@ git push origin master
 +版本索引 文件名：比较暂存区和文件库，该文件的差异
 ```
 
-![img](E:\Project\Textbook\assets\wps9.jpg) 
+![img](E:\Project\notetext\assets\wps9.jpg) 
 
  
 
@@ -211,7 +211,7 @@ git push origin master
 
 【2】通过一张图展示分支:
 
-![img](E:\Project\Textbook\assets\wps10.jpg) 
+![img](E:\Project\notetext\assets\wps10.jpg) 
 
 【3】分支的好处:
 
@@ -251,7 +251,7 @@ b 分支名 // 创建并切换到分支
 --delete 分支名 // 上传，删除远程分支
 ```
 
-![img](E:\Project\Textbook\assets\wps11.jpg) 
+![img](E:\Project\notetext\assets\wps11.jpg) 
 
 `git pull   `// 拉取，下拉指定主机的指定分支，并与本地的指定分支合并
 
@@ -281,7 +281,7 @@ pull = fetch + merge 操作的合并
 
 邀请其他成员，并能push操作
 
-![img](E:\Project\Textbook\assets\wps12.jpg) 
+![img](E:\Project\notetext\assets\wps12.jpg) 
 
  
 
@@ -299,13 +299,13 @@ pull = fetch + merge 操作的合并
 
 ## 跨团队合作
 
-![img](E:\Project\Textbook\assets\wps13.jpg) 
+![img](E:\Project\notetext\assets\wps13.jpg) 
 
  
 
 pull request请求按钮：
 
-![img](E:\Project\Textbook\assets\wps14.jpg) 
+![img](E:\Project\notetext\assets\wps14.jpg) 
 
  
 
@@ -341,36 +341,36 @@ pull request请求按钮：
 
 `./ssh/id_rsa.pub`  //复制该文件内容
 
-![img](E:\Project\Textbook\assets\wps15.jpg) 
+![img](E:\Project\notetext\assets\wps15.jpg) 
 
  
 
 ## JetBrains集成系列工具
 
-![img](E:\Project\Textbook\assets\wps16.jpg) 
+![img](E:\Project\notetext\assets\wps16.jpg) 
 
  
 
 本地库初始化操作：
 
-![img](E:\Project\Textbook\assets\wps17.jpg) 
+![img](E:\Project\notetext\assets\wps17.jpg) 
 
  
 
 本地库commit提交操作：
 
-![img](E:\Project\Textbook\assets\wps18.jpg) 
+![img](E:\Project\notetext\assets\wps18.jpg) 
 
  
 
 远程库提交操作：
 
-![img](E:\Project\Textbook\assets\wps19.jpg) 
+![img](E:\Project\notetext\assets\wps19.jpg) 
 
  
 
 远程clone克隆操作：
 
-![img](E:\Project\Textbook\assets\wps20.jpg) 
+![img](E:\Project\notetext\assets\wps20.jpg) 
 
  

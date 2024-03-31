@@ -96,7 +96,7 @@ XPath的选择功能十分强大，它提供了非常简洁明了的路径选择
 
 2. XPath常用规则
 
-<img src="E:\Project\Textbook\Python\assets\wps1-1682691000002-321.jpg" alt="img" style="zoom:50%;" /> 
+<img src="./assets/wps1-1682691000002-321.jpg" alt="img" style="zoom:50%;" /> 
 
  
 

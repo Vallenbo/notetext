@@ -588,7 +588,7 @@ pidstat -u -p ALL
 pidstat 和 pidstat -u -p ALL 是等效的。
 pidstat 默认显示了所有进程的cpu使用率。
 
-![img](https:////upload-images.jianshu.io/upload_images/2843224-bee9066f2689e541.png?imageMogr2/auto-orient/strip|imageView2/2/w/803/format/webp)
+<img src="./assets/2843224-bee9066f2689e541.webp" alt="2843224-bee9066f2689e541" style="zoom: 67%;" />
 
 #### 详细说明
 
@@ -983,24 +983,7 @@ apt install linux-tools-common linux-tools-generic -y #安装包
 
 
 
-# 修改系统默认版本命令
 
-要修改 `pip` 默认使用的 Python 版本，可以使用以下命令：
-
-```sh
-$ sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1
-$ sudo update-alternatives --install /usr/bin/pip pip /usr/local/bin/pip3.12 1
-```
-
-以上命令将 `/usr/bin/python` 和 `/usr/bin/pip` 两个命令的默认路径分别指向 Python 3.12 版本和对应版本的 `pip` 命令。
-
-执行完上述命令后，你可以通过以下命令验证是否已成功修改 `pip` 的默认 Python 版本：
-
-```sh
-$ pip -V
-```
-
-如果输出的版本号与你选择的 Python 版本相同，则说明已成功修改默认版本。
 
 
 
@@ -1924,13 +1907,20 @@ groupdel 删除组
 
 ## 文件权限
 
+锁定系统重要文件通常是通过设置文件的权限或者使用一些特定的命令来实现的。以下是一些常见的方法：
+
 user group other					su 切换用户 用法：su -xxx(用户)
 
 u(所有者)，g(所属组)，o(其他用户)，a(所有用户)		+（代表添加） -（减少） =（权限覆盖）
 
 r（读取权限数字代表为4)，w（写入权限数字代表为2)，x（执行权限数字代表为1）
 
+1. **设置文件权限**：通过设置文件的权限，可以限制对系统重要文件的访问。一般来说，系统重要文件的权限设置为只有 root 用户或者特定用户组才有读写权限，其他用户没有权限进行修改。例如，可以使用以下命令设置文件的权限：
+
+```
 chmod 更改文件或目录的权限			chmod	a+rwx  a			chmod 777 a
+```
+2. **设置文件所属用户和用户组**：通过设置文件的所属用户和用户组，可以限制对文件的访问权限。通常情况下，系统重要文件的所属用户和用户组设置为 root。可以使用 chown 命令来修改文件的所属用户和用户组：
 
 chown 更换文件所有者/更换文件所属组	chown 	root:bin 	/file
 
@@ -1940,7 +1930,14 @@ u+s所有人对此文件都有执行权限			g+s强制将此群组里的目录�
 
 o+t这个目录只有root和此目录的拥有者可以删除，其他用户全都不可以
 
-chattr +i/-i	 123	 锁定/取消文件或目录（锁定后无法修改删除移动）	lsattr 查看文件是否被锁定
+3. **使用 chattr 命令**：chattr 命令用于修改文件的属性，包括设置文件为只读、不可删除等。可以使用 chattr 命令将系统重要文件设置为只读，以防止意外修改或删除。例如，可以使用以下命令设置文件为只读：
+
+```bash
+sudo chattr +i /path/to/file  # 设置文件为只读
+lsattr # 查看文件是否被锁
+```
+
+
 
 ## ACL访问控制列表
 
