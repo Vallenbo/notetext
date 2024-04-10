@@ -1,6 +1,6 @@
-# gRPC介绍
+# gRPC
 
-gRPC 是一个高性能、开源和通用的 RPC 框架，面向移动和 HTTP/2 设计。其主要特点如下：
+`gRPC`是一种现代化开源的高性能RPC框架，能够运行于任意环境之中。最初由谷歌进行开发。它使用HTTP/2作为传输协议。
 
 1. **基于 HTTP/2**: gRPC 基于 HTTP/2 标准设计，带来诸如双向流、流控、头部压缩、单连接上的多复用请求等特性。这些特性使得其成为构建高性能和伸缩性系统的理想选择。
 2. **Protobuf 序列化**: gRPC 使用 Protobuf 作为接口定义语言，用于描述服务接口和消息结构。Protobuf 是一种语言无关、平台无关、可扩展的序列化结构数据的协议，使得系统间数据交互更加高效。
@@ -10,92 +10,17 @@ gRPC 是一个高性能、开源和通用的 RPC 框架，面向移动和 HTTP/2
 6. **拦截器**: gRPC 允许开发者通过拦截器对请求进行预处理和对响应进行后处理。
 7. **安全**: gRPC 支持 TLS/SSL 和 Token 基础的认证，可以确保数据的安全传输。
 
- 
+# 为什么要用gRPC？
 
-## 原始的grpc
+使用gRPC， 我们可以一次性的在一个`.proto`文件中定义服务并使用任何支持它的语言去实现客户端和服务端。反过来，它们可以应用在各种场景中，从Google的服务器到你自己的平板电脑—— gRPC帮你解决了不同语言及环境间通信的复杂性。使用`protocol buffers`还能获得其他好处，包括高效的序列化，简单的IDL以及容易进行接口更新。总之一句话，使用gRPC能让我们更容易编写跨语言的分布式代码。
 
-服务端
+> IDL（Interface description language）是指接口描述语言，是用来描述软件组件接口的一种计算机语言，是跨平台开发的基础。IDL通过一种中立的方式来描述接口，使得在不同平台上运行的对象和用不同语言编写的程序可以相互通信交流；比如，一个组件用C++写成，另一个组件用Go写成。
 
-```go
-package main
+# protobuf数据序列化格式
 
-import (
-  "fmt"
-  "net"
-  "net/http"
-  "net/rpc"
-)
+[protobuf 官网文档 (protobuf.dev)](https://protobuf.dev/overview/)
 
-type Server struct {
-}
-type Req struct { //请求
-  Num1 int
-  Num2 int
-}
-type Res struct { //接收
-  Num int
-}
-
-func (s Server) Add(req Req, res *Res) error {
-  res.Num = req.Num1 + req.Num2
-  return nil
-}
-
-func main() {
-  rpc.Register(new(Server))	 // 注册rpc服务
-  rpc.HandleHTTP()
-  listen, err := net.Listen("tcp", ":8080")
-  if err != nil {
-    fmt.Println(err)
-    return
-  }
-  http.Serve(listen, nil)
-}
-```
-
-客户端
-
-```go
-package main
-
-import (
-  "fmt"
-  "net/rpc"
-)
-
-type Req struct { //请求
-  Num1 int
-  Num2 int
-}
-type Res struct { //接收
-  Num int
-}
-
-func main() {
-  req := Req{1, 2}
-  client, err := rpc.DialHTTP("tcp", ":8080")
-  if err != nil {
-    fmt.Println(err)
-    return
-  }
-  var res Res
-  client.Call("Server.Add", req, &res)
-  fmt.Println(res)
-}
-```
-
-原生rpc的问题：
-
-1. 编写相对复杂，需要自己去关注实现过程
-2. 没有代码提示，容易写错
-
-
-
-# protobuf介绍
-
- [protobuf 官网文档 (protobuf.dev)](https://protobuf.dev/overview/)
-
-Protocol Buffers（通常被称为 Protobuf）是 Google 开发的一种数据序列化协议（类似于 XML、JSON、YAML 等），它可用于数据存储、通信协议等方面。Protobuf 是一种语言无关、平台无关、可扩展的序列化结构数据的协议，它比 XML 和 JSON 更小、更快、更简单。
+Protocol Buffers（简称 Protobuf）是一种由 Google 开发的跨平台、语言无关、高效的**数据序列化格式**。它类似于 XML 或 JSON 这样的数据交换格式，但更轻量级、更高效。
 
 以下是 Protobuf3 的一些主要特性：
 
@@ -112,102 +37,98 @@ Protocol Buffers（通常被称为 Protobuf）是 Google 开发的一种数据�
 
 ​	3：缺乏自描述
 
-## protobuf安装
+## 安装
 
-[Releases下载地址 · protocolbuffers/protobuf (github.com)](https://github.com/protocolbuffers/protobuf/releases)
+[Releases下载地址 · protobuf (github.com)](https://github.com/protocolbuffers/protobuf/releases) | [protobuf编译器 win版](https://github.com/protocolbuffers/protobuf/releases/download/v3.9.0/protoc-3.9.0-win64.zip)
 
-**protobuf编译器安装**
+**1、protobuf编译器安装**
 
 <img src="./assets/image-20231218100743483.png" alt="image-20231218100743483" style="zoom: 33%;" />
 
-https://github.com/protocolbuffers/protobuf/releases/download/v3.9.0/protoc-3.9.0-win64.zip
+解压压缩文件后，添加protoc变量到系统环境变量中
 
-解压压缩文件
-
-```go
-D:\Program Files\protoc-25.1-win64
-```
-
-添加protoc变量到系统环境变量中
-
-```go
+```sh
 D:\Program Files\protoc-25.1-win64\bin
+
+验证：
+> protoc --version
+libprotoc 26.1
 ```
 
-**下载go依赖包**
+**2、下载go依赖包**
 
-google接管后的新版本，下面为必须安装的依赖
+我们是使用Go语言做开发，接下来执行下面的命令安装`protoc`的Go插件。google接管后的新版本
 
-```shell
-go get github.com/golang/protobuf/proto
-go get google.golang.org/grpc
-go install github.com/golang/protobuf/protoc-gen-go
+```sh
+go get github.com/golang/protobuf/proto				# 安装protoc
+go get google.golang.org/grpc						# 安装grpc
+go install github.com/golang/protobuf/protoc-gen-go # 安装go语言插件
 ```
 
-## protobuf编写和编译
+安装好之后，需要将protoc-gen-go.exe的目录和protoc的bin目录添加到环境变量中
+
+
+
+## 编写
 
 [语法参考文档（需翻墙）](https://developers.google.com/protocol-buffers/docs/proto3)
 
-1. message 成员编号， 可以不从1开始, 但是不能重复. -- 不能使用 19000 - 19999
-2. 可以使用 message 嵌套
-3. 定义数组、切片 使用 repeated 关键字
-4. 可以使用枚举 enum
-5. 可以使用联合体。 oneof 关键字。成员编号，不能重复
-
 ```protobuf
-syntax = "proto3";	// 默认是 proto2
-package go_RPC;     // 指定生成的包名
-option go_package = "/go_proto";	// 指定需要生成的go包名
-// option go_package = ".;go_proto"; // .为路径，go_proto为生成文件名
+syntax = "proto3";  // 默认是 proto2
+package hello_proto;     // 指定生成的包名，与go_package参数一致
+option go_package = "/hello_proto";  // 指定需要生成的go包名
+// option go_package = ".;hello_proto"; // .为路径，go_proto为生成文件名
 
-enum Week { // 定义枚举类型
-    Monday = 0;   // 枚举值,必须从 0 开始.
-    Turesday = 1;
+enum Week {// 定义枚举类型
+  Monday = 0;   // 枚举值,必须从 0 开始.
+  Turesday = 1;
 }
 
-service HelloService { //定义grpc服务
-  rpc SayHello (HelloRequest) returns (HelloResponse) {}   // 定义grpc接口，定义接口名，传入参数 ，输出内容
+service HelloService {//定义grpc服务
+  rpc SayHello (Student) returns (Student) {}   // 定义grpc接口，定义接口名，传入参数 ，输出内容
 }
 
-message Student { // 定义消息体
-    int32 age = 1;  // 可以不从1开始, 但是不能重复. -- 不能使用 19000 - 19999
-    string name = 2;
-    People p = 3;
-    repeated int32 score = 4;  // 数组
-    Week w = 5; // 枚举
-    oneof data { // 联合体
-        string teacher = 6;
-        string class = 7;
-    }
-}
+message Student {// 定义消息体
+  int32 age = 1;  // 可以不从1开始, 但是不能重复. -- 不能使用 19000 - 19999
+  string name = 2;
+  People p = 3;
+  repeated int32 score = 4;  // 数组
+  Week w = 5; // 枚举
+  oneof data {// 联合体
+    string teacher = 6;
+    string class = 7;
+  }
 
-message People { // 消息体可以嵌套
+  message People {// 消息体可以嵌套
     int32 weight = 1;
+  }
 }
 ```
 
-**编译 protobuf**
+本级目录下即会生成 `hello_proto\hello.pb.go`文件
+
+## 编译 protobuf
 
 go 语言中编译命令：
 
-```go
+```sh
 protoc -I . --go_out=plugins=grpc:. ./*.proto     // 生成xxx.pb.go 文件。
-```
 
-- -I：-IPATH, --proto_path=PATH, 指定proto文件搜索的路径, 如果有多个路径 可以多次使用-I 来指定, 如果不指定默认为当前目录
-- --go_out: --go指插件的名称, 我们安装的插件为: protoc-gen-go, 而protoc-gen是插件命名规范, go是插件名称, 因此这里是--go, 而--go_out 表示的是 go插件的 out参数, 这里指编译产物的存放目录
-- --go_opt: protoc-gen-go插件opt参数, 这里的module指定了go module, 生成的go pkg 会去除掉module路径，生成对应pkg
-- pb/hello.proto: 我们proto文件路径
+# protoc: ProtocBuff编译器的可执行文件。来编译指定目录下的所有 .proto 文件并生成相应的 Go 语言代码，同时还会为 gRPC 支持生成必要的代码。
+# -I .: 指定编译目录。-I 选项可以用来指定多个目录，如果 .proto 文件位于其他目录，可以在这里添加相应的路径。
+# --go_out=plugins=grpc:.: 用于指定编译器生成的 Go 语言代码的输出目录 和 生成代码时使用的插件（指定了 plugins=grpc）。后面的 . 表示输出目录与 .proto 文件所在的相同目录。
+# ./*.proto: 这是一个通配符，用于指定要编译的 .proto 文件。在这个例子中，* 匹配当前目录下的所有 .proto 文件。
+```
 
 
 
 # grpc示例程序
 
-使用Protocol Buffers带来的便利性。只需要去实现和注重业务方法。将其和grpc相绑定
+使用Protocol Buffers带来的便利性。只需要去实现和注重业务方法，将其和grpc相绑定。该模式也是简单数据流模式。
 
 ==server端==：
 
-监听socket端口，创建grpc服务器示例，将protobuf生成的服务与创建的结构体和grpc服务器绑定。
+整个流程：注册socket监听器-->注册grpc服务，绑定类方法--->将socket和grpc服务相绑定
 
 ```go
 package main
@@ -235,20 +156,18 @@ func (HelloServer1) SayHello(ctx context.Context, request *hello_grpc.HelloReque
 }
 
 func main() {
-	// 监听端口
-	listen, err := net.Listen("tcp", ":8080")
+	listen, err := net.Listen("tcp", ":8080") // 1、监听端口。创建socket进程间通信
 	if err != nil {
 		grpclog.Fatalf("Failed to listen: %v", err)
 	}
-
-	// 创建一个gRPC服务器实例。
-	s := grpc.NewServer()
+	
+	s := grpc.NewServer()	// 2、创建一个gRPC服务器实例
 	server := HelloServer1{}
-	// 将grpc服务器实例和结构体的方法与protoc buffer生成的服务名绑定，注册为gRPC服务。
-	hello_grpc.RegisterHelloServiceServer(s, &server)
+	
+	hello_grpc.RegisterHelloServiceServer(s, &server) // 3、将grpc服务器实例和结构体类方法绑定，注册为gRPC服务
 	fmt.Println("grpc server running :8080")
-	// 开始处理客户端请求。
-	err = s.Serve(listen)
+	
+	err = s.Serve(listen) // 开始处理客户端请求。
 }
 ```
 
@@ -271,17 +190,15 @@ import (
 )
 
 func main() {
-	addr := ":8080"
-	// 使用 grpc.Dial 创建一个到指定地址的 gRPC 连接。
-	// 此处使用不安全的证书来实现 SSL/TLS 连接
-	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// 1、拨号，连接远程服务器。 此处使用不安全的证书来实现 SSL/TLS 连接
+	conn, err := grpc.Dial(":8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf(fmt.Sprintf("grpc connect addr [%s] 连接失败 %s", addr, err))
 	}
 	defer conn.Close()
-
-	client := hello_grpc.NewHelloServiceClient(conn) // 初始化客户端
-	result, err := client.SayHello(context.Background(), &hello_grpc.HelloRequest{
+	
+	client := hello_grpc.NewHelloServiceClient(conn) // 创建grpc初始化客户端
+	result, err := client.SayHello(context.Background(), &hello_grpc.HelloRequest{ // 2、调用远程服务
 		Name:    "枫枫",
 		Message: "ok",
 	})
@@ -291,7 +208,7 @@ func main() {
 
 
 
-# grpc的4种模式介绍
+# 4种服务模式介绍
 
 **1、简单模式（Simple RPC）**
 简单模式：也称简单 RPC，即客户端发起一次请求，服务端响应处理后返回一个结果给客户端。
@@ -312,8 +229,6 @@ rpc SayHello(HelloRequest) returns (HelloResponse);
 ```go
 rpc LotsOfReplies(HelloRequest) returns (stream HelloResponse); //返回结果加上stream代表流
 ```
-
-
 
 **3、客户端数据流模式（Client-side streaming RPC）**
 客户端数据流模式：也称客户端流式 RPC，与服务端数据流模式相反，客户端持续向服务端发送数据流，在发送结束后，由服务端返回一个响应。
@@ -338,158 +253,273 @@ rpc BidiHello(stream HelloRequest) returns (stream HelloResponse); //接收参�
 
 
 
-## 双向数据流模式 示例文件
+## server数据流模式--示例
 
-proto
+protobuf文件
 
 ```protobuf
 syntax = "proto3";
+package proto;
 option go_package = "/proto";
 
-message Request {
-  string name = 1;
-}
-message Response {
-  string Text = 1;
+service Calculator {
+    rpc SquareStream(SquareRequest) returns (stream SquareResponse) {}
 }
 
-service BothStream{
-  rpc Chat(stream Request)returns(stream Response){}
-}
-```
-
-### 服务端
-
-```go
-package main
-
-import (
-  "fmt"
-  "google.golang.org/grpc"
-  "grpc_study/stream_proto/proto"
-  "log"
-  "net"
-)
-
-type BothStream struct{}
-
-func (BothStream) Chat(stream proto.BothStream_ChatServer) error {
-  for i := 0; i < 10; i++ {
-    request, _ := stream.Recv()
-    fmt.Println(request)
-    stream.Send(&proto.Response{
-      Text: "你好",
-    })
-  }
-  return nil
+message SquareRequest {
+    int32 number = 1;
 }
 
-func main() {
-  listen, err := net.Listen("tcp", ":8080")
-  if err != nil {
-    log.Fatal(err)
-  }
-  server := grpc.NewServer()
-  proto.RegisterBothStreamServer(server, &BothStream{})
-
-  server.Serve(listen)
+message SquareResponse {
+    int32 result = 1;
 }
 ```
 
-### 客户端
+server端
 
 ```go
-package main
+type server struct{}
 
-import (
-  "context"
-  "fmt"
-  "google.golang.org/grpc"
-  "google.golang.org/grpc/credentials/insecure"
-  "grpc_study/stream_proto/proto"
-  "log"
-)
-
-func main() {
-  addr := ":8080"
-  // 使用 grpc.Dial 创建一个到指定地址的 gRPC 连接。
-  // 此处使用不安全的证书来实现 SSL/TLS 连接
-  conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-  if err != nil {
-    log.Fatalf(fmt.Sprintf("grpc connect addr [%s] 连接失败 %s", addr, err))
-  }
-  defer conn.Close()
-  // 初始化客户端
-  client := proto.NewBothStreamClient(conn)
-  stream, err := client.Chat(context.Background())
-
-  for i := 0; i < 10; i++ {
-    stream.Send(&proto.Request{
-      Name: fmt.Sprintf("第%d次", i),
-    })
-    response, err := stream.Recv()
-    fmt.Println(response, err)
-  }
+func (s *server) SquareStream(req *proto.SquareRequest, stream proto.Calculator_SquareStreamServer) error {
+	for i := 1; i < int(req.Number); i++ {
+		result := i * i
+		if err := stream.Send(&proto.SquareResponse{Result: int32(result)}); err != nil {
+			return err
+		}
+		time.Sleep(time.Second) // Simulate processing time
+	}
+	return nil
 }
 
+func main() {
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	s := grpc.NewServer()
+	proto.RegisterCalculatorServer(s, &server{})
+	log.Println("Server started at :50051")
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+}
+```
+
+client端
+
+```go
+func main() {
+	conn, err := grpc.Dial(":50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	client := proto.NewCalculatorClient(conn)
+
+	number := int32(5)
+	stream, err := client.SquareStream(context.Background(), &proto.SquareRequest{Number: number})
+	if err != nil {
+		log.Fatalf("error while calling SquareStream RPC: %v", err)
+	}
+	for {
+		response, err := stream.Recv()
+		if err != nil {
+			log.Fatalf("error while receiving response: %v", err)
+		}
+		log.Printf("Square of %d is: %d", response.Result, response.Result)
+	}
+}
+```
+
+
+
+## client数据流模式--示例
+
+proto文件
+
+```go
 syntax = "proto3";
+package proto;
 option go_package = "/proto";
 
-service Simple {
-  rpc Fun(Request)returns(Response){}
+service Calculator {
+    rpc SquareBatch(stream SquareRequest) returns (SquareResponse) {}
 }
 
-// 服务端流式
-service ServiceStream{
-  rpc Fun(Request)returns(stream Response){}
-  rpc DownLoadFile(Request)returns(stream FileResponse){}
-}
-// 客户端流式
-service ClientStream{
-  rpc UploadFile(stream FileRequest)returns(Response){}
+message SquareRequest {
+    int32 number = 1;
 }
 
-// 双向流
-service BothStream{
-  rpc Chat(stream Request)returns(stream Response){}
-}
-
-
-message Request {
-  string name = 1;
-}
-message Response {
-  string Text = 1;
-}
-
-message FileRequest{
-  string file_name = 1;
-  bytes content = 2;
-}
-
-message FileResponse{
-  string file_name = 1;
-  bytes content = 2;
+message SquareResponse {
+    int32 result = 1;
 }
 ```
+
+Server 端代码：
 
 ```go
-// protoc -I . --go_out=plugins=grpc:./stream_proto .\stream_proto\stream.proto
+type server struct{}
+
+func (s *server) SquareBatch(stream proto.Calculator_SquareBatchServer) error {
+	var result int32 = 1
+	for {
+		req, err := stream.Recv()
+		if err != nil {
+			return err
+		}
+		result *= req.Number
+	}
+	return stream.SendAndClose(&proto.SquareResponse{Result: result})
+}
+
+func main() {
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	s := grpc.NewServer()
+	proto.RegisterCalculatorServer(s, &server{})
+	log.Println("Server started at :50051")
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+}
+```
+
+client端
+
+```go
+func main() {
+	conn, err := grpc.Dial(":50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	client := proto.NewCalculatorClient(conn)
+
+	stream, err := client.SquareBatch(context.Background())
+	if err != nil {
+		log.Fatalf("error while calling SquareBatch RPC: %v", err)
+	}
+
+	numbers := []int32{2, 3, 4, 5}
+	for _, number := range numbers {
+		if err := stream.Send(&proto.SquareRequest{Number: number}); err != nil {
+			log.Fatalf("error while sending request: %v", err)
+		}
+	}
+
+	response, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("error while receiving response: %v", err)
+	}
+	log.Printf("Result of batch square is: %d", response.Result)
+}
 ```
 
 
 
- 
+## 双向数据流模式--示例
 
-# metadata元数据使用
+proto文件
+
+```protobuf
+syntax = "proto3";
+package proto;
+option go_package = "/proto";
+
+service Calculator {
+    rpc SquareUpdates(stream SquareRequest) returns (stream SquareResponse) {}
+}
+
+message SquareRequest {
+    int32 number = 1;
+}
+
+message SquareResponse {
+    int32 result = 1;
+}
+```
+
+server服务端
+
+```go
+type server struct{}
+
+func (s *server) SquareUpdates(stream proto.Calculator_SquareUpdatesServer) error {
+	for {
+		req, err := stream.Recv()
+		if err != nil {
+			return err
+		}
+		result := req.Number * req.Number
+		if err := stream.Send(&proto.SquareResponse{Result: result}); err != nil {
+			return err
+		}
+	}
+}
+
+func main() {
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	s := grpc.NewServer()
+	proto.RegisterCalculatorServer(s, &server{})
+	log.Println("Server started at :50051")
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+}
+```
+
+client客户端
+
+```go
+func main() {
+	conn, err := grpc.Dial(":50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	client := proto.NewCalculatorClient(conn)
+
+	stream, err := client.SquareUpdates(context.Background())
+	if err != nil {
+		log.Fatalf("error while calling SquareUpdates RPC: %v", err)
+	}
+
+	numbers := []int32{2, 3, 4, 5}
+	for _, number := range numbers {
+		if err := stream.Send(&proto.SquareRequest{Number: number}); err != nil {
+			log.Fatalf("error while sending request: %v", err)
+		}
+		time.Sleep(time.Second) // Simulate processing time
+		response, err := stream.Recv()
+		if err != nil {
+			log.Fatalf("error while receiving response: %v", err)
+		}
+		log.Printf("Square of %d is: %d", number, response.Result)
+	}
+	stream.CloseSend()
+}
+```
+
+
+
+# metadata元数据
 
 gRPC 让我们可以像本地调用一样进行远程调用。在每次的 RPC 调用中，可能需要在 header 中传递一些数据，这些数据可以通过 metadata 来传递。
 
-Metadata 是以 key-value 的形式存储数据的，其中 key 是 string 类型，而 value 是 []string 类型，即一个字符串切片类型。Metadata 使得客户端和服务器能够为对方提供关于本次调用的一些信息，这与 HTTP 请求的 RequestHeader 和 ResponseHeader 类似。就像 HTTP 中的 header 的生命周期是一次 HTTP 请求，gRPC 中的 metadata 的生命周期是一次 RPC 调用。
+Metadata 是以 key-value 的形式存储数据的`map[string][]string` 类型。Metadata 使得客户端和服务器能够为对方提供关于本次调用的一些信息，这与 HTTP 请求的 RequestHeader 和 ResponseHeader 类似。就像 HTTP 中的 header 的生命周期是一次 HTTP 请求，gRPC 中的 metadata 的生命周期是一次 RPC 调用。
 
-需要注意的是，gRPC 的 metadata 实际上分为两种：传入（incoming）和传出（outgoing）。传入 metadata 是服务器从客户端接收的，传出 metadata 是服务器发送给客户端的。在服务器端，传入 metadata 包含客户端发送的所有 metadata，传出 metadata 是服务器想要发送给客户端的任何额外信息。在客户端，传入 metadata 是从服务器接收的响应的一部分，传出 metadata 是要发送给服务器的请求的一部分。
+metadata 实际上分为两种：传入和传出。传入 metadata 是服务器从客户端接收的，传出 metadata 是服务器发送给客户端的。
 
-## 1、go中使用metadata
+- 在服务器端，传入 metadata 包含客户端发送的所有 metadata，传出 metadata 是服务器想要发送给客户端的任何额外信息。
+
+- 在客户端，传入 metadata 是从服务器接收的响应的一部分，传出 metadata 是要发送给服务器的请求的一部分。
+
+## 1、rpc中使用metadata
 
 项目源代码路径：https://github.com/grpc/grpc-go/tree/master/metadata
 
@@ -498,6 +528,7 @@ Metadata 是以 key-value 的形式存储数据的，其中 key 是 string 类�
 使用的go包："google.golang.org/grpc/metadata"
 
 ### 1）新建metadata
+
 MD 类型实际上是map，key是string，value是string类型的slice。
 
 ```go
@@ -510,7 +541,7 @@ type MD map[string][]string
 //第一种方式
 md := metadata.New(map[string]string{"key1": "val1", "key2": "val2"})
 
-//第二种方式 key不区分大小写，会被统一转成小写
+//第二种方式 ，所有的键将自动转换为小写
 md := metadata.Pairs(
     "key1", "val1",
     "key1", "val1-2", // "key1" will have map value []string{"val1", "val1-2"}
@@ -518,24 +549,159 @@ md := metadata.Pairs(
 )
 ```
 
-### 2）发送metadata
+### 2）元数据中存储二进制数据
+
+在元数据中，键始终是字符串。但是值可以是字符串或二进制数据。要在元数据中存储二进制数据值，只需在密钥中添加“-bin”后缀。在创建元数据时，将对带有“-bin”后缀键的值进行编码:
 
 ```go
-md := metadata.Pairs("key", "val")
-
-// 新建一个有 metadata 的 context
-ctx := metadata.NewOutgoingContext(context.Background(), md)
-
-// 单向 RPC
-response, err := client.SomeRPC(ctx, someRequest)
+md := metadata.Pairs(
+    "key", "string value",
+    "key-bin", string([]byte{96, 102}), // 二进制数据在发送前会进行(base64) 编码
+                                        // 收到后会进行解码
+)
 ```
 
-### 3）接收metadata
+### 3）从请求上下文中获取元数据
+
+可以使用 `FromIncomingContext` 方法从RPC请求的上下文中获取元数据:
 
 ```go
 func (s *server) SomeRPC(ctx context.Context, in *pb.SomeRequest) (*pb.SomeResponse, err) {
     md, ok := metadata.FromIncomingContext(ctx)
     // do something with metadata
+}
+```
+
+### 发送和接收元数据-客户端
+
+#### 发送metadata
+
+方式一：使用 `AppendToOutgoingContext` 将 kv 对附加到context。无论context中是否已经有元数据都可以使用这个方法。如果先前没有元数据，则添加元数据; 如果context中已经存在元数据，则将 kv 对合并进去。
+
+```go
+// 创建带有metadata的context
+ctx := metadata.AppendToOutgoingContext(ctx, "k1", "v1", ) 
+
+// 添加一些 metadata 到 context (e.g. in an interceptor)
+ctx := metadata.AppendToOutgoingContext(ctx, "k3", "v4")
+
+// 发起普通RPC请求
+response, err := client.SomeRPC(ctx, someRequest)
+
+// 或者发起流式RPC请求
+stream, err := client.SomeStreamingRPC(ctx)
+```
+
+方式二：使用 `NewOutgoingContext` 将元数据附加到context。但是，这将替换context中的任何已有的元数据，因此必须注意保留现有元数据(如果需要的话)。这个方法比使用 `AppendToOutgoingContext` 要慢。这方面的一个例子如下:
+
+```go
+// 创建带有metadata的context
+md := metadata.Pairs("k1", "v1", "k1", "v2", "k2", "v3")
+ctx := metadata.NewOutgoingContext(context.Background(), md)
+
+// 添加一些metadata到context (e.g. in an interceptor)
+send, _ := metadata.FromOutgoingContext(ctx)
+newMD := metadata.Pairs("k3", "v3")
+ctx = metadata.NewOutgoingContext(ctx, metadata.Join(send, newMD))
+
+// 发起普通RPC请求
+response, err := client.SomeRPC(ctx, someRequest)
+
+// 或者发起流式RPC请求
+stream, err := client.SomeStreamingRPC(ctx)
+```
+
+#### 接收metadata
+
+客户端可以接收的元数据包括header和trailer。
+
+> trailer可以用于服务器希望在处理请求后给客户端发送任何内容，例如在流式RPC中只有等所有结果都流到客户端后才能计算出负载信息，这时候就不能使用headers（header在数据之前，trailer在数据之后）。
+
+引申：[HTTP trailer](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Trailer)
+
+##### 普通调用
+
+可以使用 [CallOption](https://godoc.org/google.golang.org/grpc#CallOption) 中的 [Header](https://godoc.org/google.golang.org/grpc#Header) 和 [Trailer](https://godoc.org/google.golang.org/grpc#Trailer) 函数来获取普通RPC调用发送的header和trailer:
+
+```go
+var header, trailer metadata.MD // 声明存储header和trailer的变量
+r, err := client.SomeRPC(
+    ctx,
+    someRequest,
+    grpc.Header(&header),    // 将会接收header
+    grpc.Trailer(&trailer),  // 将会接收trailer
+)
+
+// do something with header and trailer
+```
+
+##### 流式调用
+
+流式调用包括：
+
+- 客户端流式
+- 服务端流式
+- 双向流式
+
+使用接口 [ClientStream](https://godoc.org/google.golang.org/grpc#ClientStream) 中的 `Header` 和 `Trailer` 函数，可以从返回的流中接收 Header 和 Trailer:
+
+```go
+stream, err := client.SomeStreamingRPC(ctx)
+header, err := stream.Header() // 接收 header
+trailer := stream.Trailer() // 接收 trailer
+```
+
+### 发送和接收元数据-服务器端
+
+#### 接收metadata
+
+要读取客户端发送的元数据，服务器需要从 RPC 上下文检索它。如果是普通RPC调用，则可以使用 RPC 处理程序的上下文。对于流调用，服务器需要从流中获取上下文。
+
+##### 普通调用
+
+```go
+func (s *server) SomeRPC(ctx context.Context, in *pb.someRequest) (*pb.someResponse, error) {
+    md, ok := metadata.FromIncomingContext(ctx)
+    // do something with metadata
+}
+```
+
+##### 流式调用
+
+```go
+func (s *server) SomeStreamingRPC(stream pb.Service_SomeStreamingRPCServer) error {
+    md, ok := metadata.FromIncomingContext(stream.Context()) // get context from stream
+    // do something with metadata
+}
+```
+
+#### 发送metadata
+
+##### 普通调用
+
+在普通调用中，服务器可以调用 [grpc](https://godoc.org/google.golang.org/grpc) 模块中的 [SendHeader](https://godoc.org/google.golang.org/grpc#SendHeader) 和 [SetTrailer](https://godoc.org/google.golang.org/grpc#SetTrailer) 函数向客户端发送header和trailer。这两个函数将context作为第一个参数。它应该是 RPC 处理程序的上下文或从中派生的上下文：
+
+```go
+func (s *server) SomeRPC(ctx context.Context, in *pb.someRequest) (*pb.someResponse, error) {
+    header := metadata.Pairs("header-key", "val") // 创建和发送 header
+    grpc.SendHeader(ctx, header)
+    
+    trailer := metadata.Pairs("trailer-key", "val") // 创建和发送 trailer
+    grpc.SetTrailer(ctx, trailer)
+}
+```
+
+##### 流式调用
+
+对于流式调用，可以使用接口 [ServerStream](https://godoc.org/google.golang.org/grpc#ServerStream) 中的 `SendHeader` 和 `SetTrailer` 函数发送header和trailer:
+
+```go
+func (s *server) SomeStreamingRPC(stream pb.Service_SomeStreamingRPCServer) error {
+    header := metadata.Pairs("header-key", "val") // 创建和发送 header
+    stream.SendHeader(header)
+    
+    trailer := metadata.Pairs("trailer-key", "val") // 创建和发送 trailer
+    stream.SetTrailer(trailer)
 }
 ```
 
@@ -565,73 +731,41 @@ message HelloReply {
 ### 2）client 
 
 ```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"go-class/rpc/07metadata/proto"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
-)
-
 func main() {
-	conn, err := grpc.Dial(":8083", grpc.WithInsecure())
+	conn, err := grpc.Dial(":8083", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
 	}
 	defer conn.Close()
-	c := proto.NewGreeterClient(conn)
+	c := proto.NewGreeterClient(conn) // 创建grpc客户端实例
 
-	//写入metadata***********
-	md := metadata.New(map[string]string{
+	md := metadata.New(map[string]string{ // 写入metadata
 		"name": "lff",
 		"password": "123456",
 	})
-	ctx := metadata.NewOutgoingContext(context.Background(), md)
-	r, err := c.SayHello(ctx, &proto.HelloRequest{Name: "lff111"})
+	ctx := metadata.NewOutgoingContext(context.Background(), md) //使用metadata创建携带数据的ctx
+	r, err := c.SayHello(ctx, &proto.HelloRequest{Name: "lff111"}) // 传入ctx到类方法中
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(r.Message)
-
 }
 ```
 
 ### 3）server
 
 ```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"net"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
-	 
-	"go-class/rpc/07metadata/proto"
-)
-
 type Server struct {}
 
 func (s *Server) SayHello(ctx context.Context, req *proto.HelloRequest) (*proto.HelloReply, error) {
-    //获取header*********
-	md, ok := metadata.FromIncomingContext(ctx)
+	md, ok := metadata.FromIncomingContext(ctx) //从ctx中获取header
 	if ok {
 		fmt.Println("get metadata error")
 	}
 	for key, val := range md {
 		fmt.Println(key, val)
 	}
-    //获取header中的name*********
-	//if nameSlice, ok := md["name"]; ok {
-	//	fmt.Println(nameSlice)
-	//	for i, e := range nameSlice {
-	//		fmt.Println(i, e)
-	//	}
-	//}
+
 	return &proto.HelloReply{
 		Message: "Hello " + req.Name,
 	}, nil
@@ -655,23 +789,500 @@ func main(){
 
 <img src="./assets/image-20231220191237282.png" alt="image-20231220191237282" style="zoom: 50%;" />
 
+### 3、普通RPC调用metadata示例
 
+#### client端的metadata操作
+
+下面的代码片段演示了client端如何设置和获取metadata。
+
+```go
+// unaryCallWithMetadata 普通RPC调用客户端metadata操作
+func unaryCallWithMetadata(c pb.GreeterClient, name string) {
+	fmt.Println("--- UnarySayHello client---")
+	md := metadata.Pairs( // 创建metadata
+		"token", "app-test-q1mi",
+		"request_id", "1234567",
+	)
+	
+	ctx := metadata.NewOutgoingContext(context.Background(), md) // 基于metadata创建context.
+	// RPC调用
+	var header, trailer metadata.MD
+	r, err := c.SayHello(
+		ctx,
+		&pb.HelloRequest{Name: name},
+		grpc.Header(&header),   // 接收服务端发来的header
+		grpc.Trailer(&trailer), // 接收服务端发来的trailer
+	)
+	if err != nil {
+		log.Printf("failed to call SayHello: %v", err)
+		return
+	}
+	// 从header中取location
+	if t, ok := header["location"]; ok {
+		fmt.Printf("location from header:\n")
+		for i, e := range t {
+			fmt.Printf(" %d. %s\n", i, e)
+		}
+	} else {
+		log.Printf("location expected but doesn't exist in header")
+		return
+	}
+    // 获取响应结果
+	fmt.Printf("got response: %s\n", r.Reply)
+	// 从trailer中取timestamp
+	if t, ok := trailer["timestamp"]; ok {
+		fmt.Printf("timestamp from trailer:\n")
+		for i, e := range t {
+			fmt.Printf(" %d. %s\n", i, e)
+		}
+	} else {
+		log.Printf("timestamp expected but doesn't exist in trailer")
+	}
+}
+```
+
+#### server端metadata操作
+
+下面的代码片段演示了server端如何设置和获取metadata。
+
+```go
+// UnarySayHello 普通RPC调用服务端metadata操作
+func (s *server) UnarySayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloResponse, error) {
+	defer func() { // 通过defer中设置trailer.
+		trailer := metadata.Pairs("timestamp", strconv.Itoa(int(time.Now().Unix())))
+		grpc.SetTrailer(ctx, trailer)
+	}()
+
+	// 从客户端请求上下文中读取metadata.
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Errorf(codes.DataLoss, "UnarySayHello: failed to get metadata")
+	}
+	if t, ok := md["token"]; ok {
+		fmt.Printf("token from metadata:\n")
+		if len(t) < 1 || t[0] != "app-test-q1mi" {
+			return nil, status.Error(codes.Unauthenticated, "认证失败")
+		}
+	}
+
+	// 创建和发送header.
+	header := metadata.New(map[string]string{"location": "BeiJing"})
+	grpc.SendHeader(ctx, header)
+	fmt.Printf("request received: %v, say hello...\n", in)
+
+	return &pb.HelloResponse{Reply: in.Name}, nil
+}
+```
+
+### 4、流式RPC调用metadata示例
+
+这里以双向流式RPC为例演示客户端和服务端如何进行metadata操作。
+
+#### client端的metadata操作
+
+下面的代码片段演示了client端在服务端流式RPC模式下如何设置和获取metadata。
+
+```go
+// bidirectionalWithMetadata 流式RPC调用客户端metadata操作
+func bidirectionalWithMetadata(c pb.GreeterClient, name string) {
+	md := metadata.Pairs("token", "app-test-q1mi") // 创建metadata和context.
+	ctx := metadata.NewOutgoingContext(context.Background(), md)
+
+	// 使用带有metadata的context执行RPC调用.
+	stream, err := c.BidiHello(ctx)
+	if err != nil {
+		log.Fatalf("failed to call BidiHello: %v\n", err)
+	}
+
+	go func() {
+		// 当header到达时读取header.
+		header, err := stream.Header()
+		if err != nil {
+			log.Fatalf("failed to get header from stream: %v", err)
+		}
+		if l, ok := header["location"]; ok { // 从返回响应的header中读取数据.
+			fmt.Printf("location from header:\n")
+			for i, e := range l {
+				fmt.Printf(" %d. %s\n", i, e)
+			}
+		} else {
+			log.Println("location expected but doesn't exist in header")
+			return
+		}
+
+		// 发送所有的请求数据到server.
+		for i := 0; i < 5; i++ {
+			if err := stream.Send(&pb.HelloRequest{Name: name}); err != nil {
+				log.Fatalf("failed to send streaming: %v\n", err)
+			}
+		}
+		stream.CloseSend()
+	}()
+
+	// 读取所有的响应.
+	var rpcStatus error
+	fmt.Printf("got response:\n")
+	for {
+		r, err := stream.Recv()
+		if err != nil {
+			rpcStatus = err
+			break
+		}
+		fmt.Printf(" - %s\n", r.Reply)
+	}
+	if rpcStatus != io.EOF {
+		log.Printf("failed to finish server streaming: %v", rpcStatus)
+		return
+	}
+
+	// 当RPC结束时读取trailer
+	trailer := stream.Trailer()
+	// 从返回响应的trailer中读取metadata.
+	if t, ok := trailer["timestamp"]; ok {
+		fmt.Printf("timestamp from trailer:\n")
+		for i, e := range t {
+			fmt.Printf(" %d. %s\n", i, e)
+		}
+	} else {
+		log.Printf("timestamp expected but doesn't exist in trailer")
+	}
+}
+```
+
+#### server端的metadata操作
+
+下面的代码片段演示了server端在服务端流式RPC模式下设置和操作metadata。
+
+```go
+// BidirectionalStreamingSayHello 流式RPC调用客户端metadata操作
+func (s *server) BidirectionalStreamingSayHello(stream pb.Greeter_BidiHelloServer) error {
+	defer func() { // 在defer中创建trailer记录函数的返回时间.
+		trailer := metadata.Pairs("timestamp", strconv.Itoa(int(time.Now().Unix())))
+		stream.SetTrailer(trailer)
+	}()
+
+	md, ok := metadata.FromIncomingContext(stream.Context()) // 从client读取metadata.
+	if !ok {
+		return status.Errorf(codes.DataLoss, "BidirectionalStreamingSayHello: failed to get metadata")
+	}
+	if t, ok := md["token"]; ok {
+		fmt.Printf("token from metadata:\n")
+		for i, e := range t {
+			fmt.Printf(" %d. %s\n", i, e)
+		}
+	}
+
+	// 创建和发送header.
+	header := metadata.New(map[string]string{"location": "X2Q"})
+	stream.SendHeader(header)
+
+	for { // 读取请求数据发送响应数据.
+		in, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Printf("request received %v, sending reply\n", in)
+		if err := stream.Send(&pb.HelloResponse{Reply: in.Name}); err != nil {
+			return err
+		}
+	}
+}
+```
 
 # grpc拦截器
 
-gRPC 提供了拦截器（Interceptors）的功能，这是一种中间件机制，可以用来处理或者改变 RPC 调用的行为。拦截器可以用来处理各种跨切面（cross-cutting）的任务，例如日志记录、身份验证、负载均衡等。
+gRPC 提供了拦截器（Interceptors）的功能，这是一种中间件机制，可以用来处理或者改变 RPC 调用的行为。拦截器可以用来处理各种跨切面的任务，例如日志记录、身份验证、负载均衡、指标收集以及许多其他可以跨 RPC 共享的功能。
 
-在 gRPC 中，有两种类型的拦截器：一种是 Unary Interceptor，用于处理普通的一元 RPC 调用；另一种是 Stream Interceptor，用于处理流式 RPC 调用。
+在 gRPC 中，有两种类型的拦截器：
+
+- Unary Interceptor普通拦截器（一元拦截器），用于处理普通的一元 RPC 调用；
+- Stream Interceptor流拦截器，用于处理流式 RPC 调用。而客户端和服务端都有自己的普通拦截器和流拦截器类型。因此，在 gRPC 中总共有四种不同类型的拦截器。
+
+## client端端拦截器
+
+### 普通拦截器
+
+[UnaryClientInterceptor](https://godoc.org/google.golang.org/grpc#UnaryClientInterceptor) 是客户端一元拦截器的类型，它的函数前面如下：
+
+```go
+func(ctx context.Context, method string, req, reply interface{}, cc *ClientConn, invoker UnaryInvoker, opts ...CallOption) error
+```
+
+一元拦截器的实现通常可以分为三个部分: 调用 RPC 方法之前（预处理）、调用 RPC 方法（RPC调用）、调用 RPC 方法之后（调用后）。
+
+- 预处理：用户可以通过检查传入的参数(如 RPC 上下文、方法字符串、要发送的请求和 CallOptions 配置)来获得有关当前 RPC 调用的信息。
+- RPC调用：预处理完成后，可以通过执行`invoker`执行 RPC 调用。
+- 调用后：一旦调用者返回应答和错误，用户就可以对 RPC 调用进行后处理。通常，它是关于处理返回的响应和错误的。 若要在 `ClientConn` 上安装一元拦截器，请使用`DialOptionWithUnaryInterceptor`的`DialOption`配置 Dial 。
+
+### 流拦截器
+
+[StreamClientInterceptor](https://godoc.org/google.golang.org/grpc#StreamClientInterceptor)是客户端流拦截器的类型。它的函数签名是
+
+```go
+func(ctx context.Context, desc *StreamDesc, cc *ClientConn, method string, streamer Streamer, opts ...CallOption) (ClientStream, error)
+```
+
+流拦截器的实现通常包括预处理和流操作拦截。
+
+- 预处理：类似于上面的普通拦截器。
+- 流操作拦截：流拦截器并没有事后进行 RPC 方法调用和后处理，而是拦截了用户在流上的操作。首先，拦截器调用传入的`streamer`以获取 `ClientStream`，然后包装 `ClientStream` 并用拦截逻辑重载其方法。最后，拦截器将包装好的 `ClientStream` 返回给用户进行操作。
+
+若要为 `ClientConn` 安装流拦截器，请使用`WithStreamInterceptor`的 DialOption 配置 Dial。
+
+## server端拦截器
+
+服务器端拦截器与客户端类似，但提供的信息略有不同。
+
+### 普通拦截器
+
+[UnaryServerInterceptor](https://godoc.org/google.golang.org/grpc#UnaryServerInterceptor)是服务端的一元拦截器类型，它的函数签名是
+
+```go
+func(ctx context.Context, req interface{}, info *UnaryServerInfo, handler UnaryHandler) (resp interface{}, err error)
+```
+
+服务端一元拦截器具体实现细节和客户端版本的类似。
+
+若要为服务端安装一元拦截器，请使用 `UnaryInterceptor` 的`ServerOption`配置 `NewServer`。
+
+### 流拦截器
+
+[StreamServerInterceptor](https://godoc.org/google.golang.org/grpc#StreamServerInterceptor)是服务端流式拦截器的类型，它的签名如下：
+
+```go
+func(srv interface{}, ss ServerStream, info *StreamServerInfo, handler StreamHandler) error
+```
+
+实现细节类似于客户端流拦截器部分。
+
+若要为服务端安装流拦截器，请使用 `StreamInterceptor` 的`ServerOption`来配置 `NewServer`。
+
+## 拦截器示例
+
+下面将演示一个完整的拦截器示例，我们为一元RPC和流式RPC服务都添加上拦截器。
+
+我们首先定义一个名为`valid`的校验函数。
+
+```go
+func valid(authorization []string) bool { // valid 校验认证信息.
+	if len(authorization) < 1 {
+		return false
+	}
+	token := strings.TrimPrefix(authorization[0], "Bearer ")
+	// 执行token认证的逻辑 ，这里是为了演示方便简单判断token是否与"some-secret-token"相等
+	return token == "some-secret-token"
+}
+```
+
+### 客户端拦截器定义
+
+#### 普通拦截器
+
+```go
+// unaryInterceptor 客户端普通拦截器
+func unaryInterceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+	var credsConfigured bool
+	for _, o := range opts {
+		_, ok := o.(grpc.PerRPCCredsCallOption)
+		if ok {
+			credsConfigured = true
+			break
+		}
+	}
+	if !credsConfigured {
+		opts = append(opts, grpc.PerRPCCredentials(oauth.NewOauthAccess(&oauth2.Token{
+			AccessToken: "some-secret-token",
+		})))
+	}
+	start := time.Now()
+	err := invoker(ctx, method, req, reply, cc, opts...)
+	end := time.Now()
+	fmt.Printf("RPC: %s, start time: %s, end time: %s, err: %v\n", method, start.Format("Basic"), end.Format(time.RFC3339), err)
+	return err
+}
+```
+
+其中，`grpc.PerRPCCredentials()`函数指明每个 RPC 请求使用的凭据，它接收一个`credentials.PerRPCCredentials`接口类型的参数。`credentials.PerRPCCredentials`接口的定义如下：
+
+```go
+type PerRPCCredentials interface {
+	// GetRequestMetadata 获取当前请求的元数据,如果需要则会设置token。
+	// 传输层在每个请求上调用，并且数据会被填充到headers或其他context。
+	GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error)
+	// RequireTransportSecurity 指示该 Credentials 的传输是否需要需要 TLS 加密
+	RequireTransportSecurity() bool
+}
+```
+
+而示例代码中使用的`oauth.NewOauthAccess()`是内置oauth包提供的一个函数，用来返回包含给定token的`PerRPCCredentials`。
+
+```go
+// NewOauthAccess constructs the PerRPCCredentials using a given token.
+func NewOauthAccess(token *oauth2.Token) credentials.PerRPCCredentials {
+	return oauthAccess{token: *token}
+}
+
+func (oa oauthAccess) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
+	ri, _ := credentials.RequestInfoFromContext(ctx)
+	if err := credentials.CheckSecurityLevel(ri.AuthInfo, credentials.PrivacyAndIntegrity); err != nil {
+		return nil, fmt.Errorf("unable to transfer oauthAccess PerRPCCredentials: %v", err)
+	}
+	return map[string]string{
+		"authorization": oa.token.Type() + " " + oa.token.AccessToken,
+	}, nil
+}
+
+func (oa oauthAccess) RequireTransportSecurity() bool {
+	return true
+}
+```
+
+#### 流式拦截器
+
+自定义一个`ClientStream`类型。
+
+```go
+type wrappedStream struct {
+	grpc.ClientStream
+}
+```
+
+`wrappedStream`重写`grpc.ClientStream`接口的`RecvMsg`和`SendMsg`方法。
+
+```go
+func (w *wrappedStream) RecvMsg(m interface{}) error {
+	logger("Receive a message (Type: %T) at %v", m, time.Now().Format(time.RFC3339))
+	return w.ClientStream.RecvMsg(m)
+}
+
+func (w *wrappedStream) SendMsg(m interface{}) error {
+	logger("Send a message (Type: %T) at %v", m, time.Now().Format(time.RFC3339))
+	return w.ClientStream.SendMsg(m)
+}
+
+func newWrappedStream(s grpc.ClientStream) grpc.ClientStream {
+	return &wrappedStream{s}
+}
+```
+
+> 这里的`wrappedStream`嵌入了`grpc.ClientStream`接口类型，然后又重新实现了一遍`grpc.ClientStream`接口的方法。
+
+下面就定义一个流式拦截器，最后返回上面定义的`wrappedStream`。
+
+```go
+// streamInterceptor 客户端流式拦截器
+func streamInterceptor(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
+	var credsConfigured bool
+	for _, o := range opts {
+		_, ok := o.(*grpc.PerRPCCredsCallOption)
+		if ok {
+			credsConfigured = true
+			break
+		}
+	}
+	if !credsConfigured {
+		opts = append(opts, grpc.PerRPCCredentials(oauth.NewOauthAccess(&oauth2.Token{
+			AccessToken: "some-secret-token",
+		})))
+	}
+	s, err := streamer(ctx, desc, cc, method, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return newWrappedStream(s), nil
+}
+```
+
+### 服务端拦截器定义
+
+#### 一元拦截器
+
+服务端定义一个一元拦截器，对从请求元数据中获取的`authorization`进行校验。
+
+```go
+// unaryInterceptor 服务端一元拦截器
+func unaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	// authentication (token verification)
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Errorf(codes.InvalidArgument, "missing metadata")
+	}
+	if !valid(md["authorization"]) {
+		return nil, status.Errorf(codes.Unauthenticated, "invalid token")
+	}
+	m, err := handler(ctx, req)
+	if err != nil {
+		fmt.Printf("RPC failed with error %v\n", err)
+	}
+	return m, err
+}
+```
+
+### 流拦截器
+
+同样为流RPC也定义一个从元数据中获取认证信息的流式拦截器。
+
+```go
+// streamInterceptor 服务端流拦截器
+func streamInterceptor(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+	// authentication (token verification)
+	md, ok := metadata.FromIncomingContext(ss.Context())
+	if !ok {
+		return status.Errorf(codes.InvalidArgument, "missing metadata")
+	}
+	if !valid(md["authorization"]) {
+		return status.Errorf(codes.Unauthenticated, "invalid token")
+	}
+
+	err := handler(srv, newWrappedStream(ss))
+	if err != nil {
+		fmt.Printf("RPC failed with error %v\n", err)
+	}
+	return err
+}
+```
+
+### 注册拦截器
+
+客户端注册拦截器
+
+```go
+conn, err := grpc.Dial("127.0.0.1:8972",
+	grpc.WithTransportCredentials(creds),
+	grpc.WithUnaryInterceptor(unaryInterceptor),
+	grpc.WithStreamInterceptor(streamInterceptor),
+)
+```
+
+服务端注册拦截器
+
+```go
+s := grpc.NewServer(
+	grpc.Creds(creds),
+	grpc.UnaryInterceptor(unaryInterceptor),
+	grpc.StreamInterceptor(streamInterceptor),
+)
+```
+
+## go-grpc-middleware
+
+社区中有很多开源的常用的grpc中间件——[go-grpc-middleware](https://github.com/grpc-ecosystem/go-grpc-middleware)，大家可以根据需要选择使用。
+
+[关于grpc开源的拦截器推荐](https://github.com/grpc-ecosystem/go-grpc-middleware)
+
+## 示例
 
 以下是在 Go 中使用 Unary Interceptor 的一个简单示例：
 
 ```go
-// HelloServer1 得有一个结构体，需要实现这个服务的全部方法,叫什么名字不重要
 type HelloServer1 struct {
 }
 
-func (HelloServer1) SayHello(ctx context.Context, request *hello_grpc.HelloRequest) (pd *hello_grpc.HelloResponse, err error) {
-	fmt.Println("入参：", request.Name, request.Message)
+func (HelloServer1) SayHello(ctx context.Context, req *hello_grpc.HelloRequest) (pd *hello_grpc.HelloResponse, err error) {
+	fmt.Println("入参：", req.Name, req.Message)
 	pd = new(hello_grpc.HelloResponse)
 	pd.Name = "你好"
 	pd.Message = "ok"
@@ -689,14 +1300,13 @@ func main() {
 		return handler(ctx, nil)
 	}
 
-	ServerInterceptorOption := grpc.UnaryInterceptor(Interceptor) // 创建拦截器
+	ServerInterceptorOption := grpc.UnaryInterceptor(Interceptor) // grpc中添加拦截器
 	s := grpc.NewServer(ServerInterceptorOption)                  // 创建一个包含拦截器的gRPC服务器实例。
 	server := HelloServer1{}
-	// 将server结构体注册为gRPC服务。
-	hello_grpc.RegisterHelloServiceServer(s, &server)
+	hello_grpc.RegisterHelloServiceServer(s, &server) 			// 将server结构体注册为gRPC服务。
 	fmt.Println("grpc server running :8080")
-	// 开始处理客户端请求。
-	err = s.Serve(listen)
+
+	err = s.Serve(listen) // 开始处理客户端请求。
 }
 ```
 
@@ -706,11 +1316,11 @@ func main() {
 
 同样的，你也可以创建和使用 Stream Interceptor，但是由于流式 RPC 的复杂性，其代码会稍微复杂一些。
 
-[关于grpc开源的拦截器推荐](https://github.com/grpc-ecosystem/go-grpc-middleware)
 
 
 
-#  实现grpc的auth认证
+
+#  grpc的auth认证
 
 auth认证作用：验证请求的用户身份，避免破坏者伪造身份获取他人数据隐私。auth认证是通过拦截器和metadata实现一起实现的
 
@@ -723,12 +1333,12 @@ gRPC的用户认证可以用两句话总结：
 
 
 
-
-
 下面是server和client的两种认证方式
 
+相同的server端代码：
+
 ```go
-func main() { //server端
+func main() {
 	listen, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		grpclog.Fatalf("Failed to listen: %v", err)
@@ -752,25 +1362,25 @@ func main() { //server端
 			password = value[0]
 		}
 
-		if appid != "111111" || password != "123456" { //这里可以是连接数据库认证
+		if appid != "111111" || password != "123456" { // 这里可以是连接数据库认证
 			return resp, status.Error(codes.PermissionDenied, "not authentication failed")
 		}
-
 		return handler(ctx, req)
 	}
 
 	ServerInterceptorOption := grpc.UnaryInterceptor(Interceptor) // 创建拦截器
 	s := grpc.NewServer(ServerInterceptorOption)                  // 创建一个包含拦截器的gRPC服务器实例。
 	server := HelloServer1{}
-	// 将server结构体注册为gRPC服务。
-	hello_grpc.RegisterHelloServiceServer(s, &server)
+	hello_grpc.RegisterHelloServiceServer(s, &server) 			// 将server结构体注册为gRPC服务。
 	fmt.Println("grpc server running :8080")
-	// 开始处理客户端请求。
-	err = s.Serve(listen)
+	
+	err = s.Serve(listen) // 开始处理客户端请求。
 }
 ```
 
-client端，方式一：通过grpc的拦截器和metadata实现auth验证
+## 通过grpc拦截器和metadata实现auth验证
+
+client端，方式一
 
 ```go
 func main() {
@@ -812,7 +1422,9 @@ func main() {
 }
 ```
 
-client端，方式二：通过grpc自带封装的方法实现auth认证
+## 通过grpc自带封装的方法实现auth认证
+
+client端，方式二
 
 ```go
 type ClientCredentials struct{}
@@ -878,38 +1490,105 @@ import "github.com/bufbuild/protovalidate-go"
 
 
 
-
-
-
-
 # grpc状态码和错误处理
 
-[grpc/doc/statuscodes.md at master · grpc/grpc (github.com)](https://github.com/grpc/grpc/blob/master/doc/statuscodes.md)
+[grpc状态码文档](https://github.com/grpc/grpc/blob/master/doc/statuscodes.md)
 
-grpc的异常处理
+**grpc code状态码**
+
+类似于HTTP定义了一套响应状态码，gRPC也定义有一些状态码。Go语言中此状态码本质上是一个uint32。
 
 ```go
-func (HelloServer) SayHello(ctx context.Context, request *hello_grpc.HelloRequest) (*hello_grpc.HelloResponse, error) {
+错误处理codes.NotFound //未找到的状态码
+```
+
+**grpc status错误处理**
+
+Go语言使用的gRPC Status 定义在[google.golang.org/grpc/status](https://pkg.go.dev/google.golang.org/grpc/status)，使用时需导入。
+
+```go
+import "google.golang.org/grpc/status"
+```
+
+RPC服务的方法应该返回 `nil` 或来自`status.Status`类型的错误。客户端可以直接访问错误。
+
+## 创建错误
+
+当遇到错误时，gRPC服务的方法函数应该创建一个 `status.Status`。通常我们会使用 `status.New`函数并传入适当的`status.Code`和错误描述来生成一个`status.Status`。调用`status.Err`方法便能将一个`status.Status`转为`error`类型。也存在一个简单的`status.Error`方法直接生成`error`。下面是两种方式的比较。
+
+```go
+st := status.New(codes.NotFound, "some description") // 创建status.Status
+err := st.Err()  // 转为error类型
+
+// vs.
+
+err := status.Error(codes.NotFound, "some description")
+```
+
+## 为错误添加其他详细信息
+
+在某些情况下，可能需要为服务器端的特定错误添加详细信息。`status.WithDetails`就是为此而存在的，它可以添加任意多个`proto.Message`，我们可以使用`google.golang.org/genproto/googleapis/rpc/errdetails`中的定义或自定义的错误详情。
+
+```go
+st := status.New(codes.ResourceExhausted, "Request limit exceeded.")
+ds, _ := st.WithDetails(
+	// proto.Message
+)
+return nil, ds.Err()
+```
+
+然后，客户端可以通过首先将普通`error`类型转换回`status.Status`，然后使用`status.Details`来读取这些详细信息。
+
+```go
+s := status.Convert(err)
+for _, d := range s.Details() {
+	// ...
+}
+```
+
+
+
+## 使用示例
+
+server服务端
+
+```go
+type HelloServer struct {
+}
+
+func (*HelloServer) SayHello(ctx context.Context, request *hello_grpc.HelloRequest) (*hello_grpc.HelloResponse, error) {
 	fmt.Println("入参：", request.Name, request.Message)
 	//return nil, status.Error(codes.NotFound, "记录未找到")
 	return nil, status.Errorf(codes.NotFound, "记录未找到:%s", request.Name)
 }
+
+func main() {
+	listen, err := net.Listen("tcp", ":8080") // 监听端口
+	if err != nil {
+		grpclog.Fatalf("Failed to listen: %v", err)
+	}
+
+	s := grpc.NewServer() // 创建一个gRPC服务器实例。
+	server := HelloServer{}
+	hello_grpc.RegisterHelloServiceServer(s, &server) // 将server结构体注册为gRPC服务。
+	fmt.Println("grpc server running :8080")
+
+	err = s.Serve(listen) // 开始处理客户端请求。
+}
 ```
 
-2.客户端
+client客户端
 
 ```go
 func main() {
-	addr := ":8080"
-	// 使用 grpc.Dial 创建一个到指定地址的 gRPC 连接。
-	// 此处使用不安全的证书来实现 SSL/TLS 连接
-	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// 使用 grpc.Dial 创建一个到指定地址的 gRPC 连接。 此处使用不安全的证书来实现 SSL/TLS 连接
+	conn, err := grpc.Dial(":8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf(fmt.Sprintf("grpc connect addr [%s] 连接失败 %s", addr, err))
+		log.Fatalf(fmt.Sprintf("grpc connect addr :8080 连接失败 %s", err))
 	}
 	defer conn.Close()
-	// 初始化客户端
-	client := hello_grpc.NewHelloServiceClient(conn)
+
+	client := hello_grpc.NewHelloServiceClient(conn) // 初始化客户端
 	ResponseBody, err := client.SayHello(context.Background(), &hello_grpc.HelloRequest{
 		Name:    "枫枫",
 		Message: "ok",

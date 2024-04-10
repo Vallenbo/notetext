@@ -1834,7 +1834,7 @@ print(set(t1))
  	1. 集合可以快速完成列表去重
  	2. 集合不支持下标
 
-# 推导式
+# 列表推导式
 
 作用：用一个表达式创建一个有规律的列表或控制一个有规律列表。
 
@@ -2250,7 +2250,6 @@ round(1.9)  # 2
 def add_num(a, b):
     return abs(a) + abs(b)
 
-
 result = add_num(-1, 2)
 print(result)  # 3
 ```
@@ -2260,7 +2259,6 @@ print(result)  # 3
 ``` python
 def sum_num(a, b, f):
     return f(a) + f(b)
-
 
 result = sum_num(-1, 2, abs)
 print(result)  # 3
@@ -2285,7 +2283,6 @@ def func(x):
     return x ** 2
 
 result = map(func, list1)
-
 print(result)  # <map object at 0x0000013769653198>
 print(list(result))  # [1, 4, 9, 16, 25]
 ```
@@ -2305,13 +2302,10 @@ import functools
 
 list1 = [1, 2, 3, 4, 5]
 
-
 def func(a, b):
     return a + b
 
-
 result = functools.reduce(func, list1)
-
 print(result)  # 15
 ```
 
@@ -2327,9 +2321,7 @@ list1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 def func(x):
     return x % 2 == 0
 
-
 result = filter(func, list1)
-
 print(result)  # <filter object at 0x0000017AF9DC3198>
 print(list(result))  # [2, 4, 6, 8, 10]
 ```
@@ -2399,13 +2391,11 @@ class Washer():
         # <__main__.Washer object at 0x0000024BA2B34240>
         print(self)
 
-
 # 2. 创建对象
 haier1 = Washer()
 # <__main__.Washer object at 0x0000018B7B224240>
 print(haier1)
 haier1.wash() # haier1对象调用实例方法
-
 
 haier2 = Washer()
 # <__main__.Washer object at 0x0000022005857EF0>
@@ -2480,7 +2470,6 @@ haier1 = Washer()
 # 添加实例属性
 haier1.width = 500
 haier1.height = 800
-
 haier1.print_info()
 ```
 
@@ -2512,7 +2501,6 @@ class Washer():
         # 类里面调用实例属性
         print(f'洗衣机的宽度是{self.width}, 高度是{self.height}')
 
-
 haier1 = Washer()
 haier1.print_info()
 ```
@@ -2540,7 +2528,6 @@ class Washer():
         print(f'洗衣机的宽度是{self.width}')
         print(f'洗衣机的高度是{self.height}')
 
-
 haier1 = Washer(10, 20)
 haier1.print_info()
 
@@ -2563,7 +2550,6 @@ class Washer():
     def __str__(self):
         return '这是海尔洗衣机的说明书'
 
-
 haier1 = Washer(10, 20)
 print(haier1) # 这是海尔洗衣机的说明书
 ```
@@ -2582,7 +2568,6 @@ class Washer():
 
     def __del__(self):
         print(f'{self}对象已经被删除')
-
 
 haier1 = Washer(10, 20)
 del haier1 # <__main__.Washer object at 0x0000026118223278>对象已经被删除
@@ -2612,8 +2597,6 @@ class 类名:
 class 类名(object):
 	代码
 ```
-
-
 
 Python面向对象的继承指的是多个类之间的所属关系，即子类默认继承父类的所有属性和方法，具体如下：
 
@@ -2658,7 +2641,6 @@ class Master(object):
 class Prentice(Master):
     pass
 
-
 daqiu = Prentice() # 3. 创建对象daqiu
 print(daqiu.kongfu) # 4. 对象访问实例属性
 daqiu.make_cake() # 5. 对象调用实例方法
@@ -2680,7 +2662,6 @@ class Master(object):
     def make_cake(self):
         print(f'运用{self.kongfu}制作煎饼果子')
 
-
 # 创建学校类
 class School(object):
     def __init__(self):
@@ -2689,10 +2670,8 @@ class School(object):
     def make_cake(self):
         print(f'运用{self.kongfu}制作煎饼果子')
 
-
 class Prentice(School, Master):
     pass
-
 
 daqiu = Prentice()
 print(daqiu.kongfu) # [黑马煎饼果子配方]
@@ -2715,14 +2694,12 @@ class Master(object):
     def make_cake(self):
         print(f'运用{self.kongfu}制作煎饼果子')
 
-
 class School(object):
     def __init__(self):
         self.kongfu = '[黑马煎饼果子配方]'
 
     def make_cake(self):
         print(f'运用{self.kongfu}制作煎饼果子')
-
 
 # 独创配方
 class Prentice(School, Master):
@@ -2731,7 +2708,6 @@ class Prentice(School, Master):
 
     def make_cake(self):
         print(f'运用{self.kongfu}制作煎饼果子')
-
 
 daqiu = Prentice()
 print(daqiu.kongfu) # [独创煎饼果子配方]
@@ -2755,14 +2731,12 @@ class Master(object):
     def make_cake(self):
         print(f'运用{self.kongfu}制作煎饼果子')
 
-
 class School(object):
     def __init__(self):
         self.kongfu = '[黑马煎饼果子配方]'
 
     def make_cake(self):
         print(f'运用{self.kongfu}制作煎饼果子')
-
 
 class Prentice(School, Master):
     def __init__(self):
@@ -3085,16 +3059,13 @@ class Dog(object):
     def work(self):  # 父类提供统一的方法，哪怕是空方法
         print('指哪打哪...')
 
-
 class ArmyDog(Dog):  # 继承Dog类
     def work(self):  # 子类重写父类同名方法
         print('追击敌人...')
 
-
 class DrugDog(Dog):
     def work(self):
         print('追查毒品...')
-
 
 class Person(object):
     def work_with_dog(self, dog):  # 传入不同的对象，执行不同的代码，即不同的work函数
@@ -3124,7 +3095,6 @@ daqiu.work_with_dog(dd)
 class Dog(object):
     tooth = 10
 
-
 wangcai = Dog()
 xiaohei = Dog()
 
@@ -3147,7 +3117,6 @@ print(xiaohei.tooth)  # 10
 ``` python
 class Dog(object):
     tooth = 10
-
 
 wangcai = Dog()
 xiaohei = Dog()
@@ -3177,7 +3146,6 @@ class Dog(object):
     def info_print(self):
         print(self.age)
 
-
 wangcai = Dog()
 print(wangcai.age)  # 5
 # print(Dog.age)  # 报错：实例属性不能通过类访问
@@ -3205,7 +3173,7 @@ class Dog(object):
 
     @classmethod
     def get_tooth(cls): # 类方法
-        return cls.__tooth
+        return cls.__tooth # 类属性
 	def info_print(self): # 示例方法
         print(self.age)
 
@@ -3239,12 +3207,105 @@ class Dog(object):
 
 
 wangcai = Dog()
-
 wangcai.info_print() # 静态方法既可以使用对象访问又可以使用类访问
 Dog.info_print()
 ```
 
+## 五、property属性
 
+### 1. property属性的介绍
+
+property属性就是将属性和方法进行绑定，调用属性同时会调用方法，这样做可以简化代码使用。
+
+**定义property属性有两种方式**
+
+1. 装饰器方式
+2. 类属性方式
+
+### 2. 装饰器方式
+
+```py
+class Person(object):
+    def __init__(self):
+        self.__age = 0
+
+    # 装饰器方式的property, 表示当获取属性时会执行下面property修饰的方法
+    @property
+    def age(self):
+        return self.__age
+
+    # 把age方法当做属性使用, 表示当设置属性时会执行下面修饰的方法
+    @age.setter
+    def age(self, new_age):
+        if new_age >= 150:
+            print("成精了")
+        else:
+            self.__age = new_age
+
+# 创建person
+p = Person()
+print(p.age)
+p.age = 100
+print(p.age)
+p.age = 1000
+```
+
+**运行结果:**
+
+```py
+0
+100
+成精了
+```
+
+**代码说明:**
+
+- @property 表示把方法当做属性使用, 表示当获取属性时会执行下面修饰的方法
+- @方法名.setter 表示把方法当做属性使用,表示当设置属性时会执行下面修饰的方法
+- 装饰器方式的property属性修饰的方法名一定要一样。
+
+### 3. 类属性方式
+
+```py
+class Person(object):
+    def __init__(self):
+        self.__age = 0
+
+    def get_age(self):
+        """当获取age属性的时候会执行该方法"""
+        return self.__age
+
+    def set_age(self, new_age):
+        """当设置age属性的时候会执行该方法"""
+        if new_age >= 150:
+            print("成精了")
+        else:
+            self.__age = new_age
+
+    # 添加类属性方法，property包含三个参数：fget、fset、fdel
+    age = property(get_age, set_age)
+
+# 创建person
+p = Person()
+print(p.age)
+p.age = 100
+print(p.age)
+p.age = 1000
+```
+
+**运行结果:**
+
+```py
+0
+100
+成精了
+```
+
+**代码说明:**
+
+- property的参数说明:
+  - 第一个参数是获取属性时要执行的方法
+  - 第二个参数是设置属性时要执行的方法
 
 ## 类的常用方法：
 
@@ -3259,6 +3320,542 @@ getattr(D，'成员') 方法：获取D类/对象成员的属性值
 setattr(D，'成员'，‘属性值’) 方法：设置D类/对象的成员的属性值
 
 delattr(D，‘属性’) 方法：删除D类/对象的属性
+
+
+
+# with语句和上下文管理器
+
+## 1. with语句的使用
+
+**基础班向文件中写入数据的示例代码:**
+
+```py
+ f = open("1.txt", "w")  # 1、以写的方式打开文件
+ f.write("hello world")  # 2、写入文件内容
+ f.close()  # 3、关闭文件
+```
+
+**代码说明:**
+
+- 文件使用完后必须关闭，因为文件对象会占用操作系统的资源，并且操作系统同一时间能打开的文件数量也是有限的
+
+**这种写法可能出现一定的安全隐患，错误代码如下:**
+
+```py
+ f = open("1.txt", "r") # 1、以读的方式打开文件
+ f.write("hello world") # 2、读取文件内容
+ f.close()  # 3、关闭文件
+```
+
+**运行结果:**
+
+```py
+Traceback (most recent call last):
+  File "/home/python/Desktop/test/xxf.py", line 4, in <module>
+    f.write("hello world")
+io.UnsupportedOperation: not writable
+```
+
+**代码说明:**
+
+- 由于文件读写时都有可能产生IOError，一旦出错，后面的f.close()就不会调用。
+- 为了保证无论是否出错都能正确地关闭文件，我们可以使用try ... finally来解决
+
+**安全写法, 代码如下:**
+
+```py
+try:
+    f = open("1.txt", "r")	# 1、以读的方式打开文件
+    f.write("xxxxx")	 # 2、读取文件内容
+
+except IOError as e:
+    print("文件操作出错", e)
+
+finally:
+    f.close() # 3、关闭文件
+```
+
+**运行结果:**
+
+```py
+文件操作出错 not writable
+```
+
+这种方法虽然代码运行良好,但是缺点就是代码过于冗长,并且需要添加try-except-finally语句,不是很方便,也容易忘记.
+
+在这种情况下,**Python提供了 with 语句的这种写法，既简单又安全，并且 with 语句执行完成以后自动调用关闭文件操作，即使出现异常也会自动调用关闭文件操作**。
+
+**with 语句的示例代码:**
+
+```py
+with open("1.txt", "w") as f:	# 1、以写的方式打开文件
+    f.write("hello world")		# 2、读取文件内容
+```
+
+## 2. 上下文管理器
+
+一个类只要实现了`__enter__()和__exit__()`这个两个方法，通过该类创建的对象我们就称之为上下文管理器。
+
+上下文管理器可以使用 with 语句，**with语句之所以这么强大，背后是由上下文管理器做支撑的**，也就是说刚才使用 open 函数创建的文件对象就是就是一个上下文管理器对象。
+
+**自定义上下文管理器类,模拟文件操作:**
+
+定义一个File类，实现 `__enter__() 和 __exit__()`方法，然后使用 with 语句来完成操作文件， 示例代码:
+
+```py
+class File(object):
+    # 初始化方法
+    def __init__(self, file_name, file_model):
+        self.file_name = file_name # 定义变量保存文件名和打开模式
+        self.file_model = file_model
+
+    # 上文方法
+    def __enter__(self):
+        print("进入上文方法")
+        self.file = open(self.file_name,self.file_model)	# 返回文件资源
+        return self.file
+
+    # 下文方法
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        print("进入下文方法")
+        self.file.close()
+
+if __name__ == '__main__':
+    with File("1.txt", "r") as file:	# 使用with管理文件
+        file_data = file.read()
+        print(file_data)
+```
+
+**运行结果:**
+
+```py
+进入上文方法
+hello world
+进入下文方法
+```
+
+**代码说明:**
+
+- `__enter__`表示上文方法，需要返回一个操作文件对象
+- `__exit__`表示下文方法，with语句执行完成会自动执行，即使出现异常也会执行该方法。
+
+## 3. 上下文管理器的另外一种实现方式
+
+假如想要让一个函数成为上下文管理器，Python 还提供了一个 @contextmanager 的装饰器，更进一步简化了上下文管理器的实现方式。通过 yield 将函数分割成两部分，yield 上面的语句在 `__enter__` 方法中执行，yield 下面的语句在 `__exit__` 方法中执行，紧跟在 yield 后面的参数是函数的返回值。
+
+```py
+# 导入装饰器
+from contextlib import contextmanager
+
+# 装饰器装饰函数，让其称为一个上下文管理器对象
+@contextmanager
+def my_open(path, mode):
+    try:
+        file = open(file_name, file_mode)	# 打开文件
+        yield file	# yield之前的代码好比是上文方法
+    except Exception as e:
+        print(e)
+    finally:
+        print("over")
+        file.close() # yield下面的代码好比是下文方法
+
+# 使用with语句
+with my_open('out.txt', 'w') as f:
+    f.write("hello , the simplest context manager")
+```
+
+
+
+# 生成器的创建方式
+
+## 1. 生成器的介绍
+
+根据程序员制定的规则循环生成数据，当条件不成立时则生成数据结束。数据不是一次性全部生成处理，而是使用一个，再生成一个，可以**节约大量的内存**。
+
+## 2. 创建生成器的方式
+
+1. 生成器推导式
+2. yield 关键字
+
+**生成器推导式:**
+
+- 与列表推导式类似，只不过生成器推导式使用小括号
+
+```py
+# 创建生成器
+my_generator = (i * 2 for i in range(5))
+print(my_generator)
+
+# next获取生成器下一个值
+# value = next(my_generator)
+# print(value)
+
+# 遍历生成器
+for value in my_generator:
+    print(value)
+```
+
+**代码说明:**
+
+- next 函数获取生成器中的下一个值
+- for 循环遍历生成器中的每一个值
+
+**运行结果:**
+
+```py
+<generator object <genexpr> at 0x101367048>
+0
+2
+4
+6
+8
+```
+
+**yield 关键字:**
+
+- 只要在def函数里面看到有 yield 关键字那么就是生成器
+
+```py
+def mygenerater(n):
+    for i in range(n):
+        print('开始生成...')
+        yield i
+        print('完成一次...')
+
+if __name__ == '__main__':
+    g = mygenerater(2)
+    # 获取生成器中下一个值
+    # result = next(g)
+    # print(result)
+
+    # while True:
+    #     try:
+    #         result = next(g)
+    #         print(result)
+    #     except StopIteration as e:
+    #         break
+
+    # for遍历生成器, for 循环内部自动处理了停止迭代异常，使用起来更加方便
+    for i in g:
+        print(i)
+```
+
+**代码说明:**
+
+- 代码执行到 yield 会暂停，然后把结果返回出去，下次启动生成器会在暂停的位置继续往下执行
+- 生成器如果把数据生成完成，再次获取生成器中的下一个数据会抛出一个StopIteration 异常，表示停止迭代异常
+- while 循环内部没有处理异常操作，需要手动添加处理异常操作
+- for 循环内部自动处理了停止迭代异常，使用起来更加方便，推荐大家使用。
+
+**运行结果:**
+
+```py
+开始生成...
+0
+完成一次...
+开始生成...
+1
+完成一次...
+```
+
+## 3. 生成器的使用场景
+
+数学中有个著名的斐波拉契数列（Fibonacci），数列中第一个数为0，第二个数为1，其后的每一个数都可由前两个数相加得到：
+
+0, 1, 1, 2, 3, 5, 8, 13, 21, 34, ...
+
+现在我们使用生成器来实现这个斐波那契数列，每次取值都通过算法来生成下一个数据, **生成器每次调用只生成一个数据，可以节省大量的内存。**
+
+```py
+def fibonacci(num):
+    a = 0
+    b = 1
+
+    # 记录生成fibonacci数字的下标
+    current_index = 0
+    while current_index < num:
+        result = a
+        a, b = b, a + b
+        current_index += 1
+        yield result # 代码执行到yield会暂停，然后把结果返回出去，下次启动生成器会在暂停的位置继续往下执行
+
+fib = fibonacci(5)
+for value in fib: # 遍历生成的数据
+    print(value)
+```
+
+**运行结果:**
+
+```py
+0
+1
+1
+2
+3
+```
+
+
+
+# 深拷贝和浅拷贝
+
+## 1. 浅拷贝
+
+copy函数是浅拷贝，只对可变类型的第一层对象进行拷贝，对拷贝的对象开辟新的内存空间进行存储，不会拷贝对象内部的子对象。
+
+**不可变类型的浅拷贝示例代码:**
+
+```py
+import copy  # 使用浅拷贝需要导入copy模块
+
+# 不可变类型有: 数字、字符串、元组
+a1 = 123123
+b1 = copy.copy(a1)  # 使用copy模块里的copy()函数就是浅拷贝了
+# 查看内存地址
+print(id(a1))
+print(id(b1))
+print("-" * 10)
+
+a2 = "abc"
+b2 = copy.copy(a2)
+# 查看内存地址
+print(id(a2))
+print(id(b2))
+print("-" * 10)
+
+a3 = (1, 2, ["hello", "world"])
+b3 = copy.copy(a3)
+# 查看内存地址
+print(id(a3))
+print(id(b3))
+```
+
+**运行结果:**
+
+```py
+140459558944048
+140459558944048
+----------
+140459558648776
+140459558648776
+----------
+140459558073328
+140459558073328
+```
+
+**不可变类型的浅拷贝说明:**
+
+- **通过上面的执行结果可以得知，不可变类型进行浅拷贝不会给拷贝的对象开辟新的内存空间，而只是拷贝了这个对象的引用。**
+
+**可变类型的浅拷贝示例代码:**
+
+```py
+import copy # 使用浅拷贝需要导入copy模块
+
+# 可变类型有: 列表、字典、集合
+a1 = [1, 2]
+b1 = copy.copy(a1) # 使用copy模块里的copy()函数就是浅拷贝了
+# 查看内存地址
+print(id(a1))
+print(id(b1))
+print("-" * 10)
+
+a2 = {"name": "张三", "age": 20}
+b2 = copy.copy(a2)
+# 查看内存地址
+print(id(a2))
+print(id(b2))
+print("-" * 10)
+
+a3 = {1, 2, "王五"}
+b3 = copy.copy(a3)
+# 查看内存地址
+print(id(a3))
+print(id(b3))
+print("-" * 10)
+
+a4 = [1, 2, [4, 5]]
+# 注意：浅拷贝只会拷贝父对象，不会对子对象进行拷贝
+b4 = copy.copy(a4) # 使用copy模块里的copy()函数就是浅拷贝了
+# 查看内存地址
+print(id(a4))
+print(id(b4))
+print("-" * 10)
+# 查看内存地址
+print(id(a4[2]))
+print(id(b4[2]))
+
+# 修改数据
+a4[2][0] = 6
+
+# 子对象的数据会受影响
+print(a4)
+print(b4)
+```
+
+**运行结果:**
+
+```py
+139882899585608
+139882899585800
+----------
+139882919626432
+139882919626504
+----------
+139882919321672
+139882899616264
+----------
+139882899587016
+139882899586952
+----------
+139882899693640
+139882899693640
+[1, 2, [6, 5]]
+[1, 2, [6, 5]]
+```
+
+**可变类型的浅拷贝说明:**
+
+- **通过上面的执行结果可以得知，可变类型进行浅拷贝只对可变类型的第一层对象进行拷贝，对拷贝的对象会开辟新的内存空间进行存储，子对象不进行拷贝。**
+
+## 2. 深拷贝
+
+deepcopy函数是深拷贝, 只要发现对象有可变类型就会对该对象到最后一个可变类型的每一层对象就行拷贝, 对每一层拷贝的对象都会开辟新的内存空间进行存储。
+
+**不可变类型的深拷贝示例代码:**
+
+```py
+import copy  # 使用深拷贝需要导入copy模块
+
+# 不可变类型有: 数字、字符串、元组
+a1 = 1
+b1 = copy.deepcopy(a1)  # 使用copy模块里的deepcopy()函数就是深拷贝了
+# 查看内存地址
+print(id(a1))
+print(id(b1))
+print("-" * 10)
+
+a2 = "张三"
+b2 = copy.deepcopy(a2)
+# 查看内存地址
+print(id(a2))
+print(id(b2))
+print("-" * 10)
+
+a3 = (1, 2)
+b3 = copy.deepcopy(a3)
+# 查看内存地址
+print(id(a3))
+print(id(b3))
+print("-" * 10)
+
+# 注意: 元组里面要是有可变类型对象，发现对象有可变类型就会该对象到最后一个可变类型的每一层对象进行拷贝
+a4 = (1, ["李四"])
+b4 = copy.deepcopy(a4)
+# 查看内存地址
+print(id(a4))
+print(id(b4))
+# 元组里面的可变类型子对象也会进行拷贝
+print(id(a4[1]))
+print(id(b4[1]))
+```
+
+**运行结果:**
+
+```py
+9289120
+9289120
+----------
+140115621848320
+140115621848320
+----------
+140115621859592
+140115621859592
+----------
+140115602480584
+140115621834568
+140115602328136
+140115602436168
+```
+
+**不可变类型的深拷贝说明:**
+
+- 通过上面的执行结果可以得知：
+  - **不可变类型进行深拷贝如果子对象没有可变类型则不会进行拷贝，而只是拷贝了这个对象的引用，否则会对该对象到最后一个可变类型的每一层对象就行拷贝, 对每一层拷贝的对象都会开辟新的内存空间进行存储**
+
+**可变类型的深拷贝示例代码:**
+
+```py
+import copy  # 使用深拷贝需要导入copy模块
+
+# 可变类型有: 列表、字典、集合
+a1 = [1, 2]
+b1 = copy.deepcopy(a1)  # 使用copy模块里的deepcopy()函数就是深拷贝了
+# 查看内存地址
+print(id(a1))
+print(id(b1))
+print("-" * 10)
+
+a2 = {"name": "张三"}
+b2 = copy.deepcopy(a2)
+# 查看内存地址
+print(id(a2))
+print(id(b2))
+print("-" * 10)
+
+a3 = {1, 2}
+b3 = copy.deepcopy(a3)
+# 查看内存地址
+print(id(a3))
+print(id(b3))
+print("-" * 10)
+
+a4 = [1, 2, ["李四", "王五"]]
+b4 = copy.deepcopy(a4)  # 使用copy模块里的deepcopy()函数就是深拷贝了
+# 查看内存地址
+print(id(a4))
+print(id(b4))
+# 查看内存地址
+print(id(a4[2]))
+print(id(b4[2]))
+
+a4[2][0] = "王五"
+# 因为列表的内存地址不同，所以数据不会收到影响
+print(a4)
+print(b4)
+```
+
+**运行结果:**
+
+```py
+140348291721736
+140348291721928
+----------
+140348311762624
+140348311221592
+----------
+140348311457864
+140348291752456
+----------
+140348291723080
+140348291723144
+140348291723208
+140348291723016
+[1, 2, ['王五', '王五']]
+[1, 2, ['李四', '王五']]
+```
+
+**可变类型的深拷贝说明:**
+
+- 通过上面的执行结果可以得知, 可变类型进行深拷贝会对该对象到最后一个可变类型的每一层对象就行拷贝, 对每一层拷贝的对象都会开辟新的内存空间进行存储。
+
+## 3. 浅拷贝和深拷贝的区别
+
+- 浅拷贝最多拷贝对象的一层
+- 深拷贝可能拷贝对象的多层
+
+
+
+
 
 # 异常
 
@@ -3570,7 +4167,6 @@ def testA(a, b):
 def testA(a, b):
     print(a + b)
 
-
 testA(1, 1)
 ```
 
@@ -3648,10 +4244,8 @@ my_test(1, 1)
 ``` python
 __all__ = ['testA']
 
-
 def testA():
     print('testA')
-
 
 def testB():
     print('testB')
@@ -3689,7 +4283,6 @@ testB()
 # my_module1
 print(1)
 
-
 def info_print1():
     print('my_module1')
 ```
@@ -3697,7 +4290,6 @@ def info_print1():
 ``` python
 # my_module2
 print(2)
-
 
 def info_print2():
     print('my_module2')

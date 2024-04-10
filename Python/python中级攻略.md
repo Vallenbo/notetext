@@ -26,6 +26,8 @@
 
 对于多核cpu处理多任务，操作系统会给cpu的每个内核安排一个执行的软件，**多个内核是真正的一起执行软件**。这里需要注意**多核cpu是并行的执行多任务，始终有多个软件一起执行**。
 
+在 Python 中处理 CPU 密集型任务时，应该优先选择多进程。当涉及到 I/O 密集型任务时，可以考虑使用多线程。
+
 
 
 ## 进程
@@ -73,10 +75,10 @@ import multiprocessing #导入进程包
 **Process([group [, target [, name [, args [, kwargs]]]]])**
 
 - group：指定进程组，目前只能使用None
-- target：执行的目标任务名
+- target：执行的目标任务名，即需要被执行的函数
 - name：进程名字
-- args：以元组方式给执行任务传参
-- kwargs：以字典方式给执行任务传参
+- args：以`元组`方式给执行任务传参
+- kwargs：以`字典`方式给执行任务传参
 
 **Process创建的实例对象的常用方法:**
 
@@ -86,7 +88,7 @@ import multiprocessing #导入进程包
 
 **Process创建的实例对象的常用属性:**
 
-name：当前进程的别名，默认为Process-N，N为从1开始递增的整数
+name：当前进程的别名，默认为Process-N（N为从1开始递增的整数）
 
 ### 3. 多进程完成多任务的代码
 
@@ -111,8 +113,8 @@ if __name__ == '__main__':
     # group: 表示进程组，目前只能使用None
     # target: 表示执行的目标任务名(函数名、方法名)
     # name: 进程名称, 默认是Process-1, .....
-    dance_process = multiprocessing.Process(target=dance, name="myprocess1")
-    sing_process = multiprocessing.Process(target=sing)
+    dance_process = multiprocessing.Process(target=dance, name="myprocess1") # 创建子进程对象
+    sing_process = multiprocessing.Process(target=sing) # 创建子进程对象
 
     # 启动子进程执行对应的任务
     dance_process.start()
@@ -129,9 +131,6 @@ if __name__ == '__main__':
 唱歌中...
 跳舞中...
 唱歌中...
-跳舞中...
-唱歌中...
-跳舞中...
 ```
 
 
@@ -250,6 +249,9 @@ if __name__ == '__main__':
     # 启动子进程执行对应的任务
     dance_process.start()
     sing_process.start()
+```
+
+```python
 main: 70860
 main: <_MainProcess(MainProcess, started)>
 dance: 70861
@@ -322,7 +324,6 @@ if __name__ == '__main__':
 import multiprocessing
 import time
 
-
 # 带有参数的任务
 def task(count):
     for i in range(count):
@@ -330,7 +331,6 @@ def task(count):
         time.sleep(0.2)
     else:
         print("任务执行完成")
-
 
 if __name__ == '__main__':
     # 创建子进程
@@ -371,13 +371,10 @@ def add_data():
         g_list.append(i)
         print("add:", i)
         time.sleep(0.2)
-
     print("add_data:", g_list) # 代码执行到此，说明数据添加完成
-
 
 def read_data():
     print("read_data", g_list)
-
 
 if __name__ == '__main__':
     add_data_process = multiprocessing.Process(target=add_data)  # 创建添加数据的子进程
@@ -388,7 +385,6 @@ if __name__ == '__main__':
     read_data_process.start()
 
     print("main:", g_list)
-
     # 总结: 多进程之间不共享全局变量
 ```
 
@@ -409,9 +405,37 @@ read_data []
 
 <img src="./assets/进程关系-1711976460500-5.png" alt="进程关系" style="zoom:67%;" />
 
-### 3. 进程之间不共享全局变量的小结
+### 3. 进程之间共享全局变量方法
 
-- 创建子进程会对主进程资源进行拷贝，也就是说子进程是主进程的一个副本，好比是一对双胞胎，之所以进程之间不共享全局变量，是因为操作的不是同一个进程里面的全局变量，只不过不同进程里面的全局变量名字相同而已。
+`multiprocessing` 模块提供了一些机制来在进程之间共享数据，例如使用 `multiprocessing.Queue`、`multiprocessing.Pipe`、`multiprocessing.Array` 和 `multiprocessing.Value` 等。通过这些工具，你可以在多个进程之间安全地传递和共享数据。
+
+以下是一个简单的示例，展示如何使用 `multiprocessing.Queue` 在两个子进程之间共享数据：
+
+```python
+import multiprocessing
+
+def producer(queue):
+    for i in range(5):
+        queue.put(i)
+        print(f"Producer put {i} into queue")
+
+def consumer(queue):
+    while not queue.empty():
+        item = queue.get()
+        print(f"Consumer got {item} from queue")
+
+if __name__ == "__main__":
+    queue = multiprocessing.Queue()
+    
+    producer_process = multiprocessing.Process(target=producer, args=(queue,))
+    consumer_process = multiprocessing.Process(target=consumer, args=(queue,))
+    
+    producer_process.start()
+    consumer_process.start()
+    
+    producer_process.join()
+    consumer_process.join()
+```
 
 ### 4. 主进程会等待所有的子进程执行结束再结束
 
@@ -434,7 +458,6 @@ if __name__ == '__main__':
     time.sleep(0.5) # 主进程延时0.5秒钟
     print("over")
     exit()
-
     # 总结： 主进程会等待所有的子进程执行完成以后程序再退出
 ```
 
@@ -476,7 +499,6 @@ over
 import multiprocessing
 import time
 
-
 # 定义进程所需要执行的任务
 def task():
     for i in range(10):
@@ -484,18 +506,16 @@ def task():
         time.sleep(0.2)
 
 if __name__ == '__main__':
-    # 创建子进程
-    sub_process = multiprocessing.Process(target=task)
+    sub_process = multiprocessing.Process(target=task) # 创建子进程
     # 设置守护主进程，主进程退出子进程直接销毁，子进程的生命周期依赖与主进程
     # sub_process.daemon = True
     sub_process.start()
 
     time.sleep(0.5)
     print("over")
-    # 让子进程销毁
-    sub_process.terminate()
+    
+    sub_process.terminate() # 让子进程销毁
     exit()
-
     # 总结： 主进程会等待所有的子进程执行完成以后程序再退出
     # 如果想要主进程退出子进程销毁，可以设置守护主进程或者在主进程退出之前让子进程销毁
 ```
@@ -538,8 +558,7 @@ over
 ### 1. 导入线程模块
 
 ```py
-#导入线程模块
-import threading
+import threading # 导入线程模块
 ```
 
 ### 2. 线程类Thread参数说明
@@ -626,7 +645,6 @@ Thread类执行任务并给任务传参数有两种方式:
 import threading
 import time
 
-
 # 带有参数的任务
 def task(count):
     for i in range(count):
@@ -634,7 +652,6 @@ def task(count):
         time.sleep(0.2)
     else:
         print("任务执行完成")
-
 
 if __name__ == '__main__':
     # 创建子线程
@@ -662,7 +679,6 @@ if __name__ == '__main__':
 import threading
 import time
 
-
 # 带有参数的任务
 def task(count):
     for i in range(count):
@@ -670,7 +686,6 @@ def task(count):
         time.sleep(0.2)
     else:
         print("任务执行完成")
-
 
 if __name__ == '__main__':
     # 创建子线程
@@ -703,14 +718,11 @@ if __name__ == '__main__':
 import threading
 import time
 
-
 def task():
     time.sleep(1)
     print("当前线程:", threading.current_thread().name)
 
-
 if __name__ == '__main__':
-
    for _ in range(5):
        sub_thread = threading.Thread(target=task)
        sub_thread.start()
@@ -801,7 +813,6 @@ if __name__ == '__main__':
     # sub_thread.setDaemon(True)
     sub_thread.start()
 
-   
     time.sleep(1) # 主线程延时1秒
     print("over")
 ```
@@ -834,15 +845,13 @@ def write_data(): # 写入数据任务
         time.sleep(0.1)
     print("write_data:", my_list)
 
-
 def read_data(): # 读取数据任务
     print("read_data:", my_list)
-
 
 if __name__ == '__main__':
     write_thread = threading.Thread(target=write_data)  # 创建写入数据的线程
     read_thread = threading.Thread(target=read_data) # 创建读取数据的线程
-
+    
     write_thread.start()
     # 延时
     # time.sleep(1)
@@ -875,11 +884,9 @@ g_num = 0 # 定义全局变量
 # 循环一次给全局变量加1
 def sum_num1():
     for i in range(1000000):
-        global g_num
+        global g_num # 声明在函数内部要修改的变量，如果在函数内部要修改全局变量的值，需要使用 global 关键字显式声明。
         g_num += 1
-
     print("sum1:", g_num)
-
 
 # 循环一次给全局变量加1
 def sum_num2():
@@ -887,7 +894,6 @@ def sum_num2():
         global g_num
         g_num += 1
     print("sum2:", g_num)
-
 
 if __name__ == '__main__':
     # 创建两个线程
@@ -939,9 +945,7 @@ def sum_num1():
     for i in range(1000000):
         global g_num
         g_num += 1
-
     print("sum1:", g_num)
-
 
 # 循环1000000次每次给全局变量加1
 def sum_num2():
@@ -949,7 +953,6 @@ def sum_num2():
         global g_num
         g_num += 1
     print("sum2:", g_num)
-
 
 if __name__ == '__main__':
     # 创建两个线程
@@ -973,8 +976,6 @@ sum2: 2000000
 ```
 
 ## 互斥锁
-
-
 
 ### 1.互斥锁的概念
 
@@ -1018,10 +1019,8 @@ def sum_num1():
     for i in range(1000000):
         global g_num
         g_num += 1
-
     print("sum1:", g_num)
     lock.release() # 释放锁
-
 
 # 循环一次给全局变量加1
 def sum_num2():
@@ -1033,7 +1032,6 @@ def sum_num2():
     print("sum2:", g_num)
     lock.release() # 释放锁
 
-
 if __name__ == '__main__':
     # 创建两个线程
     first_thread = threading.Thread(target=sum_num1)
@@ -1041,7 +1039,6 @@ if __name__ == '__main__':
     # 启动线程
     first_thread.start()
     second_thread.start()
-
     # 提示：加上互斥锁，那个线程抢到这个锁我们决定不了，那线程抢到锁那个线程先执行，没有抢到的线程需要等待
     # 加上互斥锁多任务瞬间变成单任务，性能会下降，也就是说同一时刻只能有一个线程去执行
 ```
@@ -1091,7 +1088,6 @@ def get_value(index): # 根据下标去取值， 保证同一时刻只能有一�
     time.sleep(0.2)
     lock.release() # 释放锁
 
-
 if __name__ == '__main__':
     # 模拟大量线程去执行取值操作
     for i in range(30):
@@ -1123,7 +1119,6 @@ def get_value(index):
     time.sleep(0.2)
     lock.release()  # 释放锁
 
-
 if __name__ == '__main__':
     for i in range(30):  # 模拟大量线程去执行取值操作
         sub_thread = threading.Thread(target=get_value, args=(i,))
@@ -1134,20 +1129,14 @@ if __name__ == '__main__':
 
 ## 进程和线程的对比
 
-### 1. 进程和线程的对比的三个方向
-
-1. 关系对比
-2. 区别对比
-3. 优缺点对比
-
-### 2. 关系对比
+### 关系对比
 
 1. 线程是依附在进程里面的，没有进程就没有线程。
 2. 一个进程默认提供一条线程，进程可以创建多个线程。
 
 <img src="./assets/关系-1711976708531-8.png" alt="对比" style="zoom:50%;" />
 
-### 2. 区别对比
+### 区别对比
 
 1. 进程之间不共享全局变量
 2. 线程之间共享全局变量，但是要注意资源竞争的问题，解决办法: 互斥锁或者线程同步
@@ -1156,7 +1145,7 @@ if __name__ == '__main__':
 5. 线程不能够独立执行，必须依存在进程中
 6. 多进程开发比单进程多线程开发稳定性要强
 
-### 3. 优缺点对比
+### 优缺点对比
 
 - 进程优缺点:
   - 优点：可以用多核
@@ -1173,9 +1162,7 @@ if __name__ == '__main__':
 
 ### 1. 问题思考
 
-到目前为止我们学习了 ip 地址和端口号还有 tcp 传输协议，为了保证数据的完整性和可靠性我们使用 tcp 传输协议进行数据的传输，为了能够找到对应设备我们需要使用 ip 地址，为了区别某个端口的应用程序接收数据我们需要使用端口号，那么通信数据是如何完成传输的呢？
-
-使用 **socket** 来完成
+到目前为止我们学习了 ip 地址和端口号还有 tcp 传输协议，为了保证数据的完整性和可靠性我们使用 tcp 传输协议进行数据的传输，为了能够找到对应设备我们需要使用 ip 地址，为了区别某个端口的应用程序接收数据我们需要使用端口号，那么通信数据是如何完成传输的呢？	使用 **socket** 来完成
 
 ### 2. socket 的概念
 
@@ -1191,11 +1178,9 @@ socket (简称 套接字) 是**进程之间通信一个工具**，好比现实�
 
 ### 3. socket 的作用
 
-负责**进程之间的网络数据传输**，好比数据的搬运工。
+负责**进程之间的网络数据传输**，好比数据的搬运工。 不夸张的说，只要跟**网络相关的应用程序或者软件都使用到了 socket** 。
 
-### 4. socket 使用场景
 
-不夸张的说，只要跟**网络相关的应用程序或者软件都使用到了 socket** 。
 
 ## TCP 网络应用程序开发流程
 
@@ -1248,9 +1233,10 @@ TCP 网络应用程序开发分为:
 
 ### 2. socket 类的介绍
 
-导入 socket 模块 **import socket**
-
-创建客户端 socket 对象 **socket.socket(AddressFamily, Type)**
+```python
+import socket # 导入 socket 模块
+socket.socket(AddressFamily, Type)  # 创建客户端 socket 对象
+```
 
 **参数说明:**
 
@@ -1270,25 +1256,21 @@ import socket
 
 if __name__ == '__main__':
     # 创建tcp客户端套接字
-    # 1. AF_INET：表示ipv4
-    # 2. SOCK_STREAM: tcp传输协议
+    # 1. AF_INET：表示ipv4	# 2. SOCK_STREAM: tcp传输协议
     tcp_client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # 和服务端应用程序建立连接
-    tcp_client_socket.connect(("192.168.131.62", 8080))
+    tcp_client_socket.connect(("192.168.131.62", 8080))  # 和服务端应用程序建立连接
     # 代码执行到此，说明连接建立成功
-    # 准备发送的数据
-    send_data = "你好服务端，我是客户端小黑!".encode("gbk")
-    # 发送数据
-    tcp_client_socket.send(send_data)
-    # 接收数据, 这次接收的数据最大字节数是1024
-    recv_data = tcp_client_socket.recv(1024)
-    # 返回的直接是服务端程序发送的二进制数据
-    print(recv_data)
-    # 对数据进行解码
-    recv_content = recv_data.decode("gbk")
+
+    send_data = "你好服务端，我是客户端小黑!".encode("gbk") # 准备发送的数据
+    tcp_client_socket.send(send_data)  # 发送数据
+    recv_data = tcp_client_socket.recv(1024) # 接收数据, 这次接收的数据最大字节数是1024
+
+    print(recv_data)  # 返回的直接是服务端程序发送的二进制数据
+
+    recv_content = recv_data.decode("gbk") # 对数据进行解码
     print("接收服务端的数据为:", recv_content)
-    # 关闭套接字
-    tcp_client_socket.close()
+
+    tcp_client_socket.close() # 关闭套接字
 ```
 
 **执行结果:**
@@ -1302,10 +1284,6 @@ b'hello'
 
 1. str.encode(编码格式) 表示把字符串编码成为二进制
 2. data.decode(编码格式) 表示把二进制解码成为字符串
-
-**网络调试助手充当服务端程序:**
-
-<img src="./assets/网络调试助手-1711977123924-18.png" alt="网络调试助手" style="zoom:50%;" />
 
 
 
@@ -1323,11 +1301,10 @@ b'hello'
 
 ### 2. socket 类的介绍
 
-导入 socket 模块
-**import socket**
-
-创建服务端 socket 对象
-**socket.socket(AddressFamily, Type)**
+```python
+import socket #  导入 socket 模块
+socket.socket(AddressFamily, Type) # 创建服务端 socket 对象
+```
 
 **参数说明:**
 
@@ -1352,35 +1329,28 @@ if __name__ == '__main__':
     tcp_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # 设置端口号复用，让程序退出端口号立即释放
     tcp_server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True) 
-    # 给程序绑定端口号
-    tcp_server_socket.bind(("", 8989))
+    tcp_server_socket.bind(("", 8989))  # 给程序绑定端口号
     # 设置监听
-    # 128:最大等待建立连接的个数， 提示： 目前是单任务的服务端，同一时刻只能服务与一个客户端，后续使用多任务能够让服务端同时服务与多个客户端，
-    # 不需要让客户端进行等待建立连接
+    # 128:最大等待建立连接的个数，提示：目前是单任务的服务端，同一时刻只能服务与一个客户端，后续使用多任务能够让服务端同时服务与多个客户端，不需要让客户端进行等待建立连接
     # listen后的这个套接字只负责接收客户端连接请求，不能收发消息，收发消息使用返回的这个新套接字来完成
     tcp_server_socket.listen(128)
     # 等待客户端建立连接的请求, 只有客户端和服务端建立连接成功代码才会解阻塞，代码才能继续往下执行
-    # 1. 专门和客户端通信的套接字： service_client_socket
-    # 2. 客户端的ip地址和端口号： ip_port
+    # 1. 专门和客户端通信的套接字： service_client_socket	# 2. 客户端的ip地址和端口号： ip_port
     service_client_socket, ip_port = tcp_server_socket.accept()
     # 代码执行到此说明连接建立成功
     print("客户端的ip地址和端口号:", ip_port)
-    # 接收客户端发送的数据, 这次接收数据的最大字节数是1024
-    recv_data = service_client_socket.recv(1024)
-    # 获取数据的长度
-    recv_data_length = len(recv_data)
+   
+    recv_data = service_client_socket.recv(1024)  # 接收客户端发送的数据, 这次接收数据的最大字节数是1024
+    recv_data_length = len(recv_data) # 获取数据的长度
     print("接收数据的长度为:", recv_data_length)
-    # 对二进制数据进行解码
-    recv_content = recv_data.decode("gbk")
+    
+    recv_content = recv_data.decode("gbk") # 对二进制数据进行解码
     print("接收客户端的数据为:", recv_content)
-    # 准备发送的数据
-    send_data = "ok, 问题正在处理中...".encode("gbk")
-    # 发送数据给客户端
-    service_client_socket.send(send_data)
-    # 关闭服务与客户端的套接字， 终止和客户端通信的服务
-    service_client_socket.close()
-    # 关闭服务端的套接字, 终止和客户端提供建立连接请求的服务
-    tcp_server_socket.close()
+    
+    send_data = "ok, 问题正在处理中...".encode("gbk") # 准备发送的数据
+    service_client_socket.send(send_data) # 发送数据给客户端
+    service_client_socket.close()  # 关闭服务与客户端的套接字， 终止和客户端通信的服务
+    tcp_server_socket.close() # 关闭服务端的套接字, 终止和客户端提供建立连接请求的服务
 ```
 
 **执行结果:**
@@ -1409,9 +1379,7 @@ if __name__ == '__main__':
 tcp_server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
 ```
 
-**网络调试助手充当客户端程序:**
 
-<img src="./assets/网络调试助手-1.png" alt="网络调试助手" style="zoom: 33%;" />
 
 ## TCP网络应用程序的注意点
 
@@ -1444,7 +1412,6 @@ tcp_server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
 import socket
 import threading
 
-
 # 处理客户端的请求操作
 def handle_client_request(service_client_socket, ip_port):
     # 循环接收客户端发送的数据
@@ -1461,8 +1428,8 @@ def handle_client_request(service_client_socket, ip_port):
         else:
             print("客户端下线了:", ip_port)
             break
-    # 终止和客户端进行通信
-    service_client_socket.close()
+    
+    service_client_socket.close() # 终止和客户端进行通信
 
 
 if __name__ == '__main__':
@@ -1470,25 +1437,18 @@ if __name__ == '__main__':
     tcp_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # 设置端口号复用，让程序退出端口号立即释放
     tcp_server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
-    # 绑定端口号
-    tcp_server_socket.bind(("", 9090))
-    # 设置监听, listen后的套接字是被动套接字，只负责接收客户端的连接请求
-    tcp_server_socket.listen(128)
-    # 循环等待接收客户端的连接请求
-    while True:
-        # 等待接收客户端的连接请求
-        service_client_socket, ip_port = tcp_server_socket.accept()
+    tcp_server_socket.bind(("", 9090)) # 绑定端口号
+    tcp_server_socket.listen(128) # 设置监听, listen后的套接字是被动套接字，只负责接收客户端的连接请求
+    
+    while True: # 循环等待接收客户端的连接请求
+        service_client_socket, ip_port = tcp_server_socket.accept() # 等待接收客户端的连接请求
         print("客户端连接成功:", ip_port)
         # 当客户端和服务端建立连接成功以后，需要创建一个子线程，不同子线程负责接收不同客户端的消息
         sub_thread = threading.Thread(target=handle_client_request, args=(service_client_socket, ip_port))
-        # 设置守护主线程
-        sub_thread.setDaemon(True)
-        # 启动子线程
-        sub_thread.start()
+        sub_thread.setDaemon(True) # 设置守护主线程
+        sub_thread.start() # 启动子线程
 
-
-    # tcp服务端套接字可以不需要关闭，因为服务端程序需要一直运行
-    # tcp_server_socket.close()
+    # tcp_server_socket.close() # tcp服务端套接字可以不需要关闭，因为服务端程序需要一直运行
 ```
 
 **执行结果:**
@@ -1531,7 +1491,7 @@ recv是不是直接从客户端接收数据?
 
 # HTTP协议和静态Web服务器
 
-### 1. HTTP 协议的介绍
+## 1. HTTP 协议的介绍
 
 HTTP 协议的全称是(HyperText Transfer Protocol)，翻译过来就是**超文本传输协议**。
 
@@ -1541,11 +1501,11 @@ HTTP 协议的制作者是**蒂姆·伯纳斯-李**，1991年设计出来的，*
 
 **传输 HTTP 协议格式的数据是基于 TCP 传输协议的，发送数据之前需要先建立连接。**
 
-### 2. HTTP 协议的作用
+## 2. HTTP 协议的作用
 
 它**规定了浏览器和 Web 服务器通信数据的格式，也就是说浏览器和web服务器通信需要使用http协议**。
 
-### 3. 浏览器访问web服务器的通信过程
+## 3. 浏览器访问web服务器的通信过程
 
 **通信效果图:**
 
@@ -1655,7 +1615,6 @@ Serving HTTP on 0.0.0.0 port 9000 (http://0.0.0.0:9000/) ...
 ```py
 import socket
 
-
 if __name__ == '__main__':
     # 创建tcp服务端套接字
     tcp_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -1666,34 +1625,22 @@ if __name__ == '__main__':
     # 设置监听
     tcp_server_socket.listen(128)
     while True:
-        # 等待接受客户端的连接请求
-        new_socket, ip_port = tcp_server_socket.accept()
-        # 代码执行到此，说明连接建立成功
-        recv_client_data = new_socket.recv(4096)
-        # 对二进制数据进行解码
-        recv_client_content = recv_client_data.decode("utf-8")
+        new_socket, ip_port = tcp_server_socket.accept() # 等待接受客户端的连接请求
+        recv_client_data = new_socket.recv(4096) # 代码执行到此，说明连接建立成功
+        recv_client_content = recv_client_data.decode("utf-8")  # 对二进制数据进行解码
         print(recv_client_content)
 
         with open("static/index.html", "rb") as file:
-            # 读取文件数据
-            file_data = file.read()
+            file_data = file.read()  # 读取文件数据
 
-
-        # 响应行
-        response_line = "HTTP/1.1 200 OK\r\n"
-        # 响应头
-        response_header = "Server: PWS1.0\r\n"
-
-        # 响应体
-        response_body = file_data
+        response_line = "HTTP/1.1 200 OK\r\n" # 响应行
+        response_header = "Server: PWS1.0\r\n"  # 响应头
+        response_body = file_data  # 响应体
 
         # 拼接响应报文
         response_data = (response_line + response_header + "\r\n").encode("utf-8") + response_body
-        # 发送数据
-        new_socket.send(response_data)
-
-        # 关闭服务与客户端的套接字
-        new_socket.close()
+        new_socket.send(response_data)  # 发送数据
+        new_socket.close()  # 关闭服务与客户端的套接字
 ```
 
 ## 静态Web服务器-返回指定页面数据
@@ -1716,31 +1663,25 @@ if __name__ == '__main__':
 ```py
 import socket
 
-
 def main():
     # 创建tcp服务端套接字
     tcp_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # 设置端口号复用, 程序退出端口立即释放
     tcp_server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
-    # 绑定端口号
-    tcp_server_socket.bind(("", 9000))
-    # 设置监听
-    tcp_server_socket.listen(128)
+    tcp_server_socket.bind(("", 9000))  # 绑定端口号
+    tcp_server_socket.listen(128) # 设置监听
     while True:
-        # 等待接受客户端的连接请求
-        new_socket, ip_port = tcp_server_socket.accept()
-        # 代码执行到此，说明连接建立成功
-        recv_client_data = new_socket.recv(4096)
+        new_socket, ip_port = tcp_server_socket.accept() # 等待接受客户端的连接请求
+        recv_client_data = new_socket.recv(4096) # 代码执行到此，说明连接建立成功
         if len(recv_client_data) == 0:
             print("关闭浏览器了")
             new_socket.close()
             return
 
-        # 对二进制数据进行解码
-        recv_client_content = recv_client_data.decode("utf-8")
+        recv_client_content = recv_client_data.decode("utf-8") # 对二进制数据进行解码
         print(recv_client_content)
-        # 根据指定字符串进行分割， 最大分割次数指定2
-        request_list = recv_client_content.split(" ", maxsplit=2)
+
+        request_list = recv_client_content.split(" ", maxsplit=2) # 根据指定字符串进行分割， 最大分割次数指定2
 
         # 获取请求资源路径
         request_path = request_list[1]
@@ -1751,41 +1692,27 @@ def main():
             request_path = "/index.html"
 
         try:
-            # 动态打开指定文件
-            with open("static" + request_path, "rb") as file:
-                # 读取文件数据
-                file_data = file.read()
+            with open("static" + request_path, "rb") as file: # 动态打开指定文件
+                file_data = file.read() # 读取文件数据
         except Exception as e:
             # 请求资源不存在，返回404数据
-            # 响应行
-            response_line = "HTTP/1.1 404 Not Found\r\n"
-            # 响应头
-            response_header = "Server: PWS1.0\r\n"
+            response_line = "HTTP/1.1 404 Not Found\r\n" # 响应行
+            response_header = "Server: PWS1.0\r\n"  # 响应头
             with open("static/error.html", "rb") as file:
                 file_data = file.read()
-            # 响应体
-            response_body = file_data
-
-            # 拼接响应报文
-            response_data = (response_line + response_header + "\r\n").encode("utf-8") + response_body
-            # 发送数据
-            new_socket.send(response_data)
+            
+            response_body = file_data # 响应体
+            response_data = (response_line + response_header + "\r\n").encode("utf-8") + response_body # 拼接响应报文
+            new_socket.send(response_data) # 发送数据
         else:
-            # 响应行
-            response_line = "HTTP/1.1 200 OK\r\n"
-            # 响应头
-            response_header = "Server: PWS1.0\r\n"
-
-            # 响应体
-            response_body = file_data
-
-            # 拼接响应报文
-            response_data = (response_line + response_header + "\r\n").encode("utf-8") + response_body
-            # 发送数据
-            new_socket.send(response_data)
+            response_line = "HTTP/1.1 200 OK\r\n" # 响应行
+            response_header = "Server: PWS1.0\r\n"  # 响应头
+            response_body = file_data # 响应体
+            response_data = (response_line + response_header + "\r\n").encode("utf-8") + response_body  # 拼接响应报文
+            new_socket.send(response_data) # 发送数据
         finally:
-            # 关闭服务与客户端的套接字
-            new_socket.close()
+            
+            new_socket.close() # 关闭服务与客户端的套接字
 
 if __name__ == '__main__':
     main()
@@ -1812,7 +1739,6 @@ if __name__ == '__main__':
 import socket
 import threading
 
-
 # 处理客户端的请求
 def handle_client_request(new_socket):
     # 代码执行到此，说明连接建立成功
@@ -1822,12 +1748,10 @@ def handle_client_request(new_socket):
         new_socket.close()
         return
 
-    # 对二进制数据进行解码
-    recv_client_content = recv_client_data.decode("utf-8")
+    recv_client_content = recv_client_data.decode("utf-8") # 对二进制数据进行解码
     print(recv_client_content)
-    # 根据指定字符串进行分割， 最大分割次数指定2
-    request_list = recv_client_content.split(" ", maxsplit=2)
-
+    
+    request_list = recv_client_content.split(" ", maxsplit=2) # 根据指定字符串进行分割， 最大分割次数指定2
     # 获取请求资源路径
     request_path = request_list[1]
     print(request_path)
@@ -1837,41 +1761,26 @@ def handle_client_request(new_socket):
         request_path = "/index.html"
 
     try:
-        # 动态打开指定文件
-        with open("static" + request_path, "rb") as file:
-            # 读取文件数据
-            file_data = file.read()
+        with open("static" + request_path, "rb") as file: # 动态打开指定文件
+            file_data = file.read() # 读取文件数据
     except Exception as e:
         # 请求资源不存在，返回404数据
-        # 响应行
-        response_line = "HTTP/1.1 404 Not Found\r\n"
-        # 响应头
-        response_header = "Server: PWS1.0\r\n"
+        response_line = "HTTP/1.1 404 Not Found\r\n"  # 响应行
+        response_header = "Server: PWS1.0\r\n" # 响应头
         with open("static/error.html", "rb") as file:
             file_data = file.read()
-        # 响应体
-        response_body = file_data
-
-        # 拼接响应报文
-        response_data = (response_line + response_header + "\r\n").encode("utf-8") + response_body
-        # 发送数据
-        new_socket.send(response_data)
+        
+        response_body = file_data # 响应体
+        response_data = (response_line + response_header + "\r\n").encode("utf-8") + response_body # 拼接响应报文
+        new_socket.send(response_data) # 发送数据
     else:
-        # 响应行
-        response_line = "HTTP/1.1 200 OK\r\n"
-        # 响应头
-        response_header = "Server: PWS1.0\r\n"
-
-        # 响应体
-        response_body = file_data
-
-        # 拼接响应报文
-        response_data = (response_line + response_header + "\r\n").encode("utf-8") + response_body
-        # 发送数据
-        new_socket.send(response_data)
+        response_line = "HTTP/1.1 200 OK\r\n" # 响应行
+        response_header = "Server: PWS1.0\r\n" # 响应头
+        response_body = file_data  # 响应体
+        response_data = (response_line + response_header + "\r\n").encode("utf-8") + response_body # 拼接响应报文
+        new_socket.send(response_data) # 发送数据
     finally:
-        # 关闭服务与客户端的套接字
-        new_socket.close()
+        new_socket.close() # 关闭服务与客户端的套接字
 
 
 # 程序入口函数
@@ -1880,22 +1789,16 @@ def main():
     tcp_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # 设置端口号复用, 程序退出端口立即释放
     tcp_server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
-    # 绑定端口号
-    tcp_server_socket.bind(("", 9000))
-    # 设置监听
-    tcp_server_socket.listen(128)
+    tcp_server_socket.bind(("", 9000)) # 绑定端口号
+    tcp_server_socket.listen(128) # 设置监听
 
     while True:
-        # 等待接受客户端的连接请求
-        new_socket, ip_port = tcp_server_socket.accept()
+        new_socket, ip_port = tcp_server_socket.accept() # 等待接受客户端的连接请求
         print(ip_port)
         # 当客户端和服务器建立连接程，创建子线程
         sub_thread = threading.Thread(target=handle_client_request, args=(new_socket,))
-        # 设置守护主线程
-        sub_thread.setDaemon(True)
-        # 启动子线程执行对应的任务
-        sub_thread.start()
-
+        sub_thread.setDaemon(True)  # 设置守护主线程
+        sub_thread.start() # 启动子线程执行对应的任务
 
 if __name__ == '__main__':
     main()
@@ -1928,14 +1831,12 @@ class HttpWebServer(object): # 定义web服务器类
     # 处理客户端的请求
     @staticmethod
     def handle_client_request(new_socket):
-        
         recv_client_data = new_socket.recv(4096) # 代码执行到此，说明连接建立成功
         if len(recv_client_data) == 0:
             print("关闭浏览器了")
             new_socket.close()
             return
 
-        
         recv_client_content = recv_client_data.decode("utf-8") # 对二进制数据进行解码
         print(recv_client_content)
         request_list = recv_client_content.split(" ", maxsplit=2) # 根据指定字符串进行分割， 最大分割次数指定2
@@ -2090,236 +1991,11 @@ if __name__ == '__main__':
     main()
 ```
 
-#  MySQL数据库的基本使用
 
-## 关系型数据库管理系统
-
-### 1. 关系型数据库管理系统的介绍
-
-数据库管理系统（英语全拼：Relational Database Management System，简称RDBMS）是**为管理关系型数据库而设计的软件系统，如果大家想要使用关系型数据库就需要安装数据库管理系统，其实就是一个应用软件**。
-
-**关系型数据库管理系统可以分为:**
-
-- 关系型数据库服务端软件
-- 关系型数据库客户端软件
-
-**关系型数据库服务端软件:**
-
-主要负责管理不同的数据库，而每个数据库里面会有一系列数据文件，数据文件是用来存储数据的, 其实数据库就是一系列数据文件的集合。
-
-**关系型数据库客户端软件:**
-
-主要负责和关系型数据库服务端软件进行通信, 向服务端传输数据或者从服务端获取数据.
-
-**关系型数据库管理系统的效果图:**
-
-<img src="./assets/数据库关系图.png" alt="关系型数据库" style="zoom:67%;" />
-
-**说明:**
-
-1. 用户操作关系型数据库客户端，实现数据库相关操作。
-2. 关系数据库客户端借助网络使用SQL语言和关系型数据库服务端进行数据通信
-3. 关系型数据库服务端管理着不同的数据库，每个数据库会有一系列的数据文件，数据都保存在数据文件里面，每个数据库可以理解成是一个文件夹。
-
-通过上面的效果图我们可以得知，数据库客户端和数据库服务器想要通信需要使用SQL
-
-**通信流程效果图**
-
-<img src="./assets/通信流程.png" alt="关系型数据库" style="zoom: 67%;" />
-
-# PyMySQL的使用
-
-### 1. 思考
-
-如何实现将100000条数据插入到MySQL数据库?
-
-**答案:**
-
-如果使用之前学习的MySQL客户端来完成这个操作，那么这个工作量无疑是巨大的，我们可以通过使用程序代码的方式去连接MySQL数据库，然后对MySQL数据库进行增删改查的方式，实现10000条数据的插入，像这样使用代码的方式操作数据库就称为数据库编程。
-
-### 2. Python程序操作MySQL数据库
-
-**安装pymysql第三方包:**
-
-```
-sudo pip3 install pymysql
-```
-
-**说明:**
-
-- 安装命令使用 sudo pip3 install 第三方包名
-- 卸载命令使用 sudo pip3 uninstall 第三方包
-- 大家现在使用的虚拟机已经安装了这个第三方包，可以使用： **pip3 show pymysql** 命令查看第三方包的信息
-- **pip3 list** 查看使用pip命令安装的第三方包列表
-
-**pymysql的使用:**
-
-1. 导入 pymysql 包
-
-   ```py
-    import pymysql
-   ```
-
-2. 创建连接对象
-
-   调用pymysql模块中的connect()函数来创建连接对象,代码如下:
-
-   ```py
-    conn=connect(参数列表)
-   
-    * 参数host：连接的mysql主机，如果本机是'localhost'
-    * 参数port：连接的mysql主机的端口，默认是3306
-    * 参数user：连接的用户名
-    * 参数password：连接的密码
-    * 参数database：数据库的名称
-    * 参数charset：通信采用的编码方式，推荐使用utf8
-   ```
-
-   **连接对象操作说明:**
-
-   - 关闭连接 conn.close()
-   - 提交数据 conn.commit()
-   - 撤销数据 conn.rollback()
-
-3. 获取游标对象
-
-   获取游标对象的目标就是要执行sql语句，完成对数据库的增、删、改、查操作。代码如下:
-
-   ```py
-   cur =conn.cursor()  # 调用连接对象的cursor()方法获取游标对象  
-   ```
-
-   **游标操作说明:**
-
-   - 使用游标执行SQL语句: execute(operation [parameters ]) 执行SQL语句，返回受影响的行数，主要用于执行insert、update、delete、select等语句
-   - 获取查询结果集中的一条数据:cur.fetchone()返回一个元组, 如 (1,'张三')
-   - 获取查询结果集中的所有数据: cur.fetchall()返回一个元组,如((1,'张三'),(2,'李四'))
-   - 关闭游标: cur.close(),表示和数据库操作完成
-
-4. pymysql完成数据的查询操作
-
-   ```py
-   import pymysql
-   
-   # 创建连接对象
-   conn = pymysql.connect(host='localhost', port=3306, user='root', password='mysql',database='python', charset='utf8')
-   
-   cursor = conn.cursor() # 获取游标对象
-   
-   # 查询 SQL 语句
-   sql = "select * from students;"
-   # 执行 SQL 语句 返回值就是 SQL 语句在执行过程中影响的行数
-   row_count = cursor.execute(sql)
-   print("SQL 语句执行影响的行数%d" % row_count)
-   
-   # 取出结果集中一行数据,　例如:(1, '张三')
-   # print(cursor.fetchone())
-   
-   # 取出结果集中的所有数据, 例如:((1, '张三'), (2, '李四'), (3, '王五'))
-   for line in cursor.fetchall():
-       print(line)
-   
-   
-   cursor.close() # 关闭游标
-   conn.close() # 关闭连接
-   ```
-
-5. pymysql完成对数据的增删改
-
-   ```py
-   import pymysql
-   
-   # 创建连接对象
-   conn = pymysql.connect(host='localhost', port=3306, user='root', password='mysql',database='python', charset='utf8')
-   
-   cursor = conn.cursor() # 获取游标对象
-   
-   try:
-       # 添加 SQL 语句
-       # sql = "insert into students(name) values('刘璐'), ('王美丽');"
-       # 删除 SQ L语句
-       # sql = "delete from students where id = 5;"
-       # 修改 SQL 语句
-       sql = "update students set name = '王铁蛋' where id = 6;"
-       # 执行 SQL 语句
-       row_count = cursor.execute(sql)
-       print("SQL 语句执行影响的行数%d" % row_count)
-      
-       conn.commit()  # 提交数据到数据库
-   except Exception as e:
-       conn.rollback()  # 回滚数据， 即撤销刚刚的SQL语句操作
-   
-   
-   cursor.close() # 关闭游标
-   conn.close() # 关闭连接
-   ```
-
-   **说明:**
-
-   - conn.commit() 表示将修改操作提交到数据库
-   - conn.rollback() 表示回滚数据
-
-6. 防止SQL注入
-
-   什么是SQL注入?
-
-   用户提交带有恶意的数据与SQL语句进行字符串方式的拼接，从而影响了SQL语句的语义，最终产生数据泄露的现象。
-
-   如何防止SQL注入?
-
-   SQL语句参数化
-
-   - SQL语言中的参数使用%s来占位，此处不是python中的字符串格式化操作
-   - 将SQL语句中%s占位所需要的参数存在一个列表中，把参数列表传递给execute方法中第二个参数
-
-   **防止SQL注入的示例代码:**
-
-   ```py
-   from pymysql import connect
-   
-   def main():
-       find_name = input("请输入物品名称：")
-       # 创建Connection连接
-       conn = connect(host='localhost',port=3306,user='root',password='mysql',database='jing_dong',charset='utf8')
-       
-       cs1 = conn.cursor() # 获得Cursor对象
-   
-       # 非安全的方式
-       # 输入 ' or 1 = 1 or '   (单引号也要输入)
-       # sql = "select * from goods where name='%s'" % find_name
-       # print("""sql===>%s<====""" % sql)
-       # # 执行select语句，并返回受影响的行数：查询所有数据
-       # count = cs1.execute(sql)
-   
-       # 安全的方式
-       # 构造参数列表
-       params = [find_name]
-       # 执行select语句，并返回受影响的行数：查询所有数据
-       count = cs1.execute("select * from goods where name=%s", params)
-       # 注意：
-       # 如果要是有多个参数，需要进行参数化
-       # 那么params = [数值1, 数值2....]，此时sql语句中有多个%s即可
-       # %s 不需要带引号
-   
-   
-       print(count)  # 打印受影响的行数
-       # result = cs1.fetchone() # 获取查询的结果
-       result = cs1.fetchall()
-       print(result) # 打印查询的结果
-       cs1.close() # 关闭Cursor对象
-       conn.close()  # 关闭Connection对象
-   
-   if __name__ == '__main__':
-       main()
-   ```
-
-   **说明:**
-
-   - execute方法中的 %s 占位不需要带引号
 
 # 闭包
 
-### 1. 闭包的介绍
+## 1. 闭包的介绍
 
 我们前面已经学过了函数，我们知道当函数调用完，函数内定义的变量都销毁了，但是我们有时候需要保存函数内的这个变量，每次在这个变量的基础上完成一些列的操作，比如: 每次在这个变量的基础上和其它数字进行求和计算，那怎么办呢?
 
@@ -2329,7 +2005,7 @@ sudo pip3 install pymysql
 
 在函数嵌套的前提下，内部函数使用了外部函数的变量，并且外部函数返回了内部函数，我们把这个**使用外部函数变量的内部函数称为闭包**。
 
-### 2. 闭包的构成条件
+## 2. 闭包的构成条件
 
 通过闭包的定义，我们可以得知闭包的形成条件:
 
@@ -2337,7 +2013,7 @@ sudo pip3 install pymysql
 2. 内部函数使用了外部函数的变量(还包括外部函数的参数)
 3. 外部函数返回了内部函数
 
-### 3. 简单闭包的示例代码
+## 3. 简单闭包的示例代码
 
 ```py
 def func_out(num1): # 定义一个外部函数
@@ -2363,7 +2039,7 @@ f(3)
 
 通过上面的输出结果可以看出闭包保存了外部函数内的变量num1，每次执行闭包都是在num1 = 1 基础上进行计算。
 
-### 4. 闭包的作用
+## 4. 闭包的作用
 
 - 闭包可以保存外部函数内的变量，不会随着外部函数调用完而销毁。
 
@@ -2391,7 +2067,6 @@ f(3)
 def config_name(name): # 外部函数
     def say_info(info): # 内部函数
         print(name + ": " + info)
-
     return say_info
 
 tom = config_name("Tom")
@@ -2441,7 +2116,6 @@ f(2)# 执行闭包
 
 ```py
 def func_out(num1): # 定义一个外部函数
-
     def func_inner(num2):  # 定义一个内部函数
         # 这里本意想要修改外部num1的值，实际上是在内部函数定义了一个局部变量num1
         nonlocal num1  # 告诉解释器，此处使用的是 外部变量a
@@ -2463,7 +2137,7 @@ f(2)# 执行闭包
 
 # 装饰器
 
-### 1. 装饰器的定义
+## 1. 装饰器的定义
 
 就是**给已有函数增加额外功能的函数，它本质上就是一个闭包函数**。
 
@@ -2473,7 +2147,7 @@ f(2)# 执行闭包
 2. 不修改已有函数的调用方式
 3. 给已有函数增加额外的功能
 
-### 2. 装饰器的示例代码
+## 2. 装饰器的示例代码
 
 ```py
 def check(fn): # 添加一个登录验证的功能
@@ -2481,7 +2155,6 @@ def check(fn): # 添加一个登录验证的功能
         print("请先登录....")
         fn()
     return inner
-
 
 def comment():
     print("发表评论")
@@ -2510,7 +2183,7 @@ comment()
 发表评论
 ```
 
-### 3. 装饰器的语法糖写法
+## 3. 装饰器的语法糖写法
 
 如果有多个函数都需要添加登录验证的功能，每次都需要编写func = check(func)这样代码对已有函数进行装饰，这种做法还是比较麻烦。
 
@@ -2567,7 +2240,6 @@ def get_time(func):
         print("函数执行花费%f" % (end-begin))
     return inner
 
-
 @get_time
 def func1():
     for i in range(100000):
@@ -2599,9 +2271,7 @@ def logging(fn):
     def inner(num1, num2):
         print("--正在努力计算--")
         fn(num1, num2)
-
     return inner
-
 
 # 使用装饰器装饰函数
 @logging
@@ -2631,7 +2301,6 @@ def logging(fn):
         return result
     return inner
 
-
 # 使用装饰器装饰函数
 @logging
 def sum_num(a, b):
@@ -2658,9 +2327,7 @@ def logging(fn):
     def inner(*args, **kwargs):
         print("--正在努力计算--")
         fn(*args, **kwargs)
-
     return inner
-
 
 # 使用语法糖装饰函数
 @logging
@@ -2693,9 +2360,7 @@ def logging(fn):
         print("--正在努力计算--")
         result = fn(*args, **kwargs)
         return result
-
     return inner
-
 
 # 使用语法糖装饰函数
 @logging
@@ -2708,7 +2373,6 @@ def sum_num(*args, **kwargs):
         result += value
 
     return result
-
 
 @logging
 def subtraction(a, b):
@@ -2741,13 +2405,11 @@ def make_div(func):
         return "<div>" + func() + "</div>"
     return inner
 
-
 def make_p(func):
     """对被装饰的函数的返回值 p标签"""
     def inner(*args, **kwargs):
         return "<p>" + func() + "</p>"
     return inner
-
 
 # 装饰过程: 1 content = make_p(content) 2 content = make_div(content)
 # content = make_div(make_p(content))
@@ -2757,7 +2419,6 @@ def content():
     return "人生苦短"
 
 result = content()
-
 print(result)
 ```
 
@@ -2824,13 +2485,11 @@ def logging(flag): # 添加输出日志的功能
         return inner
     return decorator # 返回装饰器
 
-
 # 使用装饰器装饰函数
 @logging("+")
 def add(a, b):
     result = a + b
     return result
-
 
 @logging("-")
 def sub(a, b):
@@ -2863,7 +2522,6 @@ class Check(object):
         # 添加装饰功能
         print("请先登陆...")
         self.__fn()
-
 
 @Check
 def comment():
@@ -2936,7 +2594,6 @@ import threading
 import sys
 import framework
 
-
 # 定义web服务器类
 class HttpWebServer(object):
     def __init__(self, port):
@@ -2944,10 +2601,8 @@ class HttpWebServer(object):
         tcp_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # 设置端口号复用, 程序退出端口立即释放
         tcp_server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
-        # 绑定端口号
-        tcp_server_socket.bind(("", port))
-        # 设置监听
-        tcp_server_socket.listen(128)
+        tcp_server_socket.bind(("", port)) # 绑定端口号
+        tcp_server_socket.listen(128)  # 设置监听
         self.tcp_server_socket = tcp_server_socket
 
     # 处理客户的请求
@@ -2957,15 +2612,12 @@ class HttpWebServer(object):
         recv_client_data = new_socket.recv(4096)
         if len(recv_client_data) == 0:
             print("关闭浏览器了")
-            # 关闭服务与客户端的套接字
-            new_socket.close()
+            new_socket.close() # 关闭服务与客户端的套接字
             return
 
-        # 对二进制数据进行解码
-        recv_client_content = recv_client_data.decode("utf-8")
+        recv_client_content = recv_client_data.decode("utf-8") # 对二进制数据进行解码
         print(recv_client_content)
-        # 根据指定字符串进行分割， 最大分割次数指定2
-        request_list = recv_client_content.split(" ", maxsplit=2)
+        request_list = recv_client_content.split(" ", maxsplit=2) # 根据指定字符串进行分割， 最大分割次数指定2
 
         # 获取请求资源路径
         request_path = request_list[1]
@@ -2983,79 +2635,58 @@ class HttpWebServer(object):
                 "request_path": request_path
             }
 
-            # 获取处理结果
-            status, headers, response_body = framework.handle_request(env)
+            status, headers, response_body = framework.handle_request(env) # 获取处理结果
 
             # 使用框架处理的数据拼接响应报文
-            # 响应行
-            response_line = "HTTP/1.1 %s\r\n" % status
-            # 响应头
-            response_header = ""
-            # 遍历头部信息
-            for header in headers:
-                # 拼接多个响应头
-                response_header += "%s: %s\r\n" % header
+            response_line = "HTTP/1.1 %s\r\n" % status # 响应行
+            response_header = "" # 响应头
+            for header in headers: # 遍历头部信息
+                response_header += "%s: %s\r\n" % header # 拼接多个响应头
             response_data = (response_line +
                              response_header +
                              "\r\n" +
                              response_body).encode("utf-8")
-            # 发送数据
-            new_socket.send(response_data)
-            # 关闭socket
-            new_socket.close()
+            new_socket.send(response_data) # 发送数据
+            
+            new_socket.close() # 关闭socket
 
         else:
             """这里是静态资源请求"""
             try:
-                # 动态打开指定文件
-                with open("static" + request_path, "rb") as file:
-                    # 读取文件数据
-                    file_data = file.read()
+                with open("static" + request_path, "rb") as file: # 动态打开指定文件
+                    file_data = file.read() # 读取文件数据
             except Exception as e:
                 # 请求资源不存在，返回404数据
-                # 响应行
-                response_line = "HTTP/1.1 404 Not Found\r\n"
-                # 响应头
-                response_header = "Server: PWS1.0\r\n"
+                response_line = "HTTP/1.1 404 Not Found\r\n" # 响应行
+                response_header = "Server: PWS1.0\r\n" # 响应头
                 with open("static/error.html", "rb") as file:
                     file_data = file.read()
-                # 响应体
-                response_body = file_data
+                
+                response_body = file_data # 响应体
 
                 # 拼接响应报文
                 response_data = (response_line + response_header + "\r\n").encode("utf-8") + response_body
                 # 发送数据
                 new_socket.send(response_data)
             else:
-                # 响应行
-                response_line = "HTTP/1.1 200 OK\r\n"
-                # 响应头
-                response_header = "Server: PWS1.0\r\n"
-
-                # 响应体
-                response_body = file_data
-
+                response_line = "HTTP/1.1 200 OK\r\n"  # 响应行
+                response_header = "Server: PWS1.0\r\n" # 响应头
+                response_body = file_data # 响应体
                 # 拼接响应报文
                 response_data = (response_line + response_header + "\r\n").encode("utf-8") + response_body
-                # 发送数据
-                new_socket.send(response_data)
+                new_socket.send(response_data) # 发送数据
             finally:
-                # 关闭服务与客户端的套接字
-                new_socket.close()
+                new_socket.close() # 关闭服务与客户端的套接字
 
     def start(self):
         while True:
-            # 等待接受客户端的连接请求
-            new_socket, ip_port = self.tcp_server_socket.accept()
+            new_socket, ip_port = self.tcp_server_socket.accept() # 等待接受客户端的连接请求
             sub_thread = threading.Thread(target=self.handle_client_quest, args=(new_socket,))
-            # 设置守护线程
-            sub_thread.setDaemon(True)
+            sub_thread.setDaemon(True) # 设置守护线程
             sub_thread.start()
-
 
 # 程序入口函数
 def main():
-
     # 获取命令行参数判断长度
     if len(sys.argv) != 2:
         print("执行命令如下: python3 xxx.py 9000")
@@ -3066,14 +2697,9 @@ def main():
         print("执行命令如下: python3 xxx.py 9000")
         return
 
-    # 需要转成int类型
-    port = int(sys.argv[1])
-
-    # 创建web服务器
-    web_server = HttpWebServer(port)
-    # 启动web服务器
-    web_server.start()
-
+    port = int(sys.argv[1]) # 需要转成int类型
+    web_server = HttpWebServer(port) # 创建web服务器
+    web_server.start() # 启动web服务器
 
 if __name__ == '__main__':
     main()
@@ -3092,44 +2718,30 @@ if __name__ == '__main__':
 """miniweb框架，负责处理动态资源请求"""
 import time
 
-
 # 获取首页数据
 def index():
-    # 响应状态
-    status = "200 OK";
-    # 响应头
-    response_header = [("Server", "PWS2.0")]
-    # 处理后的数据
-    data = time.ctime()
-
+    status = "200 OK"; # 响应状态
+    response_header = [("Server", "PWS2.0")] # 响应头
+    data = time.ctime() # 处理后的数据
     return status, response_header, data
-
 
 # 没有找到动态资源
 def not_found():
-    # 响应状态
-    status = "404 Not Found";
-    # 响应头
-    response_header = [("Server", "PWS2.0")]
-    # 处理后的数据
-    data = "not found"
-
+    status = "404 Not Found"; # 响应状态
+    response_header = [("Server", "PWS2.0")] # 响应头
+    data = "not found" # 处理后的数据
     return status, response_header, data
-
 
 # 处理动态资源请求
 def handle_request(env):
-    # 获取动态请求资源路径
-    request_path = env["request_path"]
+    request_path = env["request_path"] # 获取动态请求资源路径
     print("接收到的动态资源请求:", request_path)
 
     if request_path == "/index.html":
-        # 获取首页数据
-        result = index()
+        result = index()  # 获取首页数据
         return result
     else:
-        # 没有找到动态资源
-        result = not_found()
+        result = not_found() # 没有找到动态资源
         return result
 ```
 
@@ -3142,13 +2754,10 @@ def handle_request(env):
 ```py
 # 获取首页数据
 def index():
-    # 响应状态
-    status = "200 OK";
-    # 响应头
-    response_header = [("Server", "PWS2.0")]
-
-    # 打开模板文件，读取数据
-    with open("template/index.html", "r") as file:
+    status = "200 OK"; # 响应状态
+    response_header = [("Server", "PWS2.0")] # 响应头
+    
+    with open("template/index.html", "r") as file: # 打开模板文件，读取数据
         file_data = file.read()
 ```
 
@@ -3159,20 +2768,15 @@ def index():
 ```py
 # 获取首页数据
 def index():
-    # 响应状态
-    status = "200 OK";
-    # 响应头
-    response_header = [("Server", "PWS2.0")]
+    status = "200 OK"; # 响应状态
+    response_header = [("Server", "PWS2.0")] # 响应头
 
     # 1. 打开模板文件，读取数据
     with open("template/index.html", "r") as file:
         file_data = file.read()
 
-    # 处理后的数据, 从数据库查询
-    data = time.ctime()
-    # 2. 替换模板文件中的模板遍历
-    result = file_data.replace("{%content%}", data)
-
+    data = time.ctime() # 处理后的数据, 从数据库查询
+    result = file_data.replace("{%content%}", data) # 2. 替换模板文件中的模板遍历
     return status, response_header, result
 ```
 
@@ -3189,40 +2793,29 @@ def index():
 ```py
 # 获取个人中心数据
 def center():
-    # 响应状态
-    status = "200 OK";
-    # 响应头
-    response_header = [("Server", "PWS2.0")]
+    status = "200 OK"; # 响应状态
+    response_header = [("Server", "PWS2.0")] # 响应头
 
-    # 打开模板文件，读取数据
-    with open("template/center.html", "r") as file:
+    with open("template/center.html", "r") as file: # 打开模板文件，读取数据
         file_data = file.read()
 
-    # 处理后的数据, 从数据库查询
-    data = time.ctime()
-    # 替换模板文件中的模板遍历
-    result = file_data.replace("{%content%}", data)
-
+    data = time.ctime() # 处理后的数据, 从数据库查询
+    result = file_data.replace("{%content%}", data) # 替换模板文件中的模板遍历
     return status, response_header, result
-
 
 # 处理动态资源请求
 def handle_request(env):
-    # 获取动态请求资源路径
-    request_path = env["request_path"]
+    request_path = env["request_path"] # 获取动态请求资源路径
     print("接收到的动态资源请求:", request_path)
 
     if request_path == "/index.html":
-        # 获取首页数据
-        result = index()
+        result = index() # 获取首页数据
         return result
     elif request_path == "/center.html":
-        # 获取个人中心数据
-        result = center()
+        result = center() # 获取个人中心数据
         return result
     else:
-        # 没有找到动态资源
-        result = not_found()
+        result = not_found() # 没有找到动态资源
         return result
 ```
 
@@ -3263,8 +2856,7 @@ route_list = [
 ```py
 # 处理动态资源请求
 def handle_request(env):
-    # 获取动态请求资源路径
-    request_path = env["request_path"]
+    request_path = env["request_path"] # 获取动态请求资源路径
     print("接收到的动态资源请求:", request_path)
     # 遍历路由列表，选择执行的函数
     for path, func in route_list:
@@ -3272,8 +2864,7 @@ def handle_request(env):
             result = func()
             return result
     else:
-        # 没有找到动态资源
-        result = not_found()
+        result = not_found()  # 没有找到动态资源
         return result
 
     # if request_path == "/index.html":
@@ -3305,79 +2896,52 @@ import time
 # 定义路由列表
 route_list = []
 
-
 # 定义带有参数的装饰器
 def route(path):
     # 装饰器
     def decorator(func):
         # 当执行装饰器装饰指定函数的时候，把路径和函数添加到路由列表
         route_list.append((path, func))
-
         def inner():
-            # 执行指定函数
-            return func()
-
+            return func() # 执行指定函数
         return inner
-    # 返回装饰器
-    return decorator
-
+    return decorator # 返回装饰器
 
 # 获取首页数据
 @route("/index.html")
 def index():
-    # 响应状态
-    status = "200 OK";
-    # 响应头
-    response_header = [("Server", "PWS2.0")]
+    status = "200 OK"; # 响应状态
+    response_header = [("Server", "PWS2.0")] # 响应头
 
-    # 打开模板文件，读取数据
-    with open("template/index.html", "r") as file:
+    with open("template/index.html", "r") as file: # 打开模板文件，读取数据
         file_data = file.read()
 
-    # 处理后的数据, 从数据库查询
-    data = time.ctime()
-    # 替换模板文件中的模板遍历
-    result = file_data.replace("{%content%}", data)
-
+    data = time.ctime() # 处理后的数据, 从数据库查询
+    result = file_data.replace("{%content%}", data)# 替换模板文件中的模板遍历
     return status, response_header, result
-
 
 # 获取个人中心数据
 @route("/center.html")
 def center():
-    # 响应状态
-    status = "200 OK";
-    # 响应头
-    response_header = [("Server", "PWS2.0")]
-
-    # 打开模板文件，读取数据
-    with open("template/center.html", "r") as file:
+    status = "200 OK"; # 响应状态
+    response_header = [("Server", "PWS2.0")]  # 响应头
+    with open("template/center.html", "r") as file: # 打开模板文件，读取数据
         file_data = file.read()
-
-    # 处理后的数据, 从数据库查询
-    data = time.ctime()
-    # 替换模板文件中的模板遍历
-    result = file_data.replace("{%content%}", data)
-
+    
+    data = time.ctime() # 处理后的数据, 从数据库查询
+    result = file_data.replace("{%content%}", data) # 替换模板文件中的模板遍历
     return status, response_header, result
-
 
 # 没有找到动态资源
 def not_found():
-    # 响应状态
-    status = "404 Not Found";
-    # 响应头
-    response_header = [("Server", "PWS2.0")]
-    # 处理后的数据
-    data = "not found"
-
+    status = "404 Not Found"; # 响应状态
+    response_header = [("Server", "PWS2.0")] # 响应头
+    data = "not found" # 处理后的数据
     return status, response_header, data
-
 
 # 处理动态资源请求
 def handle_request(env):
-    # 获取动态请求资源路径
-    request_path = env["request_path"]
+    request_path = env["request_path"] # 获取动态请求资源路径
     print("接收到的动态资源请求:", request_path)
     # 遍历路由列表，选择执行的函数
     for path, func in route_list:
@@ -3385,8 +2949,7 @@ def handle_request(env):
             result = func()
             return result
     else:
-        # 没有找到动态资源
-        result = not_found()
+        result = not_found() # 没有找到动态资源
         return result
 ```
 
@@ -3411,31 +2974,23 @@ source stock_db.sql;
 # 获取首页数据
 @route("/index.html")
 def index():
-    # 响应状态
-    status = "200 OK";
-    # 响应头
-    response_header = [("Server", "PWS2.0")]
+    status = "200 OK"; # 响应状态
+    response_header = [("Server", "PWS2.0")] # 响应头
 
-    # 打开模板文件，读取数据
-    with open("template/index.html", "r") as file:
+    with open("template/index.html", "r") as file: # 打开模板文件，读取数据
         file_data = file.read()
 
-    # 处理后的数据, 从数据库查询
-    conn = pymysql.connect(host="localhost",
+    conn = pymysql.connect(host="localhost", # 处理后的数据, 从数据库查询
                            port=3306,
                            user="root",
                            password="mysql",
                            database="stock_db",
                            charset="utf8")
 
-    # 获取游标
-    cursor = conn.cursor()
-    # 查询sql语句
-    sql = "select * from info;"
-    # 执行sql
-    cursor.execute(sql)
-    # 获取结果集
-    result = cursor.fetchall()
+    cursor = conn.cursor() # 获取游标
+    sql = "select * from info;" # 查询sql语句
+    cursor.execute(sql)  # 执行sql
+    result = cursor.fetchall() # 获取结果集
     print(result)
 ```
 
@@ -3447,31 +3002,23 @@ def index():
 # 获取首页数据
 @route("/index.html")
 def index():
-    # 响应状态
-    status = "200 OK";
-    # 响应头
-    response_header = [("Server", "PWS2.0")]
-
-    # 打开模板文件，读取数据
-    with open("template/index.html", "r") as file:
+    status = "200 OK"; # 响应状态
+    response_header = [("Server", "PWS2.0")] # 响应头
+    
+    with open("template/index.html", "r") as file: # 打开模板文件，读取数据
         file_data = file.read()
 
-    # 处理后的数据, 从数据库查询
-    conn = pymysql.connect(host="localhost",
+    conn = pymysql.connect(host="localhost", # 处理后的数据, 从数据库查询
                            port=3306,
                            user="root",
                            password="mysql",
                            database="stock_db",
                            charset="utf8")
 
-    # 获取游标
-    cursor = conn.cursor()
-    # 查询sql语句
-    sql = "select * from info;"
-    # 执行sql
-    cursor.execute(sql)
-    # 获取结果集
-    result = cursor.fetchall()
+    cursor = conn.cursor()  # 获取游标
+    sql = "select * from info;" # 查询sql语句
+    cursor.execute(sql) # 执行sql
+    result = cursor.fetchall() # 获取结果集
     print(result)
 
     data = ""
@@ -3490,7 +3037,6 @@ def index():
 
     # 替换模板文件中的模板遍历
     result = file_data.replace("{%content%}", data)
-
     return status, response_header, result
 ```
 
@@ -3502,10 +3048,8 @@ def index():
 # 个人中心数据接口开发
 @route("/center_data.html")
 def center_data():
-    # 响应状态
-    status = "200 OK";
-    # 响应头
-    response_header = [("Server", "PWS2.0"), ("Content-Type", "text/html;charset=utf-8")]
+    status = "200 OK";  # 响应状态
+    response_header = [("Server", "PWS2.0"), ("Content-Type", "text/html;charset=utf-8")] # 响应头
     conn = pymysql.connect(host="localhost",
                            port=3306,
                            user="root",
@@ -3513,20 +3057,17 @@ def center_data():
                            database="stock_db",
                            charset="utf8")
 
-    # 获取游标
-    cursor = conn.cursor()
+    
+    cursor = conn.cursor() # 获取游标
     # 查询sql语句
     sql = '''select i.code, i.short, i.chg, 
              i.turnover, i.price, i.highs, f.note_info 
              from info as i inner join focus as f on i.id = f.info_id;'''
-    # 执行sql
-    cursor.execute(sql)
-    # 获取结果集
-    result = cursor.fetchall()
-    # 关闭游标
-    cursor.close()
-    # 关闭数据库连接
-    conn.close()
+   
+    cursor.execute(sql)  # 执行sql
+    result = cursor.fetchall() # 获取结果集
+    cursor.close() # 关闭游标
+    conn.close() # 关闭数据库连接
     print(result)
 ```
 
@@ -3536,10 +3077,8 @@ def center_data():
 # 个人中心数据接口开发
 @route("/center_data.html")
 def center_data():
-    # 响应状态
-    status = "200 OK";
-    # 响应头
-    response_header = [("Server", "PWS2.0"), ("Content-Type", "text/html;charset=utf-8")]
+    status = "200 OK"; # 响应状态
+    response_header = [("Server", "PWS2.0"), ("Content-Type", "text/html;charset=utf-8")] # 响应头
     conn = pymysql.connect(host="localhost",
                            port=3306,
                            user="root",
@@ -3547,26 +3086,20 @@ def center_data():
                            database="stock_db",
                            charset="utf8")
 
-    # 获取游标
-    cursor = conn.cursor()
+    cursor = conn.cursor() # 获取游标
     # 查询sql语句
     sql = '''select i.code, i.short, i.chg, 
              i.turnover, i.price, i.highs, f.note_info 
              from info as i inner join focus as f on i.id = f.info_id;'''
-    # 执行sql
-    cursor.execute(sql)
-    # 获取结果集
-    result = cursor.fetchall()
-    # 关闭游标
-    cursor.close()
-    # 关闭数据库连接
-    conn.close()
-    # 个人中心数据列表
-    center_data_list = list()
+
+    cursor.execute(sql) # 执行sql
+    result = cursor.fetchall() # 获取结果集
+    cursor.close()  # 关闭游标
+    conn.close()  # 关闭数据库连接
+    center_data_list = list() # 个人中心数据列表
     # 遍历每一行数据转成字典
     for row in result:
-        # 创建空的字典
-        center_dict = dict()
+        center_dict = dict() # 创建空的字典
         center_dict["code"] = row[0]
         center_dict["short"] = row[1]
         center_dict["chg"] = row[2]
@@ -3574,8 +3107,7 @@ def center_data():
         center_dict["price"] = str(row[4])
         center_dict["highs"] = str(row[5])
         center_dict["note_info"] = row[6]
-        # 添加每个字典信息
-        center_data_list.append(center_dict)
+        center_data_list.append(center_dict) # 添加每个字典信息
 
     # 把列表字典转成json字符串, 并在控制台显示
     json_str = json.dumps(center_data_list,ensure_ascii=False)
@@ -3598,18 +3130,14 @@ def center_data():
 # 获取个人中心数据
 @route("/center.html")
 def center():
-    # 响应状态
-    status = "200 OK"
-    # 响应头
-    response_header = [("Server", "PWS2.0")]
+    status = "200 OK" # 响应状态
+    response_header = [("Server", "PWS2.0")] # 响应头
 
     # 打开模板文件，读取数据
     with open("template/center.html", "r") as file:
         file_data = file.read()
 
-    # 替换模板文件中的模板遍历
-    result = file_data.replace("{%content%}", "")
-
+    result = file_data.replace("{%content%}", "") # 替换模板文件中的模板遍历
     return status, response_header, result
 ```
 
@@ -3629,14 +3157,11 @@ $.get("center_data.html", function (data) {
 ```js
 // 发送ajax请求获取个人中心页面数据
 $.get("center_data.html", function (data) {
-
     var data_array = data;
-
-    // 获取table标签对象
-    var $table = $(".table")
+    var $table = $(".table") // 获取table标签对象
+    
     for(var i = 0; i < data_array.length; i++){
-        // 获取每一条对象
-        var center_obj = data_array[i];
+        var center_obj = data_array[i]; // 获取每一条对象
         var row_html = '<tr>' +
             '<td>'+ center_obj.code +'</td>' +
             '<td>'+ center_obj.short +'</td>' +
@@ -3649,7 +3174,6 @@ $.get("center_data.html", function (data) {
         // 为table标签添加每一行组装的html数据
         $table.append(row_html);
     }
-
 }, "json");
 ```
 
@@ -3773,7 +3297,7 @@ logging.critical('这是一个critical级别的日志信息')
 
 **运行结果:**
 
-![日志文件](./D:/Program Files/Typora/imgs/日志文件.png)
+<img src="./assets/日志文件.png" alt="日志文件" style="zoom:67%;" />
 
 ### 4. logging日志在mini-web项目中应用
 
@@ -3854,661 +3378,6 @@ logging.critical('这是一个critical级别的日志信息')
 
 # 正则表达式
 
-## property属性
-
-### 1. property属性的介绍
-
-property属性就是负责把一个方法当做属性进行使用，这样做可以简化代码使用。
-
-**定义property属性有两种方式**
-
-1. 装饰器方式
-2. 类属性方式
-
-### 2. 装饰器方式
-
-```py
-class Person(object):
-
-    def __init__(self):
-        self.__age = 0
-
-    # 装饰器方式的property, 把age方法当做属性使用, 表示当获取属性时会执行下面修饰的方法
-    @property
-    def age(self):
-        return self.__age
-
-    # 把age方法当做属性使用, 表示当设置属性时会执行下面修饰的方法
-    @age.setter
-    def age(self, new_age):
-        if new_age >= 150:
-            print("成精了")
-        else:
-            self.__age = new_age
-
-# 创建person
-p = Person()
-print(p.age)
-p.age = 100
-print(p.age)
-p.age = 1000
-```
-
-**运行结果:**
-
-```py
-0
-100
-成精了
-```
-
-**代码说明:**
-
-- @property 表示把方法当做属性使用, 表示当获取属性时会执行下面修饰的方法
-- @方法名.setter 表示把方法当做属性使用,表示当设置属性时会执行下面修饰的方法
-- 装饰器方式的property属性修饰的方法名一定要一样。
-
-### 3. 类属性方式
-
-```py
-class Person(object):
-
-    def __init__(self):
-        self.__age = 0
-
-    def get_age(self):
-        """当获取age属性的时候会执行该方法"""
-        return self.__age
-
-    def set_age(self, new_age):
-        """当设置age属性的时候会执行该方法"""
-        if new_age >= 150:
-            print("成精了")
-        else:
-            self.__age = new_age
-
-    # 类属性方式的property属性
-    age = property(get_age, set_age)
-
-# 创建person
-p = Person()
-print(p.age)
-p.age = 100
-print(p.age)
-p.age = 1000
-```
-
-**运行结果:**
-
-```py
-0
-100
-成精了
-```
-
-**代码说明:**
-
-- property的参数说明:
-  - 第一个参数是获取属性时要执行的方法
-  - 第二个参数是设置属性时要执行的方法
-
-## with语句和上下文管理器
-
-### 1. with语句的使用
-
-**基础班向文件中写入数据的示例代码:**
-
-```py
- # 1、以写的方式打开文件
- f = open("1.txt", "w")
- # 2、写入文件内容
- f.write("hello world")
- # 3、关闭文件
- f.close()
-```
-
-**代码说明:**
-
-- 文件使用完后必须关闭，因为文件对象会占用操作系统的资源，并且操作系统同一时间能打开的文件数量也是有限的
-
-**这种写法可能出现一定的安全隐患，错误代码如下:**
-
-```py
- # 1、以读的方式打开文件
- f = open("1.txt", "r")
- # 2、读取文件内容
- f.write("hello world")
- # 3、关闭文件
- f.close()
-```
-
-**运行结果:**
-
-```py
-Traceback (most recent call last):
-  File "/home/python/Desktop/test/xxf.py", line 4, in <module>
-    f.write("hello world")
-io.UnsupportedOperation: not writable
-```
-
-**代码说明:**
-
-- 由于文件读写时都有可能产生IOError，一旦出错，后面的f.close()就不会调用。
-- 为了保证无论是否出错都能正确地关闭文件，我们可以使用try ... finally来解决
-
-**安全写法, 代码如下:**
-
-```py
-try:
-    # 1、以读的方式打开文件
-    f = open("1.txt", "r")
-    # 2、读取文件内容
-    f.write("xxxxx")
-
-except IOError as e:
-    print("文件操作出错", e)
-
-finally:
-    # 3、关闭文件
-    f.close()
-```
-
-**运行结果:**
-
-```py
-文件操作出错 not writable
-```
-
-这种方法虽然代码运行良好,但是缺点就是代码过于冗长,并且需要添加try-except-finally语句,不是很方便,也容易忘记.
-
-在这种情况下,**Python提供了 with 语句的这种写法，既简单又安全，并且 with 语句执行完成以后自动调用关闭文件操作，即使出现异常也会自动调用关闭文件操作**。
-
-**with 语句的示例代码:**
-
-```py
-# 1、以写的方式打开文件
-with open("1.txt", "w") as f:
-    # 2、读取文件内容
-    f.write("hello world")
-```
-
-### 2. 上下文管理器
-
-一个类只要实现了`__enter__()和__exit__()`这个两个方法，通过该类创建的对象我们就称之为上下文管理器。
-
-上下文管理器可以使用 with 语句，**with语句之所以这么强大，背后是由上下文管理器做支撑的**，也就是说刚才使用 open 函数创建的文件对象就是就是一个上下文管理器对象。
-
-**自定义上下文管理器类,模拟文件操作:**
-
-定义一个File类，实现 `__enter__() 和 __exit__()`方法，然后使用 with 语句来完成操作文件， 示例代码:
-
-```py
-class File(object):
-
-    # 初始化方法
-    def __init__(self, file_name, file_model):
-        # 定义变量保存文件名和打开模式
-        self.file_name = file_name
-        self.file_model = file_model
-
-    # 上文方法
-    def __enter__(self):
-        print("进入上文方法")
-        # 返回文件资源
-        self.file = open(self.file_name,self.file_model)
-        return self.file
-
-    # 下文方法
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        print("进入下文方法")
-        self.file.close()
-
-
-if __name__ == '__main__':
-
-    # 使用with管理文件
-    with File("1.txt", "r") as file:
-        file_data = file.read()
-        print(file_data)
-```
-
-**运行结果:**
-
-```py
-进入上文方法
-hello world
-进入下文方法
-```
-
-**代码说明:**
-
-- `__enter__`表示上文方法，需要返回一个操作文件对象
-- `__exit__`表示下文方法，with语句执行完成会自动执行，即使出现异常也会执行该方法。
-
-### 3. 上下文管理器的另外一种实现方式
-
-假如想要让一个函数成为上下文管理器，Python 还提供了一个 @contextmanager 的装饰器，更进一步简化了上下文管理器的实现方式。通过 yield 将函数分割成两部分，yield 上面的语句在 `__enter__` 方法中执行，yield 下面的语句在 `__exit__` 方法中执行，紧跟在 yield 后面的参数是函数的返回值。
-
-```py
-# 导入装饰器
-from contextlib import contextmanager
-
-
-# 装饰器装饰函数，让其称为一个上下文管理器对象
-@contextmanager
-def my_open(path, mode):
-    try:
-        # 打开文件
-        file = open(file_name, file_mode)
-        # yield之前的代码好比是上文方法
-        yield file
-    except Exception as e:
-        print(e)
-    finally:
-        print("over")
-        # yield下面的代码好比是下文方法
-        file.close()
-
-# 使用with语句
-with my_open('out.txt', 'w') as f:
-    f.write("hello , the simplest context manager")
-```
-
-
-
-## 生成器的创建方式
-
-### 1. 生成器的介绍
-
-根据程序员制定的规则循环生成数据，当条件不成立时则生成数据结束。数据不是一次性全部生成处理，而是使用一个，再生成一个，可以**节约大量的内存**。
-
-### 2. 创建生成器的方式
-
-1. 生成器推导式
-2. yield 关键字
-
-**生成器推导式:**
-
-- 与列表推导式类似，只不过生成器推导式使用小括号
-
-```py
-# 创建生成器
-my_generator = (i * 2 for i in range(5))
-print(my_generator)
-
-# next获取生成器下一个值
-# value = next(my_generator)
-# print(value)
-
-# 遍历生成器
-for value in my_generator:
-    print(value)
-```
-
-**代码说明:**
-
-- next 函数获取生成器中的下一个值
-- for 循环遍历生成器中的每一个值
-
-**运行结果:**
-
-```py
-<generator object <genexpr> at 0x101367048>
-0
-2
-4
-6
-8
-```
-
-**yield 关键字:**
-
-- 只要在def函数里面看到有 yield 关键字那么就是生成器
-
-```py
-def mygenerater(n):
-    for i in range(n):
-        print('开始生成...')
-        yield i
-        print('完成一次...')
-
-
-if __name__ == '__main__':
-
-    g = mygenerater(2)
-    # 获取生成器中下一个值
-    # result = next(g)
-    # print(result)
-
-    # while True:
-    #     try:
-    #         result = next(g)
-    #         print(result)
-    #     except StopIteration as e:
-    #         break
-
-    # # for遍历生成器, for 循环内部自动处理了停止迭代异常，使用起来更加方便
-    for i in g:
-        print(i)
-```
-
-**代码说明:**
-
-- 代码执行到 yield 会暂停，然后把结果返回出去，下次启动生成器会在暂停的位置继续往下执行
-- 生成器如果把数据生成完成，再次获取生成器中的下一个数据会抛出一个StopIteration 异常，表示停止迭代异常
-- while 循环内部没有处理异常操作，需要手动添加处理异常操作
-- for 循环内部自动处理了停止迭代异常，使用起来更加方便，推荐大家使用。
-
-**运行结果:**
-
-```py
-开始生成...
-0
-完成一次...
-开始生成...
-1
-完成一次...
-```
-
-### 3. 生成器的使用场景
-
-数学中有个著名的斐波拉契数列（Fibonacci），数列中第一个数为0，第二个数为1，其后的每一个数都可由前两个数相加得到：
-
-0, 1, 1, 2, 3, 5, 8, 13, 21, 34, ...
-
-现在我们使用生成器来实现这个斐波那契数列，每次取值都通过算法来生成下一个数据, **生成器每次调用只生成一个数据，可以节省大量的内存。**
-
-```py
-def fibonacci(num):
-    a = 0
-    b = 1
-
-    # 记录生成fibonacci数字的下标
-    current_index = 0
-
-    while current_index < num:
-        result = a
-        a, b = b, a + b
-        current_index += 1
-        # 代码执行到yield会暂停，然后把结果返回出去，下次启动生成器会在暂停的位置继续往下执行
-        yield result
-
-
-fib = fibonacci(5)
-# 遍历生成的数据
-for value in fib:
-    print(value)
-```
-
-**运行结果:**
-
-```py
-0
-1
-1
-2
-3
-```
-
-
-
-## 深拷贝和浅拷贝
-
-### 1. 浅拷贝
-
-copy函数是浅拷贝，只对可变类型的第一层对象进行拷贝，对拷贝的对象开辟新的内存空间进行存储，不会拷贝对象内部的子对象。
-
-**不可变类型的浅拷贝示例代码:**
-
-```py
-import copy  # 使用浅拷贝需要导入copy模块
-
-# 不可变类型有: 数字、字符串、元组
-
-a1 = 123123
-b1 = copy.copy(a1)  # 使用copy模块里的copy()函数就是浅拷贝了
-# 查看内存地址
-print(id(a1))
-print(id(b1))
-
-print("-" * 10)
-a2 = "abc"
-b2 = copy.copy(a2)
-# 查看内存地址
-print(id(a2))
-print(id(b2))
-
-print("-" * 10)
-a3 = (1, 2, ["hello", "world"])
-b3 = copy.copy(a3)
-# 查看内存地址
-print(id(a3))
-print(id(b3))
-```
-
-**运行结果:**
-
-```py
-140459558944048
-140459558944048
-----------
-140459558648776
-140459558648776
-----------
-140459558073328
-140459558073328
-```
-
-**不可变类型的浅拷贝说明:**
-
-- **通过上面的执行结果可以得知，不可变类型进行浅拷贝不会给拷贝的对象开辟新的内存空间，而只是拷贝了这个对象的引用。**
-
-**可变类型的浅拷贝示例代码:**
-
-```py
-import copy # 使用浅拷贝需要导入copy模块
-
-# 可变类型有: 列表、字典、集合
-
-a1 = [1, 2]
-b1 = copy.copy(a1) # 使用copy模块里的copy()函数就是浅拷贝了
-# 查看内存地址
-print(id(a1))
-print(id(b1))
-print("-" * 10)
-a2 = {"name": "张三", "age": 20}
-b2 = copy.copy(a2)
-# 查看内存地址
-print(id(a2))
-print(id(b2))
-print("-" * 10)
-a3 = {1, 2, "王五"}
-b3 = copy.copy(a3)
-# 查看内存地址
-print(id(a3))
-print(id(b3))
-
-print("-" * 10)
-a4 = [1, 2, [4, 5]]
-# 注意：浅拷贝只会拷贝父对象，不会对子对象进行拷贝
-b4 = copy.copy(a4) # 使用copy模块里的copy()函数就是浅拷贝了
-# 查看内存地址
-print(id(a4))
-print(id(b4))
-print("-" * 10)
-# 查看内存地址
-print(id(a4[2]))
-print(id(b4[2]))
-
-# 修改数据
-a4[2][0] = 6
-
-# 子对象的数据会受影响
-print(a4)
-print(b4)
-```
-
-**运行结果:**
-
-```py
-139882899585608
-139882899585800
-----------
-139882919626432
-139882919626504
-----------
-139882919321672
-139882899616264
-----------
-139882899587016
-139882899586952
-----------
-139882899693640
-139882899693640
-[1, 2, [6, 5]]
-[1, 2, [6, 5]]
-```
-
-**可变类型的浅拷贝说明:**
-
-- **通过上面的执行结果可以得知，可变类型进行浅拷贝只对可变类型的第一层对象进行拷贝，对拷贝的对象会开辟新的内存空间进行存储，子对象不进行拷贝。**
-
-### 2. 深拷贝
-
-deepcopy函数是深拷贝, 只要发现对象有可变类型就会对该对象到最后一个可变类型的每一层对象就行拷贝, 对每一层拷贝的对象都会开辟新的内存空间进行存储。
-
-**不可变类型的深拷贝示例代码:**
-
-```py
-import copy  # 使用深拷贝需要导入copy模块
-
-# 不可变类型有: 数字、字符串、元组
-
-a1 = 1
-b1 = copy.deepcopy(a1)  # 使用copy模块里的deepcopy()函数就是深拷贝了
-# 查看内存地址
-print(id(a1))
-print(id(b1))
-print("-" * 10)
-a2 = "张三"
-b2 = copy.deepcopy(a2)
-# 查看内存地址
-print(id(a2))
-print(id(b2))
-print("-" * 10)
-a3 = (1, 2)
-b3 = copy.deepcopy(a3)
-# 查看内存地址
-print(id(a3))
-print(id(b3))
-print("-" * 10)
-
-# 注意: 元组里面要是有可变类型对象，发现对象有可变类型就会该对象到最后一个可变类型的每一层对象进行拷贝
-a4 = (1, ["李四"])
-b4 = copy.deepcopy(a4)
-# 查看内存地址
-print(id(a4))
-print(id(b4))
-# 元组里面的可变类型子对象也会进行拷贝
-print(id(a4[1]))
-print(id(b4[1]))
-```
-
-**运行结果:**
-
-```py
-9289120
-9289120
-----------
-140115621848320
-140115621848320
-----------
-140115621859592
-140115621859592
-----------
-140115602480584
-140115621834568
-140115602328136
-140115602436168
-```
-
-**不可变类型的深拷贝说明:**
-
-- 通过上面的执行结果可以得知：
-  - **不可变类型进行深拷贝如果子对象没有可变类型则不会进行拷贝，而只是拷贝了这个对象的引用，否则会对该对象到最后一个可变类型的每一层对象就行拷贝, 对每一层拷贝的对象都会开辟新的内存空间进行存储**
-
-**可变类型的深拷贝示例代码:**
-
-```py
-import copy  # 使用深拷贝需要导入copy模块
-
-# 可变类型有: 列表、字典、集合
-
-a1 = [1, 2]
-b1 = copy.deepcopy(a1)  # 使用copy模块里的deepcopy()函数就是深拷贝了
-# 查看内存地址
-print(id(a1))
-print(id(b1))
-print("-" * 10)
-a2 = {"name": "张三"}
-b2 = copy.deepcopy(a2)
-# 查看内存地址
-print(id(a2))
-print(id(b2))
-print("-" * 10)
-a3 = {1, 2}
-b3 = copy.deepcopy(a3)
-# 查看内存地址
-print(id(a3))
-print(id(b3))
-print("-" * 10)
-
-a4 = [1, 2, ["李四", "王五"]]
-b4 = copy.deepcopy(a4)  # 使用copy模块里的deepcopy()函数就是深拷贝了
-# 查看内存地址
-print(id(a4))
-print(id(b4))
-
-# 查看内存地址
-print(id(a4[2]))
-print(id(b4[2]))
-a4[2][0] = "王五"
-# 因为列表的内存地址不同，所以数据不会收到影响
-print(a4)
-print(b4)
-```
-
-**运行结果:**
-
-```py
-140348291721736
-140348291721928
-----------
-140348311762624
-140348311221592
-----------
-140348311457864
-140348291752456
-----------
-140348291723080
-140348291723144
-140348291723208
-140348291723016
-[1, 2, ['王五', '王五']]
-[1, 2, ['李四', '王五']]
-```
-
-**可变类型的深拷贝说明:**
-
-- 通过上面的执行结果可以得知, 可变类型进行深拷贝会对该对象到最后一个可变类型的每一层对象就行拷贝, 对每一层拷贝的对象都会开辟新的内存空间进行存储。
-
-### 3. 浅拷贝和深拷贝的区别
-
-- 浅拷贝最多拷贝对象的一层
-- 深拷贝可能拷贝对象的多层
-
-
-
 ## 正则表达式的概述
 
 ### 1. 正则表达式的介绍
@@ -4550,11 +3419,8 @@ result.group()
 ```py
 import re
 
-
-# 使用match方法进行匹配操作
-result = re.match("itcast","itcast.cn")
-# 获取匹配结果
-info = result.group()
+result = re.match("itcast","itcast.cn") # 使用match方法进行匹配操作
+info = result.group() # 获取匹配结果
 print(info)
 ```
 
@@ -4614,7 +3480,6 @@ import re
 # 如果hello的首字符小写，那么正则表达式需要小写的h
 ret = re.match("h","hello Python") 
 print(ret.group())
-
 
 # 如果hello的首字符大写，那么正则表达式需要大写的H
 ret = re.match("H","Hello Python") 
@@ -4701,8 +3566,7 @@ import re
 
 match_obj = re.match("\D", "f")
 if match_obj:
-    # 获取匹配结果
-    print(match_obj.group())
+    print(match_obj.group()) # 获取匹配结果
 else:
     print("匹配失败")
 ```
@@ -4725,8 +3589,6 @@ if match_obj:
     print(result)
 else:
     print("匹配失败")
-
-
 
 # \t 属于空白字符
 match_obj = re.match("hello\sworld", "hello\tworld")
@@ -4751,19 +3613,18 @@ import re
 
 match_obj = re.match("hello\Sworld", "hello&world")
 if match_obj:
-result = match_obj.group()
-print(result)
+	result = match_obj.group()
+	print(result)
 else:
-print("匹配失败")
-
+	print("匹配失败")
 
 
 match_obj = re.match("hello\Sworld", "hello$world")
 if match_obj:
-result = match_obj.group()
-print(result)
+	result = match_obj.group()
+	print(result)
 else:
-print("匹配失败")
+	print("匹配失败")
 ```
 
 运行结果:
@@ -4781,8 +3642,7 @@ import re
 # 匹配非特殊字符中的一位
 match_obj = re.match("\w", "A")
 if match_obj:
-    # 获取匹配结果
-    print(match_obj.group())
+    print(match_obj.group())  # 获取匹配结果
 else:
     print("匹配失败")
 ```
@@ -4799,8 +3659,7 @@ A
 # 匹配特殊字符中的一位
 match_obj = re.match("\W", "&")
 if match_obj:
-    # 获取匹配结果
-    print(match_obj.group())
+    print(match_obj.group()) # 获取匹配结果
 else:
     print("匹配失败")
 ```
@@ -4855,7 +3714,6 @@ Aabcdef
 ```python
 import re
 
-
 match_obj = re.match("t.+o", "two")
 if match_obj:
     print(match_obj.group())
@@ -4896,7 +3754,6 @@ https
 ```python
 import re
 
-
 ret = re.match("[a-zA-Z0-9_]{6}","12a3g45678")
 print(ret.group())
 
@@ -4930,8 +3787,7 @@ import re
 # 匹配以数字开头的数据
 match_obj = re.match("^\d.*", "3hello")
 if match_obj:
-    # 获取匹配结果
-    print(match_obj.group())
+    print(match_obj.group()) # 获取匹配结果
 else:
     print("匹配失败")
 ```
@@ -4948,11 +3804,11 @@ else:
 
 ```python
 import re
+
 # 匹配以数字结尾的数据
 match_obj = re.match(".*\d$", "hello5")
 if match_obj:
-    # 获取匹配结果
-    print(match_obj.group())
+    print(match_obj.group()) # 获取匹配结果
 else:
     print("匹配失败")
 ```
@@ -4970,8 +3826,7 @@ hello5
 ```python
 match_obj = re.match("^\d.*\d$", "4hello4")
 if match_obj:
-    # 获取匹配结果
-    print(match_obj.group())
+    print(match_obj.group()) # 获取匹配结果
 else:
     print("匹配失败")
 ```
@@ -4991,11 +3846,9 @@ else:
 ```python
 import re
 
-
 match_obj = re.match("[^aeiou]", "h")
 if match_obj:
-    # 获取匹配结果
-    print(match_obj.group())
+    print(match_obj.group()) # 获取匹配结果
 else:
     print("匹配失败")
 ```
@@ -5057,8 +3910,7 @@ import re
 match_obj = re.match("[a-zA-Z0-9_]{4,20}@(163|126|qq|sina|yahoo)\.com", "hello@163.com")
 if match_obj:
     print(match_obj.group())
-    # 获取分组数据
-    print(match_obj.group(1))
+    print(match_obj.group(1)) # 获取分组数据
 else:
     print("匹配失败")
 ```
@@ -5076,7 +3928,6 @@ hello@163.com
 import re
 
 match_obj = re.match("(qq):([1-9]\d{4,10})", "qq:10567")
-
 if match_obj:
     print(match_obj.group())
     # 分组:默认是1一个分组，多个分组从左到右依次加1
@@ -5100,14 +3951,12 @@ qq
 
 ```python
 match_obj = re.match("<[a-zA-Z1-6]+>.*</[a-zA-Z1-6]+>", "<html>hh</div>")
-
 if match_obj:
     print(match_obj.group())
 else:
     print("匹配失败")
 
 match_obj = re.match("<([a-zA-Z1-6]+)>.*</\\1>", "<html>hh</html>")
-
 if match_obj:
     print(match_obj.group())
 else:

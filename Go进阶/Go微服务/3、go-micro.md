@@ -145,8 +145,6 @@ protoc --plugin=protoc-gen-go=$GOPATH/bin/protoc-gen-go --plugin=protoc-gen-micr
 
 ## go-micro注册服务
 
-
-
 ```go
 	// Register consul
     consulReg:= consul.NewRegistry(func(options *registry.Options) {
@@ -214,7 +212,7 @@ micro server # 启动命令
 
 # docker方式：启动micro server
 root@123:~$ docker run -d -p 8080:8080 -p 8081:8081 ghcr.io/micro/micro:latest server #创建 micro服务
-5227920ac2098e3acd939b3fc3aa3b2850783efd12293ea1a11ea1a39ea57025 
+5227920ac2098e3acd939b3fc3aa3b2850783efd12293ea1a11ea1a39ea57025
 ```
 
 **登录Micro**

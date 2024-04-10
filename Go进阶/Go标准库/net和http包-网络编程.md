@@ -139,7 +139,6 @@ func main() {
 
 	for {
 		fmt.Println("监听中...")
-
 		//Accept() (Conn, error)
 		conn, err := listener.Accept()
 		if err != nil {
@@ -148,7 +147,6 @@ func main() {
 		}
 
 		fmt.Println("连接建立成功!")
-
 		go handleFunc(conn)
 	}
 }
@@ -282,43 +280,70 @@ GetBody：原则上是可以多次读取，但是在原生的http.Request里面�
 
 ## 创建Server端
 
-ListenAndServe使用指定的监听地址和处理器启动一个HTTP服务端。处理器参数通常是nil，这表示采用包变量DefaultServeMux作为处理器。
+`Handle` 和 `HandleFunc` 函数都是用于设置HTTP请求的处理器的方法。它们通常用于创建HTTP服务器并定义不同URL路径的处理逻辑。
 
-Handle和HandleFunc函数可以向DefaultServeMux添加处理器。
+1. `Handle` 函数：
 
-```go
-http.Handle("/foo", fooHandler)
-http.HandleFunc("/bar", func(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
-})
-log.Fatal(http.ListenAndServe(":8080", nil))
-```
+   `Handle` 函数用于将指定的处理器（Handler）与特定的URL路径进行绑定。其签名如下：
 
-示例文件如下：
+   ```
+   goCopy Codefunc Handle(pattern string, handler Handler)
+   ```
 
-使用Go语言中的`net/http`包来编写一个简单的接收HTTP请求的Server端示例，`net/http`包是对net包的进一步封装，专门用来处理HTTP协议的数据。具体的代码如下：
+   其中，`pattern` 是一个URL路径模式，而 `handler` 则是一个实现了 `http.Handler` 接口的处理器对象，用于处理与该URL模式匹配的HTTP请求。
 
-```go
-// http server
-func sayHello(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Hello 沙河！")
-}
+   以下是一个简单的示例，演示了如何使用 `Handle` 函数创建一个简单的HTTP服务器，并将不同的URL路径与不同的处理器绑定：
 
-func main() {
-	http.HandleFunc("/", sayHello)
-	err := http.ListenAndServe(":9090", nil)
-	if err != nil {
-		fmt.Printf("http server failed, err:%v\n", err)
-		return
-	}
-}
-```
+   ```go
+   func main() {
+       // 绑定处理器到不同的URL路径
+       http.Handle("/hello", &helloHandler{})
+   
+       // 启动HTTP服务器，监听端口8080
+       fmt.Println("Server listening on port 8080...")
+       // ListenAndServe使用指定的监听地址和处理器启动一个HTTP服务端。处理器参数通常是nil，这表示采用包变量DefaultServeMux作为处理器。
+       http.ListenAndServe(":8080", nil)
+   }
+   
+   // 实现一个简单的处理器，用于处理/hello路径的请求
+   type helloHandler struct{}
+   
+   func (h *helloHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {  // 实现Handle接口的方法
+       fmt.Fprintf(w, "Hello, World!")
+   }
+   ```
 
-将上面的代码编译之后执行，打开你电脑上的浏览器在地址栏输入`127.0.0.1:9090`回车，此时就能够看到如下页面了。
+2. `HandleFunc` 函数：
 
-<img src="assets/image-20230424180141729.png" alt="image-20230424180141729" style="zoom: 33%;" />
+   `HandleFunc` 函数与 `Handle` 函数的功能类似，但它允许直接使用函数来作为处理器，而不需要创建一个实现 `http.Handler` 接口的结构体。其签名如下：
 
-## 自定义的Server端
+   ```go
+   goCopy Codefunc HandleFunc(pattern string, handler func(ResponseWriter, *Request))
+   ```
+
+   其中，`pattern` 是URL路径模式，而 `handler` 则是一个函数，该函数接受两个参数，分别是 `http.ResponseWriter` 和 `*http.Request`，用于处理与该URL模式匹配的HTTP请求。
+
+   以下是使用 `HandleFunc` 函数的示例：
+
+   ```go
+   func main() {
+       // 绑定处理函数到不同的URL路径
+       http.HandleFunc("/hello", helloHandler)
+   
+       // 启动HTTP服务器，监听端口8080
+       fmt.Println("Server listening on port 8080...")
+       http.ListenAndServe(":8080", nil)
+   }
+   
+   // 处理/hello路径的函数
+   func helloHandler(w http.ResponseWriter, r *http.Request) {
+       fmt.Fprintf(w, "Hello, World!")
+   }
+   ```
+
+
+
+## 定义Server内部参数
 
 要管理服务端的行为，可以创建一个自定义的Server：
 
@@ -425,7 +450,7 @@ Write以有线格式将头域写入w。
 
 1) 获取请求头中的所有信息
 
-**r.Header**得到的结果如下：、
+**r.Header**得到的结果如下：
 
 **map**[User-Agent:[Mozilla/5.0 (Windows NT 10.0; Win64; x64) 
 
@@ -457,7 +482,7 @@ ii. 结果gzip, deflate, br
 
 请求和响应的主体都是有 Request 结构中的 Body 字段表示，这个字段的类型是io.ReadCloser 接口，该接口包含了 Reader 接口和 Closer 接口，Reader 接口拥有 Read方法，Closer 接口拥有 Close 方法
 
-```
+```go
 type ReadCloser interface {
 	Reader
 	Closer
@@ -466,7 +491,7 @@ type ReadCloser interface {
 
 ReadCloser是一个接口，它将基本的Read和Close方法组合在一起。
 
-```
+```go
 type Reader interface {
 	Read(p []byte) (n int, err error)
 }
@@ -482,7 +507,7 @@ Read将len（p）个字节读入p。它返回字节数 read（0<= n<= len（p）
 
 实现不能保留p。
 
-```
+```go
 type Closer interface {
 	Close() error
 }
@@ -855,7 +880,7 @@ if err != nil {
 	// handle error
 }
 defer resp.Body.Close()
-body, err := ioutil.ReadAll(resp.Body)
+body, err := io.ReadAll(resp.Body)
 // ...
 ```
 
@@ -872,7 +897,7 @@ func main() {
 	}
 	defer resp.Body.Close()
   
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Printf("read from resp.Body failed, err:%v\n", err)
 		return

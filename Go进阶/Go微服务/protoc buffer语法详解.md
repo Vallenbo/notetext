@@ -8,20 +8,17 @@ package hello_grpc;     // 指定默认包名
 // 指定golang包名
 option go_package = "/hello_grpc";
 
-//定义rpc服务
-service HelloService {
-  // 定义函数
-  rpc SayHello (HelloRequest) returns (HelloResponse) {}
+
+service HelloService { //定义rpc服务
+  rpc SayHello (HelloRequest) returns (HelloResponse) {} // 定义函数
 }
 
-// HelloRequest 请求内容
-message HelloRequest {
+message HelloRequest { // HelloRequest 请求内容
   string name = 1;  // 消息号
   string message = 2;
 }
 
-// HelloResponse 响应内容
-message HelloResponse{
+message HelloResponse{ // HelloResponse 响应内容
   string name = 1;
   string message = 2;
 }
@@ -259,15 +256,13 @@ type Q1 struct {
 外层嵌套
 
 ```go
-// 定义Result消息
-message Result {
+message Result { // 定义Result消息
   string url = 1;
   string title = 2;
   repeated string snippets = 3; // 字符串数组类型
 }
 
-// 定义SearchResponse消息
-message SearchResponse {
+message SearchResponse { // 定义SearchResponse消息
   // 引用上面定义的Result消息类型，作为results字段的类型
   repeated Result results = 1; // repeated关键词标记，说明results字段是一个数组
 }

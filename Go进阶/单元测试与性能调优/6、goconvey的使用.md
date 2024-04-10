@@ -7,7 +7,7 @@
 如果需要使用`goconvey`的Web UI程序，请执行下面的命令安装可执行程序。
 
 ```bash
- go install github.com/smartystreets/goconvey@latest
+go install github.com/smartystreets/goconvey@latest
 ```
 
 如果只是想在项目中引入依赖，只需要在项目目录中执行以下命令。
@@ -22,7 +22,6 @@ go get github.com/smartystreets/goconvey
 
 ```go
 // split.go
-
 func Split(s, sep string) (result []string) {
 	result = make([]string, 0, strings.Count(s, sep)+1)
 	i := strings.Index(s, sep)
@@ -40,7 +39,6 @@ func Split(s, sep string) (result []string) {
 
 ```go
 // split_test.go
-
 
 import (
 	"testing"
