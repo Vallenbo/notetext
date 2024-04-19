@@ -45,7 +45,7 @@ docker run -it --network host --rm redis:5.0.7 redis-cli
 
 Go 社区中目前有很多成熟的 redis client 库操作 Redis 数据库。使用以下命令下安装 go-redis 库。
 
-```bash
+```go
 go get github.com/go-redis/redis
 go get github.com/go-redis/redis/v8  //最新版本的go-redis库的相关命令都需要传递context.Context参数
 ```
@@ -108,7 +108,6 @@ rdb := redis.NewFailoverClient(&redis.FailoverOptions{
 ```go
 rdb := redis.NewClusterClient(&redis.ClusterOptions{
     Addrs: []string{":7000", ":7001", ":7002", ":7003", ":7004", ":7005"},
-
     // 若要根据延迟或随机路由命令，请启用以下命令之一
     // RouteByLatency: true,
     // RouteRandomly: true,
@@ -122,25 +121,20 @@ rdb := redis.NewClusterClient(&redis.ClusterOptions{
 下面的示例代码演示了 go-redis 库的基本使用。
 
 ```go
-// doCommand go-redis基本使用示例
-func doCommand() {
+func doCommand() { // doCommand go-redis基本使用示例
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 
-	// 执行命令获取结果
-	val, err := rdb.Get(ctx, "key").Result()
+	val, err := rdb.Get(ctx, "key").Result() // 执行命令获取结果
 	fmt.Println(val, err)
-
-	// 先获取到命令对象
-	cmder := rdb.Get(ctx, "key")
+	
+	cmder := rdb.Get(ctx, "key") // 先获取到命令对象
 	fmt.Println(cmder.Val()) // 获取值
 	fmt.Println(cmder.Err()) // 获取错误
 
-	// 直接执行命令获取错误
-	err = rdb.Set(ctx, "key", 10, time.Hour).Err()
+	err = rdb.Set(ctx, "key", 10, time.Hour).Err() // 直接执行命令获取错误
 
-	// 直接执行命令获取值
-	value := rdb.Get(ctx, "key").Val()
+	value := rdb.Get(ctx, "key").Val() // 直接执行命令获取值
 	fmt.Println(value)
 }
 ```
@@ -150,17 +144,14 @@ func doCommand() {
 go-redis 还提供了一个执行任意命令或自定义命令的 Do 方法，特别是一些 go-redis 库暂时不支持的命令都可以使用该方法执行。具体使用方法如下。
 
 ```go
-// doDemo rdb.Do 方法使用示例
-func doDemo() {
+func doDemo() { // doDemo rdb.Do 方法使用示例
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 
-	// 直接执行命令获取错误
-	err := rdb.Do(ctx, "set", "key", 10, "EX", 3600).Err()
+	err := rdb.Do(ctx, "set", "key", 10, "EX", 3600).Err() // 直接执行命令获取错误
 	fmt.Println(err)
 
-	// 执行命令获取结果
-	val, err := rdb.Do(ctx, "get", "key").Result()
+	val, err := rdb.Do(ctx, "get", "key").Result() // 执行命令获取结果
 	fmt.Println(val, err)
 }
 ```
@@ -170,19 +161,16 @@ func doDemo() {
 go-redis 库提供了一个 redis.Nil 错误来表示 Key 不存在的错误。因此在使用 go-redis 时需要注意对返回错误的判断。在某些场景下我们应该区别处理 redis.Nil 和其他不为 nil 的错误。
 
 ```go
-// getValueFromRedis redis.Nil判断
-func getValueFromRedis(key, defaultValue string) (string, error) {
+func getValueFromRedis(key, defaultValue string) (string, error) { // getValueFromRedis redis.Nil判断
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 
 	val, err := rdb.Get(ctx, key).Result()
 	if err != nil {
-		// 如果返回的错误是key不存在
-		if errors.Is(err, redis.Nil) {
+		if errors.Is(err, redis.Nil) { // 如果返回的错误是key不存在
 			return defaultValue, nil
 		}
-		// 出其他错了
-		return "", err
+		return "", err // 出其他错了
 	}
 	return val, nil
 }
@@ -195,12 +183,9 @@ func getValueFromRedis(key, defaultValue string) (string, error) {
 下面的示例代码演示了如何使用 go-redis 库操作 zset。
 
 ```go
-// zsetDemo 操作zset示例
-func zsetDemo() {
-	// key
-	zsetKey := "language_rank"
-	// value
-	languages := []*redis.Z{
+func zsetDemo() { // zsetDemo 操作zset示例
+	zsetKey := "language_rank"// key
+	languages := []*redis.Z{ // value
 		{Score: 90.0, Member: "Golang"},
 		{Score: 98.0, Member: "Java"},
 		{Score: 95.0, Member: "Python"},
@@ -274,8 +259,7 @@ vals, err := rdb.Keys(ctx, "prefix*").Result()
 但是如果需要扫描数百万的 key ，那速度就会比较慢。这种场景下你可以使用Scan 命令来遍历所有符合要求的 key。
 
 ```go
-// scanKeysDemo1 按前缀查找所有key示例
-func scanKeysDemo1() {
+func scanKeysDemo1() { // scanKeysDemo1 按前缀查找所有key示例
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 
@@ -283,8 +267,7 @@ func scanKeysDemo1() {
 	for {
 		var keys []string
 		var err error
-		// 按前缀扫描key
-		keys, cursor, err = rdb.Scan(ctx, cursor, "prefix:*", 0).Result()
+		keys, cursor, err = rdb.Scan(ctx, cursor, "prefix:*", 0).Result() // 按前缀扫描key
 		if err != nil {
 			panic(err)
 		}
@@ -303,12 +286,11 @@ func scanKeysDemo1() {
 Go-redis 允许将上面的代码简化为如下示例。
 
 ```go
-// scanKeysDemo2 按前缀扫描key示例
-func scanKeysDemo2() {
+func scanKeysDemo2() { // scanKeysDemo2 按前缀扫描key示例
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
-	// 按前缀扫描key
-	iter := rdb.Scan(ctx, 0, "prefix:*", 0).Iterator()
+	
+	iter := rdb.Scan(ctx, 0, "prefix:*", 0).Iterator() // 按前缀扫描key
 	for iter.Next(ctx) {
 		fmt.Println("keys", iter.Val())
 	}
@@ -321,8 +303,7 @@ func scanKeysDemo2() {
 例如，我们可以写出一个将所有匹配指定模式的 key 删除的示例。
 
 ```go
-// delKeysByMatch 按match格式扫描所有key并删除
-func delKeysByMatch(match string, timeout time.Duration) {
+func delKeysByMatch(match string, timeout time.Duration) { // delKeysByMatch 按match格式扫描所有key并删除
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
@@ -364,8 +345,7 @@ if err != nil {
 	panic(err)
 }
 
-// 在执行pipe.Exec之后才能获取到结果
-fmt.Println(incr.Val())
+fmt.Println(incr.Val()) // 在执行pipe.Exec之后才能获取到结果
 ```
 
 上面的代码相当于将以下两个命令一次发给 Redis Server 端执行，与不使用 Pipeline 相比能减少一次RTT。
@@ -389,8 +369,7 @@ if err != nil {
 	panic(err)
 }
 
-// 在pipeline执行后获取到结果
-fmt.Println(incr.Val())
+fmt.Println(incr.Val()) // 在pipeline执行后获取到结果
 ```
 
 我们可以遍历 pipeline 命令的返回值依次获取每个命令的结果。下方的示例代码中使用pipiline一次执行了100个 Get 命令，在pipeline 执行后遍历取出100个命令的执行结果。
@@ -487,14 +466,12 @@ const routineCount = 100
 
 increment := func(key string) error {
 	txf := func(tx *redis.Tx) error {
-		// 获得当前值或零值
-		n, err := tx.Get(key).Int()
+		n, err := tx.Get(key).Int() // 获得当前值或零值
 		if err != nil && err != redis.Nil {
 			return err
 		}
 
-		// 实际操作（乐观锁定中的本地操作）
-		n++
+		n++ // 实际操作（乐观锁定中的本地操作）
 
 		// 仅在监视的Key保持不变的情况下运行
 		_, err = tx.Pipelined(func(pipe redis.Pipeliner) error {

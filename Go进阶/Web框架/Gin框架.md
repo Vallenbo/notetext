@@ -584,11 +584,245 @@ shopGroup := r.Group("/shop")
 
 Gin框架中的路由使用的是[httprouter](https://github.com/julienschmidt/httprouter)这个库。其基本原理就是构造一个路由地址的前缀树。
 
-# jwt中间件鉴权
+# 路由拆分与注册
+
+### 基本的路由注册
+
+下面最基础的gin路由注册方式，适用于路由条目比较少的简单项目或者项目demo。
+
+```go
+func helloHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Hello q1mi!",
+	})
+}
+
+func main() {
+	r := gin.Default()
+	r.GET("/hello", helloHandler)
+	if err := r.Run(); err != nil {
+		fmt.Println("startup service failed, err:%v\n", err)
+	}
+}
+```
+
+### 路由拆分成单独文件或包
+
+当项目的规模增大后就不太适合继续在项目的`main.go`文件中去实现路由注册相关逻辑了，我们会倾向于把路由部分的代码都拆分出来，形成一个单独的文件或包：
+
+我们在`routers.go`文件中定义并注册路由信息：
+
+```go
+func helloHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Hello q1mi!",
+	})
+}
+
+func setupRouter() *gin.Engine {
+	r := gin.Default()
+	r.GET("/hello", helloHandler)
+	return r
+}
+```
+
+此时`main.go`中调用上面定义好的`setupRouter`函数：
+
+```go
+func main() {
+	r := setupRouter()
+	if err := r.Run(); err != nil {
+		fmt.Println("startup service failed, err:%v\n", err)
+	}
+}
+```
+
+此时的目录结构：
+
+```bash
+gin_demo
+├── go.mod
+├── go.sum
+├── main.go
+└── routers.go
+```
+
+把路由部分的代码单独拆分成包的话也是可以的，拆分后的目录结构如下：
+
+```bash
+gin_demo
+├── go.mod
+├── go.sum
+├── main.go
+└── routers
+    └── routers.go
+```
+
+`routers/routers.go`需要注意此时`setupRouter`需要改成首字母大写：
+
+```go
+func helloHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Hello q1mi!",
+	})
+}
+
+func SetupRouter() *gin.Engine { // SetupRouter 配置路由信息
+	r := gin.Default()
+	r.GET("/hello", helloHandler)
+	return r
+}
+```
+
+`main.go`文件内容如下：
+
+```go
+func main() {
+	r := routers.SetupRouter()
+	if err := r.Run(); err != nil {
+		fmt.Println("startup service failed, err:%v\n", err)
+	}
+}
+```
+
+### 路由拆分成多个文件
+
+当我们的业务规模继续膨胀，单独的一个`routers`文件或包已经满足不了我们的需求了，
+
+```go
+func SetupRouter() *gin.Engine {
+	r := gin.Default()
+	r.GET("/hello", helloHandler)
+  r.GET("/xx1", xxHandler1)
+  ...
+  r.GET("/xx30", xxHandler30)
+	return r
+}
+```
+
+因为我们把所有的路由注册都写在一个`SetupRouter`函数中的话就会太复杂了。
+
+我们可以分开定义多个路由文件，例如：
+
+```bash
+gin_demo
+├── go.mod
+├── go.sum
+├── main.go
+└── routers
+    ├── blog.go
+    └── shop.go
+```
+
+`routers/shop.go`中添加一个`LoadShop`的函数，将shop相关的路由注册到指定的路由器：
+
+```go
+func LoadShop(e *gin.Engine)  {
+	e.GET("/hello", helloHandler)
+  e.GET("/goods", goodsHandler)
+  e.GET("/checkout", checkoutHandler)
+  ...
+}
+```
+
+`routers/blog.go`中添加一个`LoadBlog的函数，将blog相关的路由注册到指定的路由器：
+
+```go
+func LoadBlog(e *gin.Engine) {
+	e.GET("/post", postHandler)
+  e.GET("/comment", commentHandler)
+  ...
+}
+```
+
+在main函数中实现最终的注册逻辑如下：
+
+```go
+func main() {
+	r := gin.Default()
+	routers.LoadBlog(r)
+	routers.LoadShop(r)
+	if err := r.Run(); err != nil {
+		fmt.Println("startup service failed, err:%v\n", err)
+	}
+}
+```
+
+### 路由拆分到不同的APP
+
+有时候项目规模实在太大，那么我们就更倾向于把业务拆分的更详细一些，例如把不同的业务代码拆分成不同的APP。
+
+因此我们在项目目录下单独定义一个`app`目录，用来存放我们不同业务线的代码文件，这样就很容易进行横向扩展。大致目录结构如下：
+
+```bash
+gin_demo
+├── app
+│   ├── blog
+│   │   ├── handler.go
+│   │   └── router.go
+│   └── shop
+│       ├── handler.go
+│       └── router.go
+├── go.mod
+├── go.sum
+├── main.go
+└── routers
+    └── routers.go
+```
+
+其中`app/blog/router.go`用来定义`blog`相关的路由信息，具体内容如下：
+
+```go
+func Routers(e *gin.Engine) {
+	e.GET("/post", postHandler)
+	e.GET("/comment", commentHandler)
+}
+```
+
+`app/shop/router.go`用来定义shop相关路由信息，具体内容如下：
+
+```go
+func Routers(e *gin.Engine) {
+	e.GET("/goods", goodsHandler)
+	e.GET("/checkout", checkoutHandler)
+}
+```
+
+`routers/routers.go`中根据需要定义`Include`函数用来注册子app中定义的路由，`Init`函数用来进行路由的初始化操作：
+
+```go
+type Option func(*gin.Engine)
+
+var options = []Option{}
+
+func Include(opts ...Option) { // 注册app的路由配置
+	options = append(options, opts...)
+}
+
+func Init() *gin.Engine { // 初始化
+	r := gin.Default()
+	for _, opt := range options {
+		opt(r)
+	}
+	return r
+}
+```
+
+`main.go`中按如下方式先注册子app中的路由，然后再进行路由的初始化：
+
+```go
+func main() {
+	routers.Include(shop.Routers, blog.Routers) // 加载多个APP的路由配置
+	r := routers.Init() // 初始化路由
+	if err := r.Run(); err != nil {
+		fmt.Println("startup service failed, err:%v\n", err)
+	}
+}
+```
+
+# Gin中间件
 
 Gin框架允许开发者在处理请求的过程中，加入用户自己的钩子（Hook）函数。这个钩子函数就叫中间件，中间件适合处理一些公共的业务逻辑，比如登录认证、权限校验、数据分页、记录日志、耗时统计等。
-
-<img src="E:\Project\Textbook\Golang常用服务手册\assets\image-20230405172542079.png" alt="image-20230405172542079" style="zoom:50%;" /><img src="E:\Project\Textbook\Golang常用服务手册\assets\image-20230405172552434.png" alt="image-20230405172552434" style="zoom:50%;" />
 
 ## 定义中间件
 
@@ -765,9 +999,366 @@ r.GET("/hello", func(c *gin.Context) {
 go funcXX(c.Copy())
 ```
 
+# JWT
 
+JWT全称JSON Web Token是一种跨域认证解决方案，属于一个开放的标准，它规定了一种Token实现方式，目前多用于前后端分离项目和OAuth2.0业务场景下。
 
-# 运行多个服务
+## 为什么需要JWT？
+
+在之前的一些web项目中，我们通常使用的是`Cookie-Session`模式实现用户认证。相关流程大致如下：
+
+1. 用户在浏览器端填写用户名和密码，并发送给服务端
+2. 服务端对用户名和密码校验通过后会生成一份保存当前用户相关信息的session数据和一个与之对应的标识（通常称为session_id）
+3. 服务端返回响应时将上一步的session_id写入用户浏览器的Cookie
+4. 后续用户来自该浏览器的每次请求都会自动携带包含session_id的Cookie
+5. 服务端通过请求中的session_id就能找到之前保存的该用户那份session数据，从而获取该用户的相关信息。
+
+这种方案依赖于客户端（浏览器）保存 Cookie，并且需要在服务端存储用户的session数据。
+
+在移动互联网时代，我们的用户可能使用浏览器也可能使用APP来访问我们的服务，我们的web应用可能是前后端分开部署在不同的端口，有时候我们还需要支持第三方登录，这下`Cookie-Session`的模式就有些力不从心了。
+
+JWT就是一种基于Token的轻量级认证模式，服务端认证通过后，会生成一个JSON对象，经过签名后得到一个Token（令牌）再发回给用户，用户后续请求只需要带上这个Token，服务端解密之后就能获取该用户的相关信息了。
+
+想要了解JWT的原理，推荐大家阅读：[阮一峰的JWT入门教程](https://www.ruanyifeng.com/blog/2018/07/json_web_token-tutorial.html)
+
+## 安装
+
+我们使用 Go 语言社区中的 jwt 相关库来构建我们的应用，例如：https://github.com/golang-jwt/jwt。
+
+```bash
+go get github.com/golang-jwt/jwt/v4
+go get -u github.com/golang-jwt/jwt/v5
+```
+
+本文将使用这个库来实现我们生成JWT和解析JWT的功能。
+
+## 默认Claim
+
+如果我们直接使用JWT中默认的字段，没有其他定制化的需求则可以直接使用这个包中的和方法快速生成和解析token。
+
+```go
+var mySigningKey = []byte("liwenzhou.com") // 用于签名的字符串
+
+// GenRegisteredClaims 使用默认声明创建jwt
+func GenRegisteredClaims() (string, error) {
+	claims := &jwt.RegisteredClaims{ // 创建 Claims
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)), // 过期时间
+		Issuer:    "qimi",                                             // 签发人
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims) // 使用指定的签名方法和声明创建新的token
+
+	return token.SignedString(mySigningKey) // 生成签名字符串
+}
+
+// ParseRegisteredClaims 解析jwt
+func ValidateRegisteredClaims(tokenString string) bool {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) { // 解析token
+		return mySigningKey, nil
+	})
+	if err != nil { // 解析token失败
+		return false
+	}
+	return token.Valid
+}
+```
+
+## 自定义Claims
+
+我们需要定制自己的需求来决定JWT中保存哪些数据，比如我们规定在JWT中要存储`username`信息，那么我们就定义一个`MyClaims`结构体如下：
+
+```go
+// jwt包自带的jwt.RegisteredClaims只包含了官方字段
+// 假设我们这里需要额外记录一个username字段，所以要自定义结构体
+// 如果想要保存更多信息，都可以添加到这个结构体中
+type CustomClaims struct { 				// 自定义声明类型 并内嵌jwt.RegisteredClaims
+	Username string `json:"username"` // 可根据需要自行添加字段
+	jwt.RegisteredClaims        		// 内嵌标准的声明
+}
+```
+
+然后我们定义JWT的过期时间，这里以24小时为例：
+
+```go
+const TokenExpireDuration = time.Hour * 24
+```
+
+接下来还需要定义一个用于签名的字符串：
+
+```go
+var CustomSecret = []byte("夏天夏天悄悄过去") // CustomSecret 用于加盐的字符串
+```
+
+## 生成JWT
+
+我们可以根据自己的业务需要封装一个生成 token 的函数。
+
+```go
+// GenToken 生成JWT
+func GenToken(username string) (string, error) {
+	claims := CustomClaims{ // 创建一个我们自己的声明Claims
+		username, // 自定义字段
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TokenExpireDuration)),
+			Issuer:    "my-project", // 签发人
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims) // 使用指定的签名方法创建签名对象
+	return token.SignedString(CustomSecret) // 使用指定的secret签名并获得完整的编码后的字符串token
+}
+```
+
+## 解析JWT
+
+根据给定的 JWT 字符串，解析出数据。
+
+```go
+func ParseToken(tokenString string) (*CustomClaims, error) { // ParseToken 解析JWT
+	// 解析token
+    // 直接使用标准的Claim则可以直接使用Parse方法
+    // token, err := jwt.Parse(tokenString, func(token *jwt.Token) (i interface{}, err error) {
+	// 如果是自定义Claim结构体则需要使用 ParseWithClaims 方法
+	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (i interface{}, err error) { return CustomSecret, nil })
+	if err != nil {
+		return nil, err
+	}
+	// 对token对象中的Claim进行类型断言
+	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid { // 校验token
+		return claims, nil
+	}
+	return nil, errors.New("invalid token")
+}
+```
+
+## 在gin框架中使用JWT
+
+首先我们注册一条路由`/auth`，对外提供获取Token的渠道：
+
+```go
+r.POST("/auth", authHandler)
+```
+
+我们的`authHandler`定义如下：
+
+```go
+func authHandler(c *gin.Context) {
+	var user UserInfo
+	err := c.ShouldBind(&user) // 用户发送用户名和密码过来
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 2001,
+			"msg":  "无效的参数",
+		})
+		return
+	}
+	// 校验用户名和密码是否正确
+	if user.Username == "q1mi" && user.Password == "q1mi123" {
+		tokenString, _ := GenToken(user.Username) // 生成Token
+		c.JSON(http.StatusOK, gin.H{
+			"code": 2000,
+			"msg":  "success",
+			"data": gin.H{"token": tokenString},
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 2002,
+		"msg":  "鉴权失败",
+	})
+	return
+}
+```
+
+用户通过上面的接口获取Token之后，后续就会携带着Token再来请求我们的其他接口，这个时候就需要对这些请求的Token进行校验操作了，很显然我们应该实现一个检验Token的中间件，具体实现如下：
+
+```go
+func JWTAuthMiddleware() func(c *gin.Context) { // JWTAuthMiddleware 基于JWT的认证中间件
+	return func(c *gin.Context) {
+		// 客户端携带Token有三种方式 1.放在请求头 2.放在请求体 3.放在URI
+		// 这里假设Token放在Header的Authorization中，并使用Bearer开头
+		// 这里的具体实现方式要依据你的实际业务情况决定
+		authHeader := c.Request.Header.Get("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusOK, gin.H{
+				"code": 2003,
+				"msg":  "请求头中auth为空",
+			})
+			c.Abort()
+			return
+		}
+
+		parts := strings.SplitN(authHeader, " ", 2) // 按空格分割
+		if !(len(parts) == 2 && parts[0] == "Bearer") {
+			c.JSON(http.StatusOK, gin.H{
+				"code": 2004,
+				"msg":  "请求头中auth格式有误",
+			})
+			c.Abort()
+			return
+		}
+
+		mc, err := ParseToken(parts[1]) // parts[1]是获取到的tokenString，我们使用之前定义好的解析JWT的函数来解析它
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"code": 2005,
+				"msg":  "无效的Token",
+			})
+			c.Abort()
+			return
+		}
+
+		c.Set("username", mc.Username) // 将当前请求的username信息保存到请求的上下文c上
+		c.Next() // 后续的处理函数可以用过c.Get("username")来获取当前请求的用户信息
+	}
+}
+```
+
+注册一个`/home`路由，发个请求验证一下吧。
+
+```go
+r.GET("/home", JWTAuthMiddleware(), homeHandler)
+
+func homeHandler(c *gin.Context) {
+	username := c.MustGet("username").(string)
+	c.JSON(http.StatusOK, gin.H{
+		"code": 2000,
+		"msg":  "success",
+		"data": gin.H{"username": username},
+	})
+}
+```
+
+如果不想自己实现上述功能，你也可以使用Github上别人封装好的包，比如https://github.com/appleboy/gin-jwt。
+
+### refresh token
+
+在某些业务场景下，我们可能还需要使用refresh token。
+
+这里可以参考 [RFC 6749 OAuth2.0中关于refresh token的介绍](https://datatracker.ietf.org/doc/html/rfc6749#section-1.5)
+
+# Cookie和Session
+
+## Cookie
+
+**Cookie的由来**
+
+HTTP协议是无状态的，这就存在一个问题。
+
+无状态的意思是每次请求都是独立的，它的执行情况和结果与前面的请求和之后的请求都无直接关系，它不会受前面的请求响应情况直接影响，也不会直接影响后面的请求响应情况。
+
+一句有意思的话来描述就是人生只如初见，对服务器来说，每次的请求都是全新的。
+
+状态可以理解为客户端和服务器在某次会话中产生的数据，那无状态的就以为这些数据不会被保留。会话中产生的数据又是我们需要保存的，也就是说要“保持状态”。因此Cookie就是在这样一个场景下诞生。
+
+**Cookie是什么**
+
+在 Internet 中，Cookie 实际上是指小量信息，是由 Web 服务器创建的，将信息存储在用户计算机上（客户端）的数据文件。一般网络用户习惯用其复数形式 Cookies，指某些网站为了辨别用户身份、进行 Session 跟踪而存储在用户本地终端上的数据，而这些数据通常会经过加密处理。
+
+**Cookie的机制**
+
+Cookie是由服务器端生成，发送给User-Agent（一般是浏览器），浏览器会将Cookie的key/value保存到某个目录下的文本文件内，下次请求同一网站时就发送该Cookie给服务器（前提是浏览器设置为启用cookie）。Cookie名称和值可以由服务器端开发自己定义，这样服务器可以知道该用户是否是合法用户以及是否需要重新登录等，服务器可以设置或读取Cookies中包含信息，借此维护用户跟服务器会话中的状态。
+
+总结一下Cookie的特点：
+
+1. 浏览器发送请求的时候，自动把携带该站点之前存储的Cookie信息。
+2. 服务端可以设置Cookie数据。
+3. Cookie是针对单个域名的，不同域名之间的Cookie是独立的。
+4. Cookie数据可以配置过期时间，过期的Cookie数据会被系统清除。
+
+**查看Cookie**
+
+我们使用Chrome浏览器打开一个网站，打开开发者工具查看该网站保存在我们电脑上的Cookie数据。
+
+## Go操作Cookie
+
+### Cookie
+
+标准库`net/http`中定义了Cookie，它代表一个出现在HTTP响应头中Set-Cookie的值里或者HTTP请求头中Cookie的值的`HTTP cookie`。
+
+```go
+type Cookie struct {
+    Name       string
+    Value      string
+    Path       string
+    Domain     string
+    Expires    time.Time
+    RawExpires string
+    // MaxAge=0表示未设置Max-Age属性
+    // MaxAge<0表示立刻删除该cookie，等价于"Max-Age: 0"
+    // MaxAge>0表示存在Max-Age属性，单位是秒
+    MaxAge   int
+    Secure   bool
+    HttpOnly bool
+    Raw      string
+    Unparsed []string // 未解析的“属性-值”对的原始文本
+}
+```
+
+### 设置Cookie
+
+`net/http`中提供了如下`SetCookie`函数，它在w的头域中添加Set-Cookie头，该HTTP头的值为cookie。
+
+```go
+func SetCookie(w ResponseWriter, cookie *Cookie)
+```
+
+### 获取Cookie
+
+`Request`对象拥有两个获取Cookie的方法和一个添加Cookie的方法：
+
+获取Cookie的两种方法：
+
+```go
+// 解析并返回该请求的Cookie头设置的所有cookie
+func (r *Request) Cookies() []*Cookie
+
+// 返回请求中名为name的cookie，如果未找到该cookie会返回nil, ErrNoCookie。
+func (r *Request) Cookie(name string) (*Cookie, error)
+```
+
+添加Cookie的方法：
+
+```go
+func (r *Request) AddCookie(c *Cookie) // AddCookie向请求中添加一个cookie。
+```
+
+## gin框架操作Cookie
+
+```go
+func main() {
+    router := gin.Default()
+    router.GET("/cookie", func(c *gin.Context) {
+        cookie, err := c.Cookie("gin_cookie") // 获取Cookie
+        if err != nil {
+            cookie = "NotSet"
+            c.SetCookie("gin_cookie", "test", 3600, "/", "localhost", false, true) // 设置Cookie
+        }
+        fmt.Printf("Cookie value: %s \n", cookie)
+    })
+
+    router.Run()
+}
+```
+
+## Session
+
+### Session的由来
+
+Cookie虽然在一定程度上解决了“保持状态”的需求，但是由于Cookie本身最大支持4096字节，以及Cookie本身保存在客户端，可能被拦截或窃取，因此就需要有一种新的东西，它能支持更多的字节，并且他保存在服务器，有较高的安全性。这就是`Session`。
+
+问题来了，基于HTTP协议的无状态特征，服务器根本就不知道访问者是“谁”。那么上述的Cookie就起到桥接的作用。
+
+用户登陆成功之后，我们在服务端为每个用户创建一个特定的session和一个唯一的标识，它们一一对应。其中：
+
+- Session是在服务端保存的一个数据结构，用来跟踪用户的状态，这个数据可以保存在集群、数据库、文件中；
+- 唯一标识通常称为`Session ID`会写入用户的Cookie中。
+
+这样该用户后续再次访问时，请求会自动携带Cookie数据（其中包含了`Session ID`），服务器通过该`Session ID`就能找到与之对应的Session数据，也就知道来的人是“谁”。
+
+总结而言：Cookie弥补了HTTP无状态的不足，让服务器知道来的人是“谁”；但是Cookie以文本的形式保存在本地，自身安全性较差；所以我们就通过Cookie识别不同的用户，对应的在服务端为每个用户保存一个Session数据，该Session数据中能够保存具体的用户数据信息。
+
+另外，上述所说的Cookie和Session其实是共通性的东西，不限于语言和框架。
+
+# Gin中运行多个服务
 
 我们可以在多个端口启动服务，例如：
 

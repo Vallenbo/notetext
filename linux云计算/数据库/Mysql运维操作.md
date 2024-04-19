@@ -2,10 +2,6 @@
 
 
 
-
-
-
-
 # mysql备份还原
 
 mysqld --initialize #重新初始化命令
@@ -30,14 +26,6 @@ mysql备份内容还原
 ```sh
 rsync -avz /mnt/sata/* /var/lib/mysql/data
 ```
-
-
-
-
-
-
-
-
 
 
 
@@ -493,8 +481,9 @@ where User="root" and Host="localhost";
 
 # 8.0 以上的版本，以上的命令都不支持，有以下两个命令可用
 alter user 'root'@'localhost' identified by 'root';
-set password for root@localhost = '123456';
-
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '123456';
+update user set host='%' where user='root'; // 更新root用户远程权限
+flush privileges;
 
 create user 'xiandian'@'localhost' identified by 'xd_paas'; 创建一个xiandian用户在本地授权密码xd_paas
 create user '[用户名称]'@'%' identified by '[用户密码]';	//创建用户

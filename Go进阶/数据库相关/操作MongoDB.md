@@ -48,17 +48,13 @@ import (
 )
 
 func main() {
-	// 设置客户端连接配置
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
-
-	// 连接到MongoDB
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017") // 设置客户端连接配置
+	client, err := mongo.Connect(context.TODO(), clientOptions) // 连接到MongoDB
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// 检查连接
-	err = client.Ping(context.TODO(), nil)
+	err = client.Ping(context.TODO(), nil) // 检查连接
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,15 +65,13 @@ func main() {
 连接上MongoDB之后，可以通过下面的语句处理我们上面的q1mi数据库中的student数据集了：
 
 ```go
-// 指定获取要操作的数据集
-collection := client.Database("q1mi").Collection("student")
+collection := client.Database("q1mi").Collection("student") // 指定获取要操作的数据集
 ```
 
 处理完任务之后可以通过下面的命令断开与MongoDB的连接：
 
 ```go
-// 断开连接
-err = client.Disconnect(context.TODO())
+err = client.Disconnect(context.TODO()) // 断开连接
 if err != nil {
 	log.Fatal(err)
 }
@@ -216,8 +210,7 @@ fmt.Printf("Matched %v documents and updated %v documents.\n", updateResult.Matc
 我们使用上面定义过的那个filter来查找姓名为’小兰’的文档。
 
 ```go
-// 创建一个Student变量用来接收查询的结果
-var result Student
+var result Student // 创建一个Student变量用来接收查询的结果
 err = collection.FindOne(context.TODO(), filter).Decode(&result)
 if err != nil {
 	log.Fatal(err)
@@ -229,8 +222,7 @@ fmt.Printf("Found a single document: %+v\n", result)
 
 ```go
 // 查询多个
-// 将选项传递给Find()
-findOptions := options.Find()
+findOptions := options.Find() // 将选项传递给Find()
 findOptions.SetLimit(2)
 
 // 定义一个切片用来存储查询结果
@@ -243,8 +235,7 @@ if err != nil {
 }
 
 // 查找多个文档返回一个光标
-// 遍历游标允许我们一次解码一个文档
-for cur.Next(context.TODO()) {
+for cur.Next(context.TODO()) { // 遍历游标允许我们一次解码一个文档
 	// 创建一个值，将单个文档解码为该值
 	var elem Student
 	err := cur.Decode(&elem)
@@ -258,8 +249,7 @@ if err := cur.Err(); err != nil {
 	log.Fatal(err)
 }
 
-// 完成后关闭游标
-cur.Close(context.TODO())
+cur.Close(context.TODO()) // 完成后关闭游标
 fmt.Printf("Found multiple documents (array of pointers): %#v\n", results)
 ```
 

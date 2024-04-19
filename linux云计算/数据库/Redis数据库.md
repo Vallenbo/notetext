@@ -1,1354 +1,1314 @@
-项目代码地址：
-https://gitee.com/huyi612/hm-dianping
+# 一、引言
 
+在Web应用发展的初期，那时关系型数据库受到了较为广泛的关注和应用，原因是因为那时候Web站点基本上访问和并发不高、交互也较少。而在后来，随着访问量的提升，使用关系型数据库的Web站点多多少少都开始在性能上出现了一些瓶颈，而瓶颈的源头一般是在磁盘的I/O上。而随着互联网技术的进一步发展，各种类型的应用层出不穷，这导致在当今云计算、大数据盛行的时代，对性能有了更多的需求，主要体现在以下几个方面：
 
+> 1. 低延迟的读写速度：应用快速地反应能极大地提升用户的满意度
+> 2. 支撑海量的数据和流量：对于搜索这样大型应用而言，需要利用PB级别的数据和能应对百万级的流量
+> 3. 大规模集群的管理：系统管理员希望分布式应用能更简单的部署和管理
 
+为了克服这一问题，NoSQL应运而生，它同时具备了高性能、可扩展性强、高可用等优点，受到广泛开发人员和仓库管理人员的青睐。
 
+**关系型数据库（RMDBS）与非关系型数据库（NoSQL）的对比：**
 
-# Redis支持的数据结构：
+数据库中表与表的数据之间存在某种关联的内在关系，因为这种关系，所以我们称这种数据库为关系型数据库。典型：Mysql/MariaDB、postgreSQL、Oracle、SQLServer、DB2、Access、SQLlite3。特点： 
 
-Redis支持诸如字符串（strings）、哈希（hashes）、列表（lists）、集合（sets）、带范围查询的排序集合（sorted sets）、位图（bitmaps）、hyperloglogs、带半径查询和流的地理空间索引等数据结构（geospatial indexes）。
+> 1. 全部使用SQL（结构化查询语言）进行数据库操作。
+> 2. 都存在主外键关系，表，等等关系特征。
+> 3. 大部分都支持各种关系型的数据库的特性：事务、存储过程、触发器、视图、临时表、模式、函数
 
-# Redis应用场景：
+NOSQL：not only sql，泛指非关系型数据库。泛指那些不使用SQL语句进行数据操作的数据库，所有数据库中只要不使用SQL语句的都是非关系型数据库。典型：Redis、MongoDB、hbase、 Hadoop、elasticsearch、图数据库(Neo4j、GraphDB、SequoiaDB)
 
-缓存系统，减轻主数据库（MySQL）的压力。
-计数场景，比如微博、抖音中的关注数和粉丝数。
-热门排行榜，需要排序的场景特别适合使用ZSET。
-利用LIST可以实现队列的功能。
+# 二、redis介绍
 
+## 2.1、定义
 
+> Redis（Remote Dictionary Server ，远程字典服务） 是一个使用ANSI C编写的开源、支持网络、基于内存、可选持久性的键值对存储数据库，是NoSQL数据库。
 
-| **类型**             | **简介**                                               | **特性**                                                     | **场景**                                                     |
-| -------------------- | ------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| String(字符串)       | 二进制安全                                             | 可以包含任何数据,比如jpg图片或者序列化的对象,一个键最大能存储512M | ---                                                          |
-| Hash(字典)           | 键值对集合,即编程语言中的Map类型                       | 适合存储对象,并且可以像数据库中update一个属性一样只修改某一项属性值(Memcached中需要取出整个字符串反序列化成对象修改完再序列化存回去) | 存储、读取、修改用户属性                                     |
-| List(列表)           | 链表(双向链表)                                         | 增删快,提供了操作某一段元素的API                             | 1,最新消息排行等功能(比如朋友圈的时间线) 2,消息队列          |
-| Set(集合)            | 哈希表实现,元素不重复                                  | 1、添加、删除,查找的复杂度都是O(1) 2、为集合提供了求交集、并集、差集等操作 | 1、共同好友 2、利用唯一性,统计访问网站的所有独立ip 3、好友推荐时,根据tag求交集,大于某个阈值就可以推荐 |
-| Sorted Set(有序集合) | 将Set中的元素增加一个权重参数score,元素按score有序排列 | 数据插入集合时,已经进行天然排序                              | 1、排行榜 2、带权重的                                        |
+redis的出现主要是为了替代早期的Memcache缓存系统的。map内存型(数据存放在内存中)的非关系型(nosql)key-value(键值存储)数据库，
+支持数据的持久化(基于RDB和AOF，注: 数据持久化时将数据存放到文件中，每次启动redis之后会先将文件中数据加载到内存，经常用来做缓存、数据共享、购物车、消息队列、计数器、限流等。(最基本的就是缓存一些经常用到的数据，提高读写速度)。
 
-# String（字符串）
+redis特性：
 
-string 是 redis 最基本的类型，你可以理解成与 Memcached 一模一样的类型，一个 key 对应一个 value。
+> - 速度快
+> - 持久化
+> - 多种数据结构
+> - 支持多种编程语言
+> - 主从复制
+> - 高可用、分布式
 
-string 类型是二进制安全的。意思是 redis 的 string 可以包含任何数据。比如jpg图片或者序列化的对象。
+## 2.2、Redis的数据类型及主要特性
 
-string 类型是 Redis 最基本的数据类型，string 类型的值最大能存储 512MB。
+Redis提供的数据类型主要分为5种自有类型和一种自定义类型，这5种自有类型包括：String类型、哈希类型、列表类型、集合类型和顺序集合类型。
 
-## 实例
-
-```go
-redis 127.0.0.1:6379>set runoob "hello world"
-127.0.0.1:6379> get runoob
+```
+redis={
+"name":"yuan",
+"age":"23",
+"scors":[78,79,98,],
+"info":{"gender":"male","tel":"110"},
+"set":{1,2,3},
+"zset":{1,2,3,}
+}
 ```
 
+![img](assets/139239-20191126141006657-1969131669.png)
 
+## 2.3、Redis的应用场景有哪些？
 
-Redis 的 **SET** 和 **GET** 命令。键为 runoob，对应的值为 "hello world"。
+Redis 的应用场景包括：
 
-**注意：**一个键最大能存储 512MB。
-
-
-
-# Hash（哈希）
-
-Redis hash 是一个键值(key=>value)对集合。
-
-Redis hash 是一个 string 类型的 field 和 value 的映射表，hash 特别适合用于存储对象。
-
-127.0.0.1:6379> hmset hmvalue field1 "name" field2 "liming"
-
-127.0.0.1:6379> hget hmvalue field1
-
-"name"
-
- 
-
- 
-
- 
-
-实例中我们使用了 Redis **HMSET, HGET** 命令，**HMSET** 设置了两个 **field=>value** 对, HGET 获取对应 **field** 对应的 **value**。
-
-每个 hash 可以存储 232 -1 键值对（40多亿）。
-
- 
-
- 
-
- 
-
- 
-
-# List（列表）
-
-Redis 列表是简单的字符串列表，按照插入顺序排序。你可以添加一个元素到列表的头部（左边）或者尾部（右边）。
-
-
-
-127.0.0.1:6379> lpush list 1
-
-(integer) 1
-
-127.0.0.1:6379> LRANGE list 0 10
-
-1) "4"
-2) "2"
-3) "1"
-
-
-
-列表最多可存储 232 - 1 元素 (4294967295, 每个列表可存储40多亿)。
-
-
-
-
-
-# Set（集合）
-
-Redis 的 Set 是 string 类型的无序集合。
-
-集合是通过哈希表实现的，所以添加，删除，查找的复杂度都是 O(1)。
-
-## sadd 命令
-
-添加一个 string 元素到 key 对应的 set 集合中，成功返回 1，如果元素已经在集合中返回 0。
-
-sadd key member
-
- 
-
- 
-
-127.0.0.1:6379> sadd setgather one
-
-(integer) 1
-
-127.0.0.1:6379> sadd setgather two
-
-(integer) 1
-
-127.0.0.1:6379> sadd setgather there
-
-(integer) 1
-
-127.0.0.1:6379> smembers setgather
-
-1) "two"
-2) "there"
-3) "one"
-
- 
-
- 
-
- 
-
- 
-
-## zset(sorted set：有序集合)
-
-Redis zset 和 set 一样也是string类型元素的集合,且不允许重复的成员。不同的是每个元素都会关联一个double类型的分数。redis正是通过分数来为集合中的成员进行从小到大的排序。
-
-zset的成员是唯一的,但分数(score)却可以重复。
-
-### zadd 命令
-
-添加元素到集合，元素在集合中存在则插入到score后
-
-zadd key score member 
-
- 
-
- 
-
- 
-
- 
-
-127.0.0.1:6379> zadd zsetgather 0 redis
-
-(integer) 1
-
-127.0.0.1:6379> zadd zsetgather 1 redis2
-
-(integer) 1
-
-127.0.0.1:6379> zadd zsetgather 0 update
-
-(integer) 1
-
-127.0.0.1:6379> ZRANGE zsetgather 0 3
-
-1) "redis"
-2) "update"
-3) "redis2"
-
-
-
-
-
-# 一、Redis入门
-
-## 1.认识NoSQL
-
-
-
-### 1.1	什么是NoSQL
-
----
-
-- NoSQL最常见的解释是"`non-relational`"， 很多人也说它是"***Not Only SQL***"
-- NoSQL仅仅是一个概念，泛指**非关系型的数据库**
-- 区别于关系数据库，它们不保证关系数据的ACID特性
-- NoSQL是一项全新的数据库革命性运动，提倡运用非关系型的数据存储，相对于铺天盖地的关系型数据库运用，这一概念无疑是一种全新的思维的注入
-- 常见的NoSQL数据库有：`Redis`、`MemCache`、`MongoDB`等
-
-
-
-### 1.2	NoSQL与SQL的差异
-
----
-
-|          |                            SQL                             |                            NoSQL                             |
-| :------: | :--------------------------------------------------------: | :----------------------------------------------------------: |
-| 数据结构 |                           结构化                           |                           非结构化                           |
-| 数据关联 |                           关联的                           |                           无关联的                           |
-| 查询方式 |                          SQL查询                           |                            非SQL                             |
-| 事务特性 |                            ACID                            |                             BASE                             |
-| 存储方式 |                            磁盘                            |                             内存                             |
-|  扩展性  |                            垂直                            |                             水平                             |
-| 使用场景 | 1）数据结构固定<br>2）相关业务对数据安全性、一致性要求较高 | 1）数据结构不固定<br>2）对一致性、安全性要求不高<br>3）对性能要求 |
-
-
-
-## 2.认识Redis
-
-> Redis诞生于2009年全称是Remote Dictionary Server，远程词典服务器，是一个基于内存的键值型NoSQL数据库。
-
-**Redis的特征：**
-
-- 键值（`key-value`）型，value支持多种不同数据结构，功能丰富
-- 单线程，每个命令具备原子性
-- 低延迟，速度快（基于内存、IO多路复用、良好的编码）。
-- 支持数据持久化
-- 支持主从集群、分片集群
-- 支持多语言客户端
-
-
-
-## 3.安装Redis
-
-### 3.1	前置准备
-
----
-
-> 本次安装Redis是基于Linux系统下安装的，因此需要一台Linux服务器或者虚拟机。
+> 缓存系统（“热点”数据：高频读、低频写）：缓存用户信息，优惠券过期时间，验证码过期时间、session、token等
 >
-> Ps：由于提供的CentOS操作系统为mini版，因此需要自行配置网络，不会配置的请联系我，如果您使用的是自己购买的服务器，请提前开放`6379`端口，避免后续出现的莫名其妙的错误！
+> 计数器：帖子的浏览数，视频播放次数，评论次数、点赞次数等
+>
+> 消息队列，秒杀系统
+>
+> 社交网络：粉丝、共同好友（可能认识的人），兴趣爱好（推荐商品）
+>
+> 排行榜（有序集合）
+>
+> 发布订阅：粉丝关注、消息通知
 
-- **虚拟机**：[VMware16](https://pan.baidu.com/s/1Zn13h9G7MtSgz-xdkQFeJg?pwd=1234)
-- **操作系统**：[CentOS-7-x86_64-Minimal-1708](https://pan.baidu.com/s/1SiYip29cYqiNBqjGGV0JgA?pwd=1234)
+# 三、redis环境安装
 
-- **Redis**：[redis-6.2.6.tar](https://pan.baidu.com/s/1hsoEz1NTCDCCWZmaiZrIgg?pwd=1234)
-- **xShell及xFtp**：https://www.xshell.com/zh/free-for-home-school/
+redis的官方只提供了linux版本的redis，window系统的redis是微软团队根据官方的linux版本高仿的。
 
+[官方原版](https://redis.io/) | [中文官网](http://www.redis.cn)
 
+## 3.1、下载和安装
 
-### 3.2	安装Redis依赖
+**ubuntu下安装**
 
----
+```bash
+安装命令：sudo apt-get install -y redis-server
+卸载命令：sudo apt-get purge --auto-remove redis-server 
+关闭命令：sudo service redis-server stop 
+开启命令：sudo service redis-server start 
+重启命令：sudo service redis-server restart
+配置文件：/etc/redis/redis.conf
+```
 
-> Redis是基于C语言编写的，因此首先需要安装Redis所需要的gcc依赖
+如果连接操作redis，可以在终端下，使用以下命令：
 
 ```sh
-yum install -y gcc tcl
+redis-cli
 ```
 
-**安装成功如下图所示：**
+**redis作为windows服务启动方式**
 
-![image-20220524181842626](https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220524181842626.png)
+下载地址：https://github.com/tporadowski/redis/releases
 
+使用以下命令启动redis服务端
 
-
-### 3.3	正式安装Redis
-
----
-
-- **将`redis-6.2.6.tar`上传至`/usr/local/src`目录**
-
-  ![image-20220524185659727](https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220524185659727.png)
-
-- **在xShell中`cd`到`/usr/local/src`目录执行以下命令进行解压操作**
-
-  ```sh
-  tar -xzf redis-6.2.6.tar.gz
-  ```
-
-- **解压成功后依次执行以下命令**
-
-  ```sh
-  cd redis-6.2.6
-  make
-  make install
-  ```
-
-- **安装成功后打开/usr/local/bin目录（该目录为Redis默认的安装目录）**
-
-  ![image-20220524190400547](https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220524190400547.png)
-
-
-
-## 4.启动Redis
-
-> Redis的启动方式有很多种，例如：**前台启动**、**后台启动**、**开机自启**
->
-
-
-
-### 4.1	前台启动（不推荐）
-
----
-
-> **这种启动属于前台启动，会阻塞整个会话窗口，窗口关闭或者按下`CTRL + C`则Redis停止。不推荐使用。**
-
-- **安装完成后，在任意目录输入`redis-server`命令即可启动Redis**
-
-  ```sh
-  redis-server
-  ```
-
-- **启动成功如下图所示**
-
-  ![image-20220524191137983](https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220524191137983.png)
-
-
-
-### 4.2	后台启动（不推荐）
-
----
-
-> **如果要让Redis以后台方式启动，则必须修改Redis配置文件，配置文件所在目录就是之前我们解压的安装包下**
-
-- **因为我们要修改配置文件，因此我们需要先将原文件备份一份**
-
-  ```sh
-  cd /usr/local/src/redis-6.2.6
-  ```
-
-  ```sh
-  cp redis.conf redis.conf.bck
-  ```
-
-- **然后修改`redis.conf`文件中的一些配置**
-
-  ```sh
-  # 允许访问的地址，默认是127.0.0.1，会导致只能在本地访问。修改为0.0.0.0则可以在任意IP访问，生产环境不要设置为0.0.0.0
-  bind 0.0.0.0
-  # 守护进程，修改为yes后即可后台运行
-  daemonize yes 
-  # 密码，设置后访问Redis必须输入密码
-  requirepass 1325
-  ```
-
-- **Redis其他常用配置**
-
-  ```sh
-  # 监听的端口
-  port 6379
-  # 工作目录，默认是当前目录，也就是运行redis-server时的命令，日志、持久化等文件会保存在这个目录
-  dir .
-  # 数据库数量，设置为1，代表只使用1个库，默认有16个库，编号0~15
-  databases 1
-  # 设置redis能够使用的最大内存
-  maxmemory 512mb
-  # 日志文件，默认为空，不记录日志，可以指定日志文件名
-  logfile "redis.log"
-  ```
-
-- **启动Redis**
-
-  ```sh
-  # 进入redis安装目录 
-  cd /usr/local/src/redis-6.2.6
-  # 启动
-  redis-server redis.conf
-  ```
-
-- **停止Redis服务**
-
-  ```sh
-  # 通过kill命令直接杀死进程
-  kill -9 redis进程id
-  ```
-
-  ```sh
-  # 利用redis-cli来执行 shutdown 命令，即可停止 Redis 服务，
-  # 因为之前配置了密码，因此需要通过 -a 来指定密码
-  redis-cli -a 132537 shutdown
-  ```
-
-  
-
-### 4.3	开机自启（推荐）
-
----
-
-> **我们也可以通过配置来实现开机自启**
-
-- **首先，新建一个系统服务文件**
-
-  ```sh
-  vi /etc/systemd/system/redis.service
-  ```
-
-- **将以下命令粘贴进去**
-
-  ```conf
-  [Unit]
-  Description=redis-server
-  After=network.target
-  
-  [Service]
-  Type=forking
-  ExecStart=/usr/local/bin/redis-server /usr/local/src/redis-6.2.6/redis.conf
-  PrivateTmp=true
-  
-  [Install]
-  WantedBy=multi-user.target
-  ```
-
-- **然后重载系统服务**
-
-  ```sh
-  systemctl daemon-reload
-  ```
-
-- **现在，我们可以用下面这组命令来操作redis了**
-
-  ```sh
-  # 启动
-  systemctl start redis
-  # 停止
-  systemctl stop redis
-  # 重启
-  systemctl restart redis
-  # 查看状态
-  systemctl status redis
-  ```
-
-- **执行下面的命令，可以让redis开机自启**
-
-  ```sh
-  systemctl enable redis
-  ```
-
-  
-
-
-
-# 二、Redis常见命令
-
-> 我们可以通过Redis的中文文档：http://www.redis.cn/commands.html，来学习各种命令。
->
-> 也可以通过菜鸟教程官网来学习：https://www.runoob.com/redis/redis-keys.html
-
-
-
-## 1.Redis数据结构介绍
-
-> **Redis是一个key-value的数据库，key一般是String类型，不过value的类型多种多样**
-
-![image-20220524205926164](https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220524205926164.png)
-
-
-
-## 2.通用命令
-
-> **通用指令是部分数据类型的，都可以使用的指令，常见的有如下表格所示**
-
-|  指令  |                        描述                        |
-| :----: | :------------------------------------------------: |
-|  KEYS  | 查看符合模板的所有key，不建议在生产环境设备上使用  |
-|  DEL   |                 删除一个指定的key                  |
-| EXISTS |                  判断key是否存在                   |
-| EXPIRE | 给一个key设置有效期，有效期到期时该key会被自动删除 |
-|  TTL   |              查看一个KEY的剩余有效期               |
-
-**可以通过`help [command] `可以查看一个命令的具体用法！**
-
-
-
-## 3.String类型
-
-> **String类型，也就是字符串类型，是Redis中最简单的存储类型。**
-
-其value是字符串，不过根据字符串的格式不同，又可以分为3类：
-
-- `string`：普通字符串
-- `int`：整数类型，可以做自增、自减操作
-- `float`：浮点类型，可以做自增、自减操作
-
-
-
-> 不管是哪种格式，底层都是字节数组形式存储，只不过是编码方式不同。字符串类型的最大空间不能超过**512m**.
-
-|  KEY  |    VALUE    |
-| :---: | :---------: |
-|  msg  | hello world |
-|  num  |     10      |
-| score |    92.5     |
-
-
-
-> **String的常见命令有如下表格所示**
-
-|    命令     |                             描述                             |
-| :---------: | :----------------------------------------------------------: |
-|     SET     |         添加或者修改已经存在的一个String类型的键值对         |
-|     GET     |                 根据key获取String类型的value                 |
-|    MSET     |                批量添加多个String类型的键值对                |
-|    MGET     |             根据多个key获取多个String类型的value             |
-|    INCR     |                     让一个整型的key自增1                     |
-|   INCRBY    | 让一个整型的key自增并指定步长，例如：incrby num 2 让num值自增2 |
-| INCRBYFLOAT |              让一个浮点类型的数字自增并指定步长              |
-|    SETNX    | 添加一个String类型的键值对，前提是这个key不存在，否则不执行  |
-|  **SETEX**  |          添加一个String类型的键值对，并且指定有效期          |
-
-
-
-> **Redis的key允许有多个单词形成层级结构，多个单词之间用” ：“隔开，格式如下：**
-
-```tex
-项目名:业务名:类型:id
+```
+redis-server C:/tool/redis/redis.windows.conf
 ```
 
-这个格式并非固定，也可以根据自己的需求来删除或添加词条。
+![image-20220415174704371](assets/image-20220415174704371-16500160265153.png)
 
-例如我们的项目名称叫 `heima`，有`user`和`product`两种不同类型的数据，我们可以这样定义key：
+关闭上面这个cmd窗口就关闭redis服务器服务了。
 
-- **user**相关的key：`heima:user:1`
-- **product**相关的key：`heima:product:1`
+<img src="assets/image-20220415103036668.png" alt="image-20220415103036668" style="zoom:50%;" />
+```text
+redis-server --service-install redis.windows.conf
+```
 
-如果Value是一个Java对象，例如一个User对象，则可以将对象序列化为JSON字符串后存储
+启动服务：redis-server --service-start
+停止服务：redis-server --service-stop
 
-|       KEY       |                   VALUE                   |
-| :-------------: | :---------------------------------------: |
-|  heima:user:1   |    {"id":1, "name": "Jack", "age": 21}    |
-| heima:product:1 | {"id":1, "name": "小米11", "price": 4999} |
 
+## 3.2、redis的配置
 
+```bash
+cat /etc/redis/redis.conf
+```
 
-## 4.Hash类型
+redis 安装成功以后,window下的配置文件保存在软件 安装目录下,如果是mac或者linux,则默认安装/etc/redis/redis.conf
 
-> **Hash类型，也叫散列，其value是一个无序字典，类似于Java中的`HashMap`结构。**
+### redis的核心配置选项
 
-- **Hash结构可以将对象中的每个字段独立存储，可以针对单个字段做CRUD**
+绑定ip：访问白名单，如果需要远程访问，可将此注释，或绑定1个真实ip
 
-  <img src="https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220525001227167.png" alt="image-20220525001227167"  />
+```bash
+bind 127.0.0.1   xx.xx.xx.xx
+```
 
-- **Hash的常见命令有：**
+端⼝，默认为6379
 
-  |         命令         |                             描述                             |
-  | :------------------: | :----------------------------------------------------------: |
-  | HSET key field value |              添加或者修改hash类型key的field的值              |
-  |    HGET key field    |                获取一个hash类型key的field的值                |
-  |        HMSET         |       hmset 和 hset 效果相同 ，4.0之后hmset可以弃用了        |
-  |        HMGET         |              批量获取多个hash类型key的field的值              |
-  |       HGETALL        |         获取一个hash类型的key中的所有的field和value          |
-  |        HKEYS         |             获取一个hash类型的key中的所有的field             |
-  |        HVALS         |             获取一个hash类型的key中的所有的value             |
-  |       HINCRBY        |           让一个hash类型key的字段值自增并指定步长            |
-  |        HSETNX        | 添加一个hash类型的key的field值，前提是这个field不存在，否则不执行 |
+```bash
+port 6379
+```
 
-  
+是否以守护进程运行
 
-## 5.List类型
+- 如果以守护进程运行，则不会在命令阻塞，类似于服务
+- 如果以守护进程运行，则当前终端被阻塞
+- 设置为yes表示守护进程，设置为no表示⾮守护进程
+- 推荐设置为yes
 
-> **Redis中的List类型与Java中的LinkedList类似，可以看做是一个双向链表结构。既可以支持正向检索和也可以支持反向检索。**
+```bash
+daemonize yes
+```
 
-**特征也与`LinkedList`类似：**
+RDB持久化的备份策略（RDB备份是默认开启的）
 
-- 有序
-- 元素可以重复
-- 插入和删除快
-- 查询速度一般
+```bash
+ # save 时间 读写次数
+ save 900 1     # 当redis在900内至少有1次读写操作，则触发一次数据库的备份操作
+ save 300 10    # 当redis在300内至少有10次读写操作，则触发一次数据库的备份操作
+ save 60 10000  # 当redis在60内至少有10000次读写操作，则触发一次数据库的备份操作
+```
 
-常用来存储一个有序数据，例如：朋友圈点赞列表，评论列表等.
+RDB持久化的备份文件
 
-> **List的常见命令有**
+```bash
+dbfilename dump.rdb
+```
 
-|            命令            |                             描述                             |
-| :------------------------: | :----------------------------------------------------------: |
-|   LPUSH key  element ...   |                 向列表左侧插入一个或多个元素                 |
-|          LPOP key          |        移除并返回列表左侧的第一个元素，没有则返回nil         |
-| **RPUSH key  element ...** |                 向列表右侧插入一个或多个元素                 |
-|          RPOP key          |                移除并返回列表右侧的第一个元素                |
-|    LRANGE key star end     |                 返回一段角标范围内的所有元素                 |
-|        BLPOP和BRPOP        | 与LPOP和RPOP类似，只不过在没有元素时等待指定时间，而不是直接返回nil |
+RDB持久化数据库数据文件的所在目录
 
-![new](https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/new.gif)
+```bash
+dir /var/lib/redis
+```
 
-> **思考问题**
+日志文件所载目录
 
-- **如何利用List结构模拟一个栈?**
+```bash
+loglevel notice
+logfile /var/log/redis/redis-server.log
+```
 
-  - 先进后出，入口和出口在同一边
+进程ID文件
 
-- **如何利用List结构模拟一个队列?**
+```bash
+pidfile /var/run/redis/redis-server.pid
+```
 
-  - 先进先出，入口和出口在不同边
+数据库，默认有16个，数据名是不能自定义的，只能是0-15之间，当然这个15是数据库数量-1
 
-- **如何利用List结构模拟一个阻塞队列?**
+```bash
+database 16
+```
 
-  - 入口和出口在不同边
-  - 出队时采用BLPOP或BRPOP
+redis的登录密码，生产阶段打开，开发阶段避免麻烦，一般都是注释的。redis在6.0版本以后新增了ACL访问控制机制，新增了用户管理，这个版本以后才有账号和密码，再次之前只有没有密码没有账号
 
-  
+```bash
+# requirepass foobared
+```
 
-## 6.Set类型
+注意：开启了以后，redis-cli终端下使用 `auth 密码`来认证登录。
 
-> **Redis的Set结构与Java中的HashSet类似，可以看做是一个value为null的HashMap。因为也是一个hash表，因此具备与HashSet类似的特征**
+![image-20211108102339592](assets/image-20211108102339592.png)
 
-- 无序
-- 元素不可重复
-- 查找快
-- 支持交集、并集、差集等功能
+AOF持久化的开启配置项(默认值是no，关闭状态)
 
-> **Set的常见命令有**
+```bash
+appendonly no
+```
+
+AOF持久化的备份文件（AOF的备份数据文件与RDB的备份数据文件保存在同一个目录下，由dir配置项指定）
+
+```bash
+appendfilename "appendonly.aof"
+```
+
+AOF持久化备份策略[时间]
+
+```bash
+# appendfsync always
+appendfsync everysec    # 工作中最常用。每一秒备份一次
+# appendfsync no
+```
+
+哨兵集群：一主二从三哨兵(3台服务器)
+
+### Redis的使用
 
-|         命令         |            描述             |
-| :------------------: | :-------------------------: |
-| SADD key member ...  |  向set中添加一个或多个元素  |
-| SREM key member ...  |     移除set中的指定元素     |
-|      SCARD key       |     返回set中元素的个数     |
-| SISMEMBER key member | 判断一个元素是否存在于set中 |
-|       SMEMBERS       |     获取set中的所有元素     |
-| SINTER key1 key2 ... |     求key1与key2的交集      |
-| SDIFF key1 key2 ...  |     求key1与key2的差集      |
-| SUNION key1 key2 ..  |     求key1和key2的并集      |
+redis是一款基于**CS**架构的数据库，所以redis有客户端redis-cli，也有服务端redis-server。
 
-> **交集、差集、并集图示**
+其中，客户端可以使用go、java、python等编程语言，也可以终端下使用命令行工具管理redis数据库，甚至可以安装一些别人开发的界面工具，例如：RDM。
 
-![image-20220525112632214](https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220525112632214.png)
+![1553246999266](assets/1553246999266.png)
 
+redis-cli客户端连接服务器：
 
+```bash
+# redis-cli -h `redis服务器ip` -p `redis服务器port`
+redis-cli -h 10.16.244.3 -p 6379
+```
 
-## 7.SortedSet类型
+# 四、redis数据类型
 
-> **Redis的SortedSet是一个可排序的set集合，与Java中的TreeSet有些类似，但底层数据结构却差别很大。SortedSet中的每一个元素都带有一个score属性，可以基于score属性对元素排序，底层的实现是一个跳表（SkipList）加 hash表。**
+![img](assets/139239-20191126141006657-1969131669.png)
 
-**SortedSet具备下列特性：**
+```
+redis可以理解成一个全局的大字典，key就是数据的唯一标识符。根据key对应的值不同，可以划分成5个基本数据类型。
+1. string类型:
+	字符串类型，是 Redis 中最为基础的数据存储类型，它在 Redis 中是二进制安全的，也就是byte类型。
+	单个数据的最大容量是512M。
+		key: "值",
+		"name":"yuan",
 
-- 可排序
-- 元素不重复
-- 查询速度快
+3. list类型:
+	列表类型，它的子成员类型为string。
+		key: [值1，值2, 值3.....]
+		"scors":["100","89","78"],
 
-因为SortedSet的可排序特性，经常被用来实现排行榜这样的功能。
+2. hash类型:
+	哈希类型，用于存储对象/字典，对象/字典的结构为键值对。key、域、值的类型都为string。域在同一个hash中是唯一的。
+		key:{
+            域（属性）: 值，
+            域:值，            
+            域:值，
+            域:值，
+            ...
+		}
+		"user:1": {
+      		"name": "John",
+      		"age": 30,
+      		"email": "john@example.com"
+    	}
 
-> **SortedSet的常见命令有**
+4. set类型:
+	无序集合，它的子成员类型为string类型，元素唯一不重复，没有修改操作。
+		key: {值1, 值4, 值3, ...., 值5}
+		"s":{item1,itme2,..}
 
-|             命令             |                             描述                             |
-| :--------------------------: | :----------------------------------------------------------: |
-|    ZADD key score member     | 添加一个或多个元素到sorted set ，如果已经存在则更新其score值 |
-|       ZREM key member        |                删除sorted set中的一个指定元素                |
-|      ZSCORE key member       |             获取sorted set中的指定元素的score值              |
-|       ZRANK key member       |              获取sorted set 中的指定元素的排名               |
-|          ZCARD key           |                  获取sorted set中的元素个数                  |
-|      ZCOUNT key min max      |           统计score值在给定范围内的所有元素的个数            |
-| ZINCRBY key increment member |    让sorted set中的指定元素自增，步长为指定的increment值     |
-|      ZRANGE key min max      |          按照score排序后，获取指定排名范围内的元素           |
-|  ZRANGEBYSCORE key min max   |          按照score排序后，获取指定score范围内的元素          |
-|    ZDIFF、ZINTER、ZUNION     |                      求差集、交集、并集                      |
+5. zset类型(sortedSet):
+	有序集合，它的子成员值的类型为string类型，元素唯一不重复，没有修改操作。权重值(score,分数)从小到大排列。
+		key: {
+			值1 权重值1(数字);
+			值2 权重值2;
+			值3 权重值3;
+			值4 权重值4;
+		}
+		"leaderboard": {
+      		"Player1": 1000,
+      		"Player2": 800,
+      		"Player3": 600
+    	}
+```
 
-**注意：所有的排名默认都是升序，如果要降序则在命令的Z后面添加`REV`即可**
+## 4.1. string（字符串）
 
+**1、set/setex/mset/msetnx**
 
+- `set key value`: 设置指定键的值为指定的字符串。
+- `setex key seconds value`: 设置指定键的值为指定的字符串，并设置过期时间（以秒为单位）。
+- `mset key value [key value ...]`: 设置多个键值对。
+- `msetnx key value [key value ...]`: 仅当所有指定的键都不存在时，同时设置多个键值对。
 
-# 三、Redis客户端
+示例：
 
-> 安装完成Redis，我们就可以操作Redis，实现数据的CRUD了。这需要用到Redis客户端，包括：
->
+```
+set user:1:name "John"
+setex user:1:session 3600 "session_token"
+mset user:2:name "Alice" user:2:age 25
+msetnx user:3:name "Bob" user:3:age 30
+```
 
-- **命令行客户端**
-- **图形化桌面客户端**
-- **编程客户端**
+**2、get/mget**
 
+- `get key`: 获取指定键的值。
+- `mget key [key ...]`: 获取多个键的值。
 
+示例：
 
-## 1.命令行客户端
+```
+get user:1:name
+mget user:1:name user:2:name user:3:name
+```
 
-- **Redis安装完成后就自带了命令行客户端：`redis-cli`，使用方式如下：**
+**3、getset**
 
-  ```sh
-  redis-cli [options] [commonds]
-  ```
+- `getset key value`: 设置指定键的值为指定的字符串，并返回键的旧值。
 
-- **其中常见的`options`有：**
+示例：
 
-  - `-h 127.0.0.1`：指定要连接的redis节点的IP地址，默认是127.0.0.1
-  - `-p 6379`：指定要连接的redis节点的端口，默认是6379
-  - `-a 132537`：指定redis的访问密码 
+```
+getset user:1:name "Johnny"
+```
 
-- **其中的`commonds`就是Redis的操作命令，例如：**
-  - `ping`：与redis服务端做心跳测试，服务端正常会返回`pong`
-  - 不指定commond时，会进入`redis-cli`的交互控制台：
+**4、incr/decr**
 
-![image-20220524201258092](https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220524201258092.png)
+- `incr key`: 将指定键的值递增 1。
+- `decrkey`: 将指定键的值递减 1。
 
+示例：
 
+```
+incr user:1:visits
+decr user:2:age
+```
 
-## 2.图形化客户端
+**5、del**
 
-> 下载地址：https://pan.baidu.com/s/1sxQTOt-A5MCvVZnlgDf0eA?pwd=1234 
+- `DEL key [key ...]`: 删除一个或多个键。
 
-- **安装图形化客户端**
+示例：
 
-  ```tex
-  安装步骤过于简单不再演示
-  ```
-
-- **如何连接到Redis**
-
-  <img src="https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220524202853286.png" alt="image-20220524202853286" style="zoom:80%;" />
-
-- **连接成功后如图所示**
-
-  <img src="https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220524203745436.png" alt="image-20220524203745436" style="zoom:80%;" />
-
-
-
-## 3.Java客户端
-
-### 3.1	Jedis快速入门
-
----
-
-> Jedis的官网地址： https://github.com/redis/jedis，我们先来个快速入门：
-
-- **新建一个Maven工程并引入以下依赖**
-
-  ```xml
-  <!--引入Jedis依赖-->
-  <dependency>
-      <groupId>redis.clients</groupId>
-      <artifactId>jedis</artifactId>
-      <version>4.2.0</version>
-  </dependency>
-  
-  <!--引入单元测试依赖-->
-  <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <version>5.8.2</version>
-      <scope>test</scope>
-  </dependency>
-  ```
-
-- **编写测试类并与Redis建立连接**
-
-  ```java
-  private Jedis jedis;
-  
-  @BeforeEach //被该注解修饰的方法每次执行其他方法前自动执行
-  void setUp(){
-      // 1. 获取连接
-      jedis = new Jedis("192.168.230.88",6379);
-      // 2. 设置密码
-      jedis.auth("132537");
-      // 3. 选择库（默认是下标为0的库）
-      jedis.select(0);
-  }
-  ```
-
-- **编写一个操作数据的方法（这里以操作String类型为例）**
-
-  ```java
-  @Test
-  public void testString(){
-      // 1.往redis中存放一条String类型的数据并获取返回结果
-      String result = jedis.set("url", "https://www.oz6.cn");
-      System.out.println("result = " + result);
-  
-      // 2.从redis中获取一条数据
-      String url = jedis.get("url");
-      System.out.println("url = " + url);
-  }
-  ```
-
-- **最后不要忘记编写一个释放资源的方法**
-
-  ```java
-      @AfterEach //被该注解修饰的方法会在每次执行其他方法后执行
-      void tearDown(){
-          // 1.释放资源
-          if (jedis != null){
-              jedis.close();
-          }
-      }
-  ```
-
-- **执行`testString()`方法后测试结果如图所示**
-
-  ![image-20220525131017888](https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220525131017888.png)
-
-
-
-### 3.2	Jedis连接池
-
----
-
-> **Jedis本身是线程不安全的，并且频繁的创建和销毁连接会有性能损耗，因此我们推荐大家使用Jedis连接池代替Jedis的直连方式**
-
-```java
-public class JedisConnectionFactory {
-    private static final JedisPool jedisPool;
-
-    static {
-        //配置连接池
-        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-        jedisPoolConfig.setMaxTotal(8);
-        jedisPoolConfig.setMaxIdle(8);
-        jedisPoolConfig.setMinIdle(0);
-        jedisPoolConfig.setMaxWaitMillis(200);
-        //创建连接池对象
-        jedisPool = new JedisPool(jedisPoolConfig,"192.168.230.88",6379,1000,"132537");
-    }
-
-    public static Jedis getJedis(){
-       return jedisPool.getResource();
-    }
-}
-
+```
+DEL  user:1:name
 ```
 
 
 
-### 3.3	SpringDataRedis介绍
+### 1. 设置键值
 
----
+set 设置的数据没有额外操作时，是不会过期的。
 
-> **SpringData是Spring中数据操作的模块，包含对各种数据库的集成，其中对Redis的集成模块就叫做`SpringDataRedis`**
+```bash
+set key value
+```
+
+设置键为`name`值为`yuan`的数据
+
+```bash
+set name yuan
+set name rain # 一个变量可以设置多次
+```
+
+<img src="assets/image-20220415103809481-16499902909211.png" alt="image-20220415103809481" style="zoom:50%;" />
+
+注意：redis中的所有数据操作，如果设置的键不存在则为添加，如果设置的键已经存在则修改。
+
+设置一个键，当键不存在时才能设置成功，用于一个变量只能被设置一次的情况。
+
+```bash
+setnx  key  value
+```
+
+一般用于给数据加锁(分布式锁)
+
+```bash
+127.0.0.1:6379> setnx goods_1 101
+(integer) 1
+127.0.0.1:6379> setnx goods_1 102
+(integer) 0  # 表示设置不成功
+127.0.0.1:6379> del goods_1
+(integer) 1
+127.0.0.1:6379> setnx goods_1 102
+(integer) 1
+```
+
+### 2. 设置键值的过期时间
+
+redis中可以对一切的数据进行设置有效期。以秒为单位
+
+```bash
+setex key seconds value
+setex name goods_1 10 //设置键为`goods_1`值为`101`过期时间为10秒的数据
+```
+
+### 3. 关于设置保存数据的有效期
+
+setex 添加保存数据到redis，同时设置有效期，格式：
+
+```bash
+setex key time value
+```
+
+![image-20220415104126645](assets/image-20220415104126645-16499904877172.png)
+
+### 4. 设置多个键值
+
+```bash
+mset key1 value1 key2 value2 ...
+mset a1 goland a2 java a3 c //设置键为`a1`值为`goland`、键为`a2`值为`java`、键为`a3`值为`c`
+```
+
+### 5. 字符串拼接值
+
+常见于大文件上传
+
+```bash
+append key value
+```
+
+向键为`a1`中拼接值`haha`
+
+```bash
+set title 123
+append title 123
+127.0.0.1:6379> get title
+"123123"
+```
+
+### 6. 根据键获取值
+
+根据键获取值，如果不存在此键则返回`nil`
+
+```bash
+get key
+get name //获取 name 的值
+```
+
+根据多个键获取多个值
+
+```bash
+mget key1 key2 ...
+mget a1 a2 a3 // 获取键`a1、a2、a3`的值
+```
+
+getset：设置key的新值，返回旧值
+
+```bash
+redis> GETSET db mongodb    # 没有旧值，返回 nil
+(nil)
+redis> GET db
+"mongodb"
+redis> GETSET db redis      # 返回旧值 mongodb
+"mongodb"
+redis> GET db
+"redis"
+```
+
+###  7. 自增自减
+
+web开发中的电商抢购、秒杀。游戏里面的投票、攻击计数。系统中计算当前在线人数、
+
+```bash
+set id 1
+incr id   # 相当于id+1
+get id    # 2
+incr id   # 相当于id+1
+get id    # 3
+
+set goods_id_1 10
+decr goods_id_1  # 相当于 id-1
+get goods_id_1    # "9"
+decr goods_id_1   # 相当于id-1
+get goods_id_1    # 8
+
+set age 22
+incrby age 2 # 自增自减大于1的值时候用incrby
+```
+
+### 8. 获取字符串的长度
+
+```bash
+set name xiaoming
+strlen name  # 8 
+```
+
+### 9. 比特流操作  
+
+————————
+
+mykey  00000011
+
+1字节=8比特  1kb = 1024字节  1mb = 1024kb 1gb = 1024mb
+
+1个int8就是一个字节，一个中文：3个字节
+
+```bash
+SETBIT     # SETBIT key offset value 按从左到右的偏移量设置一个bit数据的值 
+GETBIT     # 获取一个bit数据的值
+BITCOUNT   # 统计字符串被设置为1的bit数.
+BITPOS     # 返回字符串里面第一个被设置为1或者0的bit位。
+```
+
+案例1：
+
+```bash
+SETBIT mykey 7 1
+# 00000001
+getbit mykey 7
+# 00000001
+SETBIT mykey 4 1
+# 00001001
+SETBIT mykey 15 1
+# 0000100100000001
+```
+
+我们知道 'a' 的ASCII码是 97。转换为二进制是：01100001。offset的学名叫做“偏移” 。二进制中的每一位就是offset值啦，比如在这里 offset 0 等于 ‘0’ ，offset 1等于 '1' ,offset 2 等于 '1',offset 6 等于 '0' ，没错，offset是从左往右计数的，也就是从**高位往低位**。
+
+我们通过SETBIT 命令将 andy中的 'a' 变成 'b' 应该怎么变呢？
+
+也就是将 01100001 变成 01100010 （b的ASCII码是98），这个很简单啦，也就是将'a'中的offset 6从0变成1，将offset 7 从1变成0 。
+
+案例2：签到系统
+
+````bash
+setbit user_1 6 1
+setbit user_1 5 1
+setbit user_1 4 0
+setbit user_1 3 1
+setbit user_1 2 0
+setbit user_1 1 1
+setbit user_1 0 1
+BITCOUNT user_1 # 统计一周的打卡情况
+````
+
+## 4.2. key操作
+
+redis中所有的数据都是通过key（键）来进行操作，这里我们学习一下关于任何数据类型都通用的命令。
+
+### （1）查找键
+
+参数支持简单的正则表达式
+
+```bash
+keys pattern
+keys *			 # 查看所有键
+```
+
+例子：
+
+```bash
+keys *a* 		# 查看名称中包含`a`的键
+keys a*			# 查看以a开头的键
+keys *a			# 查看以a结尾的键
+```
+
+### （2）判断键是否存在
+
+如果存在返回`1`，不存在返回`0`
+
+```bash
+exists key1
+exists title // 判断键`title`是否存在
+```
+
+### （3）查看键的的值的数据类型
+
+```bash
+type key
+# string    字符串
+# hash      哈希类型
+# list      列表类型
+# set       无序集合
+# zset      有序集合
+```
+
+查看键的值类型
+
+```bash
+type a1
+# string
+sadd member_list xiaoming xiaohong xiaobai
+# (integer) 3
+type member_list
+# set
+hset user_1 name xiaobai age 17 sex 1
+# (integer) 3
+type user_1
+# hash
+lpush brothers zhangfei guangyu liubei xiaohei
+# (integer) 4
+type brothers
+# list
+
+zadd achievements 61 xiaoming 62 xiaohong 83 xiaobai  78 xiaohei 87 xiaohui 99 xiaolong
+# (integer) 6
+type achievements
+# zset
+```
+
+### （4）删除键以及键对应的值
+
+```bash
+del key1 key2 ...
+```
+
+### （5）查看键的有效期
+
+```bash
+ttl key
+
+# 结果结果是秒作为单位的整数
+# -1 表示永不过期
+# -2 表示当前数据已经过期，查看一个不存在的数据的有效期就是-2
+```
+
+### （6）设置key的有效期
+
+给已有的数据重新设置有效期，redis中所有的数据都可以通过expire来设置它的有效期。有效期到了，数据就被删除。
+
+```bash
+expire key seconds
+```
+
+### （7）清空所有key
+
+慎用，一旦执行，则redis所有数据库0~15的全部key都会被清除
+
+```bash
+flushall
+```
+
+### （8）key重命名
+
+```bash
+rename oldkey newkey
+```
+
+把name重命名为username
+
+```bash
+set name yuan
+rename name username
+get username
+```
+
+select切换数据库，每个数据库数据是独立的
+
+```bash
+select <数据库ID>		# redis的配置文件中，默认有0~15之间的16个数据库，默认操作的就是0号数据库
+```
+
+操作效果：
+
+```bash
+# 默认处于0号库
+127.0.0.1:6379> select 1
+OK
+# 这是在1号库
+127.0.0.1:6379[1]> set name xiaoming
+OK
+127.0.0.1:6379[1]> select 2
+OK
+# 这是在2号库
+127.0.0.1:6379[2]> set name xiaohei
+OK
+```
+
+## 4.3. list（数组）
+
+队列，列表的子成员类型为string
+
+> lpush key value # 将一个或多个值插入列表的头部
 >
-> **官网地址**：https://spring.io/projects/spring-data-redis
-
-- 提供了对不同Redis客户端的整合（`Lettuce`和`Jedis`）
-- 提供了`RedisTemplate`统一API来操作Redis
-- 支持Redis的发布订阅模型
-- 支持Redis哨兵和Redis集群
-- 支持基于Lettuce的响应式编程
-- 支持基于JDK、JSON、字符串、Spring对象的数据序列化及反序列化
-- 支持基于Redis的JDKCollection实现
-
-> **SpringDataRedis中提供了RedisTemplate工具类，其中封装了各种对Redis的操作。并且将不同数据类型的操作API封装到了不同的类型中：**
-
-![image-20220525140217446](https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220525140217446.png)
-
-
-
-### 3.4 SpringDataRedis快速入门
-
----
-
-> **`SpringBoot`已经提供了对`SpringDataRedis`的支持，使用非常简单**
-
-- **首先新建一个Spring Boot工程**
-
-  ![image-20220525141608974](https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220525141608974.png)
-
-- **然后引入连接池依赖**
-
-  ```xml
-  <!--连接池依赖-->
-  <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-pool2</artifactId>
-  </dependency>
-  ```
-
-- **编写配置文件`application.yml`（连接池的配置在实际开发中是根据需求来的）**
-
-  ```yml
-  spring:
-    redis:
-      host: 192.168.230.88 #指定redis所在的host
-      port: 6379  #指定redis的端口
-      password: 132537  #设置redis密码
-      lettuce:
-        pool:
-          max-active: 8 #最大连接数
-          max-idle: 8 #最大空闲数
-          min-idle: 0 #最小空闲数
-          max-wait: 100ms #连接等待时间
-  ```
-
-- **编写测试类执行测试方法**
-
-  ```java
-  @SpringBootTest
-  class RedisDemoApplicationTests {
-  
-  	@Resource
-  	private RedisTemplate redisTemplate;
-  
-  	@Test
-  	void testString() {
-  		// 1.通过RedisTemplate获取操作String类型的ValueOperations对象
-  		ValueOperations ops = redisTemplate.opsForValue();
-  		// 2.插入一条数据
-  		ops.set("blogName","Vz-Blog");
-  		
-  		// 3.获取数据
-  		String blogName = (String) ops.get("blogName");
-  		System.out.println("blogName = " + blogName);
-  	}
-  }
-  ```
-
-  
-
-### 3.5	RedisSerializer配置
-
----
-
-> **RedisTemplate可以接收任意Object作为值写入Redis，只不过写入前会把Object序列化为字节形式，`默认是采用JDK序列化`，得到的结果是这样的**
-
-![image-20220525170205272](https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220525170205272.png)
-
-**缺点：**
-
-- 可读性差
-- 内存占用较大
-
-
-
-> **那么如何解决以上的问题呢？我们可以通过自定义RedisTemplate序列化的方式来解决。**
-
-- **编写一个配置类`RedisConfig`**
-
-  ```java
-  @Configuration
-  public class RedisConfig {
-  
-      @Bean
-      public RedisTemplate<String,Object> redisTemplate(RedisConnectionFactory factory){
-          // 1.创建RedisTemplate对象
-          RedisTemplate<String ,Object> redisTemplate = new RedisTemplate<>();
-          // 2.设置连接工厂
-          redisTemplate.setConnectionFactory(factory);
-  
-          // 3.创建序列化对象
-          StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-          GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer = new GenericJackson2JsonRedisSerializer();
-  
-          // 4.设置key和hashKey采用String的序列化方式
-          redisTemplate.setKeySerializer(stringRedisSerializer);
-          redisTemplate.setHashKeySerializer(stringRedisSerializer);
-  
-          // 5.设置value和hashValue采用json的序列化方式
-          redisTemplate.setValueSerializer(genericJackson2JsonRedisSerializer);
-          redisTemplate.setHashValueSerializer(genericJackson2JsonRedisSerializer);
-  
-          return redisTemplate;
-      }
-  }
-  ```
-
-- **此时我们已经将RedisTemplate的key设置为`String序列化`，value设置为`Json序列化`的方式，再来执行方法测试**
-
-  ![image-20220525170925364](https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220525170925364.png)
-
-- **由于我们设置的value序列化方式是Json的，因此我们可以直接向redis中插入一个对象**
-
-  ```java
-  @Test
-  void testSaveUser() {
-      redisTemplate.opsForValue().set("user:100", new User("Vz", 21));
-      User user = (User) redisTemplate.opsForValue().get("user:100");
-      System.out.println("User = " + user);
-  }
-  ```
-
-  ![image-20220525171340322](https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220525171340322.png)
-
-  尽管Json序列化可以满足我们的需求，但是依旧存在一些问题。
-
-  如上图所示，为了在反序列化时知道对象的类型，JSON序列化器会将类的class类型写入json结果中，存入Redis，会带来额外的内存开销。
-
-  那么我们如何解决这个问题呢？我们可以通过下文的`StringRedisTemplate`来解决这个问题。
-
-
-
-### 3.6	StringRedisTemplate
-
----
-
-> **为了节省内存空间，我们并不会使用JSON序列化器来处理value，而是统一使用String序列化器，要求只能存储String类型的key和value。当需要存储Java对象时，手动完成对象的序列化和反序列化。**
-
-![image-20220525172001057](https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220525172001057.png)
-
-
-
-> **Spring默认提供了一个StringRedisTemplate类，它的key和value的序列化方式默认就是String方式。省去了我们自定义RedisTemplate的过程**
-
-- **我们可以直接编写一个测试类使用StringRedisTemplate来执行以下方法**
-
-  ```java
-  @SpringBootTest
-  class RedisStringTemplateTest {
-  
-  	@Resource
-  	private StringRedisTemplate stringRedisTemplate;
-  
-  	@Test
-  	void testSaveUser() throws JsonProcessingException {
-  		// 1.创建一个Json序列化对象
-  		ObjectMapper objectMapper = new ObjectMapper();
-  		// 2.将要存入的对象通过Json序列化对象转换为字符串
-  		String userJson1 = objectMapper.writeValueAsString(new User("Vz", 21));
-  		// 3.通过StringRedisTemplate将数据存入redis
-  		stringRedisTemplate.opsForValue().set("user:100",userJson1);
-  		// 4.通过key取出value
-  		String userJson2 = stringRedisTemplate.opsForValue().get("user:100");
-  		// 5.由于取出的值是String类型的Json字符串，因此我们需要通过Json序列化对象来转换为java对象
-  		User user = objectMapper.readValue(userJson2, User.class);
-  		// 6.打印结果
-  		System.out.println("user = " + user);
-  	}
-  
-  }
-  ```
-
-- **执行完毕回到Redis的图形化客户端查看结果**
-
-  ![image-20220525172508234](https://image-bed-vz.oss-cn-hangzhou.aliyuncs.com/Redis/image-20220525172508234.png)
-
-
-
-### 3.7	总结
-
----
-
-> RedisTemplate的两种序列化实践方案，两种方案各有各的优缺点，可以根据实际情况选择使用。
-
-方案一：
-
-1. 自定义RedisTemplate
-2. 修改RedisTemplate的序列化器为GenericJackson2JsonRedisSerializer
-
-方案二：
-
-1. 使用StringRedisTemplate
-2. 写入Redis时，手动把对象序列化为JSON
-3. 读取Redis时，手动把读取到的JSON反序列化为对象
-
-
-
-# Redis实战篇
-
-1. 短信登录
-项目整体架构如下：
-
-image-20221025174859439
-通过Nginx将前端请求转发到后端服务器中，Redis与MySQL作为数据库。
-
-1.1 导入项目
-创建hmdp数据库，导入SQL文件 hmdp.sql
-
-image-20221025171044276
-
-表介绍：
-
-tb_user：用户表
-tb_user_info：用户详情表
-tb_shop：商户信息表
-tb_shop_type：商户类型表
-tb_blog：用户日记表（达人探店日记）
-tb_follow：用户关注表
-tb_voucher：优惠券表
-tb_voucher_order：优惠券订单表
-导入后端项目：hm-dianping
-
-将application.yaml文件中MySQL与Redis配置修改为自己的
-
-之后启动SpringBoot项目，并访问 http://localhost:8081/shop-type/list，显示出数据则说明配置成功！
-
-image-20221025172132464
-
-导入前端项目：配置nginx
-
-由于我使用的是Mac M1，用homebrew安装的nginx，分享一下我的配置方法
-
-将 /opt/homebrew/etc/nginx/nginx.conf 修改为老师提供的nginx配置文件（修改前记得备份之前的配置文件）
-
-将 /opt/homebrew/var/www 下的文件全部替换为老师提供的nginx包下的html下的文件
-
-采用如下命令更新配置文件
-
-1
-nginx -c /opt/homebrew/etc/nginx/nginx.conf
-采用如下命令重启nginx
-
-1
-nginx -s reload
-访问 localhost:8080，即可成功
-
-1.2 基于Session的短信登录
-1.2.1 流程分析
-服务端发送短信验证码流程
-服务端接收到手机号，校验手机号是否符合规则，符合则进入下一步
-生成验证码，并将验证码保存到Session中
-发送验证码
-短信验证码登录与注册流程
-用户提交手机号与验证码，服务端校验验证码，若正确，则进入下一步
-根据手机号查询信息
-若用户存在，登陆成功，保存用户到Session
-若用户不存在，用户为新用户，则将其保存到数据库中，保存用户到Session
-校验登录状态
-用户访问网站，携带Cookie，通过Cookie中的SessionID获取对应的Session，从Session中获取用户信息，判断信息是否有效
-若信息有效，用户存在，则将信息保存到ThreadLocal中，便于后续使用
-若信息无效，用户不存在，结束
-1.2.2 功能实现
-发送短信验证码
-更改controller包下UserController中的sendCode方法
-
-
-@PostMapping("code")
-public Result sendCode(@RequestParam("phone") String phone, HttpSession session) {
-    // TODO 发送短信验证码并保存验证码
-    return userService.sendCode(phone, session);
+> rpush key value # 将一个或多个值插入列表的尾部 
+>
+> linsert key after|before  指定元素 value # 在列表中指定元素的前面或后面插入一个新元素
+>
+> lindex key index # 获取列表中指定索引位置的元素
+>
+> lrange key start stop # 获取列表中指定范围内的元素
+>
+> lset key index value # 设置列表中指定索引位置的元素值
+>
+> lrem key count value # 从列表中移除指定数量的元素，count > 0 时从表头开始移除指定值，count < 0 时从表尾开始移除指定值，count = 0 时移除所有指定值 
+
+### （1）添加子成员
+
+```bash
+# 在左侧(前)添加一条或多条数据
+lpush key value1 value2 ...
+# 在右侧(后)添加一条或多条数据
+rpush key value1 value2 ...
+
+# 在指定元素的左边(前)/右边（后）插入一个或多个数据
+linsert key before/after 指定元素 value1 value2 ....
+```
+
+从键为`brother`的列表左侧添加一个或多个数据`liubei、guanyu、zhangfei`
+
+```bash
+lpush brother liubei
+# [liubei]
+lpush brother guanyu zhangfei xiaoming
+# [xiaoming,zhangfei,guanyu,liubei]
+```
+
+从键为brother的列表右侧添加一个或多个数据，`xiaohong,xiaobai,xiaohui`
+
+```bash
+rpush brother xiaohong
+# [xiaoming,zhangfei,guanyu,liubei,xiaohong]
+rpush brother xiaobai xiaohui
+# [xiaoming,zhangfei,guanyu,liubei,xiaohong,xiaobai,xiaohui]
+```
+
+从key=brother的xiaohong的列表位置左侧添加一个数据，`xiaoA,xiaoB`
+
+```bash
+linsert brother before xiaohong xiaoA
+# [xiaoming,zhangfei,guanyu,liubei,xiaoA,xiaohong,xiaobai,xiaohui]
+linsert brother before xiaohong xiaoB
+# [xiaoming,zhangfei,guanyu,liubei,xiaoA,xiaoB,xiaohong,xiaobai,xiaohui]
+```
+
+从key=brother，key=xiaohong的列表位置右侧添加一个数据，`xiaoC,xiaoD`
+
+```bash
+linsert brother after xiaohong xiaoC
+# [xiaoming,zhangfei,guanyu,liubei,xiaoA,xiaohong,xiaoC,xiaobai,xiaohui]
+linsert brother after xiaohong xiaoD
+# [xiaoming,zhangfei,guanyu,liubei,xiaoA,xiaohong,xiaoD,xiaoC,xiaobai,xiaohui]
+```
+
+注意：当列表如果存在多个成员值一致的情况下，默认只识别第一个。
+
+```bash
+127.0.0.1:6379> linsert brother before xiaoA xiaohong
+# [xiaoming,zhangfei,guanyu,liubei,xiaohong,xiaoA,xiaohong,xiaoD,xiaoC,xiaobai,xiaohui]
+127.0.0.1:6379> linsert brother before xiaohong xiaoE
+# [xiaoming,zhangfei,guanyu,liubei,xiaoE,xiaohong,xiaoA,xiaohong,xiaoD,xiaoC,xiaobai,xiaohui]
+127.0.0.1:6379> linsert brother after xiaohong xiaoF
+# [xiaoming,zhangfei,guanyu,liubei,xiaoE,xiaohong,xiaoF,xiaoA,xiaohong,xiaoD,xiaoC,xiaobai,xiaohui]
+```
+
+### （2）基于索引获取列表成员
+
+根据指定的索引(下标)获取成员的值，负数下标从右边-1开始，逐个递减
+
+```bash
+lindex key index
+```
+
+获取brother下标为2以及-2的成员
+
+```bash
+del brother
+lpush brother guanyu zhangfei xiaoming
+lindex brother 2
+# "guanyu"
+lindex brother -2
+# "zhangfei"
+```
+
+### （3）获取列表的切片
+
+闭区间[包括stop]
+
+```bash
+lrange key start stop
+```
+
+操作：
+
+```bash
+del brother
+rpush brother liubei guanyu zhangfei xiaoming xaiohong
+# 获取btother的全部成员
+lrange brother 0 -1
+# 获取brother的前2个成员
+lrange brother 0 1
+# 获取brother的后2个成员
+lrange brother -2 -1
+```
+
+### （4）获取列表的长度
+
+```bash
+llen key
+```
+
+获取brother列表的成员个数
+
+```bash
+llen brother
+```
+
+### （5）按索引设置值
+
+```bash
+lset key index value
+# 注意：
+# redis的列表也有索引，从左往右，从0开始，逐一递增，第1个元素下标为0
+# 索引可以是负数，表示尾部开始计数，如`-1`表示最后1个元素
+```
+
+修改键为`brother`的列表中下标为`4`的元素值为`xiaohongmao`
+
+```bash
+lset brother 4 xiaohonghong
+```
+
+### （6）删除指定成员
+
+移除并获取列表的第一个成员或最后一个成员
+
+```bash
+lpop key  # 第一个成员出列
+rpop key  # 最后一个成员出列
+```
+
+获取并移除brother中的第一个成员
+
+```bash
+lpop brother
+# 开发中往往使用rpush和lpop实现队列的数据结构->实现入列和出列
+```
+
+```bash
+lrem key count value
+
+# 注意：
+# count表示删除的数量，value表示要删除的成员。该命令默认表示将列表从左侧前count个value的元素移除
+# count==0，表示删除列表所有值为value的成员
+# count >0，表示删除列表左侧开始的前count个value成员
+# count <0，表示删除列表右侧开始的前count个value成员
+
+del brother
+rpush brother A B A C A
+lrem brother 0 A
+["B","C"]
+
+del brother
+rpush brother A B A C A
+lrem brother -2 A
+["A","B","C"]
+
+del brother
+rpush brother A B A C A
+lrem brother 2 A
+["B","C","A"]
+```
+
+## 4.4. hash（哈希）
+
+> hset key field value 		# 设置哈希表中指定字段的值
+>
+> hget key field 				# 获取哈希表中指定字段的值
+>
+> hgetall key 				# 获取哈希表中指定键的所有字段和值
+>
+> hmget key field1 field2 ...  	# 获取哈希表中指定键的多个字段的值
+>
+> hincrby key field number 	# 将哈希表中指定字段的值增加指定增量（整数）
+
+专门用于结构化的数据信息。对应的就是map/结构体
+
+结构：
+
+```text
+键key:{
+   	域field: 值value,
+   	域field: 值value,
+   	域field: 值value,
 }
-在UserServiceImpl中实现该方法
+```
 
-注意：验证码的发送用log输出日志模拟一下即可，表示发送成功
+### （1）设置指定键的属性/域
 
+设置指定键的单个属性
 
-@Override
-public Result sendCode(String phone, HttpSession session) {
-    // 1.校验手机号
-    if (RegexUtils.isPhoneInvalid(phone)) {
-        // 2.如果不符合，返回错误信息
-        return Result.fail("手机号格式错误！");
-    }
-    // 3.符合，生成验证码
-    String code = RandomUtil.randomNumbers(6);
-    // 4.保存验证码到Session
-    session.setAttribute("code", code);
-    // 5.发送验证码
-    log.debug("发送短信验证码成功，验证码：{}", code);
-    return Result.ok();
-}
-登录与注册
-更改Controller包下UserController中的login方法
+```bash
+hset key field value
+```
 
+设置键 `user_1`的属性`name`为`xiaoming`
 
-@PostMapping("/login")
-public Result login(@RequestBody LoginFormDTO loginForm, HttpSession session){
-    // TODO 实现登录功能
-    return userService.login(loginForm, session);
-}
-在UserService中实现该方法
+```bash
+127.0.0.1:6379> hset user_1 name xiaoming   # user_1没有会自动创建
+(integer) 1
+127.0.0.1:6379> hset user_1 name xiaohei    # user_1中重复的属性会被修改
+(integer) 0
+127.0.0.1:6379> hset user_1 age 16          # user_1中不存在的属性会被新增
+(integer) 1
+127.0.0.1:6379> hset user:1 name xiaohui    # user:1会在redis界面操作中以:作为目录分隔符
+(integer) 1
+127.0.0.1:6379> hset user:1 age 15
+(integer) 1
+127.0.0.1:6379> hset user:2 name xiaohong age 16  # 一次性添加或修改多个属性
+```
 
+### （2）获取指定键的域/属性的值
 
+获取指定键所有的域/属性
 
-@Override
-public Result login(LoginFormDTO loginForm, HttpSession session) {
-    // 1.校验手机号
-    String phone = loginForm.getPhone();
-    if (RegexUtils.isPhoneInvalid(phone)) {
-        return Result.fail("手机号格式错误！");
-    }
-    // 2.校验验证码
-    String cacheCode = (String) session.getAttribute("code");
-    String code = loginForm.getCode();
-    if (cacheCode == null || !cacheCode.equals(code)) {
-        // 3.不一致报错
-        return Result.fail("验证码错误");
-    }
-    // 4.一致，根据手机号查询用户
-    User user = query().eq("phone", phone).one();
-    // 5.判断用户是否存在
-    if (user == null) {
-        // 6.不存在，创建用户并保存
-        user = createUserWithPhone(phone);
-    }
-    // 7.保存用户信息到Session
-    session.setAttribute("user", user);
-    return Result.ok();
-}
+```bash
+hkeys key
+```
 
-private User createUserWithPhone(String phone) {
-    User user = new User();
-    user.setPhone(phone);
-    user.setNickName(USER_NICK_NAME_PREFIX + RandomUtil.randomString(10));
-    save(user);
-    return user;
-}
-登录校验拦截器
-情景分析：
+获取键user的所有域/属性
 
-登录完成之后，一些请求需要校验用户的登录状态，然后才能允许执行进一步的操作（比如查看订单等）
+```bash
+127.0.0.1:6379> hkeys user:2
+1) "name"
+2) "age"
+127.0.0.1:6379> hkeys user:3
+1) "name"
+2) "age"
+3) "sex"
+```
 
-如果在每个请求的方法中都添加校验逻辑，会增加很多冗余代码。
+获取指定键的单个域/属性的值
 
-因此，我们采用登录校验拦截器，在请求到达每个Controller之前，对其做校验，获取用户信息。
+```sh
+hget key field
+127.0.0.1:6379> hget user:3 name	# 获取键`user:3`属性`name`的值
+"xiaohong"
+```
 
-为了避免线程安全问题，将用户信息保存到ThreadLocal中，这样每个请求对应着自己的用户信息，互不干扰。
+获取指定键的多个域/属性的值
 
-在utils包下创建LoginInterceptor
+```bash
+hmget key field1 field2 ...
+127.0.0.1:6379> hmget user:2 name age	# 获取键`user:2`属性`name`、`age`的值
+1) "xiaohong"
+2) "16"
+```
 
-UserHolder其实是一个工具类，用于将用户信息保存到ThreadLocal以及从ThreadLocal中取用户信息
+获取指定键的所有值
 
-移除用户是为了防止内存泄露
+```bash
+hvals key
+127.0.0.1:6379> hvals user:3	# 获取指定键的所有域值对
+1) "xiaohong"
+2) "17"
+3) "1"
+```
 
+### （3）获取hash的所有域值对
 
-public class LoginInterceptor implements HandlerInterceptor {
+```bash
+127.0.0.1:6379> hset user:1 name xiaoming age 16 sex 1
+(integer) 3
+127.0.0.1:6379> hgetall user:1
+1) "name"
+2) "xiaoming"
+3) "age"
+4) "16"
+5) "sex"
+6) "1"
+```
 
-    @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        // 1.获取session
-        HttpSession session = request.getSession();
-        // 2.获取session中的用户
-        Object user = session.getAttribute("user");
-        // 3.判断用户是否存在
-        if (user == null) {
-            // 4.不存在则拦截
-            response.setStatus(401);
-            return false;
-        }
-        // 5.存在则保存用户信息到ThreadLocal
-        UserHolder.saveUser((User) user);
-        // 6.放行
-        return true;
-    }
-    
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        // 移除用户
-        UserHolder.removeUser();
-    }
-}
-在config下创建MVCConfig类，将拦截器进行配置，对于一些不必要拦截的路径进行排除
+### （4）删除指定键的域/属性
 
+```bash
+hdel key field1 field2 ...
+```
 
-@Configuration
-public class MVCConfig implements WebMvcConfigurer {
+删除键`user:3`的属性`sex/age/name`，当键中的hash数据没有任何属性，则当前键会被redis删除
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new LoginInterceptor())
-                .excludePathPatterns("/user/code", "/user/login", "/blog/hot",
-                        "/shop/**", "/shop-type/**", "/voucher/**", "/upload/**");
-    }
-}
-更改UserController中的me方法
+```bash
+hdel user:3 sex age name
+```
 
+### （5）判断指定属性/域是否存在于当前键对应的hash中
 
-@GetMapping("/me")
-public Result me(){
-    User user = UserHolder.getUser();
-    return Result.ok(user);
-}
-需要注意的是：UserHolder中将UserDTO改为User（老师视频中的代码与提供的代码有些出入）
+```bash
+hexists   key  field
+```
 
-隐藏敏感信息
-为了隐藏用户敏感信息，将用户信息存入Session时，需要将User转为UserDTO对象。修改流程如下：
+判断user:2中是否存在age属性
 
-将UserServiceImpl中的login方法存入Session的代码更改为：
+```bash
+127.0.0.1:6379> hexists user:3 age
+(integer) 0
+127.0.0.1:6379> hexists user:2 age
+(integer) 1
+127.0.0.1:6379> 
+```
 
-// 7.保存用户信息到Session
-session.setAttribute("user", BeanUtil.copyProperties(user, UserDTO.class));
-更改LoginInterceptor中保存用户信息到ThreadLocal的代码：
+### （6）属性值自增自减
 
+```bash
+hincrby key field number
+```
 
-// 5.存在则保存用户信息到ThreadLocal
-UserHolder.saveUser((UserDTO) user);
-最后将UserHolder工具类中的User全部更改为UserDTO
+给user:2的age属性在原值基础上+/-10，然后在age现有值的基础上-2
 
-更改之后重启SpringBoot，进行登录测试，此时对应的me请求返回结果就没有敏感信息了
+```bash
+# 按指定数值自增
+127.0.0.1:6379> hincrby user:2 age 10
+(integer) 77
+127.0.0.1:6379> hincrby user:2 age 10
+(integer) 87
 
-image-20221025210030885
-1.2.3 集群Session共享问题
-session共享问题：多台Tomcat并不共享session存储空间，当请求切换到不同tomcat服务时导致数据丢失的问题。
+# 按指定数值自减
+127.0.0.1:6379> hincrby user:2 age -10
+(integer) 77
+127.0.0.1:6379> hincrby user:2 age -10
+```
 
-即使采用Tomcat之间拷贝Session机制，也存在拷贝时间的延迟以及内存占用问题
+## 4.5. set（集合）
 
-Session的替代方案必须满足：数据共享、内存存储、key-value结构
+无序集合，重点就是去重和无序。
 
-1.3 基于Redis的短信登录
-1.3.1 流程分析
-服务端发送短信验证码流程
-与Session的流程基本一致
+> sadd key member [member ...]    # 向集合添加一个或多个成员
+>
+> smembers key    # 返回集合中的所有成员
+>
+> scard key    # 返回集合中成员的数量
+>
+> sismember key member    # 判断指定成员是否是集合的成员
+>
+> srem key member [member ...]    # 移除集合中的一个或多个成员
+>
+> sdiff key [key ...]    # 返回两个集合的差集
+>
+> sinter key [key ...]    # 返回两个或多个集合的交集
+>
+> sunion key [key ...]    # 返回两个或多个集合的并集
+>
+> smove source destination member    # 将指定成员从一个集合移动到另一个集合
+>
+> srandmember key [count]    # 随机返回集合中的一个或多个元素
+>
+> spop key [count]    # 移除并返回集合中的一个或多个随机元素
+>
+> srandmember key [count]    # 移除并返回集合中的一个或多个随机元素，不会删除元素
 
-服务端接收到手机号，校验手机号是否符合规则，符合则进入下一步
-生成验证码，并将验证码保存到Redis中
-采用手机号作为key：phone:xxxxx，验证码作为value，值类型为string
-设置一定时间的有效期
-发送验证码
-短信验证码登录与注册流程
-用户提交手机号与验证码，服务端校验验证码，若正确，则进入下一步
-根据手机号查询信息
-若用户存在，登陆成功，保存用户到Redis
-若用户不存在，用户为新用户，则将其保存到数据库中，保存用户到Redis
-Redis中的用户信息：采用Token作为key，用户信息作为value，采用Hash结构存储
-Token是放于请求头中的，为了确保用户隐私与值唯一性，该Token值需要以一定规则生成
-设置一定时间的有效期
-将Token返回给前端
-校验登录状态
-用户访问网站，发起请求中携带着Token，通过Token从Redis中获取用户信息，判断信息是否有效
-若信息有效，用户存在，则将信息保存到ThreadLocal中，便于后续使用，并更新Token的有效期
-若信息无效，用户不存在
-1.3.2 功能实现
-发送短信验证码
+### （1）添加元素
 
-@Override
-public Result sendCode(String phone, HttpSession session) {
-    // 1.校验手机号
-    if (RegexUtils.isPhoneInvalid(phone)) {
-        // 2.如果不符合，返回错误信息
-        return Result.fail("手机号格式错误！");
-    }
-    // 3.符合，生成验证码
-    String code = RandomUtil.randomNumbers(6);
-    // 4.保存验证码到Redis
-    template.opsForValue().set(LOGIN_CODE_KEY + phone, code, LOGIN_CODE_TTL, TimeUnit.MINUTES);
-    // 5.发送验证码
-    log.debug("发送短信验证码成功，验证码：{}", code);
-    return Result.ok();
-}
-登录与注册
+```bash
+sadd key member1 member2 ...
 
-@Override
-    public Result login(LoginFormDTO loginForm, HttpSession session) {
-        // 1.校验手机号
-        String phone = loginForm.getPhone();
-        if (RegexUtils.isPhoneInvalid(phone)) {
-            return Result.fail("手机号格式错误！");
-        }
-        // 2.校验验证码
-        String cacheCode = template.opsForValue().get(LOGIN_CODE_KEY + phone);
-        String code = loginForm.getCode();
-        if (cacheCode == null || !cacheCode.equals(code)) {
-            // 3.不一致报错
-            return Result.fail("验证码错误");
-        }
-        // 4.一致，根据手机号查询用户
-        User user = query().eq("phone", phone).one();
-        // 5.判断用户是否存在
-        if (user == null) {
-            // 6.不存在，创建用户并保存
-            user = createUserWithPhone(phone);
-        }
-        // 7.保存用户信息到Redis
-        // 7.1.生成Token
-        String token = UUID.randomUUID().toString();
-        // 7.2.将User转为Hash存储
-        UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
-        Map<String, Object> userMap = BeanUtil.beanToMap(userDTO, new HashMap<>(),
-                CopyOptions.create().setIgnoreNullValue(true).setFieldValueEditor((name, value) -> value.toString()));
-        // 7.3.存储
-        template.opsForHash().putAll(LOGIN_USER_KEY + token, userMap);
-        // 7.4.设置有效期
-        template.expire(LOGIN_USER_KEY + token, LOGIN_USER_TTL, TimeUnit.MINUTES);
-        // 8.返回Token
-        return Result.ok(token);
-    }
+# 向键`authors`的集合中添加元素`zhangsan`、`lisi`、`wangwu`
+sadd authors zhangsan lisi wangwu
+```
+
+### （2）获取集合的所有的成员
+
+```bash
+smembers key
+smembers authors	# 获取键`authors`的集合中所有元素
+```
+
+### （3）获取集合的长度
+
+```bash
+scard keys
+
+sadd s2 a b c d e
+127.0.0.1:6379> scard s2	# 获取s2集合的长度
+(integer) 5
+```
+
+### （4）随机抽取一个或多个元素
+
+抽取出来的成员被删除掉 
+
+```bash
+spop key [count=1]
+# 注意：
+# count为可选参数，不填则默认一个。被提取成员会从集合中被删除掉
+```
+
+随机获取s2集合的成员
+
+```bash
+sadd s2 a c d e
+
+127.0.0.1:6379> spop s2 
+"d"
+127.0.0.1:6379> spop s2 
+"c"
+```
+
+### （5）删除指定元素
+
+```bash
+srem key value
+```
+
+删除键`authors`的集合中元素`wangwu`
+
+```bash
+srem authors wangwu
+```
+
+### （6）交集、差集和并集
+
+推荐、（协同过滤，基于用户、基于物品）
+
+```bash
+sinter  key1 key2 key3 ....    # 交集、比较多个集合中共同存在的成员
+sdiff   key1 key2 key3 ....    # 差集、比较多个集合中不同的成员
+sunion  key1 key2 key3 ....    # 并集、合并所有集合的成员，并去重
+```
+
+```bash
+del user:1 user:2 user:3 user:4
+sadd user:1 1 2 3 4     # user:1 = {1,2,3,4}
+sadd user:2 1 3 4 5     # user:2 = {1,3,4,5}
+sadd user:3 1 3 5 6     # user:3 = {1,3,5,6}
+sadd user:4 2 3 4       # user:4 = {2,3,4}
+
+# 交集
+127.0.0.1:6379> sinter user:1 user:2
+1) "1"
+2) "3"
+3) "4"
+127.0.0.1:6379> sinter user:1 user:3
+1) "1"
+2) "3"
+127.0.0.1:6379> sinter user:1 user:4
+1) "2"
+2) "3"
+3) "4"
+
+127.0.0.1:6379> sinter user:2 user:4
+1) "3"
+2) "4"
+
+# 并集
+127.0.0.1:6379> sunion user:1 user:2 user:4
+1) "1"
+2) "2"
+3) "3"
+4) "4"
+5) "5"
+
+# 差集
+127.0.0.1:6379> sdiff user:2 user:3
+1) "4"  # 此时可以给user:3推荐4
+
+127.0.0.1:6379> sdiff user:3 user:2
+1) "6"  # 此时可以给user:2推荐6
+
+127.0.0.1:6379> sdiff user:1 user:3
+1) "2"
+2) "4"
+```
+
+## 4.6. zset（有序集合）
+
+有序集合（score/value），去重并且根据score权重值来进行排序的。score从小到大排列。
+
+> zadd key [NX|XX] [CH] [INCR] score member [score member ...]    # 添加一个或多个成员到有序集合，可以指定选项如：NX（仅在成员不存在时添加）、XX（仅在成员存在时添加）、CH（修改成员的分数时，同时返回修改的成员数量）、INCR（增加成员的分数时，以增量形式返回成员的分数）
+>
+> zrange key start stop [WITHSCORES]    # 返回有序集合中指定索引范围内的成员，默认按成员分数从低到高排序，可选返回成员的分数
+>
+> zrevrange key start stop [WITHSCORES]    # 返回有序集合中指定索引范围内的成员（逆序），默认按成员分数从高到低排序，可选返回成员的分数
+>
+> zrangebyscore key min max [WITHSCORES] [LIMIT offset count]    # 返回有序集合中指定分数范围内的成员，默认按成员分数从低到高排序，可选返回成员的分数，并可指定返回数量范围
+>
+> zrevrangebyscore key max min [WITHSCORES] [LIMIT offset count]    # 返回有序集合中指定分数范围内的成员（逆序），默认按成员分数从高到低排序，可选返回成员的分数，并可指定返回数量范围
+>
+> zrem key member [member ...]    # 从有序集合中移除一个或多个成员
+>
+> zcard key    # 返回有序集合的成员数量
+>
+> zscore key member    # 返回有序集合中指定成员的分数
+>
+> zrank key member    # 返回有序集合中指定成员的排名（从低到高）
+>
+> zrevrank key member    # 返回有序集合中指定成员的排名（从高到低）
+>
+> zcount key min max    # 返回有序集合中指定分数范围内的成员数量
+>
+> zincrby key increment member    # 增加有序集合中指定成员的分数值
+>
+> zremrangebyrank key start stop    # 移除有序集合中指定排名范围内的所有成员
+>
+> zremrangebyscore key min max    # 移除有序集合中指定分数范围内的所有成员
+
+### （1）添加成员
+
+```bash
+zadd key score1 member1 score2 member2 score3 member3 ....
+```
+
+设置榜单achievements，设置成绩和用户名作为achievements的成员
+
+```bash
+127.0.0.1:6379> zadd achievements 61 xiaoming 62 xiaohong 83 xiaobai  78 xiaohei 87 xiaohui 99 xiaolan
+(integer) 6
+127.0.0.1:6379> zadd achievements 85 xiaohuang 
+(integer) 1
+127.0.0.1:6379> zadd achievements 54 xiaoqing
+```
+
+### （2）获取score在指定区间的所有成员
+
+```python
+zrangebyscore key min max     # 按score进行从低往高排序获取指定score区间
+zrevrangebyscore key min max  # 按score进行从高往低排序获取指定score区间
+zrange key start stop         # 按scoer进行从低往高排序获取指定索引区间
+zrevrange key start stop      # 按scoer进行从高往低排序获取指定索引区间
+```
+
+```python
+zrange achievements 0 -1  # 从低到高全部成员
+```
+
+### （3）获取集合长度
+
+```bash
+zcard key
+zcard achievements		# 获取users的长度
+```
+
+### （4）获取指定成员的权重值
+
+```bash
+zscore key member
+```
+
+获取users中xiaoming的成绩
+
+```bash
+127.0.0.1:6379> zscore achievements xiaobai
+"93"
+127.0.0.1:6379> zscore achievements xiaohong
+"62"
+127.0.0.1:6379> zscore achievements xiaoming
+"61"
+```
+
+### （5）获取指定成员在集合中的排名
+
+排名从0开始计算
+
+```bash
+zrank key member      # score从小到大的排名
+zrevrank key member   # score从大到小的排名
+```
+
+获取achievements中xiaohei的分数排名，从大到小
+
+```bash
+127.0.0.1:6379> zrevrank achievements xiaohei
+(integer) 4
+```
+
+### （6）获取score在指定区间的所有成员数量
+
+```bash
+zcount key min max
+```
+
+获取achievements从0~60分之间的人数[闭区间]
+
+```bash
+127.0.0.1:6379> zcount achievements 0 60
+(integer) 2
+127.0.0.1:6379> zcount achievements 54 60
+(integer) 2
+```
+
+### （7）给指定成员增加增加权重值
+
+```bash
+zincrby key score member
+127.0.0.1:6379> ZINCRBY achievements 10 xiaobai		# 给achievements中xiaobai增加10分
+"93
+```
+
+### （8）删除成员
+
+```bash
+zrem key member1 member2 member3 ....
+zrem achievements xiaoming					# 从achievements中删除xiaoming的数据
+```
+
+### （9）删除指定数量的成员
+
+```bash
+zpopmin key [count]			# 删除指定数量的成员，从最低score开始删除
+zpopmax key [count]			# 删除指定数量的成员，从最高score开始删除
+```
+
+例子：
+
+```bash
+# 从achievements中提取并删除成绩最低的2个数据
+127.0.0.1:6379> zpopmin achievements 2
+1) "xiaoqing"
+2) "54"
+3) "xiaolv"
+4) "60"
+
+# 从achievements中提取并删除成绩最高的2个数据
+127.0.0.1:6379> zpopmax achievements 2
+1) "xiaolan"
+2) "99"
+3) "xiaobai"
+4) "93"
+```
