@@ -1,0 +1,100 @@
+{
+  "main": {
+    "id": "e4e8741de76a380b",
+    "type": "split",
+    "children": [
+      {
+        "id": "e2004249f085b725",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7e4a9cf712409aa0",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "K8S/K8s教程.md",
+                "mode": "source",
+                "backlinks": false,
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "4a9293e030e17768",
+    "type": "split",
+    "children": [
+      {
+        "id": "d02042154d5e2931",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "73d4378595fd7f9f",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 203.5
+  },
+  "right": {
+    "id": "6fee827e0df31b33",
+    "type": "split",
+    "children": [
+      {
+        "id": "3b575660d590e01f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5f2d356b1264ea82",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "K8S/K8s教程.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 299.5
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "canvas:新建白板": false,
+      "command-palette:打开命令面板": false,
+      "markdown-importer:打开 Markdown 格式转换器": false
+    }
+  },
+  "active": "7e4a9cf712409aa0",
+  "lastOpenFiles": [
+    "assets/未命名.canvas",
+    "K8S/K8s教程.md",
+    "K8S/k8s集群搭建.md",
+    "K8S/k8s概念.md",
+    "K8S/k8s常见命令使用.md",
+    "K8S/assets/Pasted image 20240511234623.png",
+    "2024-05-11.md",
+    "未命名.canvas",
+    "未命名 1.canvas",
+    "K8S/assets/image-20221227143250604.png",
+    "K8S/搭建NFS服务.md",
+    "Go进阶/2、基础.md",
+    "Go进阶/Go标准库/ini包-配置读取.md",
+    "K8S/containerd使用.md"
+  ]
+}

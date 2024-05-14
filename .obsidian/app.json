@@ -1,0 +1,16 @@
+{
+  "showLineNumber": false,
+  "spellcheck": false,
+  "vimMode": false,
+  "promptDelete": false,
+  "readableLineLength": false,
+  "showIndentGuide": true,
+  "livePreview": true,
+  "defaultViewMode": "source",
+  "newFileLocation": "current",
+  "useMarkdownLinks": false,
+  "attachmentFolderPath": "./assets",
+  "foldIndent": true,
+  "foldHeading": true,
+  "showInlineTitle": true
+}
