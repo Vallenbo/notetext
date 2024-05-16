@@ -78,7 +78,7 @@ Operator更倾向于管理复杂的有状态服务，比如MySQL集群、Redis�
 
 无论是选择Helm还是Operator来管理中间件，都是非常简单的。Helm和Operator管理中间件的流程如图
 
-![img](https://hujianli94.github.io/assets/static/kubernetes/5/k8s-managezhongjj.png)
+![img](./assets/k8s-managezhongjj.png)
 
 比如使用Helm管理中间件集群的流程如下：
 
@@ -381,7 +381,9 @@ $ kubectl delete -f deploy/crds/redis.kun_redisclusterbackups_crd.yaml
 > [Helm下载地址](https://github.com/helm/helm/releases)： 每个Helm [版本](https://github.com/helm/helm/releases)都提供了各种操作系统的二进制版本，这些版本可以手动下载和安装。
 
 1. 解压(`tar -zxvf helm-v3.0.0-linux-amd64.tar.gz`)
+
 2. 在解压目录中找到`helm`程序，移动到需要的目录中(`mv linux-amd64/helm /usr/local/bin/helm`)
+
 3. 添加仓库: 
 
    ```sh
@@ -775,7 +777,9 @@ zookeeper-2                               1/1     Running   0          84s
 cd /bsm/zookeeper-kafka/kafka
 vim values.yaml
 ```
+
 修改一：
+
 ```
 persistence:
   ## @param persistence.enabled Enable Kafka data persistence using PVC, note that ZooKeeper persistence is unaffected
@@ -797,6 +801,7 @@ persistence:
 ```
 
 修改二：
+
 ```
   kraft:
   ## @param kraft.enabled Switch to enable or disable the Kraft mode for Kafka
@@ -820,6 +825,7 @@ helm install kafka --set zookeeper.enabled=false --set replicaCount=3 --set exte
 
 ![b9aff4d14583411e9113fb5798dd542f.png](./assets/y5vhhetuhmhsc_e3e139e74ba04074a37e0ec7819837cf.png)
 查看：
+
 ```sh
 [root@k8s-master1 kafka]# kubectl get pods 
 NAME                                      READY   STATUS    RESTARTS   AGE
@@ -856,12 +862,15 @@ kubectl logs -f kafka-0  | grep socket
 
 
 进入kafka的pod创建一个topic
+
 ```sh
 [root@k8s-master1 kafka]# kubectl exec -it kafka-0 bash
 I have no name!@kafka-0:/$ kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic testtopic
 heCreated topic testtopic.
 ```
+
 启动一个消费者
+
 ```sh
 [root@k8s-master1 ~]# kubectl exec -it kafka-0 bash
 I have no name!@kafka-0:/$ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic testtopic

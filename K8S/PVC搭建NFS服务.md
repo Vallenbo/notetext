@@ -18,6 +18,8 @@ exportfs -r		# 重新挂载 使 /etc/exports生效
 exportfs		# 查看共享情况
 ```
 
+
+
 #### 2 客户端测试
 
 ```shell

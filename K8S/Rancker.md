@@ -9,3 +9,4 @@ Rancher 基于 Kubernetes 添加了新的功能，包括统一所有集群的身
 此外，Rancher 可以为集群和资源提供更精细的监控和告警，将日志发送到外部提供商，并通过应用商店（Application Catalog）直接集成 Helm。如果你拥有外部 CI/CD 系统，你可以将其与 Rancher 对接。没有的话，你也可以使用 Rancher 提供的 Fleet 自动部署和升级工作负载。
 
 Rancher 是一个 *全栈式* 的 Kubernetes 容器管理平台，为你提供在任何地方都能成功运行 Kubernetes 的工具。
+
