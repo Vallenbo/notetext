@@ -1,3 +1,7 @@
+# [Istio / 文档](https://istio.io/latest/zh/docs/)
+
+
+
 # [Ingress](https://kubernetes.io/zh-cn/docs/concepts/services-networking/ingress/)
 
 Ingress 是对集群中服务的**外部访问进行管理的 API 对象**，提供从集群外部到集群内 服务 的 HTTP 和 HTTPS 路由。 流量路由由 Ingress 资源所定义的规则来控制。

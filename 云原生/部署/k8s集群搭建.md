@@ -1,10 +1,9 @@
 - **minikube**
   只是一个 K8S 集群模拟器，只有一个节点的集群，只为测试用，master 和 worker 都在一起。
 
-- **裸机安装**
-  至少需要两台机器（主节点、工作节点个一台），需要自己安装 Kubernetes 组件，配置会稍微麻烦点。
-  缺点：配置麻烦，缺少生态支持，例如负载均衡器、云存储。
-
+- **[KubeKey](https://github.com/kubesphere/kubekey)**
+  一款用于部署 Kubernetes 集群的开源轻量级工具。它提供了一种灵活、快速和方便的方式来安装 Kubernetes/K3s，包括 Kubernetes/K3s 和 KubeSphere，以及相关的云原生插件。它也是扩展和升级集群的有效工具。
+  
 - **直接用云平台 Kubernetes**
   可视化搭建，只需简单几步就可以创建好一个集群。
   优点：安装简单，生态齐全，负载均衡器、存储等都给你配套好，简单操作就搞定
@@ -259,22 +258,6 @@ source <(kubectl completion bash)
 echo "source <(kubectl completion bash)" >> ~/.bashrc
 ```
 
-# 测试集群
-
-```sh
-[root@master1 ~]# kubectl create deploy nginx --image=nginx
-deployment.apps/nginx created
-[root@master1 ~]# kubectl expose deploy nginx --port=80 --type=NodePort
-service/nginx exposed
-[root@master1 ~]# kubectl get svc
-NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
-kubernetes   ClusterIP   10.96.0.1      <none>        443/TCP        4d17h
-nginx        NodePort    10.102.88.67   <none>        80:31524/TCP   5s
-[root@master1 ~]# curl localhost:31524
-```
-
-
-
 # 查看集群状态
 
 ```sh
@@ -295,9 +278,9 @@ kubectl get pods -A -o wide
 kubectl get apiservices
 ```
 
-- 如果资源指标 API 可用，则会输出将包含一个对 `metrics.k8s.io` 的引用。
+- 如果资源指标 API 可用，则会输出将包含一个对 `metrics.k8s.io` 的引用
 
-```
+```sh
 NAME
 v1beta1.metrics.k8s.io
 ```
@@ -512,10 +495,6 @@ $ kubectl appply -f components.yaml
 
 
 
-
-
-
-
 # 快速切换k8s的context和namespace
 
 ```sh
@@ -529,7 +508,44 @@ kubectl krew install ns
 
 在 Kubernetes 集群中部署 Registry Proxy，自动帮助您使用镜像代理服务拉取新创建的 Pod 中的外网容器镜像（仅限公有镜像）。
 
-[这个镜像代理服务，帮您在 K8S 中愉快地拉取国外镜像 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/663392492)
+## 快速安装
+
+执行以下命令安装 registry-proxy（v1.1.0+ 版本）：
+
+```sh
+yum install epel-release -y
+yum install jq -y
+
+export VERSION=$(curl -s https://api.github.com/repos/ketches/registry-proxy/releases/latest | jq -r .tag_name)
+# 代理地址
+kubectl apply -f https://ghproxy.ketches.cn/https://raw.githubusercontent.com/ketches/registry-proxy/$VERSION/deploy/manifests.yaml
+
+kubectl apply -f https://raw.githubusercontent.com/ketches/registry-proxy/$VERSION/deploy/manifests.yaml
+```
+
+## 卸载&清理
+
+**卸载 registry-proxy**：
+
+```sh
+# uninstall v1.0.0 version for example
+export VERSION=v1.0.0
+kubectl delete -f https://raw.githubusercontent.com/ketches/registry-proxy/$VERSION/deploy/manifests.yaml
+
+# 代理地址
+kubectl delete -f https://ghproxy.ketches.cn/https://raw.githubusercontent.com/ketches/registry-proxy/$VERSION/deploy/manifests.yaml
+```
+
+**清理示例**：
+
+```sh
+kubectl delete -f https://raw.githubusercontent.com/ketches/registry-proxy/$VERSION/examples/dockerhub-nginx.yaml
+
+# 代理地址
+kubectl delete -f https://ghproxy.ketches.cn/https://raw.githubusercontent.com/ketches/registry-proxy/$VERSION/examples/dockerhub-nginx.yaml
+```
+
+
 
 
 

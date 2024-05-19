@@ -1,5 +1,15 @@
 # Kubernetes日志收集
 
+[prometheus-operator/kube-prometheus：使用 Prometheus 监控 Kubernetes 和运行在 Kubernetes 上的应用程序 (github.com)](https://github.com/prometheus-operator/kube-prometheus)
+
+> [Prometheus-operator](https://github.com/coreos/prometheus-operator)
+
+下载安装文件：
+
+```yaml
+git clone https://github.com/prometheus-operator/kube-prometheus.git
+```
+
 ## 1. 日志收集架构
 
 前面我们学习了 Kubernetes 集群中监控系统的搭建，除了对集群的监控报警之外，还有一项运维工作是非常重要的，那就是日志的收集。
