@@ -2310,8 +2310,7 @@ dtm运行后，会监听两个端口
 ## dtm示例
 
 ```go
-// 事务参与者的服务地址
-const qsBusiAPI = "/api/busi_start"
+const qsBusiAPI = "/api/busi_start"		// 事务参与者的服务地址
 const qsBusiPort = 8082
 
 var qsBusi = fmt.Sprintf("http://localhost:%d%s", qsBusiPort, qsBusiAPI)

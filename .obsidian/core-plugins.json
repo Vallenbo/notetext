@@ -1,9 +1,7 @@
 [
   "file-explorer",
   "canvas",
-  "page-preview",
   "command-palette",
-  "markdown-importer",
   "outline",
   "word-count"
 ]

@@ -1787,7 +1787,7 @@ service yum-updatesd stop	#停止yum自动更新服务		chkconfig yum-updatesd o
 
 
 
-## ubuntu使用阿里云源
+## ubuntu使用清华源
 
 **切换路径** && **备份源文件** && **新建源文件**
 
@@ -1797,35 +1797,19 @@ mv /etc/apt/sources.list /etc/apt/sources.list.bak && vi /etc/apt/sources.list
 
 ubuntu 22.04(bionic) 配置如下
 ```bash
-deb http://mirrors.aliyun.com/ubuntu/ jammy main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ jammy main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ jammy-security main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ jammy-security main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ jammy-updates main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ jammy-updates main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ jammy-proposed main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ jammy-proposed main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse
-```
+# 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-security main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-security main restricted universe multiverse
 
-ubuntu 20.04(focal) 配置如下
-
-```sh
-deb https://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
-deb-src https://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
-
-deb https://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse
-deb-src https://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse
-
-deb https://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
-deb-src https://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
-
-# deb https://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse
-# deb-src https://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse
-
-deb https://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse
-deb-src https://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse
+# 预发布软件源，不建议启用
+# deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-proposed main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-proposed main restricted universe multiverse
 ```
 
 

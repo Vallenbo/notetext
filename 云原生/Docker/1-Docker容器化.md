@@ -73,7 +73,7 @@ yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-co
 
 ```sh
 {
-"registry-mirrors": ["https://registry.docker-cn.com","https://docker.mirrors.ustc.edu.cn"]
+"registry-mirrors": ["https://registry.docker-cn.com"，"https://docker.mirrors.ustc.edu.cn"]
 }
 ```
 
@@ -83,8 +83,8 @@ yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-co
 
 ```sh
 curl -O https://download.docker.com/linux/static/stable/x86_64/docker-20.10.8.tgz 
-cp docker/* /usr/bin/ #复制到可执行目录
-dockerd &  #启动Docker守护程序
+cp docker/* /usr/bin/   # 复制到可执行目录
+dockerd &  				# 启动Docker守护程序
 docker-api操作，/etc/sysconfig/docker
 
 [root@localhost ~]# systemctl enable docker	#添加/var/run/docker.sock文件
@@ -112,7 +112,7 @@ $ sudo sh get-docker.sh
 
 
 
-# ubuntu安装docker
+# [在 Ubuntu 上安装 Docker 引擎 |Docker 文档](https://docs.docker.com/engine/install/ubuntu/#prerequisites)
 
 步骤 1：添加Docker官方的GPG密钥
 
@@ -212,7 +212,7 @@ ll *.tar|awk '{print $NF}'|sed -r 's#(.*)#docker load -i \1#' |bash #批量导�
 
 ## docker image拉取拉取不同架构的镜像
 
-<img src="./assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2JpZWxhaXd1eWFuZzE5OTk=,size_16,color_FFFFFF,t_70.png" alt="在这里插入图片描述" style="zoom: 50%;" />
+![testq](./assets/testq.png)
 
 在docker中运行拉取镜像命令，直接粘贴我们刚复制的pull命令然后输入一个@在粘贴digest的值。代码如下
 
@@ -220,9 +220,7 @@ ll *.tar|awk '{print $NF}'|sed -r 's#(.*)#docker load -i \1#' |bash #批量导�
 docker pull k8smx/kube-controller-manager:v1.20.7@sha256:b7d7a3945c3689bff125769372bd0ac99d4980719a463108038d5d9d7084dcda
 ```
 
-
-
-# Dockerfile创建镜像
+# Dockerfile镜像制作
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps10-1682691150322-332.jpg" alt="img" style="zoom: 67%;" /><img src="E:\Project\Textbook\linux云计算\assets\wps11-1682691150323-333.jpg" alt="img" style="zoom: 67%;" /> 
 
@@ -230,7 +228,7 @@ docker pull k8smx/kube-controller-manager:v1.20.7@sha256:b7d7a3945c3689bff125769
 
 dockerfile书写原则https://www.cnblogs.com/ainimore/p/14409165.html
 
-创建docker-file文件夹进入编写vim dockerfile1（构建ssh镜像文件）
+创建dockerfile文件夹进入编写vim dockerfile1（构建ssh镜像文件）
 
 ```dockerfile
 FROM 192.168.2.5:5000/centos/latest:latest
@@ -246,13 +244,12 @@ EXPOSE 3306
 CMD mysql_safe	#运行命令
 ```
 
-`docker build -t centos:v1 . `			`docker build -f /test/Dockerfile .`
+```sh
+$ docker build -t centos:v1 . 			#构建镜像，-f指定dockerfile文件，-t指定镜像标签
+$ docker build -f /test/Dockerfile .
 
-\#构建镜像，-f指定dockerfile文件，-t指定镜像标签
-
-`docker run -it --name c5 -p 9999:22 centos_sshd:1.0` #映射端口进入
-
-
+$ docker run -it --name c5 -p 9999:22 centos_sshd:1.0 	# 启动镜像
+```
 
 
 ## Docker build
@@ -295,7 +292,7 @@ Error response from daemon: Unknown instruction: RUNCMD
 
 ### OPTIONS说明
 
-- **--tag, -t:** 镜像的名字及标签，通常 name:tag 或者 name 格式；可以在一次构建中为一个镜像设置多个标签。
+- **--tag， -t:** 镜像的名字及标签，通常 name:tag 或者 name 格式；可以在一次构建中为一个镜像设置多个标签。
 - **-f :**指定要使用的Dockerfile路径；
 - **--force-rm :**设置镜像过程中删除中间容器；
 - **--build-arg=[] :**设置镜像创建时的变量；
@@ -311,7 +308,7 @@ Error response from daemon: Unknown instruction: RUNCMD
 - **--memory-swap :**设置Swap的最大值为内存+swap，"-1"表示不限swap；
 - **--no-cache :**创建镜像的过程不使用缓存；
 - **--pull :**尝试去更新镜像的新版本；
-- **--quiet, -q :**安静模式，成功后只输出镜像 ID；
+- **--quiet， -q :**安静模式，成功后只输出镜像 ID；
 - **--rm :**设置镜像成功后删除中间容器；
 - **--shm-size :**设置/dev/shm的大小，默认值是64M；
 - **--ulimit :**Ulimit配置。
@@ -554,7 +551,7 @@ docker网桥是宿主机虚拟出来的，并不是真实存在的网络设备�
 
 ## bridge模式
 
-默认的网络模式。bridge模式下容器没有一个公有ip,只有宿主机可以直接访问,外部主机是不可见的,但容器通过宿主机的NAT规则后可以访问外网。
+默认的网络模式。bridge模式下容器没有一个公有ip，只有宿主机可以直接访问，外部主机是不可见的，但容器通过宿主机的NAT规则后可以访问外网。
 
 ### Bridge桥接模式的实现步骤
 
@@ -586,7 +583,7 @@ host网络模式需要在容器创建时指定–network=host
 
 host模式是bridge桥接模式很好的补充。采用host模式的Docker Container，可以直接使用宿主机的IP地址与外界进行通信，若宿主机的eth0是一个公有IP，那么容器也拥有这个公有IP。同时容器内服务的端口也可以使用宿主机的端口，无需额外进行NAT转换。
 
-host模式可以让容器共享宿主机网络栈,这样的好处是外部主机与容器直接通信,但是容器的网络缺少隔离性。
+host模式可以让容器共享宿主机网络栈，这样的好处是外部主机与容器直接通信，但是容器的网络缺少隔离性。
 
 ### Host模式的缺陷
 
@@ -594,7 +591,7 @@ host模式可以让容器共享宿主机网络栈,这样的好处是外部主机
 
 ## Container网络模式
 
-一种特殊host网络模式， ontainer网络模式是Docker中一种较为特别的网络的模式。在容器创建时使用– network=container:vm1指定。(vm1指定的是运行的容器名)处于这个模式下的 Docker 容器会共享一个网络环境,这样两个容器之间可以使用localhost高效快速通信。
+一种特殊host网络模式， ontainer网络模式是Docker中一种较为特别的网络的模式。在容器创建时使用– network=container:vm1指定。(vm1指定的是运行的容器名)处于这个模式下的 Docker 容器会共享一个网络环境，这样两个容器之间可以使用localhost高效快速通信。
 
 ### Container模式的缺陷
 
@@ -644,7 +641,7 @@ docker network ls [OPTIONS]
 -f --filter filter 过滤条件(如 'driver=bridge’)
 	--format string
 	--no-trunc
--q, --quiet 格式化打印结果 不缩略显示 只显示网络对象的ID
+-q， --quiet 格式化打印结果 不缩略显示 只显示网络对象的ID
 
 基本使用:
 docker network ls --no-trunc
@@ -683,7 +680,7 @@ docker network rm NETWORK [NETWORK...]
 docker network inspect [OPTIONS] NETWORK [NETWORK...]
 docker inspect [OPTIONS] NETWORK [NETWORK...]
 常见参数
-- -f, --format string 根据format输出结果
+- -f， --format string 根据format输出结果
 ```
 
 ### 使用网络（docker run –-network）
@@ -700,7 +697,7 @@ docker run/create --network NETWORK
 docker network connect [OPTIONS] NETWORK CONTAINER 
 docker network disconnect [OPTIONS] NETWORK CONTAINER
 常见参数
-- -f, --force 强制断开连接(用于disconnect)
+- -f， --force 强制断开连接(用于disconnect)
 ```
 
 ### 容器镜像设定固定ip
@@ -790,12 +787,12 @@ docker run -id  --name c1 --mount type=bind，source=/media，target=/sss，read
 [root@izoq008ryseuupz _data]# docker volume inspect centos-volume
 [
     {
-        "CreatedAt": "2020-11-25T17:30:06+08:00",
-        "Driver": "local",
-        "Labels": {},
-        "Mountpoint": "/var/lib/docker/volumes/centos-volume/_data",
-        "Name": "centos-volume",
-        "Options": {},
+        "CreatedAt": "2020-11-25T17:30:06+08:00"，
+        "Driver": "local"，
+        "Labels": {}，
+        "Mountpoint": "/var/lib/docker/volumes/centos-volume/_data"，
+        "Name": "centos-volume"，
+        "Options": {}，
         "Scope": "local"
     }
 ]
@@ -926,9 +923,8 @@ docker pull portainer/portainer
 
 ```shell
 docker run -d -p 9000:9000 --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data --name prtainer-libai portainer/portainer
-```
 
-参数说明：
+# 参数说明：
 -d：容器在后台运行；
 -p 9000:9000 ：宿主机9000端口映射容器中的9000端口（前面的是宿主机端口，后面的是容器端口）；
 –restart 标志会检查容器的退出代码，并据此来决定是否要重启容器，默认不会重启；
@@ -936,6 +932,9 @@ docker run -d -p 9000:9000 --restart=always -v /var/run/docker.sock:/var/run/doc
 -v /var/run/docker.sock:/var/run/docker.sock ：把宿主机的Docker守护进程(Docker daemon)默认监听的Unix域套接字挂载到容器中；
 -v portainer_data:/data ：把宿主机portainer_data数据卷挂载到容器/data目录；
 –name prtainer-test ： 给容器起名为portainer-libai；
+```
+
+
 
 ### 三、汉化安装：
 
@@ -1167,7 +1166,7 @@ docker container ls
 
 ### 数据库负载均衡
 
-虽然搭建了集群,但是不使用数据库负载均衡,单节点处理所有请求，负载高，性能差
+虽然搭建了集群，但是不使用数据库负载均衡，单节点处理所有请求，负载高，性能差
 
  <img src="https://img2020.cnblogs.com/blog/1256425/202011/1256425-20201117220725462-1224282658.png" alt="img" style="zoom:33%;" />
 
@@ -1316,7 +1315,7 @@ Haproxy不存储数据，只转发数据。可以在数据库中建立Haproxy的
 
 ### 为什么要采用双机热备
 
-单节点Haproxy不具备高可用,必须要有冗余设计
+单节点Haproxy不具备高可用，必须要有冗余设计
 
 双机就是两个请求处理程序，比如两个haproxy，当一个挂掉的时候，另外 一个可以顶上。热备我理解就是keepalive。在haproxy 容器中安装keepalive
 
@@ -1530,7 +1529,7 @@ systemctl restart network
 
 - 冷备份是关闭数据库时候的备份方式，通常做法是拷贝数据文件
 - 是简单安全的一种备份方式，不能在数据库运行时备份。
-- 大型网站无法做到关闭业务备份数据,所以冷备份不是最佳选择
+- 大型网站无法做到关闭业务备份数据，所以冷备份不是最佳选择
 
 热备份
 
@@ -1543,7 +1542,7 @@ MySQL常见的热备份有LVM和XtraBackup两种方案
 
 XtraBackup
 
-XtraBackup是一款基于InnoDB的在线热备工具,具有开源免费,支持在线热备,占用磁盘空间小,能够非常快速地备份与恢复mysql数据库
+XtraBackup是一款基于InnoDB的在线热备工具，具有开源免费，支持在线热备，占用磁盘空间小，能够非常快速地备份与恢复mysql数据库
 
 - 备份过程中不锁表，快速可靠
 - 备份过程中不会打断正在执行地事务
@@ -1664,23 +1663,25 @@ registries: master.example.com:5000 (insecure)，docker.io (secure)
 
 # docker-compose服务编排
 
-微服务架构的应用系统中-般包含若干个微服务,每个微服务一般都会部署多个实例，如果每个微服务都要手动启停，维护的工作量会很大。
+微服务架构的应用系统中一般包含若干个微服务，每个微服务一般都会部署多个实例，如果每个微服务都要手动启停，维护的工作量会很大。
 
 - 要从Dockerfile build image或者去dockerhub拉取image
 - 要创建多个container
 - 要管理这些container (启动停止删除)
 
 **服务编排**：按照一定的业务规则批量管理容器
-Docker Compose是一个编排多容器分布式部署的工具，提供命令集管理容器化应用的完整开发周期,包括服务构建,启动和停止。使用步骤:
+Docker Compose是一个编排多容器分布式部署的工具，提供命令集管理容器化应用的完整开发周期，包括服务构建，启动和停止。
+
+使用步骤:
 	1.利用Dockerfile定义运行环境镜像
-	2.使用docker- compose.yml定义组成应用的各服务
+	2.使用docker-compose.yml定义组成应用的各服务
 	3.运行docker-compose up启动应用
 
 <img src="E:\Project\Textbook\linux云计算\assets\wps33-1682691150324-355.jpg" alt="img" style="zoom: 33%;" /> 
 
 ## Docker-compose安装使用
 
-**一、安装Docker Compose	【需要梯子】**
+**一、安装Docker Compose【需要梯子】**
 
 \# Compose目前已经完全支持Linux、Mac OS和Windows，在我们安装Compose之前，需要先安装Docker。下面我 们以编译好的二进制包方式安装在Linux系统中。 
 
@@ -1695,17 +1696,13 @@ $ curl -SL https://github.com/docker/compose/releases/download/v2.20.3/docker-co
 $ chmod +x docker-compose
 $ docker compose version
 $ Docker Compose version v2.20.3
+$ chmod +x /usr/local/bin/docker-compose 
+$ docker-compose -version
+
+$ rm /usr/local/bin/docker-compose	# 卸载Docker Compose
 ```
 
-\# 设置文件可执行权限 	chmod +x /usr/local/bin/docker-compose
-
-\# 查看版本信息 		docker-compose -version
-
- **二、卸载Docker Compose**
-
-\# 二进制包方式安装的，删除二进制文件即可	rm /usr/local/bin/docker-compose
-
-**三、 使用docker compose编排nginx+springboot项目**
+**二、 使用docker compose编排nginx+springboot项目**
 
 1. 创建docker-compose目录
 
@@ -1745,19 +1742,18 @@ docker-compose来管理harbor。注意必须切换到docker-compose.yml同级目
 子命令：
 
 ```sh
-stop/start/restart/up #docker-compose 停止/启动/重启/构建、启动容器
-ps：列出所有运行容器 #docker-compose ps
-logs：查看服务日志输出	#docker-compose logs
-port：打印绑定的公共端口，下面命令可以输出 eureka 服务 8761 端口所绑定的公共端口
-docker-compose port eureka 8761
-build：构建或者重新构建服务 #docker-compose build
-start：启动指定服务已存在的容器 #docker-compose start eureka
-stop：停止已运行的服务的容器 #docker-compose stop eureka
-rm：删除指定服务的容器 #docker-compose rm eureka
-kill：通过发送 SIGKILL 信号来停止指定服务的容器 #docker-compose kill eureka
-pull：下载服务镜像
-scale：设置指定服务运气容器的个数，以 service=num 形式指定docker-compose scale user=3 movie=3
-run：在一个服务上执行一个命令docker-compose run web bash
+$ docker-compose stop/start/restart/up # 停止/启动/重启/构建、启动容器
+$ docker-compose ps						# 列出所有运行容器 
+$ docker-compose logs					# 查看服务日志输出	
+$ docker-compose port eureka 8761	# 打印绑定的公共端口，下面命令可以输出 eureka 服务 8761 端口所绑定的公共端口
+$ docker-compose build				# 构建或者重新构建服务 
+$ docker-compose start eureka		# 启动指定服务已存在的容器 
+$ docker-compose stop eureka		# 停止已运行的服务的容器
+$ docker-compose rm eureka			# 删除指定服务的容器 
+$ docker-compose kill eureka		# 通过发送 SIGKILL 信号来停止指定服务的容器
+$ docker-compose pull				# 下载服务镜像
+$ docker-compose scale	# 设置指定服务运行容器的个数，以 service=num 形式指定docker-compose scale user=3 movie=3
+$ docker-compose run	# 在一个服务上执行一个命令	docker-compose run web bash
 ```
 
 选项
@@ -1782,74 +1778,75 @@ run：在一个服务上执行一个命令docker-compose run web bash
 ## yaml文件关键字：
 
 ```sh
-version  指定 compose 文件的版本 //最新版本，也是推荐使用版本
-services 定义所有的 service 信息
-image   指定为镜像名称或镜像 ID(如果镜像在本地不存在，Compose 将会尝试拉取这个镜像)
-pid    跟主机系统共享进程命名空间。容器和宿主机系统之间可以通过进程 ID 来相互访问和操作
-ports   暴露端口信息
-command  覆盖容器启动后默认执行的命令：command: bundle exec thin -p 3000
-build：  #指定 Dockerfile 所在文件夹的路径
- context: ./dir #路径
- dockerfile: Dockerfile-alternate #指定编排文件
+version  # 指定 compose 文件的版本 //最新版本，也是推荐使用版本
+services # 定义所有的 service 信息
+image    # 指定为镜像名称或镜像 ID(如果镜像在本地不存在，Compose 将会尝试拉取这个镜像)
+pid      # 跟主机系统共享进程命名空间。容器和宿主机系统之间可以通过进程 ID 来相互访问和操作
+ports    # 暴露端口信息
+command  # 覆盖容器启动后默认执行的命令：command: bundle exec thin -p 3000
+build：  # 指定 Dockerfile 所在文件夹的路径
+ context: ./dir 	# 路径
+ dockerfile: Dockerfile-alternate	# 指定编排文件
  args:
   buildno: 1
-restart	 指定容器退出后的重启策略为始终重启，保持服务始终运行，推荐配置为 always 或者 unless-stopped
-depends_on:	#服务依赖容器，将会优先于服务创建并启动依赖，一般是mysql、redis等
-expose  	暴露端口，但不映射到宿主机，只被连接的服务访问
-extends:		#继承自当前yml文件或者其它文件中定义的服务，可以选择性的覆盖原有配置
+restart	 # 指定容器退出后的重启策略为始终重启，保持服务始终运行，推荐配置为 always 或者 unless-stopped
+depends_on:	# 服务依赖容器，将会优先于服务创建并启动依赖，一般是mysql、redis等
+expose  	# 暴露端口，但不映射到宿主机，只被连接的服务访问
+extends:	# 继承自当前yml文件或者其它文件中定义的服务，可以选择性的覆盖原有配置
  file: common.yml
- service: webapp		#service必须有，file可选。service是需要继承的服务，例如web、database
-environment:		#添加环境变量。可以是数组或者字典格式
- \- RACK_ENV=development
- \- SESSION_SECRET
-external_links:	#链接搭配docker-compose.yml文件或者Compose之外定义的服务，通常是提供共享或公共服务
- \- redis_1
- \- project_db_1:mysql	#注意：external_links链接的服务与当前服务必须是同一个网络环境
-environment    设置环境变量。可使用数组或字典两种格式
-depends_on    解决容器的依赖、启动先后的问题(服务不会等待依赖容器完全启动之后才启动)
-volumes:			 #数据卷所挂载路径设置，可以设置为宿主机路径或者数据卷名称
- \- /var/lib/mysql
- \- cache/:/tmp/cache
- \- ~/configs:/etc/configs/:ro
-volumes_from:	#挂载数据卷容器，挂载是容器。container:container_name格式仅支持version 2
- \- service_name
- \- service_name:ro
- \- container:container_name:rw
-links:			#链接到其他服务中的容器，别名将自动会在容器的/etc/hosts文件里创建相应记录
- \- db
- \- db:mysql
- \- redis
-external_links  #链接到docker-compose.yml外部的容器，甚至不是Compose管理的容器
-extra_hosts:		#添加主机名映射
- \- "somehost:162.242.195.82"
- \- "otherhost:50.31.209.229"
-将会在/etc/hosts创建记录：
+ service: webapp	# service必须有，file可选。service是需要继承的服务，例如web、database
+environment:		# 添加环境变量。可以是数组或者字典格式
+ - RACK_ENV=development
+ - SESSION_SECRET
+external_links:		# 链接搭配docker-compose.yml文件或者Compose之外定义的服务，通常是提供共享或公共服务
+ - redis_1
+ - project_db_1:mysql	# 注意：external_links链接的服务与当前服务必须是同一个网络环境
+environment   		# 设置环境变量。可使用数组或字典两种格式
+depends_on    		# 解决容器的依赖、启动先后的问题(服务不会等待依赖容器完全启动之后才启动)
+volumes:			# 数据卷所挂载路径设置，可以设置为宿主机路径或者数据卷名称
+ - /var/lib/mysql
+ - cache/:/tmp/cache
+ - ~/configs:/etc/configs/:ro
+volumes_from:		#挂载数据卷容器，挂载是容器。container:container_name格式仅支持version 2
+ - service_name
+ - service_name:ro
+ - container:container_name:rw
+links:				#链接到其他服务中的容器，别名将自动会在容器的/etc/hosts文件里创建相应记录
+ - db
+ - db:mysql
+ - redis
+external_links  	# 链接到docker-compose.yml外部的容器，甚至不是Compose管理的容器
+extra_hosts:		# 添加主机名映射
+ - "somehost:162.242.195.82"
+ - "otherhost:50.31.209.229"
+
+# 将会在/etc/hosts创建记录：
 162.242.195.82  somehost
 50.31.209.229  otherhost
-cap_add  让容器拥有内核的某项能力
-cap_drop 去掉容器内核的某项能力
-cgroup_parent   指定父 cgroup 组，意味着将继承该组的资源限制
-container_name  指定容器名称。默认将会使用 项目名称_服务名称_序号 这样的格式
-devices  指定设备映射关系
-dns:		#自定义 DNS 服务器。可以是一个值，也可以是一个列表
- \- 8.8.8.8
- \- 9.9.9.9
-dns_search    配置 DNS 搜索域。可以是一个值，也可以是一个列表
-tmpfs   挂载一个 tmpfs文件系统到容器
-env_file 从文件中获取环境变量，可为单独的文件路径或列表(如有变量名称与environment指令冲突则>以后者为准)
-extra_hosts    类似 Docker 中的 --add-host 参数，指定额外的 host 名称映射信息
-healthcheck    通过命令检查容器是否健康运行
-logging  配置日志选项，目前支持三种日志驱动类型(json-file、syslog和none)
-network  设置网络模式
+cap_add  # 让容器拥有内核的某项能力
+cap_drop # 去掉容器内核的某项能力
+cgroup_parent   # 指定父 cgroup 组，意味着将继承该组的资源限制
+container_name  # 指定容器名称。默认将会使用 项目名称_服务名称_序号 这样的格式
+devices  	# 指定设备映射关系
+dns:		# 自定义 DNS 服务器。可以是一个值，也可以是一个列表
+ - 8.8.8.8
+ - 9.9.9.9
+dns_search    # 配置 DNS 搜索域。可以是一个值，也可以是一个列表
+tmpfs   	# 挂载一个 tmpfs文件系统到容器
+env_file 	# 从文件中获取环境变量，可为单独的文件路径或列表(如有变量名称与environment指令冲突则>以后者为准)
+extra_hosts    # 类似 Docker 中的 --add-host 参数，指定额外的 host 名称映射信息
+healthcheck    # 通过命令检查容器是否健康运行
+logging  	# 配置日志选项，目前支持三种日志驱动类型(json-file、syslog和none)
+network  	# 设置网络模式
 net: "bridge"
 net: "none"
 net: "container:[name or id]"
 net: "host"
-networks 配置容器连接的网络
-secrets  存储敏感数据，例如 mysql 服务密码
-security_opt   指定容器模板标签（label）机制的默认属性（用户、角色、类型、级别等）
-stop_signal    设置另一个信号来停止容器。在默认情况下使用的是 SIGTERM 停止容器
-working_dir    指定容器中工作目录
+networks 		# 配置容器连接的网络
+secrets  		# 存储敏感数据，例如 mysql 服务密码
+security_opt   # 指定容器模板标签（label）机制的默认属性（用户、角色、类型、级别等）
+stop_signal    # 设置另一个信号来停止容器。在默认情况下使用的是 SIGTERM 停止容器
+working_dir    # 指定容器中工作目录
 ```
 
 
@@ -1990,7 +1987,7 @@ vi /etc/docker/daemon.json #编辑加速器
 
 ```sh
 {
-  "registry-mirrors":["https://k4i1aeje.mirror.aliyuncs.com","https://docker.mirrors.ustc.edu.cn"],"insecure-registries": ["localhost"]
+  "registry-mirrors":["https://k4i1aeje.mirror.aliyuncs.com"，"https://docker.mirrors.ustc.edu.cn"]，"insecure-registries": ["localhost"]
 }
 ```
 

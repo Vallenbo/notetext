@@ -41,7 +41,7 @@ Protocol Buffers（简称 Protobuf）是一种由 Google 开发的跨平台、�
 
 [Releases下载地址 · protobuf (github.com)](https://github.com/protocolbuffers/protobuf/releases) | [protobuf编译器 win版](https://github.com/protocolbuffers/protobuf/releases/download/v3.9.0/protoc-3.9.0-win64.zip)
 
-**1、protobuf编译器安装**
+**1、安装protobuf编译器（protoc）**
 
 <img src="./assets/image-20231218100743483.png" alt="image-20231218100743483" style="zoom: 33%;" />
 
@@ -49,20 +49,24 @@ Protocol Buffers（简称 Protobuf）是一种由 Google 开发的跨平台、�
 
 ```sh
 D:\Program Files\protoc-25.1-win64\bin
-
-验证：
-> protoc --version
+> protoc --version		# 验证
 libprotoc 26.1
 ```
 
 **2、下载go依赖包**
 
-我们是使用Go语言做开发，接下来执行下面的命令安装`protoc`的Go插件。google接管后的新版本
+我们是使用Go语言做开发，接下来执行下面的命令安装`protoc`的Go插件。[google接管后的新版本](https://github.com/protocolbuffers/protobuf-go)
+
+**安装protoc插件**：您需要安装用于生成Go代码的protoc插件。您可以通过以下命令使用Go工具链安装该插件：
 
 ```sh
-go get github.com/golang/protobuf/proto				# 安装protoc
-go get google.golang.org/grpc						# 安装grpc
-go install github.com/golang/protobuf/protoc-gen-go # 安装go语言插件
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+```
+
+**安装protobuf运行时库**：您需要安装Go语言的protobuf运行时库。您可以通过以下命令安装：
+
+```sh
+go get google.golang.org/protobuf/proto
 ```
 
 安装好之后，需要将protoc-gen-go.exe的目录和protoc的bin目录添加到环境变量中
@@ -74,7 +78,7 @@ go install github.com/golang/protobuf/protoc-gen-go # 安装go语言插件
 [语法参考文档（需翻墙）](https://developers.google.com/protocol-buffers/docs/proto3)
 
 ```protobuf
-syntax = "proto3";  // 默认是 proto2
+syntax = "proto3";  	// 默认是 proto2
 package hello_proto;     // 指定生成的包名，与go_package参数一致
 option go_package = "/hello_proto";  // 指定需要生成的go包名
 // option go_package = ".;hello_proto"; // .为路径，go_proto为生成文件名
@@ -120,7 +124,11 @@ protoc -I . --go_out=plugins=grpc:. ./*.proto     // 生成xxx.pb.go 文件。
 # ./*.proto: 这是一个通配符，用于指定要编译的 .proto 文件。在这个例子中，* 匹配当前目录下的所有 .proto 文件。
 ```
 
+# 安装grpc框架
 
+```sh
+go get google.golang.org/grpc						# 安装grpc
+```
 
 # grpc示例程序
 
