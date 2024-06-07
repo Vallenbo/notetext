@@ -1,14 +1,17 @@
-# Docker
+# [Docker](https://docs.docker.com/engine/install/centos/)
 
-[Docker官方文档](https://docs.docker.com/engine/install/centos/ )，Docker是一种容器技术，解决软件跨环境迁移的问题
+**Docker是一个开源的应用容器引擎**。Docker是一种容器技术，解决软件跨环境迁移的问题
 
-优势; 更快速的交付和部署	更高效的资源利用	更轻松的迁移和扩展	更简单的更新管理
+采用(c/s模式)构建Paas层的应用
 
- 
+优势：
 
-Docker是一个开源的应用容器引擎	(c/s模式)构建Paas层的应用
+- 更快速的交付和部署
+- 更高效的资源利用
+- 更轻松的迁移和扩展
+- 更简单的更新管理
 
-基于Go语言实现。可以让开发者打包应用(及依赖包)到一个可移植的容器中然后发布到其他liunx机器实现虚拟化。容器完全使用虚拟化沙箱机制，相互之间不会有任何接口
+基于Go语言实现。可以让开发者打包应用(及依赖包)到一个可移植的容器中然后发布到其他linux机器实现虚拟化。容器完全使用虚拟化沙箱机制，相互之间不会有任何接口
 
 Docker引擎 包括支持在桌面系统或云平台安装 Docker，以及为企业提供简单安全弹性的容器集群编排和管理，17.3版本后分为CE社区版和EE企业版
 
@@ -16,10 +19,10 @@ DockerHub 官方提供的云托管服务，可以提供公有或私有的镜像�
 
 DockerCloud 官方提供的容器云服务，可以完成容器的部署与管理，可以完整地支持容器化项目，还有CI/CD功能
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps1-1682691150322-323.jpg" alt="img" style="zoom: 67%;" /> 
+<img src="E:\Project\Textbook\linux云计算\assets\wps1-1682691150322-323.jpg" alt="img" style="zoom: 80%;" /> 
 
 ●**Docker daemon**:运行在宿主机上，Docker守护进程， 用户通过Docker client(Docker命令)与Docker daemon交互
-●**Docker elient**: Docker命令行工具，是用户使用Docker的主要方式，Docker client与Docker daemon通信并将结果返回给用户，Docker client也可以通过socket或者RESTful api访问远程的Docker daemon
+●**Docker client**: Docker命令行工具，是用户使用Docker的主要方式，Docker client与Docker daemon通信并将结果返回给用户，Docker client也可以通过socket或者RESTful api访问远程的Docker daemon
 ●**Docker image**:镜像是只读的，镜像中包含有需要运行的文件。镜像用来创建container，-个镜像可以运行多个
 container;镜像可以通过Dockerfile创建，也可以从Docker hub/registry上下载
 ●**Docker container**:容器是Docker的运行组件，启动一个镜像就是一个容器，容器是一个隔离环境，多个容器之间不会相互影响，保证容器中的程序运行在一个相对安全的环境中
@@ -45,120 +48,18 @@ Cgroups的工作目录/sys/fs/cgroup下包含了Cgroups的所有内容
 
 
 
-# Docker-ce包社区版安装
-
-[docker安装 官方文档](https://docs.docker.com/engine/install/ubuntu/)
-
-## 一、在线安装Docker
-
-1: 安装必要的一些系统工具	
-
-```sh
-yum install -y yum-utils
-```
-
-2: 添加软件源信息
-
-```sh
-yum-config-manager  --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-```
-
-3: 更新并安装Docker-CE
-
-```sh
-yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
-```
-
-**配置镜像加速器 vim /etc/docker/daemon.json**
-
-```sh
-{
-"registry-mirrors": ["https://registry.docker-cn.com"，"https://docker.mirrors.ustc.edu.cn"]
-}
-```
-
-`systemctl daemon-reload && systemctl restart docker`	#重新加载配置文件及服务
-
-## **二、离线二进制安装**
-
-```sh
-curl -O https://download.docker.com/linux/static/stable/x86_64/docker-20.10.8.tgz 
-cp docker/* /usr/bin/   # 复制到可执行目录
-dockerd &  				# 启动Docker守护程序
-docker-api操作，/etc/sysconfig/docker
-
-[root@localhost ~]# systemctl enable docker	#添加/var/run/docker.sock文件
-OPTIONS='--selinux-enabled --log-driver=journald -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock' #添加api接口
-```
-
-## **三、脚本安装**
-
-#运行docker便捷安装脚本
-
-```sh
-$ curl -fsSL https://get.docker.com -o get-docker.sh
-$ sudo sh get-docker.sh
-```
-
-卸载docker
-
-•  检查安装的docker			`yum list installed | grep docker`
-
-•  如查找出内容需要先进行docker卸载，无内容即可正常安装
-
-•  卸载docker					`yum -y remove docker 名称`
-
-•  删除镜像或者容器等等		`rm -rf docker路径`
-
-
-
-# [在 Ubuntu 上安装 Docker 引擎 |Docker 文档](https://docs.docker.com/engine/install/ubuntu/#prerequisites)
-
-步骤 1：添加Docker官方的GPG密钥
-
-```bash
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-```
-
-步骤 2：添加Docker的稳定版存储库
-
-```bash
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-```
-
-步骤 3：安装Docker Engine
-
-```bash
-sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io
-```
-
-步骤 4：验证Docker安装
-
-```bash
-sudo docker --version
-```
-
-步骤 5：将当前用户添加到docker组（可选）
-
-```bash
-sudo usermod -aG docker $USER
-```
-
-
-
 # image镜像操作
 
-## Docker镜像原理
+## 镜像原理
 
 思考:
 
 1. Docker 镜像本质是什么?
-●是一个分层文件系统
+是一个分层文件系统
 2. Docker中一个centos镜像为什么只有200MB，而一个centos操作系统的iso文件要几个个G?
-●Centos的iso镜像文件包含bootfs和rootfs，而docker的centos镜像复用操作系统的bootfs，只有rotfs和其他镜像层
+Centos的iso镜像文件包含bootfs和rootfs，而docker的centos镜像复用操作系统的bootfs，只有rotfs和其他镜像层
 3. Docker中一个tomcat镜像为什么有500MB，而一个tomcat安装包只有70多MB?
-●由于docker中镜像是分层的，tomcat虽然只有70多MB，但他需要依赖于父镜像和基础镜像，所有整个对外暴露的tomcat镜像大小500多MB
+由于docker中镜像是分层的，tomcat虽然只有70多MB，但他需要依赖于父镜像和基础镜像，所有整个对外暴露的tomcat镜像大小500多MB
 
 Docker镜像：是一个只读的Docker容器模板，包含启动容器所需要的所有文件系统结构和内容
 
@@ -168,44 +69,43 @@ Docker镜像：是一个只读的Docker容器模板，包含启动容器所需�
 
 ## docker images镜像操作
 
-查看镜像`man docker-images`
-
-从容器导出镜像，镜像打包成tar文件（-o指定保存目录）`docker save -o zi_redis.tar zi_redis:1.0`
-
-镜像保存成一个文件`docker save 0fdf2b4c26d3 > hangge_server.tar`
-
-导入镜像docker load < zi_redis.tar压缩文件还原成镜像文件
-
-注: 数据卷目录不能被制作成自制镜像的一部分
-
-上传镜像docker push test:latest 上传本地的test :latest镜像
-
-获取镜像docker pull redis:3.2拉取相应镜像版本(默认latest最新版)	-a获取仓库中的所有镜像
-
-
-
-查看镜像docker images查看本地镜像						-a列出所有（包括临时文件）镜像文件
-
--f since=centos过滤列出来自centos库的镜像				-q仅输出ID信息
-
-`Docker tag  ubunbu:latest  xxx:lates`添加xxx标签(类似链接的作用)
-
-`docker inspect centos/a1`查看镜像或容器信息				-f {{".Architecture"}} nginx指定查看内容
-
-`docker history ubuntu:18.04`查看镜像创建各层级的具体信息
-
-搜索镜像`Docker search Ubuntu` 搜索Ubuntu镜像				-f is-official=true nginx过滤出官方的镜像
-
-删除清理镜像`docker  rmi  redis:3.2`删除镜像(id号也行)		-f强制删除即使有容器依赖它
-
-`docker image prune -a`删除所有无用镜像不光是临时镜像
-
-docker images prune -f删除所有name和tag为<none>的镜像
-
--f is-official=true nginx出官方的镜像 						-f自动清理且强制删除镜像不进行提示确认
+**拉取镜像**
 
 ```sh
-ll *.tar|awk '{print $NF}'|sed -r 's#(.*)#docker load -i \1#' |bash #批量导入镜像
+docker pull redis:3.2	# 获取镜像。拉取相应镜像版本(默认latest最新版)	-a获取仓库中的所有镜像
+```
+
+**查看镜像**
+
+```sh
+docker images	# 查看本地镜像	-a列出所有（包括临时文件）镜像文件	-q仅输出ID信息
+				# -f since=centos过滤列出来自centos库的镜像				
+docker tag ubunbu:latest xxx:lates	# 添加xxx标签(类似链接的作用)
+docker inspect centos/a1 # 查看镜像或容器信息	-f {{".Architecture"}} nginx指定查看内容
+docker search Ubuntu 	# 搜索镜像				-f is-official=true nginx过滤出官方的镜像、
+
+docker history ubuntu:18.04	# 查看已有镜像dockerfile构建内容
+```
+
+**删除**
+
+```sh
+docker rmi redis:3.2	# 删除清理镜像(id号也行)		-f强制删除即使有容器依赖它
+docker image prune -a	# 删除所有无用镜像不光是临时镜像
+docker images prune -f	# 删除所有name和tag为<none>的镜像
+# -f is-official=true nginx出官方的镜像 			  -f自动清理且强制删除镜像不进行提示确认
+```
+
+**导入/导出镜像**
+
+```sh
+docker save -o zi_redis.tar zi_redis:1.0 		# 从容器导出镜像，镜像打包成tar文件（-o指定保存目录）
+docker save 0fdf2b4c26d3 > hangge_server.tar	# 镜像保存成一个文件
+docker load < zi_redis.tar	# 导入镜像，压缩文件还原成镜像文件
+# 注: 数据卷目录不能被制作成自制镜像的一部分
+docker push test:latest 	# 上传镜像。上传本地的test :latest镜像
+
+ll *.tar|awk '{print $NF}'|sed -r 's#(.*)#docker load -i \1#' |bash # 批量导入镜像
 ```
 
 
@@ -266,25 +166,25 @@ docker build [OPTIONS] PATH | URL | -
 
 使用当前目录的 Dockerfile 创建镜像，标签为 runoob/ubuntu:v1。
 
-```
+```sh
 docker build -t runoob/ubuntu:v1 . 
 ```
 
 使用URL **github.com/creack/docker-firefox** 的 Dockerfile 创建镜像。
 
-```
+```sh
 docker build github.com/creack/docker-firefox
 ```
 
 也可以通过 -f Dockerfile 文件的位置：
 
-```
+```sh
 $ docker build -f /path/to/a/Dockerfile .
 ```
 
 在 Docker 守护进程执行 Dockerfile 中的指令前，首先会对 Dockerfile 进行语法检查，有语法错误时会返回：
 
-```
+```sh
 $ docker build -t test/myapp .
 Sending build context to Docker daemon 2.048 kB
 Error response from daemon: Unknown instruction: RUNCMD
@@ -292,28 +192,30 @@ Error response from daemon: Unknown instruction: RUNCMD
 
 ### OPTIONS说明
 
-- **--tag， -t:** 镜像的名字及标签，通常 name:tag 或者 name 格式；可以在一次构建中为一个镜像设置多个标签。
-- **-f :**指定要使用的Dockerfile路径；
-- **--force-rm :**设置镜像过程中删除中间容器；
-- **--build-arg=[] :**设置镜像创建时的变量；
-- **--cpu-shares :**设置 cpu 使用权重；
-- **--cpu-period :**限制 CPU CFS周期；
-- **--cpu-quota :**限制 CPU CFS配额；
-- **--cpuset-cpus :**指定使用的CPU id；
-- **--cpuset-mems :**指定使用的内存 id；
-- **--disable-content-trust :**忽略校验，默认开启；
-- **--isolation :**使用容器隔离技术；
-- **--label=[] :**设置镜像使用的元数据；
-- **-m :**设置内存最大值；
-- **--memory-swap :**设置Swap的最大值为内存+swap，"-1"表示不限swap；
-- **--no-cache :**创建镜像的过程不使用缓存；
-- **--pull :**尝试去更新镜像的新版本；
-- **--quiet， -q :**安静模式，成功后只输出镜像 ID；
-- **--rm :**设置镜像成功后删除中间容器；
-- **--shm-size :**设置/dev/shm的大小，默认值是64M；
-- **--ulimit :**Ulimit配置。
-- **--squash :**将 Dockerfile 中所有的操作压缩为一层。
-- **--network:** 默认 default。在构建期间设置RUN指令的网络模式
+```sh
+--tag， -t: 		# 镜像的名字及标签，通常 name:tag 或者 name 格式；可以在一次构建中为一个镜像设置多个标签。
+-f : 			# 指定要使用的Dockerfile路径；
+--force-rm: 	# 设置镜像过程中删除中间容器；
+--build-arg=[]: # 设置镜像创建时的变量；
+--cpu-shares: 	# 设置 cpu 使用权重；
+--cpu-period: 	# 限制 CPU CFS周期；
+--cpu-quota: 	# 限制 CPU CFS配额；
+--cpuset-cpus:  # 指定使用的CPU id；
+--cpuset-mems: 	# 指定使用的内存 id；
+--disable-content-trust: # 忽略校验，默认开启；
+--isolation: 	# 使用容器隔离技术；
+--label=[]: 	# 设置镜像使用的元数据；
+-m: 			# 设置内存最大值；
+--memory-swap:  # 设置Swap的最大值为内存+swap，"-1"表示不限swap；
+--no-cache: 	# 创建镜像的过程不使用缓存；
+--pull: 		# 尝试去更新镜像的新版本；
+--quiet， -q: 	# 安静模式，成功后只输出镜像 ID；
+--rm: 			# 设置镜像成功后删除中间容器；
+--shm-size: 	# 设置/dev/shm的大小，默认值是64M；
+--ulimit: 		# Ulimit配置。
+--squash: 		# 将 Dockerfile 中所有的操作压缩为一层。
+--network: 		# 默认 default。在构建期间设置RUN指令的网络模式
+```
 
 
 
@@ -2015,17 +1917,47 @@ Rancher支持各类集中式身份验证系统来管理Kubernetes集群
 
 Rancher为DevOps工程师提供了一个直观的用户界面来管理他们的服务容器，用户不需要深入了解Kubernetes概念就可以开始使用Rancher
 
+```sh
 docker run -itd --restart=always -p 8080:8080 192.168.2.5:5000/rancher/server:v1.6.5	#从私有仓库
+```
 
 Gogs（极易搭建的自助 Git 服务，默认8080）、Elasticsearch（基于Lucene的搜索服务器，默认80）
 
 Prometheus （开源的服务监控系统和时间序列数据库）、Grafana（可视化监控信息工具）
 
+# docker容器日志收集方案
 
+**filebeat+本地日志收集**
+
+[docker](https://so.csdn.net/so/search?q=docker&spm=1001.2101.3001.7020)会通过的data volume映射让容器内的应用把日志写到容器外，然后就可以用Filebeat收集这些日志文件。
+
+而docker容器的标准输出都会到宿主机这个目录下：
+
+```sh
+/var/lib/docker/containers
+```
+
+docker容器日志默认记录方式为 json-file 就是将日志以json格式记录在磁盘上。格式如下：
+
+```sh
+{
+  "log": "2018-11-16 01:24:30.372  INFO [demo1,786a42d3b893168f,786a42d3b893168f,false] 1 --- [hystrix-test1-2] demo1.demo1.TestRest : 我收到了其他服务调用\n",
+  "stream": "stdout",
+  "time": "2018-11-16T01:24:30.37454385Z"
+}
+```
+
+这样我们就可以设置filebeat进行目录扫描然后传输到logstash、ES（elasticsearch）搜索因引擎中。
+
+这个方案有一个麻烦的问题，每个文件夹代表一个容器，如果要区分索引的话就需要设置，或解析日志，多个容器副本在多个宿主机上运行，需要拿到对应的服务名称等关键字段。
+
+如果大锅烩或一起全部收集可能会造成日志混乱，搜索排除条件增多，性能不佳等（logstash、ES服务器配置牛逼除外）
 
 # 容器限制块设备I/O速率
 
-创建容器，对容器进行数据写入速度测试，及限制为通过修改相应的Cgroup文件来限制写磁盘的速度为1024000字节
+创建容器，对容器进行数据写入速度测试，及限制为通过修改相应的Cgroup文件来限
+
+制写磁盘的速度为1024000字节
 
 ```sh
 [root@46214e213d1a /]# dd if=/dev/zero of=testfile0 bs=8k count=5000 oflag=direct	#dd进行测试

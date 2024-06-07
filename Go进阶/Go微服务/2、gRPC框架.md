@@ -1,6 +1,6 @@
-# gRPC
+# [gRPC](https://grpc.io/docs/languages/go/quickstart/)
 
-`gRPC`是一种现代化开源的高性能RPC框架，能够运行于任意环境之中。最初由谷歌进行开发。它使用HTTP/2作为传输协议。
+`gRPC`是一种现代化开源的**高性能RPC框架**，能够运行于任意环境之中。最初由谷歌进行开发。它使用HTTP/2作为传输协议。
 
 1. **基于 HTTP/2**: gRPC 基于 HTTP/2 标准设计，带来诸如双向流、流控、头部压缩、单连接上的多复用请求等特性。这些特性使得其成为构建高性能和伸缩性系统的理想选择。
 2. **Protobuf 序列化**: gRPC 使用 Protobuf 作为接口定义语言，用于描述服务接口和消息结构。Protobuf 是一种语言无关、平台无关、可扩展的序列化结构数据的协议，使得系统间数据交互更加高效。
@@ -12,68 +12,28 @@
 
 # 为什么要用gRPC？
 
-使用gRPC， 我们可以一次性的在一个`.proto`文件中定义服务并使用任何支持它的语言去实现客户端和服务端。反过来，它们可以应用在各种场景中，从Google的服务器到你自己的平板电脑—— gRPC帮你解决了不同语言及环境间通信的复杂性。使用`protocol buffers`还能获得其他好处，包括高效的序列化，简单的IDL以及容易进行接口更新。总之一句话，使用gRPC能让我们更容易编写跨语言的分布式代码。
+使用gRPC，可以一次性的在一个`.proto`文件中定义服务并使用任何支持它的语言去实现客户端和服务端。
+
+反过来，它们可以应用在各种场景中，从Google的服务器到你自己的平板电脑—— gRPC帮你解决了不同语言及环境间通信的复杂性。
+
+使用`protocol buffers`还能获得其他好处，包括高效的序列化，简单的IDL以及容易进行接口更新。总之一句话，使用gRPC能让我们更容易编写跨语言的分布式代码。
 
 > IDL（Interface description language）是指接口描述语言，是用来描述软件组件接口的一种计算机语言，是跨平台开发的基础。IDL通过一种中立的方式来描述接口，使得在不同平台上运行的对象和用不同语言编写的程序可以相互通信交流；比如，一个组件用C++写成，另一个组件用Go写成。
 
-# protobuf数据序列化格式
-
-[protobuf 官网文档 (protobuf.dev)](https://protobuf.dev/overview/)
-
-Protocol Buffers（简称 Protobuf）是一种由 Google 开发的跨平台、语言无关、高效的**数据序列化格式**。它类似于 XML 或 JSON 这样的数据交换格式，但更轻量级、更高效。
-
-以下是 Protobuf3 的一些主要特性：
-
-1. **简洁高效**: Protobuf 的数据大小通常要比 XML 小 3 到 10 倍，速度快 20 到 100 倍。这使得 Protobuf 非常适合用于扩展数据存储、RPC 数据交换格式或者任何需要高效存储和读写的地方。
-2. **语言无关和平台无关**: Protobuf 提供了 C++、Java、Python 以及更多其他语言的库，你可以在不同的系统和不同的语言间使用 Protobuf，它们可以无缝地进行数据交换。
-3. **可扩展**: Protobuf 是可扩展的，你可以很方便地更新数据结构而保持向后兼容。
-4. **使用 .proto 文件定义数据结构**: 你需要定义数据结构的 .proto 文件，然后使用 protobuf 编译器生成对应语言的代码，这样就可以在代码中使用定义的数据结构了。
-
-**劣势：**
-
-​	1：应用不够广(相比xml和json)
-
-​	2：二进制格式导致可读性差
-
-​	3：缺乏自描述
-
-## 安装
-
-[Releases下载地址 · protobuf (github.com)](https://github.com/protocolbuffers/protobuf/releases) | [protobuf编译器 win版](https://github.com/protocolbuffers/protobuf/releases/download/v3.9.0/protoc-3.9.0-win64.zip)
-
-**1、安装protobuf编译器（protoc）**
-
-<img src="./assets/image-20231218100743483.png" alt="image-20231218100743483" style="zoom: 33%;" />
-
-解压压缩文件后，添加protoc变量到系统环境变量中
+**安装protoc-gen-go-grpc插件**：生成 Go 语言的 gRPC 服务端和客户端代码
 
 ```sh
-D:\Program Files\protoc-25.1-win64\bin
-> protoc --version		# 验证
-libprotoc 26.1
-```
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
 
-**2、下载go依赖包**
-
-我们是使用Go语言做开发，接下来执行下面的命令安装`protoc`的Go插件。[google接管后的新版本](https://github.com/protocolbuffers/protobuf-go)
-
-**安装protoc插件**：您需要安装用于生成Go代码的protoc插件。您可以通过以下命令使用Go工具链安装该插件：
-
-```sh
-go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-```
-
-**安装protobuf运行时库**：您需要安装Go语言的protobuf运行时库。您可以通过以下命令安装：
-
-```sh
-go get google.golang.org/protobuf/proto
+import "google.golang.org/grpc"			# 导入时自动安装
+go get google.golang.org/grpc			# 也可自行安装grpc
 ```
 
 安装好之后，需要将protoc-gen-go.exe的目录和protoc的bin目录添加到环境变量中
 
 
 
-## 编写
+# 编写protocbuf
 
 [语法参考文档（需翻墙）](https://developers.google.com/protocol-buffers/docs/proto3)
 
@@ -124,19 +84,11 @@ protoc -I . --go_out=plugins=grpc:. ./*.proto     // 生成xxx.pb.go 文件。
 # ./*.proto: 这是一个通配符，用于指定要编译的 .proto 文件。在这个例子中，* 匹配当前目录下的所有 .proto 文件。
 ```
 
-# 安装grpc框架
-
-```sh
-go get google.golang.org/grpc						# 安装grpc
-```
-
-# grpc示例程序
+# grpc简单模式示例程序
 
 使用Protocol Buffers带来的便利性。只需要去实现和注重业务方法，将其和grpc相绑定。该模式也是简单数据流模式。
 
-==server端==：
-
-整个流程：注册socket监听器-->注册grpc服务，绑定类方法--->将socket和grpc服务相绑定
+==server端==：整个流程：注册socket监听器-->注册grpc服务，绑定类方法--->将socket和grpc服务相绑定
 
 ```go
 package main
@@ -179,11 +131,7 @@ func main() {
 }
 ```
 
-
-
-==client端==：
-
-进行grpc地址拨号连接，将protobuf生成的服务客户端和连接相绑定。调用微服务
+==client端==：进行grpc地址拨号连接，将protobuf生成的服务客户端和连接相绑定。调用微服务
 
 ```go
 package main
@@ -1611,8 +1559,6 @@ func main() {
 
 
 
-
-
 # grpc超时机制
 
 gRPC默认的请求的超时时间是很长的，当你没有设置请求超时时间时，所有在运行的请求都占用大量资源且可能运行很长的时间，导致服务资源损耗过高，使得后来的请求响应过慢，甚至会引起整个进程崩溃。
@@ -1653,8 +1599,6 @@ func (HelloServer1) SayHello(ctx context.Context, request *hello_grpc.HelloReque
 }
 ```
 
-
-
 # 动态获取可用端口号
 
 
@@ -1672,9 +1616,6 @@ func (HelloServer1) SayHello(ctx context.Context, request *hello_grpc.HelloReque
 GRPC-Gateway 能帮助你同时提供 gRPC 和 RESTful 风格的 API。GRPC-Gateway 是 Google protocol buffers 编译器 protoc 的一个插件。它读取 Protobuf 服务定义并生成一个反向代理服务器，该服务器将 RESTful HTTP API 转换为 gRPC。该服务器是根据服务定义中的 google.api.http 注释生成的。
 
 <img src="https://www.liwenzhou.com/images/Go/grpc_gateway/architecture.svg" alt="gRPC-Gateway" style="zoom: 50%;" />
-
-
-
 
 # 使用protobuf定义 gRPC 服务
 
@@ -1709,9 +1650,9 @@ $ protoc -I=proto \
    --go_out=proto --go_opt=paths=source_relative \
    --go-grpc_out=proto --go-grpc_opt=paths=source_relative \
    helloworld/hello_world.proto
-```
 
-*Windows执行失败的话就去掉上述命令中的`\`。*
+# Windows执行失败的话就去掉上述命令中的`\`
+```
 
 生成pb和gRPC相关代码后，在`main`函数中注册RPC服务并启动gRPC Server。
 
@@ -1835,13 +1776,9 @@ greeter
 
 需要安装`protoc-gen-grpc-gateway`插件来生成对应的 grpc-gateway 代码。
 
-```bash
+```sh
 go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2
-```
-
-如果不安装该插件，就无法生成grpc-gateway相关的代码。报错如下：
-
-```bash
+# 如果不安装该插件，就无法生成grpc-gateway相关的代码。报错如下：
 protoc-gen-grpc-gateway: program not found or is not executable
 Please specify a program using absolute path or make sure the program is available in your PATH system variable
 --grpc-gateway_out: protoc-gen-grpc-gateway: Plugin failed with status code 1.

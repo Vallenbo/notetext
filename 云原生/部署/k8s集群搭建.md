@@ -4,6 +4,10 @@
 - **[KubeKey](https://github.com/kubesphere/kubekey)**
   一款用于部署 Kubernetes 集群的开源轻量级工具。它提供了一种灵活、快速和方便的方式来安装 Kubernetes/K3s，包括 Kubernetes/K3s 和 KubeSphere，以及相关的云原生插件。它也是扩展和升级集群的有效工具。
   
+- **[kubeasz](https://github.com/easzlab/kubeasz)**
+  
+  致力于提供快速部署高可用`k8s`集群的工具, 同时也努力成为`k8s`实践、使用的参考书；基于二进制方式部署和利用`ansible-playbook`实现自动化；既提供一键安装脚本, 也可以根据`安装指南`分步执行安装各个组件。
+  
 - **直接用云平台 Kubernetes**
   可视化搭建，只需简单几步就可以创建好一个集群。
   优点：安装简单，生态齐全，负载均衡器、存储等都给你配套好，简单操作就搞定

@@ -1,4 +1,4 @@
-[go-zero-looklook · go-zero实践项目](https://github.com/Mikaelemmmm/go-zero-looklook/blob/main/README-cn.md)
+[go-zero-looklook · go-zero实践项目](https://github.com/Mikaelemmmm/go-zero-looklook/blob/main/README-cn.md)	| [概念 - 框架概述 - 《go-zero v1.6 教程》 - 书栈网 · BookStack](https://www.bookstack.cn/read/go-zero-1.6-zh/751292db2e36615e.md)
 
 # go-zero介绍
 
@@ -253,7 +253,7 @@ transform.rpc/7587872530397098244
 192.168.3.37:8080
 ```
 
-# 将api 和 rpc服务连通
+# api 和 rpc服务连通
 
 1、修改配置文件 `shorturl-api.yaml`，增加如下内容
 
@@ -394,7 +394,7 @@ etcdctl指令 https://www.jianshu.com/p/67cbef492812
 
 
 
-# 4.最简单的微服务demo
+# 4.最简单的demo
 
 这个demo是：
 
@@ -864,7 +864,7 @@ Name: users
 Host: 0.0.0.0
 Port: 8888
 Auth:								// 开启jwt验证
-  AccessSecret: duerueudfnd235sdh  // 密钥长度 > 8位
+  AccessSecret: duerueudfnd235sdh   // 密钥长度 > 8位
   AccessExpire: 3600				// 过期时间,单位是秒(s)
 ```
 
@@ -1984,11 +1984,9 @@ type ServiceContext struct {
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	zrpc.WithUnaryClientInterceptor(interceptor)
-	return &ServiceContext{
+	return &ServiceContext{	// 添加初始化rpc客户端逻辑
 		Config: c,
-		//添加初始化rpc客户端逻辑
-        // 注册客户端拦截器
-		RpcUser: userclient.NewUser(zrpc.MustNewClient(
+		RpcUser: userclient.NewUser(zrpc.MustNewClient(	// 注册客户端拦截器
 			c.RpcClientConf,
 			zrpc.WithUnaryClientInterceptor(interceptor),                    //添加一元拦截
 			zrpc.WithStreamClientInterceptor(ClientStreamLoggerInterceptor), //添加流式拦截器
@@ -2028,13 +2026,13 @@ Name: users
 Host: 0.0.0.0
 Port: 8888
 
-Log: // 日志配置
-  ServiceName: users // 记录服务名
-  Mode: console // 打印模式
-  Level: info // 记录顶级
-  Encoding: json // 记录格式 plain
-  KeepDays: 7 // 保存天数
-  Compress: true // 压缩
+Log: 					// 日志配置
+  ServiceName: users 	// 记录服务名
+  Mode: console 		// 打印模式
+  Level: info 			// 记录顶级
+  Encoding: json 		// 记录格式 plain
+  KeepDays: 7 			// 保存天数
+  Compress: true 		// 压缩
 ```
 
 ## 简单的日志打印
@@ -2102,10 +2100,12 @@ Prometheus是目前应用最广，使用最多的监控中间件。
       - TZ=Asia/Shanghai
     privileged: true
     volumes:
-      - ${PRO_DIR}/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml  # 将 prometheus 配置文件挂载到容器里
-      - ${PRO_DIR}/target.json:/opt/bitnami/prometheus/conf/targets.json  # 将 prometheus 配置文件挂载到容器里
+    	# 将 prometheus 配置文件挂载到容器里
+      - ${PRO_DIR}/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
+        # 将 prometheus 配置文件挂载到容器里
+      - ${PRO_DIR}/target.json:/opt/bitnami/prometheus/conf/targets.json
     ports:
-      - "9090:9090"                     # 设置容器9090端口映射指定宿主机端口，用于宿主机访问可视化web
+      - "9090:9090"   # 设置容器9090端口映射指定宿主机端口，用于宿主机访问可视化web
     restart: always
 ```
 

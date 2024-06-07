@@ -31,7 +31,7 @@ en_US.UTF-8
 
 echo export EDITOR=vim >> /etc/profile.d/env.sh解决vimu无颜色问题
 
-export PATH=$JAVA_HOME/bin:$PATH 环境变量添加
+export PATH=`$JAVA_HOME/bin:$PATH` 环境变量添加
 
 开机自启文件	/etc/rc.d/rc.local		chmod _+x rc.local添加执行权限	bc 计算器
 
@@ -2342,9 +2342,7 @@ ll  /lib/system/system	| grep run	查找级别
 
 # 生成复杂密码
 
-Linux系统随机生成复杂密码方法：使用 mkpasswd 命令生成随机密码
-
-  首先需要安装 expect 包，安装方式为：yum install expect -y
+Linux系统随机生成复杂密码方法：使用 mkpasswd 命令生成随机密码（首先需要安装 expect 包：yum install expect -y）
 
 mkpasswd 使用 mkpasswd 命令来生成随机密码了（区分大小写）：
 
@@ -2360,7 +2358,7 @@ mkpasswd 使用 mkpasswd 命令来生成随机密码了（区分大小写）：
 
 可以通过 data 指令获取时间后，计算 md5 值，然后截取其中的一部分当做随机密码
 
- 
+
 
 操作示例：$ date | md5sum | cut -b 10-20	-->	464dddf2644
 

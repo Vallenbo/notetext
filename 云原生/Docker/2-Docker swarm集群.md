@@ -1,6 +1,8 @@
 # swarm集群(支持多容器操作的利器)
 
-Docker Swarm 是 Docker 的集群管理工具。它将 Docker 主机池转变为单个虚拟 Docker 主机，使得容器可以组成跨主机的子网网络。Docker Swarm 提供了标准的 Docker API，所有任何已经与 Docker 守护程序通信的工具都可以使用 Swarm 轻松地扩展到多个主机。利用各节点主机的docker engine集合成一个虚拟的docker资源池，采用最典型的主从结构（即通过manages对worker进行操作）中内置了基于DNS的负载均衡和对外部负载均衡机制的集成支持，通过Raft协议管理多个节点
+Docker Swarm 是 Docker 的集群管理工具。它将 Docker 主机池转变为单个虚拟 Docker 主机，使得容器可以组成跨主机的子网网络。
+
+Docker Swarm 提供了标准的 Docker API，所有任何已经与 Docker 守护程序通信的工具都可以使用 Swarm 轻松地扩展到多个主机。利用各节点主机的docker engine集合成一个虚拟的docker资源池，采用最典型的主从结构（即通过manages对worker进行操作）中内置了基于DNS的负载均衡和对外部负载均衡机制的集成支持，通过Raft协议管理多个节点
 
 集群的管理和编排是使用嵌入到 docker 引擎的 SwarmKit，可以在 docker 初始化时启动 swarm 模式或者加入已存在的 swarm。
 
@@ -11,7 +13,7 @@ Docker Swarm 是 Docker 的集群管理工具。它将 Docker 主机池转变为
 - Docker Machine
 - Jenkins
 
-<img src="E:\Project\Textbook\linux云计算\assets\wps37-1682691150325-359.jpg" alt="img" style="zoom:67%;" /> 
+<img src="./assets/wps37-1682691150325-359.jpg" alt="img" style="zoom:67%;" /> 
 
 # Docker Swarm 优点
 
@@ -97,7 +99,7 @@ service 通过 ingress load balancing 来发布服务，且 swarm 集群中所�
 
 1、master主机上初始化swarm。执行 docker swarm init 命令的节点自动成为管理节点。
 
-```
+```sh
 docker swarm init #在管理节点上创建一个集群
 
 # 执行命令后会给出加入这个swarm的命令

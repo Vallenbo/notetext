@@ -191,7 +191,6 @@ lo        Link encap:Local Loopback
           collisions:0 txqueuelen:1000
           RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
 
-
 [root@unshare-bash /]# ip link set lo up
 [root@unshare-bash /]# ip link set c11363 name eth0 up
 [root@unshare-bash /]# # 为eth0设置一个随机的docker网段内的IP地址
@@ -247,7 +246,7 @@ drwxr-xr-x 6 root root  0 11月 11 22:49 systemd
 
 cgroups用树形的层级关系来管理各项子系统，每个子系统下都有它们自己的树形结构。树中的节点就是一组进程（或线程），不同子系统的层级关系是相互独立的。例如cpu子系统和memory子系统的层级结构可以是不一样的：
 
-```
+```sh
 cpu/                                
 ├── batch
 │   ├── bitcoins
@@ -388,6 +387,7 @@ cpu.cfs_quota_us/cpu.cfs_period_us = 分配给当前组的cpu核数
 当我们使用docker指定容器核数时，其实就是在调整cpu.cfs_quota_us文件的参数。
 
 ## cpuset cgroup
+
 cpuset用的比较少，当追求极致性能的时候，可以通过其实现绑核，绑NUMA内存节点等功能：
 
 cpuset.cpus用于标明当前分组可以使用哪些CPU。
@@ -541,7 +541,7 @@ m 创建设备文件的权限。
 
 除去一些特殊虚拟设备，docker默认禁止容器访问主机的任何设备。可以通过--devices参数为容器添加设备权限，或者使用--privileged参数开启privileged模式，使用--privileged参数启动的容器会获得主机所有设备的所有权限：
 
-参考：https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities
+[参考](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities)
 
 ```
 $ container_id=$(docker run -d --privileged nginx)
@@ -549,9 +549,7 @@ $ cat /sys/fs/cgroup/devices/docker/$container_id/devices.list
 a *:* rwm  <--- 所有设备的所有权限
 ```
 
-默认开放的虚拟设备参考：
-
-https://github.com/containerd/containerd/blob/f01665aa02d8b26c581fdfcc93d837ce3b275edd/oci/spec_opts.go#L1029
+[默认开放的虚拟设备参考](https://github.com/containerd/containerd/blob/f01665aa02d8b26c581fdfcc93d837ce3b275edd/oci/spec_opts.go#L1029)
 
 ## freezer cgroup
 
@@ -595,22 +593,18 @@ UnionFS是一种文件系统，它允许将多个目录组合成一个逻辑目�
 
 镜像是由许多仅可读的层组成的，当你使用该镜像创建一个容器时，一个可写层会被加到镜像的可读层之上，容器内所有文件的变化都会保存在这个可写层。
 
-<img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9tbWJpei5xcGljLmNuL21tYml6X3BuZy92YkVSaWNJZFlaYkFzMWZBRnh0WHFEa0huNlNINVFCbjdMbGRuQkN4Z3Joa3p1NWliaWNiTzlHVlU0YlZKN1JCaWE5aGtiNHNFcG9CY1VQTURvRUhLYjE5M0EvNjQw?x-oss-process=image/format,png" alt="img" style="zoom:67%;" />
+<img src="./assets/format,png.png" alt="img" style="zoom:67%;" />
 
 Copy-on-write
 容器的启动速度是很快的（即便在镜像很大的情况下），这得益于copy-on-write（COW，写时复制）技术的运用。当我们启动一个容器时候，并不需要将整个镜像中的文件copy一份，容器直接引用镜像中的文件，任何的读操作都直接直接从镜像读即可，当发生写操作时，才需要将镜像中的相应文件copy到容器的可写层，在可写层进行写入。
 
-docker文档中有对COW的详细介绍和示例 
-
-https://docs.docker.com/storage/storagedriver/#the-copy-on-write-cow-strategy
+[docker文档中有对COW的详细介绍和示例](https://docs.docker.com/storage/storagedriver/#the-copy-on-write-cow-strategy)
 
 OverlayFS
 
 UnionFS的实现有许多种，docker也可以配置多种类型的storage driver，其比较耳熟的有：overlay2,aufs,devicemapper。
 
-参考：
-
-https://docs.docker.com/storage/storagedriver/select-storage-driver/
+[参考](https://docs.docker.com/storage/storagedriver/select-storage-driver/)
 
 随着OverlayFS被合入Linux kernel mainline，overlay2越来越常用，也成为了docker推荐使用的storage driver。本文就以OverlayFS和overlay2为例，说明容器是如何得益于UnionFS和copy-on-write的。
 
@@ -620,9 +614,7 @@ https://docs.docker.com/storage/storagedriver/select-storage-driver/
 $ mount -t overlay overlay -o lowerdir=lower1:lower2:lower3...,upperdir=upper,workdir=work  merged
 ```
 
-参考：
-
-http://man7.org/linux/man-pages/man8/mount.8.html#FILESYSTEM-SPECIFIC_MOUNT_OPTIONS （搜overlay）
+[参考（搜overlay）](http://man7.org/linux/man-pages/man8/mount.8.html#FILESYSTEM-SPECIFIC_MOUNT_OPTIONS)
 
 上述命令将merged目录挂载成OverlayFS，其中lowerdir是只读层（镜像层），允许有多层，upperdir则是可写层（容器层）。这意味着当我们向merged目录写入文件时，文件会被写入upperdir。从merged目录读文件时，如果文件在upperdir不存在，则向下一层层从lowerdir中找。
 

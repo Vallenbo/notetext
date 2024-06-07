@@ -1135,6 +1135,8 @@ Dovecot使用PAM方式（ Pluggable Authentication Module，可插拔认证模�
 
 ##  Nginx
 
+[nginx 快速参考常用命和配置使用清单](https://mp.weixin.qq.com/s/TlE8ZNbm4p4S8ejNY-HiSQ)
+
 nginx(engine x) 是一款自由的、开源的、高性能的HTTP服务器和反向代理服务器；同时也是一个IMAP、POP3、SMTP代理服务器；nginx可以作为一个HTTP服务器进行网站的发布处理，另外nginx可以作为反向代理进行负载均衡
 
 正向代理和反向代理：通常情况下我们访问网址，但由于流量巨大，转接先访问代理服务器，由代理接受请求转给主服务器(此时的服务器并不知道具体客户机的请求，将数据统统交给正向代理服务器)，反向恰好相反，客户机发送请求却不知道具体主机

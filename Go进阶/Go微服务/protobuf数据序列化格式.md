@@ -1,13 +1,64 @@
-# Protobuf3参考指南
-[Protobuf3 语言指南 - protobuf3中文指南 (gitbook.io)](https://lixiangyun.gitbook.io/protobuf3/#oneof)
+# protobuf数据序列化格式
+
+[protobuf 官网文档](https://protobuf.dev/overview/) | [Protobuf3 语言指南（中文）](https://lixiangyun.gitbook.io/protobuf3/#oneof)
+
+Protocol Buffers（简称 Protobuf）是一种由 Google 开发的跨平台、语言无关、高效的**数据序列化格式**。它类似于 XML 或 JSON 这样的数据交换格式，但更轻量级、更高效。
+
+以下是 Protobuf3 的一些主要特性：
+
+1. **简洁高效**: Protobuf 的数据大小通常要比 XML 小 3 到 10 倍，速度快 20 到 100 倍。这使得 Protobuf 非常适合用于扩展数据存储、RPC 数据交换格式或者任何需要高效存储和读写的地方。
+2. **语言无关和平台无关**: Protobuf 提供了 C++、Java、Python 以及更多其他语言的库，你可以在不同的系统和不同的语言间使用 Protobuf，它们可以无缝地进行数据交换。
+3. **可扩展**: Protobuf 是可扩展的，你可以很方便地更新数据结构而保持向后兼容。
+4. **使用 .proto 文件定义数据结构**: 你需要定义数据结构的 .proto 文件，然后使用 protobuf 编译器生成对应语言的代码，这样就可以在代码中使用定义的数据结构了。
+
+**劣势：**
+
+​	1：应用不够广(相比xml和json)
+
+​	2：二进制格式导致可读性差
+
+​	3：缺乏自描述
+
+# 安装
+
+[Releases下载地址 · protobuf (github.com)](https://github.com/protocolbuffers/protobuf/releases) | [protobuf编译器 win版](https://github.com/protocolbuffers/protobuf/releases/download/v3.9.0/protoc-3.9.0-win64.zip)
+
+**1、安装protobuf编译器（protoc）**
+
+<img src="./assets/image-20231218100743483.png" alt="image-20231218100743483" style="zoom: 33%;" />
+
+解压压缩文件后，添加protoc变量到系统环境变量中
+
+```sh
+D:\Program Files\protoc-25.1-win64\bin
+> protoc --version		# 验证
+libprotoc 26.1
+```
+
+**2、下载go依赖包**
+
+我们是使用Go语言做开发，接下来执行下面的命令安装`protoc`的Go插件。[google接管后的新版本](https://github.com/protocolbuffers/protobuf-go)
+
+**安装protobuf运行时库**：安装Go语言的protobuf运行时库。您可以通过以下命令安装：
+
+```sh
+go get google.golang.org/protobuf/proto
+```
+
+**安装protoc-gen-go插件**：用于生成Go代码的protoc插件。您可以通过以下命令使用Go工具链安装该插件：
+
+```sh
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+```
+
+# 生成go文件
 
 ```protobuf
 syntax = "proto3"; // 指定proto版本
 package hello_grpc;     // 指定默认包名
 
-// 指定golang包名
-option go_package = "/hello_grpc";
-
+option go_package = "/hello_grpc";	// 指定golang包名
+//option go_package = ".;xxx";		// go_package 表示在当前目录生成go文件，文件的包名是xxx
 
 service HelloService { //定义rpc服务
   rpc SayHello (HelloRequest) returns (HelloResponse) {} // 定义函数
@@ -24,21 +75,13 @@ message HelloResponse{ // HelloResponse 响应内容
 }
 ```
 
-## 生成go文件
-
-```go
-option go_package = ".;xxx";
-```
-
-go_package 表示在当前目录生成go文件，文件的包名是xxx
-
 ```go
 protoc -I . --go_out=plugins=grpc:./grpc_proto .\grpc_proto\hello.proto
 ```
 
 proto文件只是定义接口方法
 
-## proto语法
+# proto语法
 
 service 对应的就是go里面的接口，可以作为服务端，客户端
 
@@ -46,9 +89,9 @@ rpc 对应的就是结构体中的方法
 
 message对应的也是结构体
 
-## 数据类型
+# 数据类型
 
-### 基本数据类型
+## 基本数据类型
 
 ```protobuf
 message Request {
@@ -120,7 +163,7 @@ type Request struct {
 - bools：false
 - 数值类型：0
 
-### 数组类型
+## 数组类型
 
 `repeated` 关键字用于表示一个字段可以包含零个或多个值，也就是说，这个字段是一个数组或列表。
 
@@ -147,7 +190,7 @@ arrayRequest := &pb.ArrayRequest{
 }
 ```
 
-### map类型
+## map类型
 
 键只能是基本类型
 
@@ -169,7 +212,7 @@ type MapRequest struct {
 }
 ```
 
-### enum枚举类型
+## enum枚举类型
 
 ```go
 enum Color {
@@ -201,7 +244,7 @@ const (
 color := pb.Color_RED
 ```
 
-### 时间戳类型
+## 时间戳类型
 
 需要引入protobuf源文件
 
@@ -230,7 +273,7 @@ func main() {
 
 
 
-### 嵌套类型
+## 嵌套类型
 
 内层嵌套
 
@@ -276,14 +319,14 @@ proto.SearchResponse_Result{}
 
 
 
-## 编写风格
+# 编写风格
 
 1. 文件名建议下划线，例如：my_student.proto
 2. 包名和目录名对应
 3. 服务名、方法名、消息名均为大驼峰
 4. 字段名为下划线
 
-## 多服务proto文件编写
+# 多服务proto文件编写
 
 ```go
 syntax = "proto3"; // 指定proto版本
@@ -306,7 +349,7 @@ service OrderService {
 }
 ```
 
-### 服务端
+## 服务端
 
 ```go
 package main
@@ -353,7 +396,7 @@ func main() {
 }
 ```
 
-### 客户端
+## 客户端
 
 ```go
 package main
@@ -391,7 +434,7 @@ func main() {
 }
 ```
 
-## 多个proto文件
+# 多个proto文件
 
 引入其他proto文件，使用其他文件内变量
 
