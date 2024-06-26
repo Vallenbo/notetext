@@ -4,7 +4,9 @@
 
 # mysql备份还原
 
+```sh
 mysqld --initialize #重新初始化命令
+```
 
 跳过密码认证
 
@@ -26,8 +28,6 @@ mysql备份内容还原
 ```sh
 rsync -avz /mnt/sata/* /var/lib/mysql/data
 ```
-
-
 
 
 
@@ -148,8 +148,6 @@ log_queries_not_using_jindexes=1 #记录执行较慢的未使用索弓|的语句
 
 
 
-
-
 ## 主从复制
 
 ### 概述
@@ -205,10 +203,10 @@ GRANT REPLICATION SLAVE ON *.* TO 'itcast'@'%';
 
 ```sql
 show master status ;
-输出内容字段含义说明:
-file :从哪个日志文件开始推送日志文件
-position:从哪个位置开始推送日志
-binlog_ignore_db :指定不需要同步的数据库
+# 输出内容字段含义说明:
+file :					从哪个日志文件开始推送日志文件
+position:				从哪个位置开始推送日志
+binlog_ignore_db :		指定不需要同步的数据库
 ```
 
 **从库配置操作**

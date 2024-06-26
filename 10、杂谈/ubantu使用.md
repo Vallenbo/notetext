@@ -1,3 +1,5 @@
+面向加薪学习
+
 ```shell
 apt-get install openssh-server #安装openssh服务
 apt-get install ufw #安装防火墙管理软件

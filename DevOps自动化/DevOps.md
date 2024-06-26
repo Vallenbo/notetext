@@ -330,8 +330,6 @@ CI/CD可以理解为：
 | :--------------------------------------: |
 | ![image-20211125154112097](assets/image-20211125154112097.png) |
 
-
-
 ## 5.2 Jenkins安装
 
 ### 容器化部署
@@ -379,7 +377,6 @@ CI/CD可以理解为：
 
   ```sh
   # 修改数据卷中的data/hudson.model.UpdateCenter.xml文件
-  
   <?xml version='1.1' encoding='UTF-8'?>
   <sites>
     <site>
@@ -397,7 +394,7 @@ CI/CD可以理解为：
   </sites>
   # 清华大学的插件源也可以https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json
   ```
-
+  
 - 再次重启Jenkins容器，访问Jenkins（需要稍微等会）
 
   |                Jenkins首页                 |
@@ -1642,7 +1639,7 @@ pipeline {
 
 
 
-##十、Kubernetes编排工具
+# Kubernetes编排工具
 
 ## 10.1 Kubernetes介绍
 
@@ -1675,8 +1672,6 @@ Kubernetes主要能帮助我们完成：
 - 秘钥与配置管理
 
   Kubernetes 允许你存储和管理敏感信息，例如密码、OAuth 令牌和 ssh 密钥。你可以在不重建容器镜像的情况下部署和更新密钥和应用程序配置，也无需在堆栈配置中暴露密钥。
-
-
 
 ## 10.2 Kubernetes架构
 
@@ -2453,13 +2448,9 @@ spec:
 修改Jenkinsfile实现基于最新提交点实现持续集成效果，将之前引用${tag}的全部去掉
 
 ```json
-// 所有的脚本命令都放在pipeline中
-pipeline{
-	// 指定任务再哪个集群节点中执行
-	agent any
-
-	// 声明全局变量，方便后面使用
-	environment {
+pipeline{			// 所有的脚本命令都放在pipeline中
+	agent any		// 指定任务再哪个集群节点中执行
+	environment {	// 声明全局变量，方便后面使用
 		harborUser = 'admin'
         harborPasswd = 'Harbor12345'
         harborAddress = '192.168.11.102:80'
@@ -2527,7 +2518,6 @@ pipeline{
         }
     }
 }
-
 ```
 
 修改pipeline.yml，更改镜像版本
@@ -2548,7 +2538,7 @@ spec:
   template:
     metadata:
       labels:
-        app: pipeline    
+        app: pipeline
     spec:
       containers:
       - name: pipeline

@@ -214,7 +214,7 @@ round-trip min/avg/max = 16.996/17.108/17.220 ms
 
 # Cgroups
 
-cgroups，其名称源自控制组群（control groups）的简写，也是Linux内核的一个功能，用来限制、控制与统计一个进程组的资源（如CPU、内存、磁盘输入输出等）。
+cgroups，其名称源自控制组群（control groups）的简写，也是Linux内核的一个功能，**用来限制、控制与统计一个进程组的资源**（如CPU、内存、磁盘输入输出等）。
 
 > cgroups用于限制容器能使用多少资源。
 >
@@ -585,7 +585,7 @@ $ cat /sys/fs/cgroup/pids/docker/$container_id/pids.max
 
 # UnionFS
 
-UnionFS是一种文件系统，它允许将多个目录组合成一个逻辑目录，该逻辑目录包含这些目录中的所有内容，并对外提供一个统一的视图。
+UnionFS是一种文件系统，**它允许将多个目录组合成一个逻辑目录**，该逻辑目录包含这些目录中的所有内容，并对外提供一个统一的视图。
 
 举个例子，假设我们需要更新一块CD-ROM中的内容，但是CD-ROM是不可写的，这个时候可以将CD-ROM与另一个可写目录挂载成UnionFS。当我们更新文件的时候，内容会被写入可写的目录，就好像CD-ROM中的内容被更新了一样。
 

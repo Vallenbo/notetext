@@ -265,7 +265,7 @@ func getCurrentPath() string {
 type Login struct {// Binding from JSON
   // binding:约束，required必填项 , min字符段最短为3
   User     string `form:"user" json:"user" binding:"required,min=3,max=8"` 
-	Password string `form:"password" json:"password" binding:"required"`
+  Password string `form:"password" json:"password" binding:"required"`
 }
 
 type SignUpParam struct { //注册
@@ -286,7 +286,7 @@ import (
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
-	en_translations "github.com/go-playground/validator/v10/translations/en" //validator的翻译器
+	en_translations "github.com/go-playground/validator/v10/translations/en" // validator的翻译器
 )
 
 func main() {
@@ -337,7 +337,7 @@ func main() {
 请求的参数通过URL路径传递，例如：`/user/search/小王子/沙河`。 获取请求URL路径中的参数的方式如下。
 
 ```go
-r.GET("/user/search/:username/:address", func(c *gin.Context) { // http:///user/search/:xiaobai/:hunan
+r.GET("/user/search/:username/:address", func(c *gin.Context) { // http://user/search/:xiaobai/:hunan
 		username := c.Param("username") //获取对应路径下指定key的参数
 		address := c.Param("address")
 		c.JSON(http.StatusOK, gin.H{ //输出json结果给调用方
@@ -347,8 +347,6 @@ r.GET("/user/search/:username/:address", func(c *gin.Context) { // http:///user/
 		})
 	})
 ```
-
-##
 
 ## 通过POST请求获取参数
 
@@ -826,7 +824,11 @@ Gin框架允许开发者在处理请求的过程中，加入用户自己的钩�
 
 ## 定义中间件
 
-Gin中的中间件必须是一个`gin.HandlerFunc`类型。例如：func StatCost() gin.HandlerFunc {}
+Gin中的中间件必须是一个`gin.HandlerFunc`类型。例如：
+
+```go
+func StatCost() gin.HandlerFunc {}
+```
 
 ### 记录接口耗时的中间件
 
@@ -995,7 +997,7 @@ r.GET("/hello", func(c *gin.Context) {
 
 当在中间件或`handler`中启动新的`goroutine`时，**不能使用**原始的上下文（c *gin.Context），必须使用其只读副本（`c.Copy()`）。
 
-```
+```go
 go funcXX(c.Copy())
 ```
 
@@ -1237,8 +1239,6 @@ func homeHandler(c *gin.Context) {
 
 # Cookie和Session
 
-## Cookie
-
 **Cookie的由来**
 
 HTTP协议是无状态的，这就存在一个问题。
@@ -1341,7 +1341,7 @@ func main() {
 
 ## Session
 
-### Session的由来
+**Session的由来**
 
 Cookie虽然在一定程度上解决了“保持状态”的需求，但是由于Cookie本身最大支持4096字节，以及Cookie本身保存在客户端，可能被拦截或窃取，因此就需要有一种新的东西，它能支持更多的字节，并且他保存在服务器，有较高的安全性。这就是`Session`。
 

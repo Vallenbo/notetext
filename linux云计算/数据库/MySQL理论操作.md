@@ -6,28 +6,28 @@
 | 数据库管理系统 | 操纵和管理数据库的大型软件                                | DataBase Management System (DBMS) |
 | SQL操作        | 关系型数据库的编程语言，定义了-套操作关系型数据库统一标准 | Structured Query Language (SQL)   |
 
+**概述**
+
+关系型数据库(RDBMS)
+
+- 概念：建立在关系模型基础上，由多张相互连接的二维表组成的数据库。
 
 
-# 概述
+- 特点：1、使用表存储数据，格式统一，便于维护
 
-- 关系型数据库(RDBMS)
 
-​		概念：建立在关系模型基础上，由多张相互连接的二维表组成的数据库。
+​			2、使用SQL语言操作，标准统使用方便
 
-​		特点：1、使用表存储数据，格式统一，便于维护
-
-​					2、使用SQL语言操作，标准统使用方便
-
-<img src="./assets/image-20230523094911583.png" alt="image-20230523094911583" style="zoom：50%;" />
+<img src="./assets/image-20230523094911583.png" alt="image-20230523094911583" style="zoom: 50%;" />
 
 # ==基础篇==
 
 # 通用语法及分类
 
-- DDL：（Data Definition Language）数据定义语言，用来定义数据库对象（数据库、表、字段）
-- DML：（Data Manipulation Language）数据操作语言，用来对数据库表中的数据进行增删改
-- DQL：（Data Query Language）数据查询语言，用来查询数据库中表的记录
-- DCL：（Data Control Language）数据控制语言，用来创建数据库用户、控制数据库的控制权限
+- DDL：（Data **Definition** Language）数据定义语言，用来定义数据库对象（数据库、表、字段）
+- DML：（Data **Manipulation** Language）数据操作语言，用来对数据库表中的数据进行**增删改**
+- DQL：（Data **Query** Language）数据查询语言，用来查询数据库中表的记录
+- DCL：（Data **Control** Language）数据控制语言，用来创建数据库用户、控制数据库的控制权限
 
 ## DDL（数据定义语言）
 
@@ -129,7 +129,7 @@ CREATE TABLE 表名(
 用来查询数据库中表的记录。语法：
 
 ```mysql
-SELECT	字段列表
+SELECT		字段列表
 FROM		表名字段
 WHERE		条件列表
 GROUP BY	分组字段列表
@@ -304,19 +304,20 @@ FROM -> WHERE -> GROUP BY -> SELECT -> ORDER BY -> LIMIT
 
 ### 管理用户
 
-查询用户：
+```sh
+# 查询用户
+USER mysql;
+SELECT * FROM user;
 
-`USER mysql;`
-`SELECT * FROM user;`
+# 创建用户
+CREATE USER '用户名'@'主机名' IDENTIFIED BY '密码';
 
-创建用户：
-`CREATE USER '用户名'@'主机名' IDENTIFIED BY '密码';`
+# 修改用户密码
+ALTER USER '用户名'@'主机名' IDENTIFIED WITH mysql_native_password BY '新密码';
 
-修改用户密码：
-`ALTER USER '用户名'@'主机名' IDENTIFIED WITH mysql_native_password BY '新密码';`
-
-删除用户：
-`DROP USER '用户名'@'主机名';`
+# 删除用户
+DROP USER '用户名'@'主机名';
+```
 
 例子：
 
@@ -352,14 +353,13 @@ drop user 'test'@'localhost'; -- 删除用户
 
 更多权限请看[权限一览表](#权限一览表 "权限一览表")
 
-查询权限：
-`SHOW GRANTS FOR '用户名'@'主机名';`
+```sh
+查询权限：SHOW GRANTS FOR '用户名'@'主机名';
+授予权限：GRANT 权限列表 ON 数据库名.表名 TO '用户名'@'主机名';
+撤销权限：REVOKE 权限列表 ON 数据库名.表名 FROM '用户名'@'主机名';
+```
 
-授予权限：
-`GRANT 权限列表 ON 数据库名.表名 TO '用户名'@'主机名';`
 
-撤销权限：
-`REVOKE 权限列表 ON 数据库名.表名 FROM '用户名'@'主机名';`
 
 #### 注意事项
 
@@ -582,6 +582,10 @@ alter table emp add constraint fk_emp_dept_id foreign key(dept_id) references de
 消除无效笛卡尔积：
 `select * from employee,dept where employee.dept = dept.id;`
 
+[数据库表练习脚本](https://gitee.com/mikoto-10032/database-domesql-script.git)
+1、进入MySQL数据库，创建并选择testDB数据库。
+2、使用source doem.sql 执行脚本，第一次执行会出现删除表失败的提示，属于正常现象，因为你数据库中没有这些表。
+
 ## 内连接查询
 
 内连接查询的是两张表交集的部分
@@ -592,11 +596,16 @@ alter table emp add constraint fk_emp_dept_id foreign key(dept_id) references de
 
 ```mysql
 -- 例子：查询员工姓名，及关联的部门的名称
+select e.name，d.name from employee ,dept where employee.dept = dept.id; 
 select e.name，d.name from employee as e,dept as d where e.dept = d.id; -- 隐式
 select e.name，d.name from employee as e inner join dept as d on e.dept = d.id; -- 显式
 ```
 
 ## 外连接查询
+
+```sql
+LEFT/RIGHT  [OUTER] JOIN ... on ...
+```
 
 左外连接：
 	查询左表所有数据，以及两张表交集部分数据
@@ -613,8 +622,7 @@ select e.name，d.name from employee as e inner join dept as d on e.dept = d.id;
 
 ```mysql
 select e.*,d.name from employee as e left outer join dept as d on e.dept = d.id; -- 左
-select d.name， e.* from dept d left outer join emp e on e.dept = d.id;  -- 这条语句与下面的语句效果一样
-
+select d.name,e.* from dept d left outer join emp e on e.dept = d.id;  -- 这条语句与下面的语句效果一样
 select d.name,e.* from employee as e right outer join dept as d on e.dept = d.id; -- 右
 ```
 
@@ -622,7 +630,7 @@ select d.name,e.* from employee as e right outer join dept as d on e.dept = d.id
 
 ## 自连接查询
 
-当前表与自身的连接查询，自连接必须使用表别名
+当前表与自身的连接查询，**自连接必须使用表别名**
 
 语法：`SELECT 字段列表 FROM 表A 别名A JOIN 表A 别名B ON 条件 ...;`
 自连接查询，可以是内连接查询，也可以是外连接查询
@@ -632,10 +640,8 @@ select d.name,e.* from employee as e right outer join dept as d on e.dept = d.id
 例子：
 
 ```mysql
--- 查询员工及其所属领导的名字
-select a.name， b.name from employee a， employee b where a.manager = b.id;
--- 没有领导的也查询出来
-select a.name， b.name from employee a left join employee b on a.manager = b.id;
+select a.name， b.name from employee a, employee b where a.managerid = b.id;		-- 查询员工及其所属领导的名字
+select a.name， b.name from employee a left join employee b on a.managerid = b.id;	-- 没有领导的也查询出来
 ```
 
 ## 联合查询 union， union all
@@ -663,7 +669,7 @@ select * from emp where age > 50;
 ## 子查询/嵌套查询
 
 概念：SQL语句中嵌套SELECT语句，称嵌套查询/子查询。
-		`SELECT * FROM t1 WHERE column1 = (SELECT column1 FROM t2);`
+	`SELECT * FROM t1 WHERE column1 = (SELECT column1 FROM t2);`
 
 > 子查询外部的语句可以是 INSERT / UPDATE / DELETE / SELECT 的任何一个
 
@@ -758,7 +764,7 @@ select e.*， d.* from (select * from employee where entrydate > '2006-01-01') a
 ```mysql
 select * from account where name = '张三'; -- 1. 查询张三账户余额
 update account set money = money - 1000 where name = '张三'; -- 2. 将张三账户余额-1000
-模拟sql语句错误 -- 此语句出错后张三钱减少但是李四钱没有增加
+# 模拟sql语句错误 -- 此语句出错后张三钱减少但是李四钱没有增加
 update account set money = money + 1000 where name = '李四'; -- 3. 将李四账户余额+1000
 
 SELECT @@AUTOCOMMIT; -- 查看事务提交方式
@@ -794,10 +800,10 @@ commit;
 
 - 原子性(Atomicity)：事务是不可分割的最小操作单元，要么全部成功，要么全部失败
 - 一致性(Consistency)：事务完成时，必须使所有数据都保持一致状态
-- 隔离性(Isolation)：数据库系统提供的隔离机制，保证事务在不受外部并发操作影响的独立环境下运行
+- 隔离性(Isolation)：数据库系统提供的隔离机制，保证事务在不受外部**并发操作影响**的独立环境下运行
 - 持久性(Durability)：事务一旦提交或回滚，它对数据库中的数据的改变就是永久的
 
-## 并发事务
+## 并发事务问题
 
 | 问题  | 描述  |
 | ------------ | ------------ |
@@ -951,11 +957,16 @@ MySQL的慢查询日志默认没有开启，需要在MySQL的配置文件（/etc
 
 ### 开启慢查询日志开关
 
-​	slow_query_log=1
+```sh
+slow_query_log=1
+```
 
 #设置慢查询日志的时间为2秒，SQL语句执行时间超过2秒，就会视为慢查询，记录慢查询日志
 
-​	long_query_time=2
+```sh
+long_query_time=2
+```
+
 更改后记得重启MySQL服务，日志文件位置：/var/lib/mysql/localhost-slow.log
 
 查看慢查询日志开关状态：
@@ -1039,6 +1050,14 @@ EXPLAIN 各字段含义：
 <img src="./assets/image-20230525094458763.png" alt="image-20230525094458763" style="zoom: 33%;" />
 红黑树也存在大数据量情况下，层级较深，检索速度慢的问题。
 
+红黑树是一种自平衡二叉搜索树，它确保树的高度始终保持在对数级别，从而保证了插入、删除和查找操作的时间复杂度为 (O(\log n))。红黑树通过以下规则来维持平衡：
+
+1. **节点是红色或黑色**：每个节点要么是红色，要么是黑色。
+2. **根节点是黑色**：树的根节点必须是黑色。
+3. **所有叶子节点（NIL节点）是黑色**：叶子节点是指树的末端节点，通常是空节点（NIL），这些节点被认为是黑色。
+4. **红色节点的子节点必须是黑色**：红色节点不能有红色的子节点（即红色节点不能直接连接红色节点）。
+5. **从任一节点到其每个叶子的所有路径都包含相同数目的黑色节点**：这确保了没有一条路径会比其他路径长出两倍，从而保证了树的平衡。
+
 ### B-Tree (多路平衡查找树)
 
 为了解决上述问题，可以使用 B-Tree 结构。
@@ -1061,6 +1080,11 @@ B-Tree (多路平衡查找树) 以一棵最大度数（max-degree，指一个节
 
 以一颗最大度数(max-degree) 为4 (4阶)的b+tree为例:
 
+与 B-Tree 的区别：
+
+- 所有的数据都会出现在叶子节点
+- 叶子节点形成一个单向链表
+
 <img src="./assets/image-20230525100039218.png" alt="image-20230525100039218" style="zoom: 50%;" />
 
 插入100 65 169 368 900 556 780 35215 1200 234 888 158 90 1000 88 120 268 250数据为例。
@@ -1068,11 +1092,6 @@ B-Tree (多路平衡查找树) 以一棵最大度数（max-degree，指一个节
 <img src="./assets/image-20230525100353196.png" alt="image-20230525100353196" style="zoom: 50%;" />
 
 > 演示地址：https：//www.cs.usfca.edu/~galles/visualization/BPlusTree.html
-
-与 B-Tree 的区别：
-
-- 所有的数据都会出现在叶子节点
-- 叶子节点形成一个单向链表
 
 MySQL 索引数据结构对经典的 B+Tree 进行了优化。在原 B+Tree 的基础上，增加一个指向相邻叶子节点的链表指针，就形成了带有顺序指针的 B+Tree，提高区间访问的性能。
 
@@ -1113,7 +1132,7 @@ MySQL 索引数据结构对经典的 B+Tree 进行了优化。在原 B+Tree 的�
 | 常规索引  | 快速定位特定数据  | 可以有多个  |   |
 | 全文索引  | 全文索引查找的是文本中的关键词，而不是比较索引中的值  | 可以有多个  | FULLTEXT  |
 
-在 InnoDB 存储引擎中，根据索引的存储形式，又可以分为以下两种：
+在 InnoDB 存储引擎中，**根据索引的存储形式**，又可以分为以下两种：
 
 | 分类  | 含义  | 特点  |
 | ------------ | ------------ | ------------ |
@@ -1524,10 +1543,6 @@ GRANT 和 REVOKE 允许的动态权限
 - HeidiSQL(免费)： http：//www.heidisql.com/
 - phpMyAdmin(免费)： https：//www.phpmyadmin.net/
 - SQLyog： https：//sqlyog.en.softonic.com/
-
-# 安装
-
-
 
 
 
