@@ -8,7 +8,7 @@
 
 由于这些应用比较复杂，并且搭建时涉及的资源文件比较多，因此使用传统的管理方式显得很麻烦，我 们需要一种简单的方式就可以部署、管理k8s上的比较复杂的应用，在k8s中，可以使用包管理工具Operator和Helm来管理比较复杂的中 间件，本章的内容就是使用k8s包管理工具将比较复杂的中间件部署至k8s。
 
-## 传统架构如何管理中间件集群
+# 传统架构如何管理中间件集群
 
 使用Kubernetes部署中间件集群之前，我们先来回顾一下，在传统架构中是如何管理中间件集群的。
 
@@ -34,9 +34,13 @@
 
 但是在k8s中，可以利用k8s的特性非常方便且迅速地启动一个对应的集群。接下来讲解如何在k8s中部署相关的中间件。
 
-# [Operator](https://kubernetes.io/zh-cn/docs/concepts/extend-kubernetes/operator/)
 
-[OperatorHub.io | The registry for Kubernetes Operators](https://operatorhub.io/)
+
+# Kubernetes如何管理中间件集群
+
+在k8s中，可以使用k8s的包管理工具非常方便地搭建一个中间件集群，最为常用的包管理工具还是以Operator和Helm为主，首先我 们来简单看一下Operator和Helm的区别。
+
+## Operator
 
 Operator 是一种用于管理复杂应用程序的自定义控制器。它们以自动化的方式扩展了 Kubernetes API，使您能够使用自定义资源来描述和管理应用程序。Operator 通过结合自定义控制循环和自定义资源定义（CRD）来实现这一点。
 
@@ -44,11 +48,7 @@ Operator 的核心思想是将人工操作应用程序的知识和经验转化�
 
 通过创建自定义资源定义（CRD），Operator 允许用户定义新的资源类型，并为这些资源类型编写自定义控制器来实现对应的操作。这样一来，用户可以利用 Kubernetes 的控制循环来自动化管理他们的应用程序，从而减少了手动操作的需求，提高了可靠性和一致性。
 
-## Kubernetes如何管理中间件集群
-
-在k8s中，可以使用k8s的包管理工具非常方便地搭建一个中间件集群，最为常用的包管理工具还是以Operator和Helm为主，首先我 们来简单看一下Operator和Helm的区别。
-
-### Operator和Helm的区别
+## Operator和Helm的区别
 
 简而言之，包管理工具就是把相关文件的定义统一管理，然后可以很方便地通过这些工具管理比较复杂的应用，比如MyS?L集群、Redis集群等，实 现一键创建集群、扩容、备份等。当然，公司内开发的应用程序也可以通过Kubernetes的包管理工具进行管理，目前常用的两种包管理工具是Operator 和Helm，类似的还有Kustomize、CNAB等。
 
@@ -80,7 +80,7 @@ Operator更倾向于管理复杂的有状态服务，比如MySQL集群、Redis�
 
 **而像这类一键式搭建业务系统的需求，编写Helm要比Operator简单很多，但是如果想要实现更多、更复杂的逻辑，Operator可能更为合适。**
 
-### Kubernetes管理中间件集群的流程
+## Kubernetes管理中间件集群的流程
 
 之前我们已经介绍了传统架构管理中间件集群的流程，接下来介绍Kubernetes是如何利用包管理工具来管理中间件集群的。
 
@@ -106,37 +106,33 @@ Operator更倾向于管理复杂的有状态服务，比如MySQL集群、Redis�
 
 由此看来，Helm和Operator可以很方便地实现中间件集群的管理和维护。接下来我们通过几个简单的例子实践一下Helm和Operator的使用。
 
-# 3. Operator的使用
+# [Operator的使用](https://kubernetes.io/zh-cn/docs/concepts/extend-kubernetes/operator/)
+
+[OperatorHub.io | The registry for Kubernetes Operators](https://operatorhub.io/)
 
 ## 3.1 使用Operator安装Redis集群
 
 本小节演示的Operator是由UCloud开源的一个项目。
 
-项目地址
-
-https://github.com/ucloud/redis-cluster-operator，
-
-接下来根据前文提到的流程创建一个具有6个实例的Redis集群。
+[项目地址](https://github.com/ucloud/redis-cluster-operator)，接下来根据前文提到的流程创建一个具有6个实例的Redis集群。
 
 首先需要下载该项目至服务器：
 
-```
+```sh
 $ git clone https://github.com/ucloud/redis-cluster-operator.git
 $ cd redis-cluster-operator
 ```
 
-
-
 之后创建对应的CRD，然后就可以通过这些CRD声明一个创建Redis集群的YAML文件：
 
-```
+```shs
 $ kubectl create -f deploy/crds/redis.kun_distributedredisclusters_crd.yaml
 $ kubectl create -f deploy/crds/redis.kun_redisclusterbackups_crd.yaml
 ```
 
 假设需要将Redis集群部署至redis-cluster命名空间，需要先创建redis-cluster命名空间和对应的一些权限，并且将Operator控制器安装至该 命名空间：
 
-```
+```sh
 $ kubectl create ns redis-cluster
 $ kubectl create -f deploy/service_account.yaml -n redis-cluster
 $ kubectl create -f deploy/namespace/role.yaml -n redis-cluster
@@ -146,7 +142,7 @@ $ kubectl create -f deploy/namespace/operator.yaml -n redis-cluster
 
 查看Redis Operator的Pod状态：
 
-```
+```sh
 $ kubectl get pod -n redis-cluster
 NAME                                      READY   STATUS    RESTARTS   AGE
 redis-cluster-operator-675ccbc697-c6m2t   1/1     Running   0          37s
@@ -154,7 +150,7 @@ redis-cluster-operator-675ccbc697-c6m2t   1/1     Running   0          37s
 
 接下来通过一个自定义类型的YAML文件一键式启动一个三主三从的节点，在启动之前先来看一下这个文件的内容：
 
-```
+```sh
 $ cat deploy/example/redis.kun_v1alpha1_distributedrediscluster_cr.yaml
 apiVersion: redis.kun/v1alpha1
 kind: DistributedRedisCluster
@@ -169,8 +165,6 @@ spec:
   clusterReplicas: 1
   image: redis:5.0.4-alpine
 ```
-
-
 
 注意看该文件的kind和apiVersion，在标准的Kubernetes中，是没有apiVersion为redis.kun/v1alpha1、kind为DistributedRedisCluster这种类 型的资源的。
 
@@ -190,7 +184,7 @@ spec:
 
 在明白其配置含义后，通过一条命令即可创建一个Redis集群：
 
-```
+```sh
 $ kubectl create -f deploy/example/redis.kun_v1alpha1_distributedrediscluster_cr.yaml -n redis-cluster
 distributedrediscluster.redis.kun/example-distributedrediscluster created
 ```
@@ -199,7 +193,7 @@ distributedrediscluster.redis.kun/example-distributedrediscluster created
 
 创建完成后，可以通过查看自定义distributedrediscluster资源的状态来判断Redis集群是否完成了初始化：
 
-```
+```sh
 $ kubectl get distributedrediscluster -n redis-cluster
 NAME                              MASTERSIZE   STATUS    AGE
 example-distributedrediscluster   3            Scaling   42s
@@ -209,7 +203,7 @@ example-distributedrediscluster   3            Scaling   42s
 
 
 
-```
+```sh
 $ kubectl get pod -n redis-cluster -w
 NAME                                      READY   STATUS    RESTARTS   AGE
 drc-example-distributedrediscluster-0-0   1/1     Running   0          7m3s
@@ -233,7 +227,7 @@ example-distributedrediscluster   3            Healthy   7m7s
 
 在创建Redis集群后，会创建如下几个Service：
 
-```
+```sh
 $ kubectl get svc -n redis-cluster
 NAME                                TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)              AGE
 example-distributedrediscluster     ClusterIP   10.104.160.70   <none>        6379/TCP,16379/TCP   7m52s
@@ -247,7 +241,7 @@ redis-cluster-operator-metrics      ClusterIP   10.101.25.137   <none>        83
 
 接下来我们可以使用任意具有Redis客户端工具的Pod进行连接测试，比如使用drc-example-distributedrediscluster-0-0这个Pod进行测试，首先 登录至该Pod（由于Redis客户端和Redis集群是同一个Namespace，因此.redis-cluster可以省略）：
 
-```
+```sh
 $ kubectl exec -it drc-example-distributedrediscluster-0-0 -n redis-cluster -- sh
 /data # redis-cli -h example-distributedrediscluster
 example-distributedrediscluster:6379> info
@@ -280,7 +274,7 @@ repl_backlog_histlen:728
 
 Redis集群采用分片机制，每个数据插入时会选择一个对应的槽存放数据，如果该槽位不在这个已经连接的实例上，就需要进行“下一 跳”，也就是会连接到具有该槽位的节点上，再写入数据，当然如果该槽位正好位于正在连接的这个实例上，就会直接写入数据。
 
-```
+```sh
 /data # redis-cli -h example-distributedrediscluster
 example-distributedrediscluster:6379> set a 1
 (error) MOVED 15495 10.0.20.225:6379
@@ -288,7 +282,7 @@ example-distributedrediscluster:6379> set a 1
 
 接下来连接到10.0.20.225:6379这个实例上，尝试写入数据
 
-```
+```sh
 /data # redis-cli -h 10.0.20.225
 10.0.20.225:6379> set a 1
 OK
@@ -316,7 +310,7 @@ OK
 
 比如将集群扩容为具有4个Master节点的集群：
 
-```
+```sh
 $ grep "master" deploy/example/redis.kun_v1alpha1_distributedrediscluster_cr.yaml
   masterSize: 4
 
@@ -326,7 +320,7 @@ distributedrediscluster.redis.kun/example-distributedrediscluster replaced
 
 再次查看Pod，会发现创建了两个新的Pod：
 
-```
+```sh
 $ kubectl get pod -n redis-cluster
 NAME                                      READY   STATUS    RESTARTS   AGE
 drc-example-distributedrediscluster-0-0   1/1     Running   0          54m
@@ -342,7 +336,7 @@ redis-cluster-operator-675ccbc697-c6m2t   1/1     Running   0          61m
 
 此时集群的状态又会变成Scaling然后变成Healthy状态：
 
-```
+```sh
 $ kubectl get distributedredisclusters -n redis-cluster
 NAME                              MASTERSIZE   STATUS    AGE
 example-distributedrediscluster   4            Healthy   55m
@@ -358,7 +352,7 @@ example-distributedrediscluster   4            Healthy   55m
 
 如果只是用来测试和学习，在操作完成后可以清理该集群，清理步骤较传统架构简单，只需要将安装的create改成delete即可：
 
-```
+```sh
 $ kubectl delete -f deploy/example/redis.kun_v1alpha1_distributedrediscluster_cr.yaml -n redis-cluster
 $ kubectl delete -f deploy/cluster/operator.yaml -n redis-cluster
 $ kubectl delete -f deploy/cluster/cluster_role_binding.yaml -n redis-cluster
@@ -371,7 +365,7 @@ $ kubectl delete ns redis-cluster
 
 如果以后不需要再创建Redis集群，可以把CRD也删除：
 
-```
+```sh
 $ kubectl delete -f deploy/crds/redis.kun_distributedredisclusters_crd.yaml
 $ kubectl delete -f deploy/crds/redis.kun_redisclusterbackups_crd.yaml
 ```
@@ -380,7 +374,7 @@ $ kubectl delete -f deploy/crds/redis.kun_redisclusterbackups_crd.yaml
 
 # [Helm](https://helm.sh/zh/)
 
-​	Helm是一个k8s应用编排工具，它允许你轻松管理和部署Kubernetes应用程序。Helm通过使用称为Charts的预定义模板来简化Kubernetes应用程序的部署和管理。Chart包含了一组Kubernetes对象定义，可以描述一个应用程序的完整部署和资源需求，包括Deployment、Service、ConfigMap、Secret等。使用Helm，你可以轻松地安装、升级、卸载和回滚Kubernetes应用程序。
+​	Helm是一个k8s**应用编排工具**，它允许你轻松管理和部署Kubernetes应用程序。Helm通过使用称为Charts的预定义模板来简化Kubernetes应用程序的部署和管理。Chart包含了一组Kubernetes对象定义，可以描述一个应用程序的**完整部署和资源需求**，包括Deployment、Service、ConfigMap、Secret等。使用Helm，你可以轻松地安装、升级、卸载和回滚Kubernetes应用程序。
 
 ​	同时，Helm还提供了一些便捷的功能，如依赖管理、全局变量、条件渲染等，可以帮助你更好地管理应用程序的部署。Helm有两个主要的组件：Helm客户端（helm）和Helm服务器（Tiller）。Helm客户端可以在本地运行，而Tiller则运行在Kubernetes集群中，并负责将Charts转换为Kubernetes对象。
 
@@ -412,7 +406,7 @@ $ kubectl delete -f deploy/crds/redis.kun_redisclusterbackups_crd.yaml
 
 ## 使用charts
 
-### 4.1 搜索 charts
+### 搜索 charts
 
 Helm 自带一个强大的搜索命令，可以用来从两种来源中进行搜索：
 
@@ -1010,7 +1004,7 @@ $ kubectl -n kube-dashboard describe secret $(kubectl -n monitor get secret | gr
 
 通过上述演示也能看出来，无论是什么中间件， 部署步骤都是一致的，基本没有太大的区别。
 
-Operator就是创建CRD和控制 器，然后创建自定义资源，Helm就是找到对应的包，然后通过install安装。
+Operator就是创建CRD和控制器，然后创建自定义资源，Helm就是找到对应的包，然后通过install安装。
 
 将一些中间件服务部署到Kubernetes中，可以很大程度地降低应用部署 的复杂度，同时可以提升部署的效率。如果企业内部有完善的存储平台供 Kubernetes使用，基本上可以将任何中间件部署至Kubernetes集群，也就是 实现“一切皆容器”的思想。
 

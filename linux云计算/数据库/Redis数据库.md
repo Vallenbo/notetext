@@ -236,7 +236,7 @@ redis-cli -h 10.16.244.3 -p 6379		# -h `redis服务器ip` -p `redis服务器port
 
 ![img](assets/139239-20191126141006657-1969131669.png)
 
-```
+```sh
 redis可以理解成一个全局的大字典，key就是数据的唯一标识符。根据key对应的值不同，可以划分成5个基本数据类型。
 1. string类型:
 	字符串类型，是 Redis 中最为基础的数据存储类型，它在 Redis 中是二进制安全的，也就是byte类型。
@@ -544,6 +544,7 @@ redis中所有的数据都是通过key（键）来进行操作，这里我们学
 ```bash
 keys pattern
 keys *			 # 查看所有键
+keys *	--raw	 # 显示中文，查看所有键
 ```
 
 例子：
@@ -2488,8 +2489,6 @@ aof 有 重写功能，只会保留最后一条修改的命令。
 - 如果不 Enable AOF ，仅靠 Master-Slave Repllcation 实现高可用也可以，能省掉一大笔 IO ，也减少了 rewrite 时带来的系统波动。代价是如果 Master/Slave 同时宕掉，会丢失十几分钟的数据，启动脚本也要比较两个 Master/Slave 中的 RDB 文件，载入较新的那个，微博就是这种架构
 
 # 消息模式
-
-## Redis 订阅发布
 
 Redis 发布订阅（pub/sub）是一种消息通信模式：发送者发（pub）送消息，订阅者(sub)接收消息。
 

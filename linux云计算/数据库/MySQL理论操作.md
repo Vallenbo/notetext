@@ -286,6 +286,7 @@ SELECT * FROM employee ORDER BY age ASC， entrydate DESC;
 ```mysql
 SELECT * FROM employee LIMIT 0， 10; -- 查询第一页数据，展示10条
 SELECT * FROM employee LIMIT 10， 10; -- 查询第二页
+SELECT name FROM products ORDER BY sales DESC LIMIT 10; -- 查询销量最好的前十个商品名称
 ```
 
 #### 注意事项
@@ -693,10 +694,9 @@ select * from emp where age > 50;
 常用操作符：- < > > >= < <=。例子：
 
 ```mysql
-select id from dept where name = '销售部'; -- 查询销售部所有员工
-select * from employee where dept = 4; -- 根据销售部部门ID，查询员工信息
--- 合并（子查询）
-select * from employee where dept = (select id from dept where name = '销售部');
+select id from dept where name = '销售部'; 	-- 查询销售部所有员工
+select * from employee where dept = 4;    	  -- 根据销售部部门ID，查询员工信息
+select * from employee where dept = (select id from dept where name = '销售部');	-- 合并（子查询）
 
 -- 查询xxx入职之后的员工信息
 select * from employee where entrydate > (select entrydate from employee where name = 'xxx');
@@ -796,12 +796,18 @@ update account set money = money + 1000 where name = '李四';
 commit;
 ```
 
-## 四大特性ACID
+## 事务四大特性ACID
 
-- 原子性(Atomicity)：事务是不可分割的最小操作单元，要么全部成功，要么全部失败
-- 一致性(Consistency)：事务完成时，必须使所有数据都保持一致状态
-- 隔离性(Isolation)：数据库系统提供的隔离机制，保证事务在不受外部**并发操作影响**的独立环境下运行
-- 持久性(Durability)：事务一旦提交或回滚，它对数据库中的数据的改变就是永久的
+- 原子性(Atomicity)：事务是不可分割的最小操作单元，**事务**要么全部成功，要么全部失败
+
+  **示例**：假设有一个银行转账操作，涉及从一个账户扣款并向另一个账户存款。原子性保证了这两个操作要么都成功，要么都失败，不会出现只扣款不存款的情况。
+
+- 一致性(Consistency)：**事务**执行前后，数据库必须保持一致的状态。事务的执行不能破坏数据库的完整性约束。
+
+​	**示例**：在银行转账的例子中，一致性保证了转账前后，两个账户的总金额保持不变。
+
+- 隔离性(Isolation)：多个**事务**并发执行时，一个事务的执行不应影响其他事务的执行。隔离性通过**锁机制**来实现。
+- 持久性(Durability)：**事务**一旦提交或回滚，它对数据库中的数据的改变就是永久的
 
 ## 并发事务问题
 

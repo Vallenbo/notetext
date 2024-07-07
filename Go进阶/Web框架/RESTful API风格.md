@@ -1,4 +1,4 @@
-## RESTful API风格
+# RESTful API风格
 
 REST与技术无关，代表的是一种软件架构风格，REST是Representational State Transfer的简称，中文翻译为“表征状态转移”或“表现层状态转化”。
 

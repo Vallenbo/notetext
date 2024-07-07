@@ -1,6 +1,4 @@
-# 常用标准库
-
-## 数学计算
+# 常用标准库 - 数学计算
 
 数学常量  
 
@@ -57,7 +55,7 @@ math.Pow10(2)	//10^x，100
 math.Exp(2)	//e^x，7.389
 ```
 
-随机数生成器  
+rand随机数生成器  
 
 ```Go
 //创建一个Rand
@@ -86,5 +84,4 @@ rand.Shuffle(len(arr), func(i, j int) { //随机打乱一个给定的slice
 })
 fmt.Println(arr)
 ```
-
 
