@@ -530,7 +530,7 @@ release "nginx" uninstalled
 │   ├── service.yaml
 │   └── tests
 │       └── test-connection.yaml
-└── values.yaml #配置全局变量或者一些参数
+└── values.yaml # 配置全局变量或者一些参数
 ```
 
 # Helm自定义 Chart

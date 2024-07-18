@@ -948,73 +948,7 @@ Memory 引擎的表数据是存储在内存中的，受硬件问题、断电问�
 
 日志和电商中的足迹和评论适合使用 MyISAM 引擎，缓存适合使用 Memory 引擎。
 
-# 性能分析
 
-## 查看执行频次
-
-查看当前数据库的 INSERT， UPDATE， DELETE， SELECT 访问频次：
-`SHOW GLOBAL STATUS LIKE 'Com_______';` 或者 `SHOW SESSION STATUS LIKE 'Com_______';`
-例：`show global status like 'Com_______'`
-
-## 慢查询日志
-
-慢查询日志记录了所有执行时间超过指定参数（long_query_time，单位：秒，默认10秒）的所有SQL语句的日志。
-MySQL的慢查询日志默认没有开启，需要在MySQL的配置文件（/etc/my.cnf）中配置如下信息：
-
-### 开启慢查询日志开关
-
-```sh
-slow_query_log=1
-```
-
-#设置慢查询日志的时间为2秒，SQL语句执行时间超过2秒，就会视为慢查询，记录慢查询日志
-
-```sh
-long_query_time=2
-```
-
-更改后记得重启MySQL服务，日志文件位置：/var/lib/mysql/localhost-slow.log
-
-查看慢查询日志开关状态：
-`show variables like 'slow_query_log';`
-
-## profile
-
-show profile 能在做SQL优化时帮我们了解时间都耗费在哪里。通过 have_profiling 参数，能看到当前 MySQL 是否支持 profile 操作：
-`SELECT @@have_profiling;`
-profiling 默认关闭，可以通过set语句在session/global级别开启 profiling：
-`SET profiling = 1;`
-查看所有语句的耗时：
-`show profiles;`
-查看指定query_id的SQL语句各个阶段的耗时：
-`show profile for query query_id;`
-查看指定query_id的SQL语句CPU的使用情况
-`show profile cpu for query query_id;`
-
-## explain
-
-EXPLAIN 或者 DESC 命令获取 MySQL 如何执行 SELECT 语句的信息，包括在 SELECT 语句执行过程中表如何连接和连接的顺序。
-语法：
-
-#直接在select语句之前加上关键字 explain / desc
-
-​	EXPLAIN SELECT 字段列表 FROM 表名 HWERE 条件;
-
-![image-20230708095543153](assets/image-20230708095543153.png)
-
-EXPLAIN 各字段含义：
-
-- id：select 查询的序列号，表示查询中执行 select 子句或者操作表的顺序（id相同，执行顺序从上到下；id不同，值越大越先执行）
-
-![image-20230708100643020](assets/image-20230708100643020.png)
-
-- select_type：表示 SELECT 的类型，常见取值有 SIMPLE（简单表，即不适用表连接或者子查询）、PRIMARY（主查询，即外层的查询）、UNION（UNION中的第二个或者后面的查询语句）、SUBQUERY（SELECT/WHERE之后包含了子查询）等
-- type：表示连接类型，性能由好到差的连接类型为 NULL、system、const、eq_ref、ref、range、index、all
-- possible_key：可能应用在这张表上的索引，一个或多个
-- Key：实际使用的索引，如果为 NULL，则没有使用索引
-- Key_len：表示索引中使用的字节数，该值为索引字段最大可能长度，并非实际使用长度，在不损失精确性的前提下，长度越短越好
-- rows：MySQL认为必须要执行的行数，在InnoDB引擎的表中，是一个估计值，可能并不总是准确的
-- filtered：表示返回结果的行数占需读取行数的百分比，filtered的值越大越好
 
 # 索引
 
@@ -1147,8 +1081,9 @@ MySQL 索引数据结构对经典的 B+Tree 进行了优化。在原 B+Tree 的�
 
 演示图：
 
-![大致原理](https：//dhc.pythonanywhere.com/media/editor/原理图_20220318194454880073.png "大致原理")
-![演示图](https：//dhc.pythonanywhere.com/media/editor/演示图_20220319215403721066.png "演示图")
+![演示图-1721263442860-2](./assets/演示图-1721263442860-2.png)
+
+![原理图-1721263427749-1](./assets/原理图-1721263427749-1.png)
 
 聚集索引选取规则：
 
@@ -1162,8 +1097,7 @@ MySQL 索引数据结构对经典的 B+Tree 进行了优化。在原 B+Tree 的�
 
 ```mysql
 select * from user where id = 10;
-select * from user where name = 'Arm';
--- 备注：id为主键，name字段创建的有索引
+select * from user where name = 'Arm';	-- 备注：id为主键，name字段创建的有索引
 ```
 
 答：第一条语句，因为第二条需要回表查询，相当于两个步骤。
@@ -1193,29 +1127,99 @@ select * from user where name = 'Arm';
 案例：
 
 ```mysql
--- name字段为姓名字段，该字段的值可能会重复，为该字段创建索引
-create index idx_user_name on tb_user(name);
--- phone手机号字段的值非空，且唯一，为该字段创建唯一索引
-create unique index idx_user_phone on tb_user (phone);
--- 为profession， age， status创建联合索引
-create index idx_user_pro_age_stat on tb_user(profession， age， status);
--- 为email建立合适的索引来提升查询效率
-create index idx_user_email on tb_user(email);
+create index idx_user_name on tb_user(name);	-- name字段为姓名字段，该字段的值可能会重复，为该字段创建索引
+create unique index idx_user_phone on tb_user (phone);	-- phone手机号字段的值非空，且唯一，为该字段创建唯一索引
+create index idx_user_pro_age_stat on tb_user(profession，age，status);-- 为profession，age，status创建联合索引
+create index idx_user_email on tb_user(email);	-- 为email建立合适的索引来提升查询效率
 
--- 删除索引
-drop index idx_user_email on tb_user;
+drop index idx_user_email on tb_user;	-- 删除索引
 ```
 
-## 使用规则
 
-### 最左前缀法则
+
+# 索引-性能分析
+
+## 查看执行频次
+
+查看当前数据库的 INSERT， UPDATE， DELETE， SELECT 访问频次：
+`SHOW GLOBAL STATUS LIKE 'Com_______';` 或者 `SHOW SESSION STATUS LIKE 'Com_______';`
+例：`show global status like 'Com_______'`
+
+## 慢查询日志
+
+慢查询日志记录了所有执行时间超过指定参数（long_query_time，单位：秒，默认10秒）的所有SQL语句的日志。
+MySQL的慢查询日志默认没有开启，需要在MySQL的配置文件（/etc/my.cnf）中配置如下信息：
+
+### 开启慢查询日志开关
+
+```sh
+slow_query_log=1
+```
+
+#设置慢查询日志的时间为2秒，SQL语句执行时间超过2秒，就会视为慢查询，记录慢查询日志
+
+```sh
+long_query_time=2
+```
+
+更改后记得重启MySQL服务，日志文件位置：/var/lib/mysql/localhost-slow.log
+
+查看慢查询日志开关状态：
+`show variables like 'slow_query_log';`
+
+## profile
+
+show profile 能在做SQL优化时帮我们了解时间都耗费在哪里。通过 have_profiling 参数，能看到当前 MySQL 是否支持 profile 操作：
+
+```sh
+`SELECT @@have_profiling;`
+profiling 默认关闭，可以通过set语句在session/global级别开启 profiling：
+`SET profiling = 1;`
+查看所有语句的耗时：
+`show profiles;`
+查看指定query_id的SQL语句各个阶段的耗时：
+`show profile for query query_id;`
+查看指定query_id的SQL语句CPU的使用情况
+`show profile cpu for query query_id;`
+```
+
+
+
+## explain
+
+EXPLAIN 或者 DESC 命令获取 MySQL 如何执行 SELECT 语句的信息，包括在 SELECT 语句执行过程中表如何连接和连接的顺序。
+语法：
+
+#直接在select语句之前加上关键字 explain / desc
+
+​	EXPLAIN SELECT 字段列表 FROM 表名 HWERE 条件;
+
+![image-20230708095543153](assets/image-20230708095543153.png)
+
+EXPLAIN 各字段含义：
+
+- id：select 查询的序列号，表示查询中执行 select 子句或者操作表的顺序（id相同，执行顺序从上到下；id不同，值越大越先执行）
+
+![image-20230708100643020](assets/image-20230708100643020.png)
+
+- select_type：表示 SELECT 的类型，常见取值有 SIMPLE（简单表，即不适用表连接或者子查询）、PRIMARY（主查询，即外层的查询）、UNION（UNION中的第二个或者后面的查询语句）、SUBQUERY（SELECT/WHERE之后包含了子查询）等
+- type：表示连接类型，性能由好到差的连接类型为 NULL、system、const、eq_ref、ref、range、index、all
+- possible_key：可能应用在这张表上的索引，一个或多个
+- Key：实际使用的索引，如果为 NULL，则没有使用索引
+- Key_len：表示索引中使用的字节数，该值为索引字段最大可能长度，并非实际使用长度，在不损失精确性的前提下，长度越短越好
+- rows：MySQL认为必须要执行的行数，在InnoDB引擎的表中，是一个估计值，可能并不总是准确的
+- filtered：表示返回结果的行数占需读取行数的百分比，filtered的值越大越好
+
+# 索引-使用规则
+
+## 最左前缀法则
 
 如果索引关联了多列（联合索引），要遵守最左前缀法则，最左前缀法则指的是查询从索引的最左列开始，并且不跳过索引中的列。
 如果跳跃某一列，索引将部分失效（后面的字段索引失效）。
 
 联合索引中，出现范围查询（<， >），范围查询右侧的列索引失效。可以用>=或者<=来规避索引失效问题。
 
-### 索引失效情况
+## 索引失效情况
 
 1. 在索引列上进行运算操作，索引将失效。如：`explain select * from tb_user where substring(phone， 10， 2) = '15';`
 2. 字符串类型字段使用时，不加引号，索引将失效。如：`explain select * from tb_user where phone = 17799990015;`，此处phone的值没有加引号
@@ -1223,43 +1227,50 @@ drop index idx_user_email on tb_user;
 4. 用 or 分割开的条件，如果 or 其中一个条件的列没有索引，那么涉及的索引都不会被用到。
 5. 如果 MySQL 评估使用索引比全表更慢，则不使用索引。
 
-### SQL 提示
+##  选择索引
 
-是优化数据库的一个重要手段，简单来说，就是在SQL语句中加入一些人为的提示来达到优化操作的目的。
+是优化数据库的一个重要手段，简单来说，就是在SQL语句中加入一些人为的**联合索引**来达到优化操作的目的。
 
+```sh
 例如，使用索引：
 `explain select * from tb_user use index(idx_user_pro) where profession="软件工程";`
 不使用哪个索引：
 `explain select * from tb_user ignore index(idx_user_pro) where profession="软件工程";`
 必须使用哪个索引：
-`explain select * from tb_user force index(idx_user_pro) where profession="软件工程";`
+`explain select * from tb_user force index(idx_user_pro) where profession="软件工程";
+```
 
 use 是建议，实际使用哪个索引 MySQL 还会自己权衡运行速度去更改，force就是无论如何都强制使用该索引。
 
-### 覆盖索引&回表查询
+## 覆盖索引&回表查询
 
 尽量使用覆盖索引（查询使用了索引，并且需要返回的列，在该索引中已经全部能找到），减少 select *。
 
+```sh
 explain 中 extra 字段含义：
 `using index condition`：查找使用了索引，但是需要回表查询数据
 `using where; using index;`：查找使用了索引，但是需要的数据都在索引列中能找到，所以不需要回表查询
+```
 
 如果在聚集索引中直接能找到对应的行，则直接返回行数据，只需要一次查询，哪怕是select \*；如果在辅助索引中找聚集索引，如`select id， name from xxx where name='xxx';`，也只需要通过辅助索引(name)查找到对应的id，返回name和name索引对应的id即可，只需要一次查询；如果是通过辅助索引查找其他字段，则需要回表查询，如`select id， name， gender from xxx where name='xxx';`
 
 所以尽量不要用`select *`，容易出现回表查询，降低效率，除非有联合索引包含了所有字段
 
-面试题：一张表，有四个字段（id， username， password， status），由于数据量大，需要对以下SQL语句进行优化，该如何进行才是最优方案：
+**面试题**：
+
+一张表，有四个字段（id， username， password， status），由于数据量大，需要对以下SQL语句进行优化，该如何进行才是最优方案：
 `select id， username， password from tb_user where username='itcast';`
 
 解：给username和password字段建立联合索引，则不需要回表查询，直接覆盖索引
 
-### 前缀索引
+## 前缀索引
 
 当字段类型为字符串（varchar， text等）时，有时候需要索引很长的字符串，这会让索引变得很大，查询时，浪费大量的磁盘IO，影响查询效率，此时可以只降字符串的一部分前缀，建立索引，这样可以大大节约索引空间，从而提高索引效率。
 
 语法：`create index idx_xxxx on table_name(columnn(n));`
 前缀长度：可以根据索引的选择性来决定，而选择性是指不重复的索引值（基数）和数据表的记录总数的比值，索引选择性越高则查询效率越高，唯一索引的选择性是1，这是最好的索引选择性，性能也是最好的。
 求选择性公式：
+
 ```mysql
 select count(distinct email) / count(*) from tb_user;
 select count(distinct substring(email， 1， 5)) / count(*) from tb_user;
@@ -1267,7 +1278,7 @@ select count(distinct substring(email， 1， 5)) / count(*) from tb_user;
 
 show index 里面的sub_part可以看到接取的长度
 
-### 单列索引&联合索引
+## 单列索引&联合索引
 
 单列索引：即一个索引只包含单个列
 联合索引：即一个索引包含了多个列
@@ -1277,7 +1288,7 @@ show index 里面的sub_part可以看到接取的长度
 `explain select id， phone， name from tb_user where phone = '17799990010' and name = '韩信';`
 这句只会用到phone索引字段
 
-#### 注意事项
+### 注意事项
 
 - 多条件联合查询时，MySQL优化器会评估哪个字段的索引效率更高，会选择该索引完成本次查询
 
@@ -1400,7 +1411,37 @@ InnoDB 的行锁是针对索引加的锁，不是针对记录加的锁，并且�
 `update student set no = '123' where id = 1;`，这句由于id有主键索引，所以只会锁这一行；
 `update student set no = '123' where name = 'test';`，这句由于name没有索引，所以会把整张表都锁住进行数据更新，解决方法是给name字段添加索引
 
+
+
+# 视图
+
+
+
+
+
+# 存储过程
+
+
+
+# 触发器
+
+
+
+
+
+# 锁
+
+
+
+
+
+
+
 # 数据类型
+
+
+
+
 
 ## 整型
 

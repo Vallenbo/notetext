@@ -716,7 +716,7 @@ gin_demo
 
 ```go
 func LoadShop(e *gin.Engine)  {
-	e.GET("/hello", helloHandler)
+  e.GET("/hello", helloHandler)
   e.GET("/goods", goodsHandler)
   e.GET("/checkout", checkoutHandler)
   ...
