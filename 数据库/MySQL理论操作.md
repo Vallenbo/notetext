@@ -1,14 +1,14 @@
 # 数据库相关概念
 
-| 名称           | 全称                                                      | 简称                              |
-| -------------- | --------------------------------------------------------- | --------------------------------- |
-| 数据库         | 存储数据的仓库，数据是有组织的进行存储                    | DataBase (DB )                    |
-| 数据库管理系统 | 操纵和管理数据库的大型软件                                | DataBase Management System (DBMS) |
-| SQL操作        | 关系型数据库的编程语言，定义了-套操作关系型数据库统一标准 | Structured Query Language (SQL)   |
+| 名称           | 全称                                                       | 简称                              |
+| -------------- | ---------------------------------------------------------- | --------------------------------- |
+| 数据库         | 存储数据的仓库，数据是有组织的进行存储                     | DataBase (DB )                    |
+| 数据库管理系统 | 操纵和管理数据库的大型软件                                 | DataBase Management System (DBMS) |
+| SQL操作        | 关系型数据库的编程语言，定义了一套操作关系型数据库统一标准 | Structured Query Language (SQL)   |
 
-**概述**
 
-关系型数据库(RDBMS)
+
+**关系型数据库(RDBMS)**
 
 - 概念：建立在关系模型基础上，由多张相互连接的二维表组成的数据库。
 
@@ -16,11 +16,44 @@
 - 特点：1、使用表存储数据，格式统一，便于维护
 
 
-​			2、使用SQL语言操作，标准统使用方便
+​			2、使用SQL语言操作，标准统一，使用方便
 
 <img src="./assets/image-20230523094911583.png" alt="image-20230523094911583" style="zoom: 50%;" />
 
+**数据模型**
+
+MySQL是关系型数据库，是基于二维表进行数据存储的，具体的结构图下:
+
+<img src="./assets/image-20240721113745203.png" alt="image-20240721113745203" style="zoom: 67%;" />
+
+- 我们可以通过MySQL客户端连接数据库管理系统DBMS，然后通过DBMS操作数据库。
+
+- 可以使用SQL语句，通过数据库管理系统操作数据库，以及操作数据库中的表结构及数据。
+
+- 一个数据库服务器中可以创建多个数据库，一个数据库中也可以包含多张表，而一张表中又可以包含多行记录。
+
+
+
 # ==基础篇==
+
+**SQL**
+
+全称 Structured Query Language，结构化查询语言。操作关系型数据库的编程语言，定义了一套操作关系型数据库统一**标准** 。
+
+**SQL 通用语法**
+
+在学习具体的SQL语句之前，先来了解一下SQL语言的同于语法。
+
+```sh
+1). SQL语句可以单行或多行书写，以分号结尾。
+2). SQL语句可以使用空格/缩进来增强语句的可读性。
+3). MySQL数据库的SQL语句不区分大小写，关键字建议使用大写。
+4). 注释：
+单行注释：-- 注释内容 或 # 注释内容
+多行注释：/* 注释内容 */
+```
+
+
 
 # 通用语法及分类
 
@@ -38,12 +71,12 @@
 查询所有数据库：
 `SHOW DATABASES;`
 查询当前数据库：
-`SELECT DATABASE();`
+`SELECT DATABASE ();`
 创建数据库：
 `CREATE DATABASE [IF NOT EXISTS] 数据库名 [DEFAULT CHARSET 字符集] [COLLATE 排序规则];`
 删除数据库：
 `DROP DATABASE [IF EXISTS] 数据库名;`
-使用数据库：
+使用/切换数据库：
 `USE 数据库名;`
 
 > 注意事项：UTF8字符集长度为3字节，有些符号占4字节，所以推荐用utf8mb4字符集
@@ -58,7 +91,7 @@
 `SHOW CREATE TABLE 表名;`
 
 创建表：
-```mysql
+```sql
 CREATE TABLE 表名(
 	字段1 字段1类型 [COMMENT 字段1注释]，
 	字段2 字段2类型 [COMMENT 字段2注释]，
@@ -66,6 +99,13 @@ CREATE TABLE 表名(
 	...
 	字段n 字段n类型 [COMMENT 字段n注释]
 )[COMMENT 表注释];
+
+create table tb_user(
+	id int comment '编号',
+	name varchar(50) comment '姓名',
+	age int comment '年龄',
+	gender varchar(1) comment '性别'
+) comment '用户表';
 ```
 **最后一个字段后面没有逗号**
 
@@ -118,7 +158,7 @@ CREATE TABLE 表名(
 
 修改数据：
 `UPDATE 表名 SET 字段名1 = 值1， 字段名2 = 值2， ... [WHERE 条件];`
-例：
+例：修改id为1的数据, 将name修改为小昭, gender修改为 女
 `UPDATE emp SET name = 'Jack' WHERE id = 1;`
 
 删除数据：
@@ -126,16 +166,16 @@ CREATE TABLE 表名(
 
 ## DQL（数据查询语言）
 
-用来查询数据库中表的记录。语法：
+用来查询数据库中表的记录。基本语法：
 
 ```mysql
 SELECT		字段列表
-FROM		表名字段
-WHERE		条件列表
-GROUP BY	分组字段列表
-HAVING		分组后的条件列表
-ORDER BY	排序字段列表
-LIMIT		分页参数
+	FROM		表名字段
+		WHERE		条件列表
+			GROUP BY	分组字段列表
+				HAVING		分组后的条件列表
+					ORDER BY	排序字段列表
+						LIMIT		分页参数
 ```
 
 ### 基础查询（select）
@@ -158,7 +198,10 @@ LIMIT		分页参数
 ### 条件查询（where）
 
 语法：
-`SELECT 字段列表 FROM 表名 WHERE 条件列表;`
+
+```sql
+SELECT 字段列表 FROM 表名 WHERE 条件列表;
+```
 
 条件：
 
@@ -232,6 +275,8 @@ where 和 having 的区别：
 - 执行时机不同：where是分组之前进行过滤，不满足where条件不参与分组；having是分组后对结果进行过滤。
 - 判断条件不同：where不能对聚合函数进行判断，而having可以。
 
+> 
+
 例子：
 
 ```mysql
@@ -248,15 +293,21 @@ select workaddress， count(*) address_count from employee where age < 45 group 
 select workaddress， count(*) from employee where age < 45 group by workaddress having count(*) >= 3; -- 这个可以，having
 ```
 
-#### 注意事项
+**注意事项**
 
-- 执行顺序：where > 聚合函数 > having
-- 分组之后，查询的字段一般为聚合函数和分组字段，查询其他字段无任何意义
+> - 分组之后，查询的字段一般为聚合函数和分组字段，查询其他字段无任何意义。
+>
+> - 执行顺序: where > 聚合函数 > having 。
+>
+> - 支持多字段分组, 具体语法为 : group by columnA,columnB
 
 ### 排序查询（order by）
 
 语法：
-`SELECT 字段列表 FROM 表名 ORDER BY 字段1 排序方式1， 字段2 排序方式2;`
+
+```sql
+SELECT 字段列表 FROM 表名 ORDER BY 字段1 排序方式1， 字段2 排序方式2;
+```
 
 排序方式：
 - ASC： 升序（默认，可省略）
@@ -272,14 +323,17 @@ SELECT * FROM employee ORDER BY age;
 SELECT * FROM employee ORDER BY age ASC， entrydate DESC;
 ```
 
-#### 注意事项
-
-如果是多字段排序，当第一个字段值相同时，才会根据第二个字段进行排序
+> **注意事项**：如果是多字段排序，当第一个字段值相同时，才会根据第二个字段进行排序
 
 ### 分页查询（limit）
 
+分页操作在业务系统开发时，也是非常常见的一个功能，我们在网站中看到的各种各样的分页条，后台都需要借助于数据库的分页操作。
+
 语法：
-`SELECT 字段列表 FROM 表名 LIMIT 起始索引， 查询记录数;`
+
+```sql
+SELECT 字段列表 FROM 表名 LIMIT 起始索引，查询记录数;
+```
 
 例子：
 
@@ -289,11 +343,12 @@ SELECT * FROM employee LIMIT 10， 10; -- 查询第二页
 SELECT name FROM products ORDER BY sales DESC LIMIT 10; -- 查询销量最好的前十个商品名称
 ```
 
-#### 注意事项
-
-- 起始索引从0开始，起始索引 = （查询页码 - 1） * 每页显示记录数
-- 分页查询是数据库的方言，不同数据库有不同实现，MySQL是LIMIT
-- 如果查询的是第一页数据，起始索引可以省略，直接简写 LIMIT 10
+> **注意事项**
+>
+> - 起始索引从0开始，起始索引 = （查询页码 - 1） * 每页显示记录数
+> - 分页查询是数据库的方言，不同数据库有不同实现，MySQL是LIMIT
+> - 如果查询的是第一页数据，起始索引可以省略，直接简写 LIMIT 10
+>
 
 ### DQL执行顺序
 
@@ -360,12 +415,11 @@ drop user 'test'@'localhost'; -- 删除用户
 撤销权限：REVOKE 权限列表 ON 数据库名.表名 FROM '用户名'@'主机名';
 ```
 
-
-
-#### 注意事项
-
-- 多个权限用逗号分隔
-- 授权时，数据库名和表名可以用 * 进行通配，代表所有
+> **注意事项**
+>
+> - 多个权限用逗号分隔
+> - 授权时，数据库名和表名可以用 * 进行通配，代表所有
+>
 
 # Sql内置函数
 
@@ -512,7 +566,11 @@ create table user(
 
 ## 外键约束
 
-概念：外键用来让两张表的数据之间建立连接，从而保证数据的一致性和完整性。添加外键：
+概念：外键用来让两张表的数据之间建立连接，从而保证数据的一致性和完整性。
+
+<img src="./assets/image-20240721120257390.png" alt="image-20240721120257390" style="zoom:67%;" />
+
+添加外键：
 
 ```mysql
 -- 方式一
@@ -532,6 +590,8 @@ alter table emp add constraint fk_emp_dept_id foreign key(dept_id) references de
 ### 外键（删除/更新）行为
 
 含有外键的表称为子表，被外键的表称为父表
+
+添加了外键之后，再删除父表数据时产生的约束行为，我们就称为删除/更新行为。具体的行为有以下几种:
 
 | 行为  | 说明  |
 | ------------ | ------------ |
@@ -587,9 +647,29 @@ alter table emp add constraint fk_emp_dept_id foreign key(dept_id) references de
 1、进入MySQL数据库，创建并选择testDB数据库。
 2、使用source doem.sql 执行脚本，第一次执行会出现删除表失败的提示，属于正常现象，因为你数据库中没有这些表。
 
+ 
+
+**分类**
+
+连接查询
+
+内连接：相当于查询A、B交集部分数据
+
+外连接：
+
+- 左外连接：查询左表所有数据，以及两张表交集部分数据
+
+- 右外连接：查询右表所有数据，以及两张表交集部分数据
+
+自连接：当前表与自身的连接查询，自连接必须使用表别名
+
+
+
 ## 内连接查询
 
-内连接查询的是两张表交集的部分
+内连接**查询的是两张表交集的部分**
+
+<img src="./assets/image-20240721121040018.png" alt="image-20240721121040018" style="zoom:33%;" />
 
 隐式内连接：`SELECT 字段列表 FROM 表1,表2 WHERE 条件 ...;`
 显式内连接：`SELECT 字段列表 FROM 表1 [INNER] JOIN 表2 ON 连接条件 ...;`
@@ -609,14 +689,14 @@ LEFT/RIGHT  [OUTER] JOIN ... on ...
 ```
 
 左外连接：
-	查询左表所有数据，以及两张表交集部分数据
+	**查询左表所有数据**，以及两张表交集部分数据
 	`SELECT 字段列表 FROM 表A LEFT [OUTER] JOIN 表B ON 条件 ...;`
 	相当于查询表A的所有数据，包含表A和表B交集部分数据
 
 <img src="./assets/image-20230523174253086.png" alt="image-20230523174253086" style="zoom:33%;" />
 
 右外连接：
-	查询右表所有数据，以及两张表交集部分数据
+	**查询右表所有数据**，以及两张表交集部分数据
 	`SELECT 字段列表 FROM 表1 RIGHT [OUTER] JOIN 表2 ON 条件 ...;`
 
 例子：
@@ -631,7 +711,7 @@ select d.name,e.* from employee as e right outer join dept as d on e.dept = d.id
 
 ## 自连接查询
 
-当前表与自身的连接查询，**自连接必须使用表别名**
+当前**表与自身的连接查询**，自连接必须使用表别名
 
 语法：`SELECT 字段列表 FROM 表A 别名A JOIN 表A 别名B ON 条件 ...;`
 自连接查询，可以是内连接查询，也可以是外连接查询
@@ -670,7 +750,10 @@ select * from emp where age > 50;
 ## 子查询/嵌套查询
 
 概念：SQL语句中嵌套SELECT语句，称嵌套查询/子查询。
-	`SELECT * FROM t1 WHERE column1 = (SELECT column1 FROM t2);`
+
+```sql
+SELECT * FROM t1 WHERE column1 = (SELECT column1 FROM t2);
+```
 
 > 子查询外部的语句可以是 INSERT / UPDATE / DELETE / SELECT 的任何一个
 
@@ -757,7 +840,7 @@ select e.*， d.* from (select * from employee where entrydate > '2006-01-01') a
 
 事务是一组操作的集合，事务会把所有操作作为一个整体一起向系统提交或撤销操作请求，即这些操作要么同时成功，要么同时失败。
 
-> 默认MySQL的事务是自动提交的，也就是说，当执行- -条DML语句，MySQL会 立即隐式的提交事务。
+> 默认MySQL的事务是自动提交的，也就是说，当执行一条DML语句，MySQL会 立即隐式的提交事务。
 
 基本操作：
 
@@ -782,9 +865,14 @@ commit; -- 只有出现该命令时，上面的命令才会执行
 
 操作方式二：
 
-开启事务：`START TRANSACTION 或 BEGIN TRANSACTION;`
-提交事务：`COMMIT;`
-回滚事务：`ROLLBACK;`
+```sql
+# 开启事务：
+START TRANSACTION 或 BEGIN TRANSACTION;
+# 提交事务：
+COMMIT;
+# 回滚事务：
+ROLLBACK;
+```
 
 操作实例：
 
@@ -819,7 +907,7 @@ commit;
 
 > 这三个问题的详细演示：https：//www.bilibili.com/video/BV1Kr4y1i7ru?p=55cd 
 
-## 并发事务隔离级别：
+**并发事务隔离级别**：
 
 | 隔离级别  | 脏读  | 不可重复读  | 幻读  |
 | ------------ | ------------ | ------------ | ------------ |
@@ -837,7 +925,11 @@ commit;
 `SET [SESSION | GLOBAL] TRANSACTION ISOLATION LEVEL {READ UNCOMMITTED | READ COMMITTED | REPEATABLE READ | SERIALIZABLE};`
 SESSION 是会话级别，表示只针对当前会话有效，GLOBAL 表示对所有会话有效
 
+> 注意：事务隔离级别越高，数据越安全，但是性能越低。
+
 # ==进阶篇==
+
+# 存储引擎
 
 ## MySQL体系结构
 
@@ -880,7 +972,7 @@ InnoDB 是一种兼顾高可靠性和高性能的通用存储引擎，在 MySQL 
 
 文件：
 
-- xxx.ibd： xxx代表表名，InnoDB 引擎的每张表都会对应这样一个表空间文件，存储该表的表结构（frm、sdi）、数据和索引。
+- xxx.ibd： xxx代表表名，每一个ibd文件就对应一张表。InnoDB 引擎的每张表都会对应这样一个表空间文件，存储该表的表结构（frm、sdi）、数据和索引。
 
 参数：innodb_file_per_table，决定多张表共享一个表空间还是每张表对应一个表空间
 
@@ -954,17 +1046,21 @@ Memory 引擎的表数据是存储在内存中的，受硬件问题、断电问�
 
 索引是帮助 MySQL **高效获取数据**的**数据结构（有序）**。在数据之外，数据库系统还维护着满足特定查找算法的数据结构，这些数据结构以某种方式引用（指向）数据，这样就可以在这些数据结构上实现高级查询算法，这种数据结构就是索引。
 
+```sql
 优点：
-
 - 提高数据检索效率，降低数据库的IO成本
 - 通过索引列对数据进行排序，降低数据排序的成本，降低CPU的消耗
 
 缺点：
-
 - 索引列也是要占用空间的
 - 索引大大提高了查询效率，但降低了更新的速度，比如 INSERT、UPDATE、DELETE
+```
+
+
 
 ## 索引数据结构
+
+MySQL的索引是在存储引擎层实现的，不同的存储引擎有不同的索引结构，主要包含以下几种：
 
 | 索引结构  | 描述  |
 | ------------ | ------------ |
@@ -972,6 +1068,8 @@ Memory 引擎的表数据是存储在内存中的，受硬件问题、断电问�
 | Hash  | 底层数据结构是用哈希表实现，只有精确匹配索引列的查询才有效，不支持范围查询  |
 | R-Tree(空间索引)  | 空间索引是 MyISAM 引擎的一个特殊索引类型，主要用于地理空间数据类型，通常使用较少  |
 | Full-Text(全文索引)  | 是一种通过建立倒排索引，快速匹配文档的方式，类似于 Lucene， Solr， ES  |
+
+不同的存储引擎对于索引结构的支持情况
 
 | 索引  | InnoDB  | MyISAM  | Memory  |
 | ------------ | ------------ | ------------ | ------------ |
@@ -1039,7 +1137,7 @@ MySQL 索引数据结构对经典的 B+Tree 进行了优化。在原 B+Tree 的�
 
 ### Hash
 
-哈希索引就是采用一定的hash算法，将键值换算成新的hash值，映射到对应的槽位上，然后存储在hash表中。
+hash哈希索引就是采用一定的hash算法，将键值换算成新的hash值，映射到对应的槽位上，然后存储在hash表中。
 如果两个（或多个）键值，映射到一个相同的槽位上，他们就产生了hash冲突（也称为hash碰撞），可以通过链表来解决。
 
 ![image-20230525100908108](./assets/image-20230525100908108.png)
@@ -1091,6 +1189,10 @@ MySQL 索引数据结构对经典的 B+Tree 进行了优化。在原 B+Tree 的�
 - 如果不存在主键，将使用第一个唯一(UNIQUE)索引作为聚集索引
 - 如果表没有主键或没有合适的唯一索引，则 InnoDB 会自动生成一个 rowid 作为隐藏的聚集索引
 
+> **回表查询**： 这种先到二级索引中查找数据，找到主键值，然后再到聚集索引中根据主键值，获取
+>
+> 数据的方式，就称之为回表查询。
+
 ### 思考题
 
 1\. 以下 SQL 语句，哪个执行效率高？为什么？
@@ -1139,18 +1241,36 @@ drop index idx_user_email on tb_user;	-- 删除索引
 
 # 索引-性能分析
 
-## 查看执行频次
+## 查看sql执行频次
 
 查看当前数据库的 INSERT， UPDATE， DELETE， SELECT 访问频次：
 `SHOW GLOBAL STATUS LIKE 'Com_______';` 或者 `SHOW SESSION STATUS LIKE 'Com_______';`
-例：`show global status like 'Com_______'`
+
+```sql
+-- session 是查看当前会话 ;
+-- global 是查询全局数据 ;
+SHOW GLOBAL STATUS LIKE 'Com_______';
+
+Com_delete: 删除次数
+Com_insert: 插入次数
+Com_select: 查询次数
+Com_update: 更新次数
+```
+
+![image-20240721164826351](./assets/image-20240721164826351.png)
+
+通过查询SQL的执行频次，我们就能够知道当前数据库到底是增删改为主，还是查询为主。 那假
+
+如说是以查询为主，我们又该如何定位针对于那些查询语句进行优化呢？ 次数我们可以借助于慢查询
+
+日志。
 
 ## 慢查询日志
 
 慢查询日志记录了所有执行时间超过指定参数（long_query_time，单位：秒，默认10秒）的所有SQL语句的日志。
 MySQL的慢查询日志默认没有开启，需要在MySQL的配置文件（/etc/my.cnf）中配置如下信息：
 
-### 开启慢查询日志开关
+**开启慢查询日志开关**
 
 ```sh
 slow_query_log=1
@@ -1162,37 +1282,37 @@ slow_query_log=1
 long_query_time=2
 ```
 
-更改后记得重启MySQL服务，日志文件位置：/var/lib/mysql/localhost-slow.log
+日志文件位置：/var/lib/mysql/localhost-slow.log，更改后记得重启MySQL服务
 
 查看慢查询日志开关状态：
 `show variables like 'slow_query_log';`
 
 ## profile
 
-show profile 能在做SQL优化时帮我们了解时间都耗费在哪里。通过 have_profiling 参数，能看到当前 MySQL 是否支持 profile 操作：
+show profile 能在做SQL优化时帮我们了解**时间都耗费在哪里**。通过 have_profiling 参数，能看到当前 MySQL 是否支持 profile 操作：
 
-```sh
-`SELECT @@have_profiling;`
-profiling 默认关闭，可以通过set语句在session/global级别开启 profiling：
-`SET profiling = 1;`
-查看所有语句的耗时：
-`show profiles;`
-查看指定query_id的SQL语句各个阶段的耗时：
-`show profile for query query_id;`
-查看指定query_id的SQL语句CPU的使用情况
-`show profile cpu for query query_id;`
+```sql
+SELECT @@have_profiling;
+# profiling 默认关闭，可以通过set语句在session/global级别开启 profiling：
+SET profiling = 1;
+# 查看所有语句的耗时：
+show profiles;
+# 查看指定query_id的SQL语句各个阶段的耗时：
+show profile for query query_id;
+# 查看指定query_id的SQL语句CPU的使用情况
+show profile cpu for query query_id;
 ```
-
-
 
 ## explain
 
-EXPLAIN 或者 DESC 命令获取 MySQL 如何执行 SELECT 语句的信息，包括在 SELECT 语句执行过程中表如何连接和连接的顺序。
+EXPLAIN 或者 DESC 命令获取 MySQL **如何执行 SELECT 语句的信息，**包括在 SELECT 语句执行过程中表如何连接和连接的顺序。
+
 语法：
 
-#直接在select语句之前加上关键字 explain / desc
-
-​	EXPLAIN SELECT 字段列表 FROM 表名 HWERE 条件;
+```sql
+# 直接在select语句之前加上关键字 explain / desc
+EXPLAIN SELECT 字段列表 FROM 表名 HWERE 条件;
+```
 
 ![image-20230708095543153](assets/image-20230708095543153.png)
 
@@ -1219,32 +1339,24 @@ EXPLAIN 各字段含义：
 
 联合索引中，出现范围查询（<， >），范围查询右侧的列索引失效。可以用>=或者<=来规避索引失效问题。
 
-## 索引失效情况
-
-1. 在索引列上进行运算操作，索引将失效。如：`explain select * from tb_user where substring(phone， 10， 2) = '15';`
-2. 字符串类型字段使用时，不加引号，索引将失效。如：`explain select * from tb_user where phone = 17799990015;`，此处phone的值没有加引号
-3. 模糊查询中，如果仅仅是尾部模糊匹配，索引不会是失效；如果是头部模糊匹配，索引失效。如：`explain select * from tb_user where profession like '%工程';`，前后都有 % 也会失效。
-4. 用 or 分割开的条件，如果 or 其中一个条件的列没有索引，那么涉及的索引都不会被用到。
-5. 如果 MySQL 评估使用索引比全表更慢，则不使用索引。
-
 ##  选择索引
 
-是优化数据库的一个重要手段，简单来说，就是在SQL语句中加入一些人为的**联合索引**来达到优化操作的目的。
+ use index(idx_user_pro)是优化数据库的一个重要手段，简单来说，就是在SQL语句中加入一些人为的**联合索引**来达到优化操作的目的。
 
 ```sh
 例如，使用索引：
-`explain select * from tb_user use index(idx_user_pro) where profession="软件工程";`
+explain select * from tb_user use index(idx_user_pro) where profession="软件工程";
 不使用哪个索引：
-`explain select * from tb_user ignore index(idx_user_pro) where profession="软件工程";`
+explain select * from tb_user ignore index(idx_user_pro) where profession="软件工程";
 必须使用哪个索引：
-`explain select * from tb_user force index(idx_user_pro) where profession="软件工程";
+explain select * from tb_user force index(idx_user_pro) where profession="软件工程";
 ```
 
 use 是建议，实际使用哪个索引 MySQL 还会自己权衡运行速度去更改，force就是无论如何都强制使用该索引。
 
 ## 覆盖索引&回表查询
 
-尽量使用覆盖索引（查询使用了索引，并且需要返回的列，在该索引中已经全部能找到），减少 select *。
+尽量使用select 覆盖索引（查询使用了索引，并且需要返回的列，在该索引中已经全部能找到），减少 select *。
 
 ```sh
 explain 中 extra 字段含义：
@@ -1302,37 +1414,87 @@ show index 里面的sub_part可以看到接取的长度
 6. 要控制索引的数量，索引并不是多多益善，索引越多，维护索引结构的代价就越大，会影响增删改的效率
 7. 如果索引列不能存储NULL值，请在创建表时使用NOT NULL约束它。当优化器知道每列是否包含NULL值时，它可以更好地确定哪个索引最有效地用于查询
 
+## 索引失效情况
+
+1. 在索引列上进行运算操作，索引将失效。
+
+   如：`explain select * from tb_user where substring(phone， 10， 2) = '15';`
+
+2. 字符串类型字段使用时，不加引号，索引将失效
+
+   如：`explain select * from tb_user where phone = 17799990015;`，此处phone的值没有加引号
+
+3. 模糊查询中，如果仅仅是尾部模糊匹配，索引不会是失效；如果是头部模糊匹配，索引失效。
+
+   如：`explain select * from tb_user where profession like '%工程';`，前后都有 % 也会失效。
+
+4. 用 or 分割开的条件，如果 or 其中一个条件的列没有索引，那么涉及的索引都不会被用到。
+
+   例如：`explain select * from tb_user where id = 10 or age = 23;`
+
+5. 如果 MySQL 评估使用索引比全表更慢，则不使用索引。
+
 # SQL 优化
 
 ## 插入数据
 
-普通插入：
+如果我们需要一次性往数据库表中插入多条记录，可以从以下三个方面进行优化。
 
-1. 采用批量插入（一次插入的数据不建议超过1000条）
-2. 手动提交事务
-3. 主键顺序插入
+优化方案一：批量插入数据
 
-大批量插入：
-如果一次性需要插入大批量数据，使用insert语句插入性能较低，此时可以使用MySQL数据库提供的load指令插入。
+```sql
+Insert into tb_test values(1,'Tom'),(2,'Cat'),(3,'Jerry'); 1
+```
+
+优化方案二：手动控制事务
+
+```sql
+start transaction;
+insert into tb_test values(1,'Tom'),(2,'Cat'),(3,'Jerry');
+insert into tb_test values(4,'Tom'),(5,'Cat'),(6,'Jerry');
+insert into tb_test values(7,'Tom'),(8,'Cat'),(9,'Jerry');
+commit;
+```
+
+优化方案三：主键顺序插入，性能要高于乱序插入。
+
+```sql
+主键乱序插入 : 8 1 9 21 88 2 4 15 89 5 7 3
+主键顺序插入 : 1 2 3 4 5 7 8 9 15 21 88 89
+```
+
+
+
+**大批量插入数据**
+
+如果一次性需要插入大批量数据(比如: 几百万的记录)，使用insert语句插入性能较低，此时可以使
+
+用MySQL数据库提供的load指令进行插入。操作如下
 
 ```mysql
 # 客户端连接服务端时，加上参数 --local-infile（这一行在bash/cmd界面输入）
 mysql --local-infile -u root -p
+
 # 设置全局参数local_infile为1，开启从本地加载文件导入数据的开关
 set global local_infile = 1;
 select @@local_infile;
+
 # 执行load指令将准备好的数据，加载到表结构中
 load data local infile '/root/sql1.log' into table 'tb_user' fields terminated by '，' lines terminated by '\n';
 ```
 
 ## 主键优化
 
-数据组织方式：在InnoDB存储引擎中，表数据都是根据主键顺序组织存放的，这种存储方式的表称为索引组织表（Index organized table， IOT）
+主键顺序插入的性能是要高于乱序插入的。介绍一下具体的原因，然后再分析一下主键又该如何设计。
 
-页分裂：页可以为空，也可以填充一般，也可以填充100%，每个页包含了2-N行数据（如果一行数据过大，会行溢出），根据主键排列。
-页合并：当删除一行记录时，实际上记录并没有被物理删除，只是记录被标记（flaged）为删除并且它的空间变得允许被其他记录声明使用。当页中删除的记录到达 MERGE_THRESHOLD（默认为页的50%），InnoDB会开始寻找最靠近的页（前后）看看是否可以将这两个页合并以优化空间使用。
+1、数据组织方式：在InnoDB存储引擎中，表数据都是根据主键顺序组织存放的，这种存储方式的表称为索引组织表（Index organized table， IOT）
 
-MERGE_THRESHOLD：合并页的阈值，可以自己设置，在创建表或创建索引时指定
+2、页分裂：页可以为空，也可以填充一般，也可以填充100%，每个页包含了2-N行数据（如果一行数据过大，会行溢出），根据主键排列。
+
+3、页合并：当删除一行记录时，实际上记录并没有被物理删除，只是记录被标记（flaged）为删除并且它的空间变得允许被其他记录声明使用。当页中删除的记录到达 MERGE_THRESHOLD（默认为页的50%），InnoDB会开始寻找最靠近的页（前后）看看是否可以将这两个页合并以优化空间使用。
+
+> MERGE_THRESHOLD：合并页的阈值，可以自己设置，在创建表或创建索引时指定
+>
 
 > 文字说明不够清晰明了，具体可以看视频里的PPT演示过程：https：//www.bilibili.com/video/BV1Kr4y1i7ru?p=90
 
@@ -1348,9 +1510,9 @@ MERGE_THRESHOLD：合并页的阈值，可以自己设置，在创建表或创�
 1. Using filesort：通过表的索引或全表扫描，读取满足条件的数据行，然后在排序缓冲区 sort buffer 中完成排序操作，所有不是通过索引直接返回排序结果的排序都叫 FileSort 排序
 2. Using index：通过有序索引顺序扫描直接返回有序数据，这种情况即为 using index，不需要额外排序，操作效率高
 
-如果order by字段全部使用升序排序或者降序排序，则都会走索引，但是如果一个字段升序排序，另一个字段降序排序，则不会走索引，explain的extra信息显示的是`Using index， Using filesort`，如果要优化掉Using filesort，则需要另外再创建一个索引，如：`create index idx_user_age_phone_ad on tb_user(age asc， phone desc);`，此时使用`select id， age， phone from tb_user order by age asc， phone desc;`会全部走索引
+对于以上的两种排序方式，Using index的性能高，而Using filesort的性能低，我们在优化排序操作时，尽量要优化为 Using index。
 
-总结：
+order by优化原则：
 
 - 根据排序字段建立合适的索引，多字段排序时，也遵循最左前缀法则
 - 尽量使用覆盖索引
@@ -1366,18 +1528,23 @@ MERGE_THRESHOLD：合并页的阈值，可以自己设置，在创建表或创�
 
 ## limit优化
 
+在数据量比较大时，如果进行limit分页查询，在查询时，越往后，分页查询效率越低。
+
 常见的问题如`limit 2000000， 10`，此时需要 MySQL 排序前2000000条记录，但仅仅返回2000000 - 2000010的记录，其他记录丢弃，查询排序的代价非常大。
-优化方案：一般分页查询时，通过创建覆盖索引能够比较好地提高性能，可以通过覆盖索引加子查询形式进行优化
+
+> 优化思路：一般分页查询时，通过创建覆盖索引能够比较好地提高性能，可以通过覆盖索引加子查询形式进行优化
 
 例如：
 
 ```mysql
--- 此语句耗时很长
-select * from tb_sku limit 9000000， 10;
+select * from tb_sku limit 9000000， 10;	-- 此语句耗时很长
+
 -- 通过覆盖索引加快速度，直接通过主键索引进行排序及查询
 select id from tb_sku order by id limit 9000000， 10;
+
 -- 下面的语句是错误的，因为 MySQL 不支持 in 里面使用 limit
 -- select * from tb_sku where id in (select id from tb_sku order by id limit 9000000， 10);
+
 -- 通过连表查询即可实现第一句的效果，并且能达到第二句的速度
 select * from tb_sku as s， (select id from tb_sku order by id limit 9000000， 10) as a where s.id = a.id;
 ```
@@ -1396,26 +1563,82 @@ count的几种用法：
 
 各种用法的性能：
 
-- count(主键)：InnoDB引擎会遍历整张表，把每行的主键id值都取出来，返回给服务层，服务层拿到主键后，直接按行进行累加（主键不可能为空）
-- count(字段)：没有not null约束的话，InnoDB引擎会遍历整张表把每一行的字段值都取出来，返回给服务层，服务层判断是否为null，不为null，计数累加；有not null约束的话，InnoDB引擎会遍历整张表把每一行的字段值都取出来，返回给服务层，直接按行进行累加
-- count(1)：InnoDB 引擎遍历整张表，但不取值。服务层对于返回的每一层，放一个数字 1 进去，直接按行进行累加
-- count(\*)：InnoDB 引擎并不会把全部字段取出来，而是专门做了优化，不取值，服务层直接按行进行累加
+| count 用法  | 含义                                                         |
+| ----------- | ------------------------------------------------------------ |
+| count(主键) | InnoDB引擎会遍历整张表，把每行的主键id值都取出来，返回给服务层，服务层拿到主键后，直接按行进行累加（主键不可能为空） |
+| count(字段) | 没有not null约束的话，InnoDB引擎会遍历整张表把每一行的字段值都取出来，返回给服务层，服务层判断是否为null，不为null，计数累加；有not null约束的话，InnoDB引擎会遍历整张表把每一行的字段值都取出来，返回给服务层，直接按行进行累加 |
+| count(数字) | InnoDB 引擎遍历整张表，但不取值。服务层对于返回的每一层，放一个数字 1 进去，直接按行进行累加 |
+| count(\*)   | InnoDB 引擎并不会把全部字段取出来，而是专门做了优化，不取值，服务层直接按行进行累加 |
 
-按效率排序：count(字段) < count(主键) < count(1) < count(\*)，所以尽量使用 count(\*)
+> 按效率排序：count(字段) < count(主键) < count(数字) < count(\*)，所以尽量使用 count(\*)
+>
 
 ## update优化（避免行锁升级为表锁）
 
 InnoDB 的行锁是针对索引加的锁，不是针对记录加的锁，并且该索引不能失效，否则会从行锁升级为表锁。
 
 如以下两条语句：
-`update student set no = '123' where id = 1;`，这句由于id有主键索引，所以只会锁这一行；
-`update student set no = '123' where name = 'test';`，这句由于name没有索引，所以会把整张表都锁住进行数据更新，解决方法是给name字段添加索引
+
+```sql
+update student set no = '123' where id = 1; # 这句由于id有主键索引，所以只会锁这一行；
+update student set no = '123' where name = 'test'; # 这句由于name没有索引，所以会把整张表都锁住进行数据更新，解决方法是给name字段添加索引
+```
 
 
 
 # 视图
 
+视图（View）是一种虚拟存在的表。视图中的数据并不在数据库中实际存在，行和列数据来自定义视
 
+图的查询中使用的表，并且是在使用视图时动态生成的。
+
+通俗的讲，视图只保存了查询的SQL逻辑，不保存查询结果。所以我们在创建视图的时候，主要的工作
+
+就落在创建这条SQL查询语句上。
+
+## 语法
+
+创建
+
+```sql
+CREATE [OR REPLACE] VIEW 视图名称[(列名列表)] AS SELECT语句 [ WITH [ CASCADED | LOCAL ] CHECK OPTION ]
+```
+
+查询
+
+```sql
+查看创建视图语句：SHOW CREATE VIEW 视图名称;
+查看视图数据：SELECT * FROM 视图名称 ...... ;
+```
+
+修改
+
+```sql
+方式一：CREATE [OR REPLACE] VIEW 视图名称[(列名列表)] AS SELECT语句 [ WITH [ CASCADED | LOCAL ] CHECK OPTION ]
+方式二：ALTER VIEW 视图名称[(列名列表)] AS SELECT语句 [ WITH [ CASCADED | LOCAL ] CHECK OPTION ]
+```
+
+删除
+
+```sql
+DROP VIEW [IF EXISTS] 视图名称 [,视图名称] ...
+```
+
+演示示例：
+
+```sql
+-- 创建视图
+create or replace view stu_v_1 as select id,name from student where id <= 10;
+-- 查询视图
+show create view stu_v_1;
+select * from stu_v_1;
+select * from stu_v_1 where id < 3;
+-- 修改视图
+create or replace view stu_v_1 as select id,name,no from student where id <= 10;
+alter view stu_v_1 as select id,name from student where id <= 10;
+-- 删除视图
+drop view if exists stu_v_1;
+```
 
 
 
@@ -1431,17 +1654,175 @@ InnoDB 的行锁是针对索引加的锁，不是针对记录加的锁，并且�
 
 # 锁
 
+锁是计算机协调多个进程或线程并发访问某一资源的机制。在数据库中，除传统的计算资源（CPU、RAM、I/O）的争用以外，数据也是一种供许多用户共享的资源。如何保证数据并发访问的一致性、有效性是所有数据库必须解决的一个问题，锁冲突也是影响数据库并发访问性能的一个重要因素。从这个角度来说，锁对数据库而言显得尤其重要，也更加复杂。
+
+MySQL中的锁，按照锁的粒度分，分为以下三类：
+
+- 全局锁：锁定数据库中的所有表。
+- 表级锁：每次操作锁住整张表。
+- 行级锁：每次操作锁住对应的行数据。
+
+##  全局锁
+
+全局锁就是对整个数据库实例加锁，加锁后整个实例就处于只读状态，后续的DML的写语句，DDL语句，已经更新操作的事务提交语句都将被阻塞。
+
+其典型的使用场景是做全库的逻辑备份，对所有的表进行锁定，从而获取一致性视图，保证数据的完整性。
+
+**语法**
+
+```sql
+flush tables with read lock ;	# 加全局锁
+mysqldump -uroot –p1234 itcast > itcast.sql		# 数据备份
+unlock tables ;  # 释放锁
+```
+
+数据库中加全局锁，是一个比较重的操作，存在以下问题：
+
+- 如果在主库上备份，那么在备份期间都不能执行更新，业务基本上就得停摆。
+- 如果在从库上备份，那么在备份期间从库不能执行主库同步过来的二进制日志（binlog），会导致主从延迟。
+
+在InnoDB引擎中，我们可以在备份时加上参数 --single-transaction 参数来完成不加锁的一致
+
+性数据备份。
+
+```sql
+mysqldump --single-transaction -uroot –p123456 itcast > itcast.sql
+```
+
+## 表级锁
+
+表级锁，每次操作锁住整张表。锁定粒度大，发生锁冲突的概率最高，并发度最低。应用在MyISAM、InnoDB、BDB等存储引擎中。对于表级锁，主要分为以下三类：
+
+- 表锁
+- 元数据锁（meta data lock，MDL）
+- 意向锁
+
+**表锁**
+
+对于表锁，分为两类：
+
+- 表共享读锁（read lock）
+- 表独占写锁（write lock）
+
+> 注意: 读锁不会阻塞其他客户端的读，但是会阻塞写。写锁既会阻塞其他客户端的读，又会阻塞
+>
+> 其他客户端的写。
+
+语法：
+
+- 加锁：lock tables 表名... read/write。
+- 释放锁：unlock tables / 客户端断开连接 。
+
+**元数据锁**
+
+meta data lock , 元数据锁，简写MDL。
+
+MDL加锁过程是系统自动控制，无需显式使用，在访问一张表的时候会自动加上。MDL锁主要作用是维护表元数据的数据一致性，在表上有活动事务的时候，不可以对元数据进行写入操作。**为了避免DML与DDL冲突，保证读写的正确性。**
+
+这里的元数据，大家可以简单理解为就是一张表的表结构。 也就是说，某一张表涉及到未提交的事务时，是不能够修改这张表的表结构的。
+
+在MySQL5.5中引入了MDL，当对一张表进行增删改查的时候，加MDL读锁(共享)；当对表结构进行变更操作的时候，加MDL写锁(排他)。
+
+常见的SQL操作时，所添加的元数据锁：
+
+| 对应SQL                                 | 锁类型                                  | 说明                                             |
+| --------------------------------------- | --------------------------------------- | ------------------------------------------------ |
+| lock tables xxx read /write             | SHARED_READ_ONLY / SHARED_NO_READ_WRITE |                                                  |
+| select 、select ... lock in share mode  | SHARED_READ                             | 与SHARED_READ、SHARED_WRITE兼容，与EXCLUSIVE互斥 |
+| insert 、update、delete、select ... for | SHARED_WRITE                            | 与SHARED_READ、SHARED_WRITE兼容，与EXCLUSIVE互斥 |
+| alter table ...                         | EXCLUSIVE                               | 与其他的MDL都互斥                                |
+
+**意向锁**
+
+为了避免DML在执行时，加的行锁与表锁的冲突，在InnoDB中引入了意向锁，使得表锁不用检查每行
+
+数据是否加锁，使用意向锁来减少表锁的检查。
+
+分类
+
+- 意向共享锁(IS): 由语句select ... lock in share mode添加 。 与 表锁共享锁(read)兼容，与表锁排他锁(write)互斥。
+- 意向排他锁(IX): 由insert、update、delete、select...for update添加 。与表锁共享锁(read)及排他锁(write)都互斥，意向锁之间不会互斥。
+
+> 一旦事务提交了，意向共享锁、意向排他锁，都会自动释放。
+
+可以通过以下SQL，查看意向锁及行锁的加锁情况：
+
+```sql
+select object_schema,object_name,index_name,lock_type,lock_mode,lock_data from
+performance_schema.data_locks;
+```
+
+## 行级锁
+
+行级锁，每次操作锁住对应的行数据。锁定粒度最小，发生锁冲突的概率最低，并发度最高。应用在InnoDB存储引擎中。
+
+InnoDB的数据是基于索引组织的，行锁是通过对索引上的索引项加锁来实现的，而不是对记录加的锁。对于行级锁，主要分为以下三类：
+
+- 行锁（Record Lock）：锁定单个行记录的锁，防止其他事务对此行进行update和delete。在RC、RR隔离级别下都支持
+
+  ![image-20240721175747956](./assets/image-20240721175747956.png)
+
+- 间隙锁（Gap Lock）：锁定索引记录间隙（不含该记录），确保索引记录间隙不变，防止其他事务在这个间隙进行insert，产生幻读。在RR隔离级别下都支持。
+
+  ![image-20240721175810266](./assets/image-20240721175810266.png)
+
+- 临键锁（Next-Key Lock）：行锁和间隙锁组合，同时锁住数据，并锁住数据前面的间隙Gap。在RR隔离级别下支持。
+
+  ![image-20240721175823607](./assets/image-20240721175823607.png)
+
+**行锁**
+
+InnoDB实现了以下两种类型的行锁：
+
+- 共享锁（S）：允许一个事务去读一行，阻止其他事务获得相同数据集的排它锁。
+- 排他锁（X）：允许获取排他锁的事务更新数据，阻止其他事务获得相同数据集的共享锁和排他锁
+
+两种行锁的兼容情况如下
+
+| 请求锁\当前锁类型 | s    | x    |
+| ----------------- | ---- | ---- |
+| s                 | 兼容 | 冲突 |
+| x                 | 冲突 | 冲突 |
+
+常见的SQL语句，在执行时，所加的行锁如下：
+
+| SQL                           | 行锁类型   | 说明                                     |
+| ----------------------------- | ---------- | ---------------------------------------- |
+| INSERT ...                    | 排他锁     | 自动加锁                                 |
+| UPDATE ...                    | 排他锁     | 自动加锁                                 |
+| DELETE ...                    | 排他锁     | 自动加锁                                 |
+| SELECT（正常）                | 不加任何锁 |                                          |
+| SELECT ... LOCK IN SHARE MODE | 共享锁     | 需要手动在SELECT之后加LOCK IN SHARE MODE |
+| SELECT ... FOR UPDATE         | 排他锁     | 需要手动在SELECT之后加FOR UPDATE         |
+
+**间隙锁&临键锁**
+
+默认情况下，InnoDB在 REPEATABLE READ事务隔离级别运行，InnoDB使用 next-key 锁进行搜索和索引扫描，以防止幻读。
+
+- 索引上的等值查询(唯一索引)，给不存在的记录加锁时, 优化为间隙锁 。
+- 索引上的等值查询(非唯一普通索引)，向右遍历时最后一个值不满足查询需求时，next-key
+- lock 退化为间隙锁。
+- 索引上的范围查询(唯一索引)--会访问到不满足条件的第一个值为止。
+
+> 注意：间隙锁唯一目的是防止其他事务插入间隙。间隙锁可以共存，一个事务采用的间隙锁不会阻止另一个事务在同一间隙上采用间隙锁。
 
 
 
 
 
 
-# 数据类型
+
+# InnoDB引擎
+
+
+
+# mysql管理
 
 
 
 
+
+# mysql数值类型
 
 ## 整型
 
