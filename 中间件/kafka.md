@@ -1,4 +1,8 @@
-# kafka的消息队列的通信模型
+# kafka
+
+[Apache Kafka](https://kafka.apache.org/documentation/)
+
+# 通信模型
 
 **点对点模式(queue消息队列)---单通道**
 消息生产者生产消息发送到queu消息队列中，然后消息消费者从queue中取出并且消费消息。一条消息被消费以后，queue中就没有了，不存在重复消费。
@@ -7,7 +11,7 @@
 
 补充:发布订阅模式下，当发布者消息量很大时，显然单个订阅者的处理能力是不足的。实际上现实场景中是多个订阅者节点组成一个订阅组（由组内一个成员中转传递消息），负载均衡消费topic消息即分组订阅，这样订阅者很容易实现消费能力线性扩展。可以看成是一个topic下有多个Queue，每个Queue是点对点的方式，Queue之间是发布订阅方式。
 
-## 介绍
+# 介绍
 
 Kafka是一个分布式数据流平台，支持部署形成集群。它提供了发布和订阅功能，使用者可以发送数据到Kafka中，也可以从Kafka中读取数据(以便进行后续的处理)。
 Kafka是一种高吞吐量的分布式发布订阅消息系统，它可以处理消费者规模的网站中的所有动作流数据，具有高性能、持久化、多副本备份、横向扩展等特点。
@@ -16,18 +20,18 @@ Kafka是一种高吞吐量的分布式发布订阅消息系统，它可以处理
 
 # 一、Kafka集群的架构
 
-Producer: 即生产者，消息的产生者，是消息的入口。
-
-Consumer：消费者，读取消息
-
 kafka cluster: kafka集群
 
-**1、Broker**: 指部署了Kafka实例的服务器节点（有唯一的标识）。每个服务器.上有一个或多个kafka的实例，我们姑且认为每个broker对应一台服务器。每个kafka集群内的broker都有一个不重复的编号，如图中的broker-0、broker-1等....
+**1、Broker**: 指部署了Kafka实例的**服务器节点**（有唯一的标识）。每个服务器.上有一个或多个kafka的实例，我们姑且认为每个broker对应一台服务器。每个kafka集群内的broker都有一个不重复的编号，如图中的broker-0、broker-1等....
 **2、Topic**: 消息的主题（如nginx专用），kafka的数据就保存在topic。在每个broker上都可以创建多个topic。实际应用中通常是一个业务线建一个topic。
-**3、Partition-leader**: Topic分区的角色（Follower:分区的从节点），每个topic可以有多个分区，分区的作用是做负载，提高kafka的吞吐量。同一个topic在不同的分区的数据是不重复的，partition的表现形式就是一个一个的文件夹!
+**3、Partition**: Topic的分区，每个topic可以有多个分区，分区的作用是做负载，提高kafka的吞吐量。Topic分区的角色（Follower:分区的从节点）。同一个topic的不同Partition分区数据是不重复的，partition的表现形式就是一个一个的文件夹!
 **4、Replication**:备份文件，每一个分区都有多个副本。当主分区(Leader) 故障的时候会选择一个备胎(Follower)上位， 成为Leader。	在kafka中默认副本的最大数量是10个，且副本的数量不能大于Broker的数量，follower和leader在不同的机器，同一机器对同一个分区也只可能存放一个副本(包括自己)。
 **5、Consumer**:消费者，即消息的消费方，是消息的出口。
-Consumer Group:我们可以将多个消费组组成一个消费者组，在kafka的设计中同一个分区的数据只能被消费者组中的某一个消费者消费。同一个消费者组的消费者可以消费同一个topic的不同分区的数据，这也是为了提高kafka的吞吐量!
+**Consumer Group**:我们可以将多个消费组组成一个消费者组，在kafka的设计中同一个分区的数据只能被消费者组中的某一个消费者消费。同一个消费者组的消费者可以消费同一个topic的不同分区的数据，这也是为了提高kafka的吞吐量!
+
+**6、Producer**: 即生产者，消息的产生者，是消息的入口。
+
+Zookeeper：kafka集群依赖zookeeper来保存集群的的元信息，来保证系统的可用性。
 
 ## 工作流程
 
@@ -41,13 +45,12 @@ Consumer Group:我们可以将多个消费组组成一个消费者组，在kafka
 5、follower将消息写入本地磁盘后向leader发送ACK
 6、leader收到所有的follower的ACK之后向生产者发送ACK
 
-### 选择partition的原则
+## 选择partition的原则
 
 某个 topic可以设置多个parition目录，生产者数据应该发往哪个分区呢？
 1、partition在写入的时候可以指定需要写入的partition,如果有指定，则写入对应的partition。
 2、如果没有指定partition,但是设置了数据的key,则会根据key的值hash出一个partition。
 3、如果既没指定partition，又没有设置key,则会采用轮询方式，即每次取一小段时间的数据写入某个partition，下一小段的时间写入下一个partition。
-
 
 # 二、kafka数据发送ack应答机制
 
@@ -59,7 +62,7 @@ producer在向kafka写入消息的时候，设置确认参数确定kafka接收�
 
 # 三、Topic分区数据日志文件结构
 
-对于每个Topic主题，Kafka集群维护了一个分区数据日志文件结构如下:
+对于每个Topic主题下 partition数据存储如下，Kafka集群维护了一个partition分区数据日志文件结构如下:
 ![image-20230424112426154](assets/image-20230424112426154.png)
 如上图，假如某个Topic有三个partition分区，采用轮询方式，在同一个partition上数据是有序存储的
 
@@ -67,6 +70,15 @@ producer在向kafka写入消息的时候，设置确认参数确定kafka接收�
 	当新的数据写入时，追加到partition的末尾。在每个partition中，每条消息都会被分配一个顺序的唯一标识， 这个标识被称为offset（即偏移量），Kafka只保证在同一个partition内部消息是有序的，在不同partition之间并不能保证消息有序。
 
 Kafka可以配置一个保留期限，用来标识日志会在Kafka集群内保留多长时间。Kafka集群会保留在保留期限内所有被发布的消息，不管这些消息是否被消费过，超过保留期，这些数据将会被清空。由于Kafka会将数据进行持久化存储(即写入到硬盘上)，所以保留的数据大小可以设置为一个比较大的值。
+
+**offset**
+
+- offset记录着下一条将要发送给Consumer的消息的序号
+- 默认Kafka将offset存储在ZooKeeper中
+- 在一个分区中，消息是有顺序的方式存储着，每个在分区的消费都是有一个递增的id。这个就是偏移量offset
+- 偏移量在分区中才是有意义的。在分区之间，offset是没有任何意义的
+
+
 
 ## Partition结构
 Partition以文件夹的形式存在， 每个partition文件夹下面会有多组segment文件，每组segment文件又包含. index文件、.1og文件、.timeindex文件三个文件
