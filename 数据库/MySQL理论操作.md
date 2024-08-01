@@ -266,7 +266,7 @@ select * from employee where idcard like '%X'; -- 身份证最后为X
 例：
 `SELECT count(id) from employee where workaddress = "广东省";`
 
-### 分组查询（group by）
+### 分组查询（group by）（having）
 
 可根据指定的字段进行分组。语法：
 `SELECT 字段列表 FROM 表名 [WHERE 条件] GROUP BY 分组字段名 [HAVING 分组后的过滤条件];`
@@ -274,8 +274,6 @@ select * from employee where idcard like '%X'; -- 身份证最后为X
 where 和 having 的区别：
 - 执行时机不同：where是分组之前进行过滤，不满足where条件不参与分组；having是分组后对结果进行过滤。
 - 判断条件不同：where不能对聚合函数进行判断，而having可以。
-
-> 
 
 例子：
 
@@ -295,9 +293,9 @@ select workaddress， count(*) from employee where age < 45 group by workaddress
 
 **注意事项**
 
-> - 分组之后，查询的字段一般为聚合函数和分组字段，查询其他字段无任何意义。
+> - 分组之后，查询的字段一般为聚合函数和分组字段，查询其他字段无任何意义
 >
-> - 执行顺序: where > 聚合函数 > having 。
+> - 执行顺序: where > 聚合函数 > having
 >
 > - 支持多字段分组, 具体语法为 : group by columnA,columnB
 
@@ -1681,9 +1679,7 @@ unlock tables ;  # 释放锁
 - 如果在主库上备份，那么在备份期间都不能执行更新，业务基本上就得停摆。
 - 如果在从库上备份，那么在备份期间从库不能执行主库同步过来的二进制日志（binlog），会导致主从延迟。
 
-在InnoDB引擎中，我们可以在备份时加上参数 --single-transaction 参数来完成不加锁的一致
-
-性数据备份。
+在InnoDB引擎中，我们可以在备份时加上参数 --single-transaction 参数来完成**不加锁的一致性数据备份**。
 
 ```sql
 mysqldump --single-transaction -uroot –p123456 itcast > itcast.sql
@@ -1701,12 +1697,11 @@ mysqldump --single-transaction -uroot –p123456 itcast > itcast.sql
 
 对于表锁，分为两类：
 
-- 表共享读锁（read lock）
+- 表共享读锁（read lock）：
 - 表独占写锁（write lock）
 
-> 注意: 读锁不会阻塞其他客户端的读，但是会阻塞写。写锁既会阻塞其他客户端的读，又会阻塞
+> 注意: 读锁不会阻塞其他客户端的读，但是会阻塞写。写锁既会阻塞其他客户端的读，又会阻塞其他客户端的写。
 >
-> 其他客户端的写。
 
 语法：
 
@@ -1715,13 +1710,13 @@ mysqldump --single-transaction -uroot –p123456 itcast > itcast.sql
 
 **元数据锁**
 
-meta data lock , 元数据锁，简写MDL。
+meta data lock , 元数据锁，简写MDL。**防止修改表结构**。
 
 MDL加锁过程是系统自动控制，无需显式使用，在访问一张表的时候会自动加上。MDL锁主要作用是维护表元数据的数据一致性，在表上有活动事务的时候，不可以对元数据进行写入操作。**为了避免DML与DDL冲突，保证读写的正确性。**
 
-这里的元数据，大家可以简单理解为就是一张表的表结构。 也就是说，某一张表涉及到未提交的事务时，是不能够修改这张表的表结构的。
+**元数据**，大家可以简单理解为就是一张表的表结构。 也就是说，某一张表涉及到未提交的事务时，是不能够修改这张表的表结构的。
 
-在MySQL5.5中引入了MDL，当对一张表进行增删改查的时候，加MDL读锁(共享)；当对表结构进行变更操作的时候，加MDL写锁(排他)。
+在MySQL5.5中引入了MDL，当对一张表进行增删改查的时候，加MDL读锁(共享)；当对表结构进行变更操作的时候，加MDL写锁(他)。
 
 常见的SQL操作时，所添加的元数据锁：
 
@@ -1734,22 +1729,17 @@ MDL加锁过程是系统自动控制，无需显式使用，在访问一张表�
 
 **意向锁**
 
-为了避免DML在执行时，加的行锁与表锁的冲突，在InnoDB中引入了意向锁，使得表锁不用检查每行
+为了避免DML在执行时，加的**行锁与表锁的冲突**，在InnoDB中引入了意向锁，使得表锁不用检查每行数据是否加锁，使用意向锁来减少表锁的检查。
 
-数据是否加锁，使用意向锁来减少表锁的检查。
-
-分类
-
-- 意向共享锁(IS): 由语句select ... lock in share mode添加 。 与 表锁共享锁(read)兼容，与表锁排他锁(write)互斥。
-- 意向排他锁(IX): 由insert、update、delete、select...for update添加 。与表锁共享锁(read)及排他锁(write)都互斥，意向锁之间不会互斥。
+- **意向共享锁(IS)**: 由语句select ... lock in share mode添加 。 与 表锁共享锁(read)兼容，与表锁排他锁(write)互斥。
+- **意向排他锁(IX)**: 由insert、update、delete、select...for update添加 。与表锁共享锁(read)及排他锁(write)都互斥，意向锁之间不会互斥。
 
 > 一旦事务提交了，意向共享锁、意向排他锁，都会自动释放。
 
 可以通过以下SQL，查看意向锁及行锁的加锁情况：
 
 ```sql
-select object_schema,object_name,index_name,lock_type,lock_mode,lock_data from
-performance_schema.data_locks;
+select object_schema,object_name,index_name,lock_type,lock_mode,lock_data from performance_schema.data_locks;
 ```
 
 ## 行级锁
@@ -1762,11 +1752,11 @@ InnoDB的数据是基于索引组织的，行锁是通过对索引上的索引�
 
   ![image-20240721175747956](./assets/image-20240721175747956.png)
 
-- 间隙锁（Gap Lock）：锁定索引记录间隙（不含该记录），确保索引记录间隙不变，防止其他事务在这个间隙进行insert，产生幻读。在RR隔离级别下都支持。
+- 间隙锁（Gap Lock）：**锁定索引记录间隙**（不含该记录）。确保索引记录间隙不变，防止其他事务在这个间隙进行insert，**防止出现幻读**。在RR隔离级别下都支持。
 
   ![image-20240721175810266](./assets/image-20240721175810266.png)
 
-- 临键锁（Next-Key Lock）：行锁和间隙锁组合，同时锁住数据，并锁住数据前面的间隙Gap。在RR隔离级别下支持。
+- 临键锁（Next-Key Lock）：行锁和间隙锁组合。**同时锁住数据，并锁住数据前面的间隙**。在RR隔离级别下支持。
 
   ![image-20240721175823607](./assets/image-20240721175823607.png)
 
@@ -1794,6 +1784,18 @@ InnoDB实现了以下两种类型的行锁：
 | SELECT（正常）                | 不加任何锁 |                                          |
 | SELECT ... LOCK IN SHARE MODE | 共享锁     | 需要手动在SELECT之后加LOCK IN SHARE MODE |
 | SELECT ... FOR UPDATE         | 排他锁     | 需要手动在SELECT之后加FOR UPDATE         |
+
+默认情况下，InnoDB在 REPEATABLE READ事务隔离级别运行，InnoDB使用 next-key 锁进行搜索和索引扫描，以防止幻读。
+
+- 针对**唯一索引**进行检索时，对已存在的记录进行等值匹配时，将会自动优化为行锁。
+- InnoDB的行锁是针对于**索引加的锁**，不通过索引条件检索数据，那么InnoDB将对表中的所有记录加锁，此时 就会升级为表锁。
+
+可以通过以下SQL，查看意向锁及行锁的加锁情况：
+
+```sql
+select object_schema,object_name,index_name,lock_type,lock_mode,lock_data from
+performance_schema.data_locks;
+```
 
 **间隙锁&临键锁**
 

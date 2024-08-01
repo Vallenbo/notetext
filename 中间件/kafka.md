@@ -2,15 +2,6 @@
 
 [Apache Kafka](https://kafka.apache.org/documentation/)
 
-# 通信模型
-
-**点对点模式(queue消息队列)---单通道**
-消息生产者生产消息发送到queu消息队列中，然后消息消费者从queue中取出并且消费消息。一条消息被消费以后，queue中就没有了，不存在重复消费。
-**发布/订阅(topic)---广播方式**
-消息生产者(发布)将消息发布到topic中，同时有多个消息消费者(订阅) 消费该消息。和点对点方式不同，发布到topic的消息会被所有订阅者消费(类似于关注了微信公众号的人都能收到推送的文章)。
-
-补充:发布订阅模式下，当发布者消息量很大时，显然单个订阅者的处理能力是不足的。实际上现实场景中是多个订阅者节点组成一个订阅组（由组内一个成员中转传递消息），负载均衡消费topic消息即分组订阅，这样订阅者很容易实现消费能力线性扩展。可以看成是一个topic下有多个Queue，每个Queue是点对点的方式，Queue之间是发布订阅方式。
-
 # 介绍
 
 Kafka是一个分布式数据流平台，支持部署形成集群。它提供了发布和订阅功能，使用者可以发送数据到Kafka中，也可以从Kafka中读取数据(以便进行后续的处理)。
@@ -25,13 +16,21 @@ kafka cluster: kafka集群
 **1、Broker**: 指部署了Kafka实例的**服务器节点**（有唯一的标识）。每个服务器.上有一个或多个kafka的实例，我们姑且认为每个broker对应一台服务器。每个kafka集群内的broker都有一个不重复的编号，如图中的broker-0、broker-1等....
 **2、Topic**: 消息的主题（如nginx专用），kafka的数据就保存在topic。在每个broker上都可以创建多个topic。实际应用中通常是一个业务线建一个topic。
 **3、Partition**: Topic的分区，每个topic可以有多个分区，分区的作用是做负载，提高kafka的吞吐量。Topic分区的角色（Follower:分区的从节点）。同一个topic的不同Partition分区数据是不重复的，partition的表现形式就是一个一个的文件夹!
-**4、Replication**:备份文件，每一个分区都有多个副本。当主分区(Leader) 故障的时候会选择一个备胎(Follower)上位， 成为Leader。	在kafka中默认副本的最大数量是10个，且副本的数量不能大于Broker的数量，follower和leader在不同的机器，同一机器对同一个分区也只可能存放一个副本(包括自己)。
+**4、Replication**:备份文件，每一个分区都有多个副本。当主分区(Leader) 故障的时候会选择一个备胎(Follower)上位， 成为Leader。
+在kafka中默认副本的最大数量是10个，且副本的数量不能大于Broker的数量，follower和leader在不同的机器，同一机器对同一个分区也只可能存放一个副本(包括自己)。
 **5、Consumer**:消费者，即消息的消费方，是消息的出口。
 **Consumer Group**:我们可以将多个消费组组成一个消费者组，在kafka的设计中同一个分区的数据只能被消费者组中的某一个消费者消费。同一个消费者组的消费者可以消费同一个topic的不同分区的数据，这也是为了提高kafka的吞吐量!
 
 **6、Producer**: 即生产者，消息的产生者，是消息的入口。
 
 Zookeeper：kafka集群依赖zookeeper来保存集群的的元信息，来保证系统的可用性。
+
+**7、offset**：偏移量
+
+- offset记录着下一条将要发送给Consumer的消息的序号
+- 默认Kafka将offset存储在ZooKeeper中
+- 在一个分区中，消息是有顺序的方式存储着，每个在分区的消费都是有一个递增的id。这个就是偏移量offset
+- 偏移量在分区中才是有意义的。在分区之间，offset是没有任何意义的
 
 ## 工作流程
 
@@ -71,15 +70,6 @@ producer在向kafka写入消息的时候，设置确认参数确定kafka接收�
 
 Kafka可以配置一个保留期限，用来标识日志会在Kafka集群内保留多长时间。Kafka集群会保留在保留期限内所有被发布的消息，不管这些消息是否被消费过，超过保留期，这些数据将会被清空。由于Kafka会将数据进行持久化存储(即写入到硬盘上)，所以保留的数据大小可以设置为一个比较大的值。
 
-**offset**
-
-- offset记录着下一条将要发送给Consumer的消息的序号
-- 默认Kafka将offset存储在ZooKeeper中
-- 在一个分区中，消息是有顺序的方式存储着，每个在分区的消费都是有一个递增的id。这个就是偏移量offset
-- 偏移量在分区中才是有意义的。在分区之间，offset是没有任何意义的
-
-
-
 ## Partition结构
 Partition以文件夹的形式存在， 每个partition文件夹下面会有多组segment文件，每组segment文件又包含. index文件、.1og文件、.timeindex文件三个文件
 
@@ -89,15 +79,184 @@ Partition以文件夹的形式存在， 每个partition文件夹下面会有多�
 ## 为什么kafka快?
 虽然是写入物理磁盘，但是每条记录都是通过index索引能快速定位
 
-# 四、Consumer组消费数据
+# 消费模型
 
-多个消费者实例可以组成一个消费者组，并用一个标签来标识这个消费者组。一个消费者组中的不同消费者实例可以运行在不同的进程甚至不同的服务器上。如果所有的消费者实例都在同一个消费者组中，那么消息记录会被很好的均衡的发送到每个消费者实例。
+**发布-订阅模式(一对多)**
+
+多个消费者实例可以组成一个消费者组，并用consumer group 标识这个消费者组。
+
+一个消费者组中的不同消费者实例可以运行在不同的进程甚至不同的服务器上。如果所有的消费者实例都在同一个消费者组中，那么消息记录会被很好的均衡的发送到每个消费者实例。
 如果所有的消费者实例都在不同的消费者组，那么每一条消息记录会被广播到每一个消费者实例。
 
-![image-20230424112434869](assets/image-20230424112434869.png)
-每个消费者实例可以消费多个分区,但是每个分区最多只能被消费者组中的一个实例消费。
+<img src="assets/image-20230424112434869.png" alt="image-20230424112434869" style="zoom:67%;" />
+
+- 分区是最小的并行单位
+- 一个消费者可以消费多个分区
+- 一个分区可以被多个消费者组里的消费者消费
+- 但是，一个分区不能同时被同一个消费者组里的多个消费者消费
+
+**点对点（一对一）**
+
+消息生产者生产消息发送到queu消息队列中，然后消息消费者从queue中取出并且消费消息。一条消息被消费以后，queue中就没有了，不存在重复消费。
+
+所有消费者都属于同一个消费者组
+
+![image-20240801145856443](./assets/image-20240801145856443.png)
 
 
+
+# 消息顺序
+
+**分区与消息顺序**
+
+<img src="./assets/image-20240801150003022.png" alt="image-20240801150003022" style="zoom: 50%;" />
+
+- 同一个生产者发送到同一分区的消息，先发送的offset比后发送的offset小。（m1 offest < m2 offest）
+- 同一个生产者发送到不同分区的消息，消息顺序无法保证。（不能保证m4和m1的顺序关系）
+
+**分区与消费顺序**
+
+<img src="./assets/image-20240801150243722.png" alt="image-20240801150243722" style="zoom: 50%;" />
+
+- 消费者按照消息在分区里的存放顺序进行消费的
+- Kafka只保证分区内的消息顺序，不能保证分区间的消息顺序
+
+解决办法：
+
+> 1.设置一个分区，这样就可以保证所有消息的顺序，但是失去了拓展性和性能
+>
+> 2.支持通过设置消息的key,相同key的消息会发送的同一个分区
+
+# 消息传递语义
+
+最多一次——消息可能会丢失，永远不重复发送
+
+<img src="./assets/image-20240801152222013.png" alt="image-20240801152222013" style="zoom:50%;" />
+
+最少一次——消息不会丢失，但是可能会重复
+
+<img src="./assets/image-20240801152207253.png" alt="image-20240801152207253" style="zoom: 50%;" />
+
+精确一次——保证消息被传递到服务端且在服务端不重复
+
+需要生产者和消费者共同来保证。修改下面配置信息
+
+```sh
+enable.idempotence=true			# 开启幂等
+
+//retries= Integer.MAX_VALUE
+
+acts= all
+```
+
+通过offset来防止重复消费不是一个好的办法
+通常在消息中加入唯一ID(例如流水ID，订单ID)，在处理业务时，通过判断ID来防止重复处理
+
+
+
+# 事务
+
+kafka支持事务（0.11.0 or later）
+
+隔离级别solation level
+默认为:read_uncommitted 脏读 （事务中未提交的数据可以读取）
+读取成功提交的数据，不会脏读read committed
+
+
+
+# 消息序列化
+
+recode消息序列化：将一个完整的数据拆分传输
+
+将对象以二进制的方式在网络之间传输或者保存到文件中，并可以根据特定的规则进行还原
+
+[message   format消息序列化文档](https://kafka.apache.org/documentation/#messageformat)
+
+**优点**
+
+- 1.节省空间，提高网络传输效率
+- 2.跨平台
+- 3.跨语言
+
+**常用消息格式**
+
+- csv适合简单数据传输
+- json可读性高（支持ES），占用空间
+- protubuf 序列化消息
+
+
+
+**Record Header用法 **
+
+<img src="./assets/image-20240801161142737.png" alt="image-20240801161142737" style="zoom: 50%;" />
+
+使用场景
+
+一个新用户注册成功之后、购买商品生成了一个订单，之后又取消了这个订单。
+
+这些事件之间的顺序很重要。
+
+Kafka 是不保证分区之间的顺序的。如果取消订单这条消息在注册用户或者购买商品之前，处理逻辑就会有问题。
+
+<img src="./assets/image-20240801161319516.png" alt="image-20240801161319516" style="zoom: 50%;" />
+
+这种情况下：为了保证消费顺秀，将所有事件放在同一个主题的同一个分区中。因此使用用户 ID 作为分区的key，使它们位于相同分区。
+
+同时引入Record Header使用，标记不同的事件类型
+
+
+
+
+
+<img src="./assets/image-20240801161008932.png" alt="image-20240801161008932" style="zoom:50%;" />
+
+
+
+# 监听器和内外部网络
+
+server.properties 必要配置项
+
+- broker.id
+- log.dirs
+- zookeeper.connect
+
+**监听器**
+
+listeners:指定broker启动时本机的监听名称、端口
+
+```sh
+监听地址配置									默认名称(协议)
+listeners=PLAINTEXT://:9092					PLAINTEXT
+listeners=PLAINTEXT://192.168.1.10:9092		SSL
+listeners=PLAINTEXT://hostname:9092			SASL
+listeners=PLAINTEXT://0.0.0.0:9092			PLAINTEXTSASL_SSL 
+```
+
+**监听器 listeners 和 advertised.listeners**
+
+- listeners:指定broker启动时的本机监听端口，给服务器端使用
+- advertised.listeners:对外发布的访问IP和端口，注册到zookeeper中，给客户端(client)使用
+
+<img src="./assets/image-20240801162110152.png" alt="image-20240801162110152" style="zoom:50%;" />
+
+**内外部网络使用**
+
+负载均衡使用kafka。
+
+<img src="./assets/image-20240801162352196.png" alt="image-20240801162352196" style="zoom: 33%;" />
+
+advertised.listeners配置需要配置成公网IP
+
+<img src="./assets/image-20240801162610836.png" alt="image-20240801162610836" style="zoom:33%;" />
+
+配置文件示例
+
+```sh
+listenerS=INTERNAL://:9092,EXTERNAL://0.0.0.0:9093
+advertised.listeners=INTERNAL://kafka-0:9092,EXTERNAL://公网IP:9093
+listener.security.protocol.map=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+inter.broker.listener.name=INTERNAL
+```
 
 
 
