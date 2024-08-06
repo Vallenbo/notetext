@@ -905,23 +905,50 @@ commit;
 
 > 这三个问题的详细演示：https：//www.bilibili.com/video/BV1Kr4y1i7ru?p=55cd 
 
-**并发事务隔离级别**：
+## 并发事务隔离级别
+
+MySQL 支持四种事务隔离级别，每种级别提供不同程度的数据一致性和并发性。以下是这四种隔离级别及其特点：
+
+**读未提交（Read Uncommitted）**：
+
+- 允许一个事务读取另一个事务未提交的数据。
+- 可能会导致脏读（Dirty Read）、不可重复读（Non-repeatable Read）和幻读（Phantom Read）问题。
+- 隔离级别最低，性能最好，但数据一致性最差。
+
+**读已提交（Read Committed）**：
+
+- 只允许一个事务读取另一个事务已提交的数据。
+- 可以避免脏读，但仍可能发生不可重复读和幻读。
+- 大多数数据库系统的默认隔离级别。
+
+**可重复读（Repeatable Read）**：
+
+- 确保在同一个事务中多次读取同一数据时，结果是一致的。
+- 可以避免脏读和不可重复读，但可能会发生幻读。
+- MySQL 的默认隔离级别。
+
+**可串行化（Serializable）**：
+
+- 强制事务按顺序执行，完全避免脏读、不可重复读和幻读。
+- 隔离级别最高，性能最差，因为事务需要等待其他事务完成。
 
 | 隔离级别  | 脏读  | 不可重复读  | 幻读  |
 | ------------ | ------------ | ------------ | ------------ |
-| Read uncommitted  | √  | √  | √  |
-| Read committed  | ×  | √  | √  |
-| Repeatable Read(默认)  | ×  | ×  | √  |
-| Serializable  | ×  | ×  | ×  |
+| Read uncommitted 未提交读 | √  | √  | √  |
+| Read committed 提交读 | ×  | √  | √  |
+| Repeatable Read(默认) 可重复读 | ×  | ×  | √  |
+| Serializable 可串行化 | ×  | ×  | ×  |
 
 - √表示在当前隔离级别下该问题会出现
 - Serializable 性能最低；Read uncommitted 性能最高，数据安全性最差
 
-查看事务隔离级别：
-`SELECT @@TRANSACTION_ISOLATION;`
-设置事务隔离级别：
-`SET [SESSION | GLOBAL] TRANSACTION ISOLATION LEVEL {READ UNCOMMITTED | READ COMMITTED | REPEATABLE READ | SERIALIZABLE};`
-SESSION 是会话级别，表示只针对当前会话有效，GLOBAL 表示对所有会话有效
+```sql
+# 查看事务隔离级别：
+SELECT @@TRANSACTION_ISOLATION;
+# 设置事务隔离级别：
+SET [SESSION | GLOBAL] TRANSACTION ISOLATION LEVEL {READ UNCOMMITTED | READ COMMITTED | REPEATABLE READ | SERIALIZABLE};
+# SESSION 是会话级别，表示只针对当前会话有效，GLOBAL 表示对所有会话有效
+```
 
 > 注意：事务隔离级别越高，数据越安全，但是性能越低。
 

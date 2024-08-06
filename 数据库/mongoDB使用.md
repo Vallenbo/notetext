@@ -2,6 +2,14 @@
 
 [官方中文文档](https://docs.mongoing.com)  | [菜鸟教程文档](https://www.runoob.com/mongodb/mongodb-databases-documents-collections.html)  |  [官方文档](https://docs.mongodb.com/manual/mongo/)  |  [中文社区](https://mongoing.com)
 
+什么是MongoDB?
+
+MongoDB是一个开源、高性能、无模式的文档型数据库，当初的设计就是用于简化开发和方便扩展，是NoSQL数据库产品中的一种。是最像关系型数据库（MySQL）的非关系型数据库。
+
+它支持的数据结构非常松散，是一种类似于 JSON 的 格式叫BSON，所以它既可以存储比较复杂的数据类型，又相当的灵活。
+
+MongoDB中的记录是一个文档，它是一个由字段和值对（field:value）组成的数据结构。MongoDB文档类似于JSON对象，即一个文档认为就是一个对象。字段的数据类型是字符型，它的值除了使用基本的一些类型外，还可以包括其他文档、普通数组和文档数组。
+
 # 什么是NoSQL?
 
 NoSQL（Not Only SQL）非关系型数据库。是对不同于传统的关系型数据库的数据库管理系统的统称。
@@ -10,11 +18,11 @@ NoSQL用于超大规模数据的存储。（例如谷歌或Facebook每天为他�
 
 # CAP定理
 
-在计算机科学中, CAP定理（CAP theorem）, 又被称作 布鲁尔定理（Brewer's theorem）, 它指出对于一个分布式计算系统来说，不可能同时满足以下三点:
+分布式架构中 CAP定理（CAP theorem）它指出对于一个分布式计算系统来说，不可能同时满足以下三点:
 
 - **一致性(Consistency)**：所有节点在同一时间具有相同的数据
-- **可用性(Availability)**：保证每个请求不管成功或者失败都有响应
-- **分区容错性(Partition tolerance)**：系统中任意信息的丢失或失败不会影响系统的继续运作
+- **可用性(Availability)**：保证**每个请求**不管成功或者失败都有响应
+- **分区容错性(Partition tolerance)**：系统中**任意信息**的丢失或失败不会影响系统的继续运作
 
 CAP理论的核心是：一个分布式系统不可能同时很好的满足一致性，可用性和分区容错性这三个需求，最多只能同时较好的满足两个。
 
@@ -25,86 +33,6 @@ CAP理论的核心是：一个分布式系统不可能同时很好的满足一�
 - AP - 满足可用性，分区容忍性的系统，通常可能对一致性要求低一些。
 
 # MongoDB相关概念
-
-## 业务应用场景
-
-传统的关系型数据库（如MySQL），在数据操作的“三高”需求以及应对Web2.0的网站需求面前，显得力不从心。
-
-解释：“三高”需求：
-
-- High performance - 对数据库高并发读写的需求。
-
-- Huge Storage - 对海量数据的高效率存储和访问的需求。
-
-- High Scalability && High Availability- 对数据库的高可扩展性和高可用性的需求。
-
-
-而MongoDB可应对三高需求：
-
-具体的应用场景如：
-
-1）社交场景，使用 MongoDB 存储存储用户信息，以及用户发表的朋友圈信息，通过地理位置索引实现附近的人、地点等功能。
-
-2）游戏场景，使用 MongoDB 存储游戏用户信息，用户的装备、积分等直接以内嵌文档的形式存储，方便查询、高效率存储和访问。
-
-3）物流场景，使用 MongoDB 存储订单信息，订单状态在运送过程中会不断更新，以 MongoDB 内嵌数组的形式来存储，一次查询就能将订单所有的变更读取出来。
-
-4）物联网场景，使用 MongoDB 存储所有接入的智能设备信息，以及设备汇报的日志信息，并对这些信息进行多维度的分析。
-
-5）视频直播，使用 MongoDB 存储用户信息、点赞互动信息等。
-
-这些应用场景中，数据操作方面的共同特点是：
-
-（1）数据量大
-
-（2）写入操作频繁（读写都很频繁）
-
-（3）价值较低的数据，对事务性要求不高
-
-对于这样的数据，我们更适合使用MongoDB来实现数据的存储。
-
-## 什么时候选择 MongoDB
-
-在架构选型上，除了上述的三个特点外，如果你还犹豫是否要选择它？可以考虑以下的一些问题：
-
-- 应用不需要事务及复杂 join 支持
-
-- 新应用，需求会变，数据模型无法确定，想快速迭代开发
-
-- 应用需要2000-3000以上的读写QPS（更高也可以）
-
-- 应用需要TB甚至 PB 级别数据存储
-
-- 应用发展迅速，需要能快速水平扩展
-
-- 应用要求存储的数据不丢失
-
-- 应用需要99.999%高可用
-
-- 应用需要大量的地理位置查询、文本查询
-
-
-如果上述有1个符合，可以考虑 MongoDB，2个及以上的符合，选择 MongoDB 绝不会后悔。
-
-思考：如果用MySQL呢？
-
-答：相对MySQL，可以以更低的成本解决问题（包括学习、开发、运维等成本）
-
-**MongoDB的优点**：
-
-可以快速开发web型应用，因为灵活，不用像关系型数据库一样需要建表
-
-MongoDB存储的是文档(document)，文档内存储的是类似json的结构，所谓json就是字符串数组
-
-## MongoDB简介
-
-什么是MongoDB?
-
-MongoDB是一个开源、高性能、无模式的文档型数据库，当初的设计就是用于简化开发和方便扩展，是NoSQL数据库产品中的一种。是最像关系型数据库（MySQL）的非关系型数据库。
-
-它支持的数据结构非常松散，是一种类似于 JSON 的 格式叫BSON，所以它既可以存储比较复杂的数据类型，又相当的灵活。
-
-MongoDB中的记录是一个文档，它是一个由字段和值对（field:value）组成的数据结构。MongoDB文档类似于JSON对象，即一个文档认为就是一个对象。字段的数据类型是字符型，它的值除了使用基本的一些类型外，还可以包括其他文档、普通数组和文档数组。
 
 ## MongoDB数据库分类
 
@@ -176,9 +104,7 @@ MongoDB提供了水平可扩展性作为其核心功能的一部分。
 
 分片将数据分布在一组集群的机器上。（海量数据存储，服务能力水平扩展）
 
-从3.4开始，MongoDB支持基于片键创建数据区域。在一个平衡的集群中，MongoDB将一个区域所覆盖的读写只定向到该区域内的那些
-
-片。
+从3.4开始，MongoDB支持基于片键创建数据区域。在一个平衡的集群中，MongoDB将一个区域所覆盖的读写只定向到该区域内的那些片。
 
 （4）丰富的查询支持：
 
@@ -188,7 +114,77 @@ MongoDB支持丰富的查询语言，支持读和写操作(CRUD)，比如数据�
 
 如无模式（动态模式）、灵活的文档模型
 
+**业务应用场景**
 
+1）社交场景，使用 MongoDB 存储存储用户信息，以及用户发表的朋友圈信息，通过地理位置索引实现附近的人、地点等功能。
+
+2）游戏场景，使用 MongoDB 存储游戏用户信息，用户的装备、积分等直接以内嵌文档的形式存储，方便查询、高效率存储和访问。
+
+3）物流场景，使用 MongoDB 存储订单信息，订单状态在运送过程中会不断更新，以 MongoDB 内嵌数组的形式来存储，一次查询就能将订单所有的变更读取出来。
+
+4）物联网场景，使用 MongoDB 存储所有接入的智能设备信息，以及设备汇报的日志信息，并对这些信息进行多维度的分析。
+
+5）视频直播，使用 MongoDB 存储用户信息、点赞互动信息等。
+
+这些应用场景中，数据操作方面的共同特点是：
+
+（1）数据量大
+
+（2）写入操作频繁（读写都很频繁）
+
+（3）价值较低的数据，对事务性要求不高
+
+对于这样的数据，我们更适合使用MongoDB来实现数据的存储。
+
+## 什么时候选择 MongoDB
+
+在架构选型上，除了上述的三个特点外，如果你还犹豫是否要选择它？可以考虑以下的一些问题：
+
+- 应用不需要事务及复杂 join 支持
+
+- 新应用，需求会变，数据模型无法确定，想快速迭代开发
+
+- 应用需要2000-3000以上的读写QPS（更高也可以）
+
+- 应用需要TB甚至 PB 级别数据存储
+
+- 应用发展迅速，需要能快速水平扩展
+
+- 应用要求存储的数据不丢失
+
+- 应用需要99.999%高可用
+
+- 应用需要大量的地理位置查询、文本查询
+
+
+如果上述有1个符合，可以考虑 MongoDB，2个及以上的符合，选择 MongoDB 绝不会后悔。
+
+思考：如果用MySQL呢？
+
+答：相对MySQL，可以以更低的成本解决问题（包括学习、开发、运维等成本）
+
+**MongoDB的优点**：
+
+可以快速开发web型应用，因为灵活，不用像关系型数据库一样需要建表
+
+MongoDB存储的是文档(document)，文档内存储的是类似json的结构，所谓json就是字符串数组
+
+## MongoDB 支持哪些存储引擎？
+
+存储引擎（Storage Engine）是数据库的核心组件，负责管理数据在内存和磁盘中的存储方式。
+
+与 MySQL 一样，MongoDB 采用的也是 **插件式的存储引擎架构** ，支持不同类型的存储引擎，不同的存储引擎解决不同场景的问题。在创建数据库或集合时，可以指定存储引擎。
+
+> 插件式的存储引擎架构可以实现 Server 层和存储引擎层的解耦，可以支持多种存储引擎，如MySQL既可以支持B-Tree结构的InnoDB存储引擎，还可以支持LSM结构的RocksDB存储引擎。
+
+在存储引擎刚出来的时候，默认是使用 MMAPV1 存储引擎，MongoDB4.x 版本不再支持 MMAPv1 存储引擎。
+
+现在主要有下面这两种存储引擎：
+
+- **WiredTiger 存储引擎** ：自 MongoDB 3.2 以后，默认的存储引擎为 [WiredTiger 存储引擎](https://link.juejin.cn?target=https%3A%2F%2Fwww.mongodb.com%2Fdocs%2Fmanual%2Fcore%2Fwiredtiger%2F) 。非常适合大多数工作负载，建议用于新部署。WiredTiger 提供文档级并发模型、检查点和数据压缩（后文会介绍到）等功能。
+- **In-Memory 存储引擎** ：[In-Memory 存储引擎](https://link.juejin.cn?target=https%3A%2F%2Fwww.mongodb.com%2Fdocs%2Fmanual%2Fcore%2Finmemory%2F)在 MongoDB Enterprise 中可用。它不是将文档存储在磁盘上，而是将它们保留在内存中以获得更可预测的数据延迟。
+
+此外，MongoDB 3.0 提供了 **可插拔的存储引擎 API** ，允许第三方为 MongoDB 开发存储引擎，这点和 MySQL 也比较类似。
 
 # 基本操作
 
@@ -711,7 +707,103 @@ db.comment.find({$or:[ {userid:"1003"} ,{likenum:{$lt:1000} }]})
 条件连接查询：db.comment.find({$and:[{条件1},{条件2}]})或db.comment.find({$or:[{条件1},{条件2}]})
 ```
 
+ 
 
+# MongoDB 聚合
+
+## MongoDB 聚合有什么用？
+
+实际项目中，我们经常需要将多个文档甚至是多个集合汇总到一起计算分析（比如求和、取最大值）并返回计算后的结果，这个过程被称为 **聚合操作** 。
+
+根据官方文档介绍，我们可以使用聚合操作来：
+
+- 将来自多个文档的值组合在一起。
+- 对集合中的数据进行的一系列运算。
+- 分析数据随时间的变化。
+
+## MongoDB 提供了哪几种执行聚合的方法？
+
+MongoDB 提供了两种执行聚合的方法：
+
+- **聚合管道（Aggregation Pipeline）** ：执行聚合操作的首选方法。
+- **单一目的聚合方法（Single purpose aggregation methods）** ：也就是单一作用的聚合函数比如 `count()`、`distinct()`、`estimatedDocumentCount()`。
+
+绝大部分文章中还提到了 **map-reduce** 这种聚合方法。不过，从 MongoDB 5.0 开始，map-reduce 已经不被官方推荐使用了，替代方案是 [聚合管道](https://link.juejin.cn?target=https%3A%2F%2Fwww.mongodb.com%2Fdocs%2Fmanual%2Fcore%2Faggregation-pipeline%2F)。聚合管道提供比 map-reduce 更好的性能和可用性。
+
+MongoDB 聚合管道由多个阶段组成，每个阶段在文档通过管道时转换文档。每个阶段接收前一个阶段的输出，进一步处理数据，并将其作为输入数据发送到下一个阶段。
+
+每个管道的工作流程是：
+
+1. 接受一系列原始数据文档
+2. 对这些文档进行一系列运算
+3. 结果文档输出给下一个阶段
+
+![管道的工作流程](./assets/e6d190cf1b9f4bffb4dc782e8e66d19btplv-k3u1fbpfcp-zoom-in-crop-mark1512000.webp)
+
+**常用阶段操作符** ：
+
+| 操作符   | 简述                                                         |
+| -------- | ------------------------------------------------------------ |
+| $match   | 匹配操作符，用于对文档集合进行筛选                           |
+| $project | 投射操作符，用于重构每一个文档的字段，可以提取字段，重命名字段，甚至可以对原有字段进行操作后新增字段 |
+| $sort    | 排序操作符，用于根据一个或多个字段对文档进行排序             |
+| $limit   | 限制操作符，用于限制返回文档的数量                           |
+| $skip    | 跳过操作符，用于跳过指定数量的文档                           |
+| $count   | 统计操作符，用于统计文档的数量                               |
+| $group   | 分组操作符，用于对文档集合进行分组                           |
+| $unwind  | 拆分操作符，用于将数组中的每一个值拆分为单独的文档           |
+| $lookup  | 连接操作符，用于连接同一个数据库中另一个集合，并获取指定的文档，类似于 populate |
+
+更多操作符介绍详见官方文档：[docs.mongodb.com/manual/refe…](https://link.juejin.cn?target=https%3A%2F%2Fdocs.mongodb.com%2Fmanual%2Freference%2Foperator%2Faggregation%2F)
+
+阶段操作符用于 `db.collection.aggregate` 方法里面，数组参数中的第一层。
+
+```sql
+db.collection.aggregate( [ { 阶段操作符：表述 }, { 阶段操作符：表述 }, ... ] )
+```
+
+下面是 MongoDB 官方文档中的一个例子：
+
+```sql
+sql 代码解读复制代码db.orders.aggregate([
+   # 第一阶段：$match阶段按status字段过滤文档，并将status等于"A"的文档传递到下一阶段。
+    { $match: { status: "A" } },
+  # 第二阶段：$group阶段按cust_id字段将文档分组，以计算每个cust_id唯一值的金额总和。
+    { $group: { _id: "$cust_id", total: { $sum: "$amount" } } }
+])
+```
+
+# 事务
+
+> MongoDB 事务想要搞懂原理还是比较花费时间的，我自己也没有搞太明白。因此，我这里只是简单介绍一下 MongoDB 事务，想要了解原理的小伙伴，可以自行搜索查阅相关资料。
+>
+> 这里推荐几篇文章，供大家参考：
+>
+> - [技术干货| MongoDB 事务原理](https://link.juejin.cn?target=https%3A%2F%2Fmongoing.com%2Farchives%2F82187)
+> - [MongoDB 一致性模型设计与实现](https://link.juejin.cn?target=https%3A%2F%2Fdeveloper.aliyun.com%2Farticle%2F782494)
+> - [MongoDB 官方文档对事务的介绍](https://link.juejin.cn?target=https%3A%2F%2Fwww.mongodb.com%2Fdocs%2Fupcoming%2Fcore%2Ftransactions%2F)
+
+我们在介绍 NoSQL 数据的时候也说过，NoSQL 数据库通常不支持事务，为了可扩展和高性能进行了权衡。不过，也有例外，MongoDB 就支持事务。
+
+与关系型数据库一样，MongoDB 事务同样具有 ACID 特性：
+
+- **原子性**（`Atomicity`） ： 事务是最小的执行单位，不允许分割。事务的原子性确保动作要么全部完成，要么完全不起作用；
+- **一致性**（`Consistency`）： 执行事务前后，数据保持一致，例如转账业务中，无论事务是否成功，转账者和收款人的总额应该是不变的；
+- **隔离性**（`Isolation`）： 并发访问数据库时，一个用户的事务不被其他事务所干扰，各并发事务之间数据库是独立的。WiredTiger 存储引擎支持读未提交（ read-uncommitted ）、读已提交（ read-committed ）和快照（ snapshot ）隔离，MongoDB 启动时默认选快照隔离。在不同隔离级别下，一个事务的生命周期内，可能出现脏读、不可重复读、幻读等现象。
+- **持久性**（`Durability`）： 一个事务被提交之后。它对数据库中数据的改变是持久的，即使数据库发生故障也不应该对其有任何影响。
+
+MongoDB 单文档原生支持原子性，也具备事务的特性。当谈论 MongoDB 事务的时候，通常指的是 **多文档** 。MongoDB 4.0 加入了对多文档 ACID 事务的支持，但只支持复制集部署模式下的 ACID 事务，也就是说事务的作用域限制为一个副本集内。MongoDB 4.2 引入了 **分布式事务** ，增加了对分片集群上多文档事务的支持，并合并了对副本集上多文档事务的现有支持。
+
+根据官方文档介绍：
+
+> 从 MongoDB 4.2 开始，分布式事务和多文档事务在 MongoDB 中是一个意思。分布式事务是指分片集群和副本集上的多文档事务。从 MongoDB 4.2 开始，多文档事务（无论是在分片集群还是副本集上）也称为分布式事务。
+
+在大多数情况下，多文档事务比单文档写入会产生更大的性能成本。对于大部分场景来说， [非规范化数据模型（嵌入式文档和数组）](https://link.juejin.cn?target=https%3A%2F%2Fwww.mongodb.com%2Fdocs%2Fupcoming%2Fcore%2Fdata-model-design%2F%23std-label-data-modeling-embedding) 依然是最佳选择。也就是说，适当地对数据进行建模可以最大限度地减少对多文档事务的需求。
+
+**注意** ：
+
+- 从MongoDB 4.2开始，多文档事务支持副本集和分片集群，其中：主节点使用WiredTiger存储引擎，同时从节点使用WiredTiger存储引擎或In-Memory存储引擎。在MongoDB 4.0中，只有使用WiredTiger存储引擎的副本集支持事务。
+- 在MongoDB 4.2及更早版本中，你无法在事务中创建集合。从 MongoDB 4.4 开始，您可以在事务中创建集合和索引。有关详细信息，请参阅 [在事务中创建集合和索引](https://link.juejin.cn?target=https%3A%2F%2Fwww.mongodb.com%2Fdocs%2Fupcoming%2Fcore%2Ftransactions%2F%23std-label-transactions-create-collections-indexes)。
 
 # 索引
 
@@ -1207,7 +1299,6 @@ MongoDB中的副本集（Replica Set）是一组维护相同数据集的mongod�
 - 如果你的副本+主节点的个数是偶数，建议加一个仲裁者，形成奇数，容易满足大多数的投票。
 
 - 如果你的副本+主节点的个数是奇数，可以不加仲裁者。
-
 
 # 副本集架构目标
 
@@ -2132,7 +2223,7 @@ myrs:PRIMARY> rs.conf()
 
 可以看出，主节点和副本节点的优先级各为1，即，默认可以认为都已经有了一票。但选举节点，优先级是0，（要注意是，官方说了，选举节点的优先级必须是0，不能是别的值。即不具备选举权，但具有投票权）
 
-# 【了解】修改优先级
+# 修改优先级【了解】
 
 比如，下面提升从节点的优先级：
 
@@ -2158,7 +2249,7 @@ myrs:SECONDARY> rs.reconfig(cfg)
 
 稍等片刻会重新开始选举。
 
-# 故障测试
+# 副本集架构故障测试
 
  ## 副本节点故障测试
 
@@ -2229,9 +2320,7 @@ db.comment.insert({"_id":"2","articleid":"100001","content":"我夏天空腹喝�
 
 副本集不可写数据了，已经故障了。
 
-# Compass连接副本集
 
-[mongodb.com/zh-cn/docs/compass/current/](https://www.mongodb.com/zh-cn/docs/compass/current/)
 
 
 
@@ -2253,7 +2342,7 @@ db.comment.insert({"_id":"2","articleid":"100001","content":"我夏天空腹喝�
 
 MongoDB支持通过分片进行水平扩展。
 
-## 分片集群包含组件
+## 包含组件
 
 - shard分片存储：每个分片包含分片数据的子集。每个分片都可以部署为副本集。
 - mongos路由：mongos充当查询路由器，在客户端应用程序和分片集群之间提供接口。
@@ -3362,7 +3451,29 @@ db.createUser({user: "bobo", pwd: "123456", roles: ["readWrite"]})
 
 注意：也要使用rs.status()命令查看副本集是否健康
 
+# MongoDB 数据压缩
 
+借助 WiredTiger 存储引擎（ MongoDB 3.2 后的默认存储引擎），MongoDB 支持对所有集合和索引进行压缩。压缩以额外的 CPU 为代价最大限度地减少存储使用。
+
+默认情况下，WiredTiger 使用 [Snappy](https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fgoogle%2Fsnappy) 压缩算法（谷歌开源，旨在实现非常高的速度和合理的压缩，压缩比 3 ～ 5 倍）对所有集合使用块压缩，对所有索引使用前缀压缩。
+
+除了 Snappy 之外，对于集合还有下面这些压缩算法：
+
+- [zlib](https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fmadler%2Fzlib)：高度压缩算法，压缩比 5 ～ 7 倍
+- [Zstandard](https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Ffacebook%2Fzstd)（简称 zstd）：Facebook 开源的一种快速无损压缩算法，针对 zlib 级别的实时压缩场景和更好的压缩比，提供更高的压缩率和更低的 CPU 使用率，MongoDB 4.2 开始可用。
+
+WiredTiger 日志也会被压缩，默认使用的也是 Snappy 压缩算法。如果日志记录小于或等于 128 字节，WiredTiger 不会压缩该记录。
+
+------
+
+title: MongoDB常见面试题总结（下） category: 数据库 tag:
+
+- NoSQL
+- MongoDB
+
+# Compass连接副本集
+
+[mongodb.com/zh-cn/docs/compass/current/](https://www.mongodb.com/zh-cn/docs/compass/current/)
 
 # MongoDB安装
 
