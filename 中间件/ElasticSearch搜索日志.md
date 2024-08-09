@@ -2,15 +2,13 @@
 
 # 1 Elasticsearch概述
 
-[Elasticsearch学习笔记-CSDN博客](https://blog.csdn.net/u011863024/article/details/115721328)
+[官方网址](https://www.elastic.co/cn/)  | [官方文档](https://www.elastic.co/guide/index.html)  | [Elasticsearch 7.8.0下载页面](https://www.elastic.co/cn/downloads/past-releases/elasticsearch-7-8-0) | [Elasticsearch学习笔记-CSDN博客](https://blog.csdn.net/u011863024/article/details/115721328)
 
 ## ES介绍
 
-Elasticsearch 是什么？
 The Elastic Stack, 包括 Elasticsearch、 Kibana、 Beats 和 Logstash（也称为 ELK Stack）。能够安全可靠地获取任何来源、任何格式的数据，然后实时地对数据进行搜索、分析和可视化。
 
 Elaticsearch，简称为 ES， **ES 是一个开源的高扩展的分布式全文搜索引擎**， 是整个 ElasticStack 技术栈的核心。
-
 它可以近乎实时的存储、检索数据；本身扩展性很好，可以扩展到上百台服务器，处理 PB 级别的数据。
 
 
@@ -39,11 +37,29 @@ Google，百度类的网站搜索，它们都是根据网页中的关键字生�
 - 阿里：使用 Elasticsearch 构建日志采集和分析体系。
 - Stack Overflow：解决 Bug 问题的网站，全英文，编程人员交流的网站。
 
-# 2 Elasticsearch入门
+## Elasticsearch8 新特性
+
+➢减少内存堆使用，完全支持 ARM 架构，引入全新的方式以使用更少的存储空间，从而让每个节点托管更多的数据
+
+➢ 降低查询开销，在大规模部署中成效尤为明显 
+
+➢ 提高日期直方图和搜索聚合的速度，增强了页面缓存的性能，并创建了一个新的“pre-filter”搜索短语
+
+➢ 在 Elasticsearch 7.3 和 Elasticsearch 7.4 版中，引入了对矢量相似函数的支持在最新发布的 8.0 版本中，也同样增加和完善了很多新的功能
+
+➢ 增加对自然语言处理 (NLP) 模型的原生支持，让矢量搜索功能更容易实现，让客户和员工能够使用他们自己的文字和语言来搜索并收到高度相关的结果。
+
+➢ 直接在 Elasticsearch 中执行命名实体识别、情感分析、文本分类等，而无需使用额外的组件或进行编码。
+
+➢ Elasticsearch 8.0 基于 Lucene 9.0 开发的，那些利用现代 NLP 的搜索体验，都可以借助（新增的）对近似最近邻搜索的原生支持，快速且大规模地实现。通过 ANN，可以快速并高效地将基于矢量的查询与基于矢量的文档语料库（无论是小语料库、大语料库还是巨型语料库）进行比较。
+
+➢ 可以直接在 Elasticsearch 中使用 PyTorch Machine Learning 模型（如 BERT），并在Elasticsearch 中原生使用这些模型执行推理
+
+
+
+# 2 Elasticsearch操作
 
 ## 环境准备
-
-[官方网址](https://www.elastic.co/cn/)  | [官方文档](https://www.elastic.co/guide/index.html)  | [Elasticsearch 7.8.0下载页面](https://www.elastic.co/cn/downloads/past-releases/elasticsearch-7-8-0)
 
 Windows 版的 Elasticsearch 压缩包，解压即安装完毕，解压后的 Elasticsearch 的目录结构如下 ：
 
@@ -90,32 +106,32 @@ REST 指的是一组架构约束条件和原则。满足这些约束条件和原
 
 在服务器端，应用程序状态和功能可以分为各种资源。资源是一个有趣的概念实体，它向客户端公开。资源的例子有：应用程序对象、数据库记录、算法等等。每个资源都使用 URI(Universal Resource Identifier) 得到一个唯一的地址。所有资源都共享统一的接口，以便在客户端和服务器之间传输状态。使用的是标准的 HTTP 方法，比如 GET、 PUT、 POST 和DELETE。
 
-在 REST 样式的 Web 服务中，每个资源都有一个地址。资源本身都是方法调用的目
-标，方法列表对所有资源都是一样的。这些方法都是标准方法，包括 HTTP GET、 POST、PUT、 DELETE，还可能包括 HEAD 和 OPTIONS。简单的理解就是，如果想要访问互联网上的资源，就必须向资源所在的服务器发出请求，请求体中必须包含资源的网络路径， 以及对资源进行的操作(增删改查)。
+在 REST 样式的 Web 服务中，每个资源都有一个地址。资源本身都是方法调用的目标，方法列表对所有资源都是一样的。这些方法都是标准方法，包括 HTTP GET、 POST、PUT、 DELETE，还可能包括 HEAD 和 OPTIONS。简单的理解就是，如果想要访问互联网上的资源，就必须向资源所在的服务器发出请求，请求体中必须包含资源的网络路径， 以及对资源进行的操作(增删改查)。
 
 REST 样式的 Web 服务若有返回结果，大多数以JSON字符串形式返回。
 ## 倒排索引
 
 正排索引（传统）
 
-| **id** | **content**          |      |
-| ------ | -------------------- | ---- |
-| 1001   | my name is zhang san |      |
-| 1002   | my name is li si     |      |
+| **id** | **content**          |
+| ------ | -------------------- |
+| 1001   | my name is zhang san |
+| 1002   | my name is li si     |
 
 倒排索引
 
-| **keyword** | **id**     |      |
-| ----------- | ---------- | ---- |
-| name        | 1001, 1002 |      |
-| zhang       | 1001       |      |
+| **keyword** | **id**     |
+| ----------- | ---------- |
+| name        | 1001, 1002 |
+| zhang       | 1001       |
 
 Elasticsearch 是**面向文档型数据库**，一条数据在这里就是一个文档。 为了方便大家理解，我们将 Elasticsearch 里存储文档数据和关系型数据库 MySQL 存储数据的概念进行一个类比
 
 ![img](./assets/f7167654168a9923a05bd2cb9325f870.png)
 
 ES 里的 Index 可以看做一个库，而 Types 相当于表， Documents 则相当于表的行。这里 Types 的概念已经被逐渐弱化， Elasticsearch 6.X 中，一个 index 下已经只能包含一个type， Elasticsearch 7.X 中, Type 的概念已经被删除了。
-## 08-索引-创建
+
+### 索引-创建
 
 对比关系型数据库，创建索引就等同于创建数据库。
 
@@ -159,7 +175,7 @@ ES 里的 Index 可以看做一个库，而 Types 相当于表， Documents 则�
 }
 ```
 
-## 09-索引-查询 & 删除
+### 索引-查询 & 删除
 
 查看所有索引
 在 Postman 中，向 ES 服务器发 GET 请求 ： http://127.0.0.1:9200/_cat/indices?v
@@ -229,7 +245,9 @@ health status index uuid pri rep docs.count docs.deleted store.size pri.store.si
 
 成功删除。
 
-## 10-文档-创建（Put & Post）
+## 文档操作
+
+### 文档创建/修改
 
 假设索引已经创建好了，接下来我们来创建文档，并添加数据。这里的文档可以类比为关系型数据库中的表数据，添加的数据格式为 JSON 格式
 
@@ -301,7 +319,7 @@ health status index uuid pri rep docs.count docs.deleted store.size pri.store.si
 
 **此处需要注意：如果增加数据时明确数据主键，那么请求方式也可以为 PUT。**
 
-## 11-查询-主键查询 & 全查询
+### 主键查询 & 全查询
 
 查看文档时，需要指明文档的唯一性标识，类似于 MySQL 中数据的主键查询
 
@@ -390,7 +408,7 @@ health status index uuid pri rep docs.count docs.deleted store.size pri.store.si
 }
 ```
 
-## 12-全量修改 & 局部修改 & 删除
+
 
 ### 全量修改
 
@@ -520,7 +538,7 @@ health status index uuid pri rep docs.count docs.deleted store.size pri.store.si
 }
 ```
 
-## 13-条件查询 & 分页查询 & 查询排序
+## 文档数据查询
 
 ### 条件查询
 
@@ -620,7 +638,7 @@ health status index uuid pri rep docs.count docs.deleted store.size pri.store.si
 }
 ```
 
-#### URL带参查询
+### URL带参查询
 
 **查找category为小米的文档**，在 Postman 中，向 ES 服务器发 GET请求 ： http://127.0.0.1:9200/shopping/_search?q=category:小米，返回结果如下：
 
@@ -757,7 +775,7 @@ health status index uuid pri rep docs.count docs.deleted store.size pri.store.si
 }
 ```
 
-#### 带请求体方式的查找所有内容
+### 带请求体方式的查找
 
 **查找所有文档内容**，也可以这样，在 Postman 中，向 ES 服务器发 GET请求 ： http://127.0.0.1:9200/shopping/_search，附带JSON体如下：
 
@@ -1149,8 +1167,6 @@ health status index uuid pri rep docs.count docs.deleted store.size pri.store.si
 }
 ```
 
-## 14-多条件查询 & 范围查询
-
 ### 多条件查询
 
 假设想找出小米牌子，价格为3999元的。（must相当于数据库的&&）
@@ -1403,8 +1419,6 @@ health status index uuid pri rep docs.count docs.deleted store.size pri.store.si
 }
 ```
 
-## 15-全文检索 & 完全匹配 & 高亮查询
-
 ### 全文检索
 
 这功能像搜索引擎那样，如品牌输入“小华”，返回结果带回品牌有“小米”和华为的。
@@ -1529,7 +1543,6 @@ health status index uuid pri rep docs.count docs.deleted store.size pri.store.si
 		}
 	}
 }
-
 ```
 
 返回结果如下：
@@ -1878,8 +1891,8 @@ health status index uuid pri rep docs.count docs.deleted store.size pri.store.si
 ```json
 {
 	"aggs":{
-		"price_avg":{//名称，随意起名
-			"avg":{//求平均
+		"price_avg":{	//名称，随意起名
+			"avg":{		//求平均
 				"field":"price"
 			}
 		}
@@ -2217,13 +2230,371 @@ health status index uuid pri rep docs.count docs.deleted store.size pri.store.si
 
 报错只因创建映射时"tel"的"index"为false。
 
-# 3 JavaAPI
+## 聚合查询
+
+ES（Elasticsearch）是一个分布式搜索和分析引擎，常用于处理大规模数据。聚合（Aggregation）是Elasticsearch中的一个强大功能，用于对数据进行复杂的分析和统计。以下是聚合的基本介绍：
+
+1. **度量聚合（Metric Aggregations）**：
+   - **平均值（avg）**：计算字段的平均值。
+   - **最大值（max）**：计算字段的最大值。
+   - **最小值（min）**：计算字段的最小值。
+   - **总和（sum）**：计算字段的总和。
+   - **统计（stats）**：提供字段的统计信息（如计数、总和、最小值、最大值、平均值）。
+2. **桶聚合（Bucket Aggregations）**：
+   - **术语（terms）**：根据字段值进行分组。
+   - **范围（range）**：根据字段值的范围进行分组。
+   - **日期直方图（date_histogram）**：根据日期字段进行分组。
+   - **地理网格（geohash_grid）**：根据地理位置进行分组。
+3. **管道聚合（Pipeline Aggregations）**：
+   - **移动平均（moving_avg）**：计算移动平均值。
+   - **差异（derivative）**：计算差异。
+   - **累积和（cumulative_sum）**：计算累积和。
+
+**示例**：假设我们有一个包含销售数据的索引，我们可以使用聚合来分析这些数据。
+
+### 计算平均销售额
+
+```json
+POST /sales/_search
+{
+  "size": 0,
+  "aggs": {
+    "average_sales": {
+      "avg": {
+        "field": "amount"
+      }
+    }
+  }
+}
+```
+
+### 按产品类别分组并计算每个类别的总销售额
+
+```json
+POST /sales/_search
+{
+  "size": 0,
+  "aggs": {
+    "sales_by_category": {
+      "terms": {
+        "field": "category"
+      },
+      "aggs": {
+        "total_sales": {
+          "sum": {
+            "field": "amount"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+## 索引模板
+
+在Elasticsearch中，索引模板（Index Template）用于定义新索引的默认设置、映射和别名。索引模板可以确保新创建的索引符合预定义的结构和配置。
+
+以下是一个创建索引模板的示例：
+
+```json
+PUT _index_template/my_template
+{
+  "index_patterns": ["logs-*"],  // 匹配的索引模式
+  "template": {
+    "settings": {
+      "number_of_shards": 1,  // 分片数量
+      "number_of_replicas": 1  // 副本数量
+    },
+    "mappings": {
+      "properties": {
+        "timestamp": {
+          "type": "date"
+        },
+        "message": {
+          "type": "text"
+        },
+        "user_id": {
+          "type": "keyword"
+        }
+      }
+    },
+    "aliases": {
+      "logs_alias": {}  // 别名
+    }
+  },
+  "priority": 1  // 优先级
+}
+```
+
+**解释**
+
+- **index_patterns**: 定义模板应用的索引模式。这里的模式是 `logs-*`，意味着所有以 `logs-` 开头的索引都会应用这个模板。
+- **settings**: 定义索引的设置，比如分片和副本的数量。
+- **mappings**: 定义索引的字段类型和结构。
+- **aliases**: 定义索引的别名。
+- **priority**: 定义模板的优先级，当多个模板匹配同一个索引时，优先级高的模板会被应用。
+
+### 使用索引模板
+
+当你创建一个匹配模板模式的索引时，模板会自动应用。例如：
+
+```
+PUT /logs-2023-10-01
+```
+
+这个索引会自动应用 `my_template` 模板中的设置、映射和别名。
+
+### 查看索引模板
+
+你可以使用以下命令查看已创建的索引模板：
+
+```
+GET _index_template/my_template
+```
+
+### 删除索引模板
+
+你可以使用以下命令删除索引模板：
+
+```js
+DELETE _index_template/my_template
+```
+
+## 中文分词
+
+中文分词是处理中文文本搜索和分析的关键步骤。Elasticsearch提供了多种插件和分词器来支持中文分词，其中最常用的是 `ik` 分词器。
+
+### 安装 IK 分词器
+
+首先，你需要安装 IK 分词器插件。可以使用以下命令：
+
+```sh
+./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.10.0/elasticsearch-analysis-ik-7.10.0.zip
+```
+
+安装完成后，重启Elasticsearch。
+
+### 配置 IK 分词器
+
+安装完成后，你可以在索引的映射中配置使用 IK 分词器。以下是一个示例：
+
+```json
+PUT /my_index
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "ik_smart": {
+          "type": "custom",
+          "tokenizer": "ik_smart"
+        },
+        "ik_max_word": {
+          "type": "custom",
+          "tokenizer": "ik_max_word"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "content": {
+        "type": "text",
+        "analyzer": "ik_max_word",
+        "search_analyzer": "ik_smart"
+      }
+    }
+  }
+}
+```
+
+**解释**：settings.analysis.analyzer: 定义了两个自定义分析器
+
+```
+ik_smart
+ik_max_word
+```
+
+- `ik_smart`：使用 IK 智能分词模式。
+- `ik_max_word`：使用 IK 最大词语分词模式。
+
+**mappings.properties.content**: 定义了一个 `content` 字段，类型为 `text`，并指定了索引时使用 `ik_max_word` 分词器，搜索时使用 `ik_smart` 分词器。
+
+### 测试分词效果
+
+你可以使用 `_analyze` API 来测试分词效果：
+
+```json
+POST /my_index/_analyze
+{
+  "analyzer": "ik_max_word",
+  "text": "中华人民共和国成立了"
+}
+```
+
+返回结果会显示分词后的词语：
+
+```json
+{
+  "tokens": [
+    {
+      "token": "中华人民共和国",
+      "start_offset": 0,
+      "end_offset": 7,
+      "type": "CN_WORD",
+      "position": 0
+    },
+    {
+      "token": "中华人民",
+      "start_offset": 0,
+      "end_offset": 4,
+      "type": "CN_WORD",
+      "position": 1
+    },
+    {
+      "token": "中华",
+      "start_offset": 0,
+      "end_offset": 2,
+      "type": "CN_WORD",
+      "position": 2
+    },
+    {
+      "token": "人民共和国",
+      "start_offset": 2,
+      "end_offset": 7,
+      "type": "CN_WORD",
+      "position": 3
+    },
+    {
+      "token": "人民",
+      "start_offset": 2,
+      "end_offset": 4,
+      "type": "CN_WORD",
+      "position": 4
+    },
+    {
+      "token": "共和国",
+      "start_offset": 4,
+      "end_offset": 7,
+      "type": "CN_WORD",
+      "position": 5
+    },
+    {
+      "token": "成立",
+      "start_offset": 7,
+      "end_offset": 9,
+      "type": "CN_WORD",
+      "position": 6
+    }
+  ]
+}
+```
+
+## 文档得分
+
+文档得分（Document Score）是衡量文档与查询匹配程度的一个重要指标。文档得分越高，表示文档与查询的相关性越强。Elasticsearch使用一种称为BM25的算法来计算文档得分。
+
+**影响文档得分的因素**
+
+1. **词频（TF）**: 词在文档中出现的频率。词频越高，得分越高。
+2. **逆文档频率（IDF）**: 词在所有文档中出现的频率。词在越少的文档中出现，得分越高。
+3. **字段长度规范化**: 较短的字段会得到更高的得分，因为它们更有可能是精确匹配。
+
+### 查看文档得分
+
+你可以在查询时查看文档得分。以下是一个示例：
+
+```json
+GET /my_index/_search
+{
+  "query": {
+    "match": {
+      "content": "中华人民共和国"
+    }
+  }
+}
+```
+
+返回结果中会包含每个文档的 `_score` 字段，表示文档得分：
+
+```json
+{
+  "hits": {
+    "total": {
+      "value": 2,
+      "relation": "eq"
+    },
+    "max_score": 1.3862944,
+    "hits": [
+      {
+        "_index": "my_index",
+        "_type": "_doc",
+        "_id": "1",
+        "_score": 1.3862944,
+        "_source": {
+          "content": "中华人民共和国成立了"
+        }
+      },
+      {
+        "_index": "my_index",
+        "_type": "_doc",
+        "_id": "2",
+        "_score": 0.2876821,
+        "_source": {
+          "content": "中华人民"
+        }
+      }
+    ]
+  }
+}
+```
+
+**解释**
+
+- **_score**: 每个文档的得分，表示文档与查询的匹配程度。
+- **max_score**: 返回结果中最高的文档得分。
+
+### 自定义文档得分
+
+你可以使用 `function_score` 查询来自定义文档得分。例如，基于字段值调整得分：
+
+```json
+GET /my_index/_search
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "match": {
+          "content": "中华人民共和国"
+        }
+      },
+      "functions": [
+        {
+          "field_value_factor": {
+            "field": "popularity",
+            "factor": 1.2,
+            "modifier": "sqrt",
+            "missing": 1
+          }
+        }
+      ],
+      "boost_mode": "multiply"
+    }
+  }
+}
+```
+
+**解释**
+
+- **function_score**: 用于自定义文档得分。
+- **field_value_factor**: 基于字段值调整得分。
+- **boost_mode**: 定义如何将自定义得分与原始得分结合。这里使用 `multiply` 表示相乘。
+
+# 3 JavaAPI 编程使用
 
 ## 18-环境准备
 
-新建Maven工程。
-
-添加依赖：
+新建Maven工程。添加依赖：
 
 ```json
 <dependencies>
@@ -3395,23 +3766,20 @@ Process finished with exit code 0
 
 
 
-# 4 Elasticsearch进阶
+# 4 Elasticsearch核心
 
 ## 33-核心概念
 
 ![img](./assets/f7167654168a9923a05bd2cb9325f870-1722959514225-1.png)
 
-索引Index
+**索引Index**
 一个索引就是一个拥有几分相似特征的文档的集合。比如说，你可以有一个客户数据的索引，另一个产品目录的索引，还有一个订单数据的索引。一个索引由一个名字来标识（必须全部是小写字母），并且当我们要对这个索引中的文档进行索引、搜索、更新和删除（CRUD）的时候，都要使用到这个名字。在一个集群中，可以定义任意多的索引。
 
 能搜索的数据必须索引，这样的好处是可以提高查询速度，比如：新华字典前面的目录就是索引的意思，目录可以提高查询速度。
 
-Elasticsearch 索引的精髓：一切设计都是为了提高搜索的性能。类型Type
+Elasticsearch 索引的精髓：一切设计都是为了提高搜索的性能。类型Type在一个索引中，你可以定义一种或多种类型。
 
-在一个索引中，你可以定义一种或多种类型。
-
-一个类型是你的索引的一个逻辑上的分类/分区，其语义完全由你来定。通常，会为具
-有一组共同字段的文档定义一个类型。不同的版本，类型发生了不同的变化。
+一个类型是你的索引的一个逻辑上的分类/分区，其语义完全由你来定。通常，会为具有一组共同字段的文档定义一个类型。不同的版本，类型发生了不同的变化。
 
 | **版本** | **Type**                                        |
 | -------- | ----------------------------------------------- |
@@ -3433,8 +3801,7 @@ Elasticsearch 索引的精髓：一切设计都是为了提高搜索的性能。
 mapping 是处理数据的方式和规则方面做一些限制，如：某个字段的数据类型、默认值、分析器、是否被索引等等。这些都是映射里面可以设置的，其它就是处理 ES 里面数据的一些使用规则设置也叫做映射，按着最优规则处理数据对性能提高很大，因此才需要建立映射，并且需要思考如何建立映射才能对性能更好。
 
 **分片Shards**
-一个索引可以存储超出单个节点硬件限制的大量数据。比如，一个具有 10 亿文档数据
-的索引占据 1TB 的磁盘空间，而任一节点都可能没有这样大的磁盘空间。 或者单个节点处理搜索请求，响应太慢。为了解决这个问题，**Elasticsearch 提供了将索引划分成多份的能力，每一份就称之为分片。**当你创建一个索引的时候，你可以指定你想要的分片的数量。每个分片本身也是一个功能完善并且独立的“索引”，这个“索引”可以被放置到集群中的任何节点上。
+一个索引可以存储超出单个节点硬件限制的大量数据。比如，一个具有 10 亿文档数据的索引占据 1TB 的磁盘空间，而任一节点都可能没有这样大的磁盘空间。 或者单个节点处理搜索请求，响应太慢。为了解决这个问题，**Elasticsearch 提供了将索引划分成多份的能力，每一份就称之为分片。**当你创建一个索引的时候，你可以指定你想要的分片的数量。每个分片本身也是一个功能完善并且独立的“索引”，这个“索引”可以被放置到集群中的任何节点上。
 
 分片很重要，主要有两方面的原因：
 
@@ -3449,8 +3816,7 @@ Lucene 是 Apache 软件基金会 Jakarta 项目组的一个子项目，提供�
 
 目前市面上流行的搜索引擎软件，主流的就两款： Elasticsearch 和 Solr,这两款都是基于 Lucene 搭建的，可以独立部署启动的搜索引擎服务软件。由于内核相同，所以两者除了服务器安装、部署、管理、集群以外，对于数据的操作 修改、添加、保存、查询等等都十分类似。
 **副本Replicas**
-在一个网络 / 云的环境里，失败随时都可能发生，在某个分片/节点不知怎么的就处于
-离线状态，或者由于任何原因消失了，这种情况下，有一个故障转移机制是非常有用并且是强烈推荐的。为此目的， Elasticsearch 允许你创建分片的一份或多份拷贝，这些拷贝叫做复制分片(副本)。
+在一个网络 / 云的环境里，失败随时都可能发生，在某个分片/节点不知怎么的就处于离线状态，或者由于任何原因消失了，这种情况下，有一个故障转移机制是非常有用并且是强烈推荐的。为此目的， Elasticsearch 允许你创建分片的一份或多份拷贝，这些拷贝叫做复制分片(副本)。
 
 复制分片之所以重要，有两个主要原因：
 
@@ -3470,14 +3836,11 @@ Lucene 是 Apache 软件基金会 Jakarta 项目组的一个子项目，提供�
 
 ![img](./assets/443de560c9af4502a4a03c1215ffa8d7.png)
 
-一个运行中的 Elasticsearch 实例称为一个节点，而集群是由一个或者多个拥有相同
-cluster.name 配置的节点组成， 它们共同承担数据和负载的压力。当有节点加入集群中或者从集群中移除节点时，集群将会重新平均分布所有的数据。
+一个运行中的 Elasticsearch 实例称为一个节点，而集群是由一个或者多个拥有相同cluster.name 配置的节点组成， 它们共同承担数据和负载的压力。当有节点加入集群中或者从集群中移除节点时，集群将会重新平均分布所有的数据。
 
-当一个节点被选举成为主节点时， 它将负责管理集群范围内的所有变更，例如增加、
-删除索引，或者增加、删除节点等。 而主节点并不需要涉及到文档级别的变更和搜索等操作，所以当集群只拥有一个主节点的情况下，即使流量的增加它也不会成为瓶颈。 任何节点都可以成为主节点。我们的示例集群就只有一个节点，所以它同时也成为了主节点。
+当一个节点被选举成为主节点时， 它将负责管理集群范围内的所有变更，例如增加、删除索引，或者增加、删除节点等。 而主节点并不需要涉及到文档级别的变更和搜索等操作，所以当集群只拥有一个主节点的情况下，即使流量的增加它也不会成为瓶颈。 任何节点都可以成为主节点。我们的示例集群就只有一个节点，所以它同时也成为了主节点。
 
-作为用户，我们可以将请求发送到集群中的任何节点 ，包括主节点。 每个节点都知道
-任意文档所处的位置，并且能够将我们的请求直接转发到存储我们所需文档的节点。 无论我们将请求发送到哪个节点，它都能负责从各个包含我们所需文档的节点收集回数据，并将最终结果返回給客户端。 Elasticsearch 对这一切的管理都是透明的。
+作为用户，我们可以将请求发送到集群中的任何节点 ，包括主节点。 每个节点都知道任意文档所处的位置，并且能够将我们的请求直接转发到存储我们所需文档的节点。 无论我们将请求发送到哪个节点，它都能负责从各个包含我们所需文档的节点收集回数据，并将最终结果返回給客户端。 Elasticsearch 对这一切的管理都是透明的。
 ## 35-单节点集群
 
 我们在包含一个空节点的集群内创建名为 users 的索引，为了演示目的，我们将分配 3个主分片和一份副本（每个主分片拥有一个副本分片）。
@@ -3512,7 +3875,7 @@ cluster.name 配置的节点组成， 它们共同承担数据和负载的压力
 
 当前集群是正常运行的，但存在丢失数据的风险。
 
-elasticsearch-head chrome插件安装
+**elasticsearch-head chrome插件安装**
 
 插件获取网址，下载压缩包，解压后将内容放入自定义命名为elasticsearch-head文件夹。
 
@@ -3559,13 +3922,9 @@ Node 1 和 Node 2 上各有一个分片被迁移到了新的 Node 3 节点，现
 
 **但是如果我们想要扩容超过 6 个节点怎么办呢？**
 
-主分片的数目在索引创建时就已经确定了下来。实际上，这个数目定义了这个索引能够
-存储 的最大数据量。（实际大小取决于你的数据、硬件和使用场景。） 但是，读操作——
-搜索和返回数据——可以同时被主分片 或 副本分片所处理，所以当你拥有越多的副本分片
-时，也将拥有越高的吞吐量。
+主分片的数目在索引创建时就已经确定了下来。实际上，这个数目定义了这个索引能够存储 的最大数据量。（实际大小取决于你的数据、硬件和使用场景。） 但是，读操作——搜索和返回数据——可以同时被主分片 或 副本分片所处理，所以当你拥有越多的副本分片时，也将拥有越高的吞吐量。
 
-在运行中的集群上是可以动态调整副本分片数目的，我们可以按需伸缩集群。让我们把
-副本数从默认的 1 增加到 2。
+在运行中的集群上是可以动态调整副本分片数目的，我们可以按需伸缩集群。让我们把副本数从默认的 1 增加到 2。
 
 ```json
 #PUT http://127.0.0.1:1001/users/_settings
@@ -3574,8 +3933,7 @@ Node 1 和 Node 2 上各有一个分片被迁移到了新的 Node 3 节点，现
 }
 ```
 
-users 索引现在拥有 9 个分片： 3 个主分片和 6 个副本分片。 这意味着我们可以将集群
-扩容到 9 个节点，每个节点上一个分片。相比原来 3 个节点时，集群搜索性能可以提升 3 倍。
+users 索引现在拥有 9 个分片： 3 个主分片和 6 个副本分片。 这意味着我们可以将集群扩容到 9 个节点，每个节点上一个分片。相比原来 3 个节点时，集群搜索性能可以提升 3 倍。
 
 ![img](./assets/7a47abe584d5207be16ba0b13af544f2.png)
 
@@ -3595,7 +3953,7 @@ users 索引现在拥有 9 个分片： 3 个主分片和 6 个副本分片。 �
 
 我们关闭的节点是一个主节点。而集群必须拥有一个主节点来保证正常工作，所以发生的第一件事情就是选举一个新的主节点： Node 2 。在我们关闭 Node 1 的同时也失去了主分片 1 和 2 ，并且在缺失主分片的时候索引也不能正常工作。 如果此时来检查集群的状况，我们看到的状态将会为 red ：不是所有主分片都在正常工作。
 
-幸运的是，在其它节点上存在着这两个主分片的完整副本， 所以新的主节点立即将这些分片在 Node 2 和 Node 3 上对应的副本分片提升为主分片， 此时集群的状态将会为yellow。这个提升主分片的过程是瞬间发生的，如同按下一个开关一般。
+幸运的是，在其它节点上存在着这两个主分片的完整副本，所以新的主节点立即将这些分片在 Node 2 和 Node 3 上对应的副本分片提升为主分片， 此时集群的状态将会为yellow。这个提升主分片的过程是瞬间发生的，如同按下一个开关一般。
 ![img](./assets/21fa3d0537b720f3a4d9a4dc3cc90171.png)
 
 **为什么我们集群状态是 yellow 而不是 green 呢？**
@@ -3613,8 +3971,9 @@ discovery.seed_hosts: ["localhost:9302", "localhost:9303"]
 ## 39-路由计算 & 分片控制
 
 **路由计算**
-当索引一个文档的时候，文档会被存储到一个主分片中。 Elasticsearch 如何知道一个
-文档应该存放到哪个分片中呢？当我们创建文档时，它如何决定这个文档应当被存储在分片 1 还是分片 2 中呢？首先这肯定不会是随机的，否则将来要获取文档的时候我们就不知道从何处寻找了。实际上，这个过程是根据下面这个公式决定的：
+当索引一个文档的时候，文档会被存储到一个主分片中。 Elasticsearch 如何知道一个文档应该存放到哪个分片中呢？当我们创建文档时，它如何决定这个文档应当被存储在分片 1 还是分片 2 中呢？首先这肯定不会是随机的，否则将来要获取文档的时候我们就不知道从何处寻找了。
+
+实际上，这个过程是根据下面这个公式决定的：
 
 ```json
 shard = hash(routing) % number_of_primary_shards
@@ -3718,7 +4077,7 @@ Elasticsearch使用一种称为倒排索引的结构，它适用于快速的全�
 
 ![img](./assets/2f735445e88c8afd3c50d9e197c58953.png)
 
-倒排索引的例子
+**倒排索引的例子**
 一个倒排索引由文档中所有不重复词的列表构成，对于其中每个词，有一个包含它的文档列表。例如，假设我们有两个文档，每个文档的content域包含如下内容：
 
 - The quick brown fox jumped over the lazy dog
@@ -3775,8 +4134,8 @@ Elasticsearch使用一种称为倒排索引的结构，它适用于快速的全�
 
 - 写入单个大的倒排索引允许数据被压缩，减少磁盘IO和需要被缓存到内存的索引的使用量。
 
-
 当然，一个不变的索引也有不好的地方。主要事实是它是不可变的! 你不能修改它。如果你需要让一个新的文档可被搜索，你需要重建整个索引。这要么对一个索引所能包含的数据量造成了很大的限制，要么对索引可被更新的频率造成了很大的限制。
+
 **动态更新索引**
 如何在保留不变性的前提下实现倒排索引的更新？
 
@@ -3787,18 +4146,19 @@ Elasticsearch基于Lucene，这个java库引入了按段搜索的概念。每一
 
 按段搜索会以如下流程执行：
 
-一、新文档被收集到内存索引缓存。
+**一、新文档被收集到内存索引缓存。**
 
 ![img](./assets/a31def6c2369308a9bd135a16e935130.png)
 
-二、不时地, 缓存被提交。
+**二、不时地, 缓存被提交。**
 
 一个新的段，一个追加的倒排索引，被写入磁盘。
 一个新的包含新段名字的提交点被写入磁盘。
 磁盘进行同步，所有在文件系统缓存中等待的写入都刷新到磁盘，以确保它们被写入物理文件
-三、新的段被开启，让它包含的文档可见以被搜索。
 
-四、内存缓存被清空，等待接收新的文档。
+**三、新的段被开启，让它包含的文档可见以被搜索。**
+
+**四、内存缓存被清空，等待接收新的文档。**
 ![img](./assets/eee0efd64f6102189ea00520b0228fc4.png)
 
 当一个查询被触发，所有已知的段按顺序被查询。词项统计会对所有段的结果进行聚合，以保证每个词和每个文档的关联都被准确计算。这种方式可以用相对较低的成本将新文档添加到索引。
@@ -3808,6 +4168,7 @@ Elasticsearch基于Lucene，这个java库引入了按段搜索的概念。每一
 当一个**文档被“删除”**时，它实际上只是在 .del 文件中被标记删除。一个被标记删除的文档仍然可以被查询匹配到，但它会在最终结果被返回前从结果集中移除。
 
 文档更新也是类似的操作方式:当一个文档被更新时，旧版本文档被标记删除，文档的新版本被索引到一个新的段中。可能两个版本的文档都会被一个查询匹配到，但被删除的那个旧版本文档在结果集返回前就已经被移除。
+
 ## 45-文档刷新 & 文档刷写 & 文档合并
 
 ![img](./assets/be3024f38f885727a94d7751be9edb49.png)
@@ -3818,6 +4179,7 @@ Elasticsearch基于Lucene，这个java库引入了按段搜索的概念。每一
 随着按段（per-segment）搜索的发展，一个新的文档从索引到可被搜索的延迟显著降低了。新文档在几分钟之内即可被检索，但这样还是不够快。磁盘在这里成为了瓶颈。提交（Commiting）一个新的段到磁盘需要一个fsync来确保段被物理性地写入磁盘，这样在断电的时候就不会丢失数据。但是fsync操作代价很大；如果每次索引一个文档都去执行一次的话会造成很大的性能问题。
 
 我们需要的是一个更轻量的方式来使一个文档可被搜索，这意味着fsync要从整个过程中被移除。在Elasticsearch和磁盘之间是文件系统缓存。像之前描述的一样，在内存索引缓冲区中的文档会被写入到一个新的段中。但是这里新段会被先写入到文件系统缓存—这一步代价会比较低，稍后再被刷新到磁盘—这一步代价比较高。不过只要文件已经在缓存中，就可以像其它文件一样被打开和读取了。
+
 ![img](./assets/20c05d97e88c0df99885a2482084a3d9.png)
 
 Lucene允许新段被写入和打开，使其包含的文档在未进行一次完整提交时便对搜索可见。这种方式比进行一次提交代价要小得多，并且在不影响性能的前提下可以被频繁地执行。
@@ -3842,7 +4204,7 @@ Lucene允许新段被写入和打开，使其包含的文档在未进行一次�
 
 refresh_interval可以在既存索引上进行动态更新。在生产环境中，当你正在建立一个大的新索引时，可以先关闭自动刷新，待开始使用该索引时，再把它们调回来。
 
-```json
+```sh
 # 关闭自动刷新
 PUT /users/_settings
 { "refresh_interval": -1 }
@@ -4137,7 +4499,6 @@ ES 中也可以进行扩展词汇，首先查询
 
 ```json
 #GET http://localhost:9200/_analyze
-
 {
     "text":"弗雷尔卓德",
     "analyzer":"ik_max_word"
@@ -4235,14 +4596,18 @@ ES 中也可以进行扩展词汇，首先查询
 ```
 
 **自定义分析器**
-虽然Elasticsearch带有一些现成的分析器，然而在分析器上Elasticsearch真正的强大之处在于，你可以通过在一个适合你的特定数据的设置之中组合字符过滤器、分词器、词汇单元过滤器来创建自定义的分析器。在分析与分析器我们说过，一个分析器就是在一个包里面组合了三种函数的一个包装器，三种函数按照顺序被执行：
-字符过滤器
+虽然Elasticsearch带有一些现成的分析器，然而在分析器上Elasticsearch真正的强大之处在于，你可以通过在一个适合你的特定数据的设置之中组合字符过滤器、分词器、词汇单元过滤器来创建自定义的分析器。
+
+在分析与分析器我们说过，一个分析器就是在一个包里面组合了三种函数的一个包装器，三种函数按照顺序被执行：
+
+**字符过滤器**
 字符过滤器用来整理一个尚未被分词的字符串。例如，如果我们的文本是HTML格式的，它会包含像<p>或者<div>这样的HTML标签，这些标签是我们不想索引的。我们可以使用html清除字符过滤器来移除掉所有的HTML标签，并且像把&Aacute;转换为相对应的Unicode字符Á 这样，转换HTML实体。一个分析器可能有0个或者多个字符过滤器。
 
 **分词器**
 一个分析器必须有一个唯一的分词器。分词器把字符串分解成单个词条或者词汇单元。标准分析器里使用的标准分词器把一个字符串根据单词边界分解成单个词条，并且移除掉大部分的标点符号，然而还有其他不同行为的分词器存在。
 
 例如，关键词分词器完整地输出接收到的同样的字符串，并不做任何分词。空格分词器只根据空格分割文本。正则分词器根据匹配正则表达式来分割文本。
+
 **词单元过滤器**
 经过分词，作为结果的词单元流会按照指定的顺序通过指定的词单元过滤器。词单元过滤器可以修改、添加或者移除词单元。我们已经提到过lowercase和stop词过滤器，但是在Elasticsearch 里面还有很多可供选择的词单元过滤器。词干过滤器把单词遏制为词干。ascii_folding过滤器移除变音符，把一个像"très”这样的词转换为“tres”。
 
@@ -4371,11 +4736,6 @@ Elasticsearch是分布式的。当文档创建、更新或删除时，新版本�
 
 ```json
 #PUT http://127.0.0.1:9200/shopping/_create/1001
-```
-
-返回结果
-
-```json
 {
     "_index": "shopping",
     "_type": "_doc",
@@ -4484,7 +4844,7 @@ Elasticsearch是分布式的。当文档创建、更新或删除时，新版本�
 **外部系统版本控制**
 一个常见的设置是使用其它数据库作为主要的数据存储，使用Elasticsearch做数据检索，这意味着主数据库的所有更改发生时都需要被复制到Elasticsearch，如果多个进程负责这一数据同步，你可能遇到类似于之前描述的并发问题。
 
-如果你的主数据库已经有了版本号，或一个能作为版本号的字段值比如timestamp，那么你就可以在 Elasticsearch 中通过增加 version_type=extermal到查询字符串的方式重用这些相同的版本号，版本号必须是大于零的整数，且小于9.2E+18，一个Java中 long类型的正值。
+如果你的主数据库已经有了版本号，或一个能作为版本号的字段值比如timestamp，那么你就可以在 ES 中通过增加 version_type=extermal到查询字符串的方式重用这些相同的版本号，版本号必须是大于零的整数，且小于9.2E+18，一个Java中 long类型的正值。
 
 外部版本号的处理方式和我们之前讨论的内部版本号的处理方式有些不同，Elasticsearch不是检查当前_version和请求中指定的版本号是否相同，而是检查当前_version是否小于指定的版本号。如果请求成功，外部的版本号作为文档的新_version进行存储。
 
@@ -4541,6 +4901,966 @@ i18n.locale: "zh-CN"
 
 ![img](./assets/5350a18fe5782152a808a29d3b208583.png)
 
+# 4 ES8 进阶功能
+
+## EQL 操作
+
+EQL 的全名是 Event Query Language (EQL)。事件查询语言（EQL）是一种用于基于事件的时间序列数据（例如日志，指标和跟踪）的查询语言。在 Elastic Security 平台上，当输入有效的 EQL 时，查询会在数据节点上编译，执行查询并返回结果。这一切都快速、并行地发生，让用户立即看到结果。
+
+EQL 的优点：
+
+➢ EQL 使你可以表达事件之间的关系
+
+许多查询语言允许您匹配单个事件。EQL 使你可以匹配不同事件类别和时间跨度的一系列事件。
+
+➢ EQL 的学习曲线很低
+
+EQL 语法看起来像其他常见查询语言，例如 SQL。 EQL 使你可以直观地编写和读取查询，从而可以进行快速，迭代的搜索。
+
+➢ EQL 设计用于安全用例
+
+尽管你可以将其用于任何基于事件的数据，但我们创建了 EQL 来进行威胁搜寻。 EQL不仅支持危害指标（IOC）搜索，而且可以描述超出 IOC 范围的活动。
+
+## 基础语法
+
+要运行 EQL 搜索，搜索到的数据流或索引必须包含时间戳和事件类别字段。 默认情况下，
+
+EQL 使用 Elastic 通用模式（ECS）中的 @timestamp 和 event.category 字段。
+
+@timestamp 表示时间戳，event.category 表示事件分类。
+
+咱们准备一些简单的数据,用于表示电商网站页面跳转
+
+```json
+# 创建索引
+PUT /gmall
+# 批量增加数据
+PUT _bulk
+{"index":{"_index":"gmall"}}
+{"@timestamp":"2022-06-01T12:00:00.00+08:00", 
+"event":{"category":"page"},"page" : {"session_id" : 
+"42FC7E13-CB3E-5C05-0000-0010A0125101","last_page_id" : "","page_id" : 
+"login","user_id" : ""}}
+{"index":{"_index":"gmall"}}
+{"@timestamp":"2022-06-01T12:01:00.00+08:00", 
+"event":{"category":"page"},"page" : {"session_id" : 
+"42FC7E13-CB3E-5C05-0000-0010A0125101","last_page_id" : "login","page_id" : 
+"good_list","user_id" : "1"}}
+{"index":{"_index":"gmall"}}
+{"@timestamp":"2022-06-01T12:05:00.00+08:00", 
+"event":{"category":"page"},"page" : {"session_id" : 
+"42FC7E13-CB3E-5C05-0000-0010A0125101","last_page_id" : "good_list","page_id" : 
+"good_detail","user_id" : "1"}}
+{"index":{"_index":"gmall"}}
+{"@timestamp":"2022-06-01T12:07:00.00+08:00", 
+"event":{"category":"page"},"page" : {"session_id" : 
+"42FC7E13-CB3E-5C05-0000-0010A0125101","last_page_id" : 
+"good_detail","page_id" : "order","user_id" : "1"}}
+{"index":{"_index":"gmall"}}
+{"@timestamp":"2022-06-01T12:08:00.00+08:00", 
+"event":{"category":"page"},"page" : {"session_id" : 
+"42FC7E13-CB3E-5C05-0000-0010A0125101","last_page_id" : "order","page_id" : 
+"payment","user_id" : "1"}}
+{"index":{"_index":"gmall"}}
+{"@timestamp":"2022-06-01T12:08:00.00+08:00", 
+"event":{"category":"page"},"page" : {"session_id" : 
+"42FC7E13-CB3E-5C05-0000-0010A0125102","last_page_id" : "","page_id" : 
+"login","user_id" : "2"}}
+{"index":{"_index":"gmall"}}
+{"@timestamp":"2022-06-01T12:08:00.00+08:00", 
+"event":{"category":"page"},"page" : {"session_id" : 
+"42FC7E13-CB3E-5C05-0000-0010A0125102","last_page_id" : "login","page_id" : 
+"payment","user_id" : "2"}}
+```
+
+### **数据窗口搜索**
+
+在事件响应过程中，有很多时候，了解特定时间发生的所有事件是很有用的。使用一种名为any 的特殊事件类型，针对所有事件进行匹配，如果想要匹配特定事件，就需要指明事件分类名称
+
+```sh
+GET /gmall/_eql/search
+{
+ "query" : """
+ any where page.user_id == "1"
+ """
+}
+```
+
+### 统计符合条件的事件
+
+```json
+GET /gmall/_eql/search
+{
+    "query" : """
+    any where true
+    """,
+    "filter": {
+    "range": {
+    "@timestamp": {
+    "gte": "1654056000000",
+    "lt": "1654056005000"
+}
+}
+}
+}
+```
+
+### 事件序列
+
+```json
+# 页面先访问 login,后面又访问了 good_detail 的页面
+GET /gmall/_eql/search
+{
+ "query" : """
+ sequence by page.session_id
+ [page where page.page_id=="login"]
+ [page where page.page_id=="good_detail"]
+ """
+}
+```
+
+## 安全检测
+
+EQL 在 Elastic Securit 中被广泛使用。实际应用时，我们可以使用 EQL 语言来进行检测安全威胁和其他可疑行为。
+
+### 数据准备
+
+regsvr32.exe 是一个内置的命令行实用程序，用于在 Windows 中注册.dll 库。作为本机工具，regsvr32.exe 具有受信任的状态，从而使它可以绕过大多数允许列表软件和脚本阻止程序。 有权访问用户命令行的攻击者可以使用 regsvr32.exe 通过.dll 库运行恶意脚本，即使
+
+在其他情况下也不允许这些脚本运行。
+
+regsvr32 滥用的一种常见变体是 Squfullydoo 攻击。在 Squfullydoo 攻击中，regsvr32.exe 命令使用 scrobj.dll 库注册并运行远程脚本。
+
+测试数据来自 Atomic Red Team 的测试数据集，其中包括模仿 Squibledoo 攻击的事件。数据已映射到 Elastic 通用架构（ECS）字段：normalized-T1117-AtomicRed-regsvr32.json
+
+将文件内容导入到 ES 软件中：
+
+```sh
+# 创建索引
+PUT my-eql-index
+# 导入数据
+POST my-eql-index/_bulk?pretty&refresh
+```
+
+查看数据导入情况
+
+```sh
+# 导入数据
+GET /_cat/indices/my-eql-index?v=true&h=health,status,index,docs.count
+```
+
+### **获取** **regsvr32** **事件的计数**
+
+获取与 regsvr32.exe 进程关联的事件数
+
+```sh
+# 查询数据
+# ?filter_path=-hits.events 从响应中排除 hits.events 属性。 此搜索仅用于获取事件计数，
+而不是匹配事件的列表
+# query : 匹配任何进程名称为 regsvr32.exe 的事件
+# size : 最多返回 200 个匹配事件的匹配,实际查询结果为 143 个
+GET my-eql-index/_eql/search?filter_path=-hits.events
+{
+ "query": """
+ any where process.name == "regsvr32.exe" 
+ """,
+ "size": 200 
+}
+```
+
+### **检查命令行参数**
+
+regsvr32.exe 进程与 143 个事件相关联。 但是如何首先调用 regsvr32.exe？谁调用的？
+
+regsvr32.exe 是一个命令行实用程序。将结果缩小到使用命令行的进程
+
+```sh
+# 增加过滤条件查询数据
+GET my-eql-index/_eql/search
+{
+ "query": """
+ process where process.name == "regsvr32.exe" and 
+process.command_line.keyword != null 
+ """
+```
+
+该查询将一个事件与创建的 event.type 相匹配，指示 regsvr32.exe 进程的开始。根据事件的process.command_line 值，regsvr32.exe 使用 scrobj.dll 注册了脚本 RegSvr32.sct.这符合Squibledoo 攻击的行为
+
+### **检查恶意脚本加载**
+
+检查 regsvr32.exe 以后是否加载 scrobj.dll 库
+
+```sh
+# 增加过滤条件查询数据
+GET my-eql-index/_eql/search
+{
+ "query": """
+ library where process.name == "regsvr32.exe" and dll.name == "scrobj.dll" 
+ """ 
+}
+```
+
+### **检查攻击成功可能性**
+
+在许多情况下，攻击者使用恶意脚本连接到远程服务器或下载其他文件。使用 EQL 序列查询来检查以下一系列事件：
+
+➢ regsvr32.exe 进程
+
+➢ 通过相同的进程加载 scrobj.dll 库
+
+➢ 同一过程中的任何网络事件
+
+根据上一个响应中看到的命令行值，你可以期望找到一个匹配项。但是，此查询并非针对该特定命令而设计。取而代之的是，它寻找一种可疑行为的模式，这种模式足以检测出相似的威胁
+
+```sh
+# 增加过滤条件查询数据
+GET my-eql-index/_eql/search
+{
+ "query": """
+ sequence by process.pid
+ [process where process.name == "regsvr32.exe"]
+ [library where dll.name == "scrobj.dll"]
+ [network where true] 
+ """ 
+}
+```
+
+## **SQL** **操作**
+
+一般使用 Elasticsearch 的时候，会使用 Query DSL 来查询数据，从 Elasticsearch6.3 版本以后，Elasticsearch 已经支持 SQL 查询了。
+
+Elasticsearch SQL 是一个 X-Pack 组件，它允许针对 Elasticsearch 实时执行类似 SQL 的查询。无论使用 REST 接口，命令行还是 JDBC，任何客户端都可以使用 SQL 对 Elasticsearch中的数据进行原生搜索和聚合数据。可以将 Elasticsearch SQL 看作是一种翻译器，它可以将SQL 翻译成 Query DSL。
+
+Elasticsearch SQL 具有如下特性：
+
+➢ 原生支持：Elasticsearch SQL 是专门为 Elasticsearch 打造的。
+
+➢ 没有额外的零件：无需其他硬件，处理器，运行环境或依赖库即可查询 Elasticsearch，SQL 直接在 Elasticsearch 内部运行。
+
+➢ 轻巧高效：Elasticsearch SQL 并未抽象化其搜索功能，相反的它拥抱并接受了 SQL 来实现全文搜索，以简洁的方式实时运行全文搜索。
+
+###  **SQL** **和** **Elasticsearch** **的对应关系**
+
+虽然 SQL 和 Elasticsearch 对数据的组织方式（以及不同的语义）有不同的术语，但它们的
+
+目的本质上是相同的。
+
+| SQL      | Elasticsearch | 描述                                                         |
+| -------- | ------------- | ------------------------------------------------------------ |
+| Column   | field         | 对比两个，数据都存储在命名条目中，具有多种数据类型，包含一个值。SQL 将此类条目称为列，而 Elasticsearch 称为字段。请注意，在 Elasticsearch 中，一个字段可以包含多个相同类型的值（本质上是一个列表），而在 SQL 中，一个列可以只包含一个所述类型的值。Elasticsearch SQL 将尽最大努力保留 SQL 语义，并根据查询拒 |
+| Row      | document      | Columns 和 fields 本身不存在；它们是 row 或 a 的一部分 document。两者的语义略有不同：row 趋于严格（并且有更多的强制执行），而document 趋于更加灵活或松散（同时仍然具有结构）。 |
+| Table    | Index         | 执行查询的目标                                               |
+| Schema   | Mapping       | 在 RDBMS 中，schem 主要是表的命名空间，通常用作安全边界。Elasticsearch 没有为它提供等效的概念。但是，当启用安全性时，Elasticsearch 会自动应用安全性强制，以便角色只能看到它被允许访问的数据 |
+| Database | Cluster 实例  | 在 SQL 中，catalog 或者 database 从概念上可以互换使用，表示一组模式，即多个表。在 Elasticsearch 中，可用的索引集被分组在一个cluster，语义也有所不同。database 本质上是另一个命名空间（可能对数据的存储方式有一些影响），而 Elasticsearch cluster 是一个运行时实例，或者更确切地说是一组至少一个 Elasticsearch 实例（通常是分布式运行）。在实践中，这意味着虽然在 SQL 中，一个实例中可能有多个目录，但在 Elasticsearch 中，一个目录仅限于一个 |
+
+虽然概念之间的映射并不完全是一对一的，语义也有所不同，但共同点多于差异。事实上，SQL 的许多概念可以在 Elasticsearch 中找到对应关系，并且这两者的术语也很类似
+
+### **数据准备**
+
+```sh
+# 创建索引并增加数据，等同于创建表和数据
+PUT my-sql-index/_bulk?refresh
+{"index":{"_id": "JAVA"}}
+{"name": "JAVA", "author": "zhangsan", "release_date": "2022-05-01", 
+"page_count": 561}
+{"index":{"_id": "BIGDATA"}}
+{"name": "BIGDATA", "author": "lisi", "release_date": "2022-05-02", "page_count": 
+482}
+{"index":{"_id": "SCALA"}}
+{"name": "SCALA", "author": "wangwu", "release_date": "2022-05-03", "page_count": 
+604}
+```
+
+### **第一个** **SQL** **查询**
+
+现在可以使用 SQL 对数据进行查询了。
+
+```sh
+# 这里的表就是索引
+# 可以通过 format 参数控制返回结果的格式，默认为 json 格式
+# txt:表示文本格式，看起来更直观点.
+# csv:使用逗号隔开的数据
+# json:JSON 格式数据
+# tsv: 使用 tab 键隔开数据
+# yaml:属性配置格式
+POST _sql?format=txt
+{
+ "query": """
+ SELECT * FROM "my-sql-index"
+ """
+}
+```
+
+```sh
+# 条件查询
+POST _sql?format=txt
+{
+ "query": """
+ SELECT * FROM "my-sql-index" where page_count > 500
+ """
+}
+```
+
+实际上会发现，和 JDBC 操作时的 SQL 语法是基本是一样的
+
+### **SQL** **转换为** **DSL** **使用**
+
+当我们需要使用 Query DSL 时，也可以先使用 SQL 来查询，然后通过 Translate API 转换即可，查询的结果为 DSL 方式的结果
+
+```sh
+# 转换 SQL 为 DSL 进行操作
+POST _sql/translate
+{
+ "query": """
+ SELECT * FROM "my-sql-index" where page_count > 500
+ """
+}
+```
+
+### **SQL** **和** **DSL** **混合使用**
+
+我们如果在优化 SQL 语句之后还不满足查询需求，可以拿 SQL 和 DSL 混用，ES 会先根据SQL 进行查询，然后根据 DSL 语句对 SQL 的执行结果进行二次查询
+
+```sh
+# SQL 和 DSL 混合使用
+# 由于索引中含有横线，所以作为表名时需要采用双引号，且外层需要三个引号包含
+POST _sql?format=txt
+{
+ "query": """SELECT * FROM "my-sql-index" """,
+ "filter" : {
+ "range": {
+ "page_count": {
+ "gte": 400,
+ "lte": 600
+ }
+ }
+ },
+ "fetch_size": 2
+}
+```
+
+### **常用** **SQL** **操作**
+
+#### **查询所有索引**
+
+```sh
+GET _sql?format=txt
+{
+ "query": """
+ show tables
+ """
+}
+```
+
+#### **查询指定索引**
+
+```sh
+GET _sql?format=txt
+{
+ "query": """
+ show tables like 'myindex'
+ """
+}
+```
+
+#### **模糊查询索引**
+
+```sh
+GET _sql?format=txt
+{
+ "query": """
+ show tables like 'my-%'
+ """
+}
+```
+
+#### **查看索引结构**
+
+```sh
+GET _sql?format=txt
+{
+ "query": """
+ describe myindex
+ """
+}
+```
+
+#### **基础查询操作**
+
+在 ES 中使用 SQL 查询的语法与在数据库中使用基本一致，具体格式如下:
+
+```sh
+SELECT select_expr [, ...]
+[ FROM table_name ]
+[ WHERE condition ]
+[ GROUP BY grouping_element [, ...] ]
+[ HAVING condition]
+[ ORDER BY expression [ ASC | DESC ] [, ...] ]
+[ LIMIT [ count ] ]
+[ PIVOT ( aggregation_expr FOR column IN ( value [ [ AS ] alias ] [, ...] ) ) ]
+```
+
+➢ where
+
+```sh
+# 条件过滤
+POST _sql?format=txt
+{
+ "query": """ SELECT * FROM "my-sql-index" where name = 'JAVA' """
+}
+```
+
+➢ group by
+
+```sh
+# 查询所有数据
+GET _sql?format=txt
+{
+ "query": """
+ SELECT * FROM "my-sql-index" 
+ """
+}
+```
+
+```sh
+# 按照日期进行分组
+GET _sql?format=txt
+{
+ "query": """
+ SELECT release_date FROM "my-sql-index" group by release_date
+ """
+}
+```
+
+➢ having
+
+```sh
+# 对分组后的数据进行过滤
+GET _sql?format=txt
+{
+ "query": """
+ SELECT sum(page_count), release_date as datacnt FROM "my-sql-index" group 
+by release_date having sum(page_count) > 1000
+ """
+}
+```
+
+➢ order by
+
+```sh
+# 对页面数量进行排序（降序）
+GET _sql?format=txt
+{
+ "query": """
+ select * from "my-sql-index" order by page_count desc
+ """
+}
+```
+
+➢ limit
+
+```sh
+# 限定查询数量
+GET _sql?format=txt
+{
+ "query": """
+ select * from "my-sql-index" limit 3
+ """
+}
+```
+
+➢ cursor
+
+游标（cursor）是系统为用户开设的一个数据缓冲区，存储 sql 语句的执行结果，每个游标区都有一个名字，用户可以用 sql 语句逐一从游标中获取记录，并赋给主变量，交由主语言进一步处理。就本质而言，游标实际上是一种能从包括多条数据记录的结果集中每次提取一条或多条记录的机制
+
+```sh
+# 查询数据
+# 因为查询结果较多，但是获取的数据较少，所以为了提高效果，会将数据存储到临时缓冲区中
+# 此处数据展示格式为 json
+POST _sql?format=json
+{
+ "query": """ SELECT * FROM "my-sql-index" order by page_count desc """,
+ "fetch_size": 2
+}
+```
+
+返回结果中的 cursor 就是缓冲区的标识，这就意味着可以从缓冲区中直接获取后续数据，操作上有点类似于迭代器，可多次执行
+
+```sh
+# 此处游标 cursor 值需要根据读者执行的操作进行修改，请勿直接使用
+POST /_sql?format=json
+{
+ "cursor": 
+"8/LoA0RGTABEissKgkAYRh2QiAh8FZVcuExKaWisxEbHTUzO7wVH7TKSb19Gi87ig8N3UIaeox/
+IgdmjlQW0YLY7iICuhO9aIpHNJvWtLMXOKXGaqKUms0vPb8wXSSJCtyE7N3JP2ggfKCZRjHdxmq9
+/eFc8Zndi0wJoeGY0PJLOq7lZVWJrJXFaee8JQ0fFjA+q6h9IVzAqTUOF3vEW/rq48RIueT90Cum
+y78pvs3yABP6Ei+AK0Py7qm5huowPAAAA//8DAA=="
+}
+```
+
+如果执行后，无任何结果返回，说明数据已经读取完毕
+
+此时再次执行，会返回错误信息
+
+如果关闭缓冲区，执行下面指令即可
+
+```sh
+# 此处游标 cursor 值需要根据读者执行的操作进行修改，请勿直接使用
+POST _sql/close
+{
+ "cursor": 
+"8/LoA0RGTABEissKgkAYRh2QiAh8FZVcuExKaWisxEbHTUzO7wVH7TKSb19Gi87ig8N3UIaeox/
+IgdmjlQW0YLY7iICuhO9aIpHNJvWtLMXOKXGaqKUms0vPb8wXSSJCtyE7N3JP2ggfKCZRjHdxmq9
+/eFc8Zndi0wJoeGY0PJLOq7lZVWJrJXFaee8JQ0fFjA+q6h9IVzAqTUOF3vEW/rq48RIueT90Cum
+y78pvs3yABP6Ei+AK0Py7qm5huowPAAAA//8DAA=="
+}
+```
+
+#### **基础聚合操作**
+
+在 ES 中使用 SQL 查询的聚合语法与在数据库中使用基本一致
+
+➢ Min
+
+➢ Max
+
+➢ Avg
+
+➢ Sum
+
+➢ Count(*)
+
+➢ Distinct
+
+```sh
+GET _sql?format=txt
+{
+ "query": """
+ SELECT 
+ MIN(page_count) min, 
+ MAX(page_count) max, 
+ AVG(page_count) avg,
+ SUM(page_count) sum,
+ COUNT(*) count,
+ COUNT(DISTINCT name) dictinct_count 
+ FROM "my-sql-index"
+  """
+}
+```
+
+### **支持的函数和运算**
+
+#### **比较运算符**
+
+```sh
+# Equality
+SELECT * FROM "my-sql-index" WHERE name = 'JAVA'
+# Null Safe Equality
+SELECT 'elastic' <=> null AS "equals"
+SELECT null <=> null AS "equals"
+# Inequality
+SELECT * FROM "my-sql-index" WHERE name <> 'JAVA'
+SELECT * FROM "my-sql-index" WHERE name != 'JAVA'
+# Comparison
+SELECT * FROM "my-sql-index" WHERE page_count > 500
+SELECT * FROM "my-sql-index" WHERE page_count >= 500
+SELECT * FROM "my-sql-index" WHERE page_count < 500
+SELECT * FROM "my-sql-index" WHERE page_count <= 500
+# BETWEEN
+SELECT * FROM "my-sql-index" WHERE page_count between 100 and 500
+# Is Null / Is Not Null
+SELECT * FROM "my-sql-index" WHERE name is not null
+SELECT * FROM "my-sql-index" WHERE name is null
+# IN
+SELECT * FROM "my-sql-index" WHERE name in ('JAVA', 'SCALA')
+```
+
+#### **逻辑运算符**
+
+```sh
+# AND
+SELECT * FROM "my-sql-index" WHERE name = 'JAVA' AND page_count > 100
+# OR
+SELECT * FROM "my-sql-index" WHERE name = 'JAVA' OR name = 'SCALA'
+# NOT
+SELECT * FROM "my-sql-index" WHERE NOT name = 'JAVA'
+```
+
+#### **数学运算符**
+
+```sh
+# 加减乘除
+select 1 + 1 as x
+select 1 - 1 as x
+select - 1 as x
+select 6 * 6 as x
+select 30 / 5 as x
+select 30 % 7 as x
+```
+
+#### **类型转换**
+
+```sh
+# 类型转换
+SELECT '123'::long AS long
+```
+
+#### **模糊查询**
+
+```sh
+# LIKE 通配符
+SELECT * FROM "my-sql-index" WHERE name like 'JAVA%'
+SELECT * FROM "my-sql-index" WHERE name like 'JAVA_'
+# 如果需要匹配通配符本身,使用转义字符
+SELECT * FROM "my-sql-index" WHERE name like 'JAVA/%' ESCAPE '/'
+# RLIKE 不要误会，这里的 R 表示的不是方向，而是正则表示式 Regex
+SELECT * FROM "my-sql-index" WHERE name like 'JAV*A'
+SELECT * FROM "my-sql-index" WHERE name rlike 'JAV*A'
+# 尽管 LIKE在 Elasticsearch SQL 中搜索或过滤时是一个有效的选项，但全文搜索 MATCH 和 QUERY
+速度更快、功能更强大，并且是首选替代方案。
+```
+
+#### **聚合分析函数**
+
+```sh
+# FIRST / FIRST_VALUE : FIRST(第一个字段，排序字段)
+SELECT first(name, release_date) FROM "my-sql-index"
+SELECT first_value(substring(name,2,1)) FROM "my-sql-index"
+# LAST / LAST_VALUE : LAST (第一个字段，排序字段)
+SELECT last(name, release_date) FROM "my-sql-index"
+SELECT last_value(substring(name,2,1)) FROM "my-sql-index"
+# KURTOSIS 量化字段的峰值分布
+SELECT KURTOSIS(page_count) FROM "my-sql-index"
+# MAD
+SELECT MAD(page_count) FROM "my-sql-index"
+```
+
+#### **分组函数**
+
+```sh
+# HISTOGRAM : 直方矩阵
+SELECT HISTOGRAM(page_count, 100) as c， count(*) FROM "my-sql-index" group by c
+```
+
+#### **数学通用函数**
+
+```sh
+# ABS：求数字的绝对值
+select ABS(page_count) from "myindex" limit 5
+# CBRT：求数字的立方根，返回 double
+select page_count v,CBRT(page_count) cbrt from "myindex" limit 5
+# CEIL：返回大于或者等于指定表达式最小整数（double）
+select page_count v,CEIL(page_count) from "myindex" limit 5
+# CEILING：等同于 CEIL
+select page_count v,CEILING(page_count) from "myindex" limit 5
+# E：返回自然常数 e(2.718281828459045)
+select page_count,E(page_count) from "myindex" limit 5
+# ROUND：四舍五入精确到个位
+select ROUND(-3.14)
+# FLOOR：向下取整
+select FLOOR(3.14)
+# LOG：计算以 2 为底的自然对数
+select LOG(4)
+# LOG10：计算以 10 为底的自然对数
+select LOG10(100)
+# SQRT：求一个非负实数的平方根
+select SQRT(9)
+# EXP：此函数返回 e(自然对数的底)的 X 次方的值
+select EXP(3)
+```
+
+#### **三角函数**
+
+```sh
+# DEGREES：返回 X 从弧度转换为度值
+select DEGREES(x)
+# RADIANS：返回 X 从度转换成弧度的值
+select RADIANS(x)
+# SIN：返回 X 的正弦
+select SIN(x)
+# COS：返回 X，X 值是以弧度给出的余弦值
+select COS(角度)
+# TAN：返回参数 X，表示以弧度的切线值
+select TAN(角度)
+# ASIN：返回 X 的反正弦，X 的值必须在-1 至 1 范围内，返回 NULL
+select ASIN(x)
+# ACOS：返回 X 的反正弦，X 值必须-1 到 1 之间范围否则将返回 NULL
+select ACOS(x)
+# ATAN：返回 X 的反正切
+select ATAN(x)
+# SINH：返回 X 的双曲正弦值
+select SINH(x)
+# COSH：返回 X 的双曲余弦值
+select COSH(x)
+```
+
+#### **日期时间函数**
+
+```sh
+# YEAR：
+SELECT YEAR(CAST('2022-05-01T00:00:00Z' AS TIMESTAMP)) AS year
+# MONTH_OF_YEAR() or MONTH()：
+SELECT MONTH(CAST('2022-05-01T00:00:00Z' AS TIMESTAMP)) AS month
+# WEEK_OF_YEAR() or WEEK()：
+SELECT WEEK(CAST('2022-05-01T00:00:00Z' AS TIMESTAMP)) AS week
+# DAY_OF_YEAR() or DOY() ，效果等同于 EXTRACT(<datetime_function> FROM 
+<expression>)：
+SELECT DOY(CAST('2022-05-01T00:00:00Z' AS TIMESTAMP)) AS day
+# DAY_OF_MONTH(), DOM(), or DAY()：
+SELECT DAY(CAST('2022-05-01T00:00:00Z' AS TIMESTAMP)) AS day
+# DAY_OF_WEEK() or DOW()：
+SELECT DOW(CAST('2022-05-01T00:00:00Z' AS TIMESTAMP)) AS day
+# HOUR_OF_DAY() or HOUR()：
+SELECT HOUR(CAST('2022-05-01T00:00:00Z' AS TIMESTAMP)) AS hour
+# MINUTE_OF_DAY()：
+SELECT MINUTE_OF_DAY(CAST('2022-05-01T00:00:00Z' AS TIMESTAMP)) AS minute
+# MINUTE_OF_HOUR() or MINUTE()：
+SELECT MINUTE(CAST('2022-05-01T00:00:00Z' AS TIMESTAMP)) AS minute
+# SECOND_OF_MINUTE() or SECOND()：
+SELECT SECOND(CAST('2022-05-01T00:00:00Z' AS TIMESTAMP)) AS second
+```
+
+#### **全文检索函数**
+
+```sh
+# MATCH：MATCH(匹配字段，规则, 配置参数(可选))
+SELECT * FROM "my-sql-index" where MATCH(name, 'JAVA')
+SELECT * FROM "my-sql-index" where MATCH(name, 'java')
+# MATCH：MATCH(('匹配字段^权重 1,匹配字段^权重 2'，规则, 配置参数(可选))
+SELECT * FROM "my-sql-index" where MATCH('author^2,name^5', 'java')
+# QUERY
+SELECT * FROM "my-sql-index" where QUERY('name:Java')
+# SCORE : 评分
+SELECT *, score() FROM "my-sql-index" where QUERY('name:Java')
+```
+
+#### **字符串检索函数**
+
+```sh
+# ASCII : 字符串转成 ASC 码
+SELECT ASCII('Elastic')
+# BIT_LENGTH ： 位长度
+SELECT BIT_LENGTH('Elastic')
+SELECT BIT_LENGTH('中国')
+# CHAR ：转换字符
+SELECT CHAR(69)
+# CHAR_LENGTH ：字符长度
+SELECT CHAR_LENGTH('Elastic')
+# CONCAT:合并
+SELECT CONCAT('Elastic', 'search')
+# INSERT : INSERT(字符串，起始位置，长度，插入的内容)
+SELECT INSERT('Elastic', 8, 1, 'search')
+SELECT INSERT('Elastic', 7, 1, 'search')
+# LCASE ：转换小写
+SELECT LCASE('Elastic')
+# LEFT : 获取左边最多 N 个字符
+SELECT LEFT('Elastic',3)
+# LENGTH
+SELECT length('Elastic')
+SELECT length('中国')
+# LOCATE : LOCATE(表达式，字符串，起始位置)，获取满足条件的位置
+SELECT LOCATE('a', 'Elasticsearch')
+SELECT LOCATE('a', 'Elasticsearch', 5)
+# LTRIM ：去除左边的空格
+SELECT LTRIM(' Elastic')
+# OCTET_LENGTH : 字节长度
+SELECT OCTET_LENGTH('Elastic')
+SELECT OCTET_LENGTH('中国')
+# POSITION ：获取指定字符串的位置
+SELECT POSITION('Elastic', 'Elasticsearch')
+# REPEAT ：将字符串重复指定次数
+SELECT REPEAT('Elastic', 3)
+# REPLACE ：替换数据
+SELECT REPLACE('Elastic','El','Fant')
+# RIGHT ：从右边获取指定数量的数据
+SELECT RIGHT('Elastic',3)
+# RTRIM ：去除右边的空格
+SELECT RTRIM('Elastic ')
+# SPACE : 生成指定数量的空格
+SELECT concat(SPACE(3),'abc')
+# STARTS_WITH : 判断是否以指定字符串开头
+SELECT STARTS_WITH('Elasticsearch', 'Elastic')
+# SUBSTRING ： 截取字符串，必须传递三个参数
+SELECT SUBSTRING('Elasticsearch', 0, 7)
+# TRIM ：去掉首尾空格
+SELECT TRIM(' Elastic ') AS trimmed
+# UCASE : 转换大写
+SELECT UCASE('Elastic')
+```
+
+#### **条件分支函数**
+
+```sh
+# 多重分支判断
+SELECT CASE 5
+ WHEN 1 THEN 'elastic'
+ WHEN 2 THEN 'search'
+ WHEN 3 THEN 'elasticsearch'
+ ELSE 'default'
+ END AS "case"
+SELECT CASE WHEN 1 > 2 THEN 'elastic'
+ WHEN 2 > 10 THEN 'search'
+ ELSE 'default'
+ END AS "case"
+# IFNULL
+SELECT IFNULL('elastic', null) AS "ifnull"
+SELECT IFNULL(null, 'search') AS "ifnull"
+# IIF
+SELECT IIF(1 < 2, 'TRUE', 'FALSE') AS result1, IIF(1 > 2, 'TRUE', 'FALSE') AS result2
+# ISNULL
+SELECT ISNULL('elastic', null) AS "isnull"
+SELECT ISNULL(null, 'search') AS "isnull"
+# LEAST:获取除 null 外的最小值
+SELECT LEAST(null, 2, 11) AS "least"
+SELECT LEAST(null, null, null, null) AS "least"
+# NULLIF : 如果两个字符串不相同，则返回第一个字符串，如果相同，返回 null
+SELECT NULLIF('elastic', 'search') AS "nullif"
+SELECT NULLIF('elastic', 'elastic') AS "nullif"
+# NVL : 返回第一个不是 null 的字符串，如果都是 null,那么返回 Null
+SELECT NVL('elastic', null) AS "nvl"
+SELECT NVL(null, null) AS "nvl"
+```
+
+#### **系统函数**
+
+```sh
+# ES 集群
+SELECT DATABASE()
+# 用户
+SELECT USER()
+```
+
+### SQL 客户端 - DataGrip
+
+## **自然语言处理** **NLP**
+
+随着 8.0 的发布，Elastic 很高兴能够将 PyTorch 机器学习模型上传到 Elasticsearch 中，以在 Elastic Stack 中提供现代自然语言处理 (NLP)。现在，Elasticsearch 用户能够集成用于构建 NLP 模型的最流行的格式之一，并将这些模型作为 NLP 数据管道的一部分通过我们的Inference processor 整合到 Elasticsearch 中
+
+### **什么是自然语言处理？**
+
+NLP 是指我们可以使用软件来操作和理解口语或书面文本或自然语言的方式。 2018 年，Google 开源了一种用于 NLP 预训练的新技术，称为来自 Transformers 的双向编码器呈现，或 BERT。 BERT 通过在没有任何人工参与的情况下对互联网大小的数据集（例如，想想所有的维基百科和数字书籍）进行训练来利用 “transfer learning”。
+
+Transfer learning 允许对 BERT 模型进行预训练以进行通用语言理解。一旦模型只经过一次预训练，它就可以被重用并针对更具体的任务进行微调，以了解语言的使用方式。
+
+为了支持类 BERT 模型（使用与 BERT 相同的标记器的模型），Elasticsearch 将首先通过 PyTorch 模型支持支持大多数最常见的 NLP 任务。 PyTorch 是最受欢迎的现代机器学习库之一，拥有大量活跃用户，它是一个支持深度神经网络的库，例如 BERT 使用的Transformer 架构。
+
+以下是一些示例 NLP 任务：
+
+◼ 情绪分析：用于识别正面与负面陈述的二元分类
+
+◼ 命名实体识别 (NER)：从非结构化文本构建结构，尝试提取名称、位置或组织等
+
+细节
+
+◼ 文本分类：零样本分类允许你根据你选择的类对文本进行分类，而无需进行预训练。
+
+◼ 文本嵌入：用于 k 近邻 (kNN) 搜索
+
+### **Elasticsearch** **中的自然语言处理**
+
+在将 NLP 模型集成到 Elastic 平台时，我们希望为上传和管理模型提供出色的用户体验。使用用于上传 PyTorch 模型的 Eland 客户端和用于管理 Elasticsearch 集群上模型的Kibana 的 ML 模型管理用户界面，用户可以尝试不同的模型并很好地了解它们在数据上的表现。我们还希望使其可跨集群中的多个可用节点进行扩展，并提供良好的推理吞吐量性能。
+
+为了使这一切成为可能，我们需要一个机器学习库来执行推理。在 Elasticsearch 中添加对 PyTorch 的支持需要使用原生库 libtorch，它支持 PyTorch，并且仅支持已导出或保存为 TorchScript 表示的 PyTorch 模型。这是 libtorch 需要的模型的表示，它将允许Elasticsearch 避免运行 Python 解释器
+
+<img src="./assets/image-20240808201055016.png" alt="image-20240808201055016" style="zoom:50%;" />
+
+通过与在 PyTorch 模型中构建 NLP 模型的最流行的格式之一集成，Elasticsearch 可以提供一个平台，该平台可处理大量 NLP 任务和用例。许多优秀的库可用于训练 NLP 模型，因此我们暂时将其留给其他工具。无论你是使用 PyTorch NLP、Hugging Face Transformers 还是 Facebook 的 fairseq 等库来训练模型，你都可以将模型导入 Elasticsearch 并对这些模型进行推理。 Elasticsearch 推理最初将仅在摄取时进行，未来还可以扩展以在查询时引入推理。
+
+### **NLP** **在** **Elasticsearch 7.x** **和** **8.x** **中的区别**
+
+Elasticsearch 一直是进行 NLP 的好地方，但从历史上看，它需要在 Elasticsearch 之外进行一些处理，或者编写一些非常复杂的插件。 借助 8.0，用户现在可以在 Elasticsearch 中更直接地执行命名实体识别、情感分析、文本分类等操作——无需额外的组件或编码。 不仅在 Elasticsearch 中本地计算和创建向量在水平可扩展性方面是“胜利”（通过在服务器集群中分布计算）——这一变化还为 Elasticsearch 用户节省了大量时间和精力。
+
+![image-20240808201145340](./assets/image-20240808201145340.png)
+
+借助 Elastic 8.0，用户可以直接在 Elasticsearch 中使用 PyTorch 机器学习模型（例如 BERT），并在 Elasticsearch 中使用这些模型进行推理。通过使用户能够直接在 Elasticsearch 中执行推理，将现代 NLP 的强大功能集成到搜索应用程序和体验、本质上更高效（得益于 Elasticsearch 的分布式计算能力）和 NLP 本身比以往任何时候都更容易 变得更快，因为你不需要将数据移出到单独的进程或系统中。
+
+### **NLP** **演示**
+
+这里我们使用 https://github.com/spinscale/elasticsearch-ingest-opennlp/releases/tag/8.1.1.1
+
+来进行演示。**我们必须安装和自己的** **Elasticsearch** **一致的版本。**
+
+目前这个 NLP 支持检测 Date， Person， Location, POS (part of speech) 及其它。
+
+**安装** **opennlp**
+
+将下载下来的插件上传到**所有** **ES** **服务器节点**的 plugins 路径中。
+
+**下载** **NER** **模型**
+
+我们需要从 sourceforge 下载最新的 NER 模型
+
+```sh
+bin/ingest-opennlp/download-models
+```
+
+执行时，可能会提示脚本路径不对等问题。直接修改脚本文件改正即可
+
+![image-20240808201337239](./assets/image-20240808201337239.png)
+
+执行后，会出现如下内容
+
+![image-20240808201355310](./assets/image-20240808201355310.png)
+
+**配置** **opennlp**
+
+修改配置文件：config/elasticsearch.yml 
+
+```sh
+ingest.opennlp.model.file.persons: en-ner-persons.bin
+ingest.opennlp.model.file.dates: en-ner-dates.bin
+ingest.opennlp.model.file.locations: en-ner-locations.bin
+```
+
+**重新启动** **Elasticsearch**
+
+#### **运用** **opennlp**
+
+创建一个支持 NLP 的 pipeline
+
+```sh
+PUT _ingest/pipeline/opennlp-pipeline
+{
+ "description": "A pipeline to do named entity extraction",
+ "processors": [
+ {
+ "opennlp" : {
+ "field" : "message"
+ }
+ }
+ ]
+}
+```
+
+增加数据
+
+```sh
+PUT my-nlp-index
+PUT my-nlp-index/_doc/1?pipeline=opennlp-pipeline
+{
+ "message": "Shay Banon announced the release of Elasticsearch 6.0 in November 
+2017"
+}
+PUT my-nlp-index/_doc/2?pipeline=opennlp-pipeline
+{
+ "message" : "Kobe Bryant was one of the best basketball players of all times. 
+Not even Michael Jordan has ever scored 81 points in one game. Munich is really 
+an awesome city, but New York is as well. Yesterday has been the hottest day of 
+the year."
+}
+```
+
+查看数据
+
+```sh
+GET my-nlp-index/_doc/1
+GET my-nlp-index/_doc/2
+```
+
+从结果我们可以看出来，它正确地识别了 dates，persons 及 locations。
+
+
+
 
 
 # 5 Elasticsearch优化
@@ -4550,7 +5870,6 @@ i18n.locale: "zh-CN"
 Elasticsearch 的基础是 Lucene，所有的索引和文档数据是存储在本地的磁盘中，具体的路径可在 ES 的配置文件…/config/elasticsearch.yml中配置，如下：
 
 ```json
-#
 # Path to directory where to store the data (separate multiple locations by comma):
 #
 path.data: /path/to/data
@@ -4655,8 +5974,7 @@ ES 为了保证集群的可用性，提供了 Replicas（副本）支持，然�
 
 当写索引时，需要把写入的数据都同步到副本节点，副本节点越多，写索引的效率就越慢。
 
-如果我们需要大批量进行写入操作，可以先禁止Replica复制，设置
-index.number_of_replicas: 0 关闭副本。在写入完成后， Replica 修改回正常的状态。
+如果我们需要大批量进行写入操作，可以先禁止Replica复制，设置index.number_of_replicas: 0 关闭副本。在写入完成后， Replica 修改回正常的状态。
 ## 60-内存设置
 
 ES 默认安装后设置的内存是 1GB，对于任何一个现实业务来说，这个设置都太小了。如果是通过解压安装的 ES，则在 ES 安装文件中包含一个 jvm.option 文件，添加如下命令来设置 ES 的堆大小， Xms 表示堆的初始大小， Xmx 表示可分配的最大内存，都是 1GB。
@@ -4694,7 +6012,155 @@ ES 默认安装后设置的内存是 1GB，对于任何一个现实业务来说�
 | discovery.zen.minimum_master_nodes | 1             | 设置在选举 Master 节点时需要参与的最少的候选 主节点数，默认为 1。如果使用默认值，则当网络 不稳定时有可能会出现脑裂。 合 理 的 数 值 为 (master_eligible_nodes/2)+1 ， 其 中 master_eligible_nodes 表示集群中的候选主节点数 |
 | discovery.zen.ping.timeout         | 3s            | 设置在集群中自动发现其他节点时 Ping 连接的超 时时间，默认为 3 秒。 在较差的网络环境下需要设置得大一点，防止因误 判该节点的存活状态而导致分片的转移 |
 
+# 5 ES8 优化
 
+**性能优化之缓存**
+
+ES 应用时会使用各种缓存，而缓存是加快数据检索速度的王道。接下来，我们将着重介绍以下三种缓存：
+
+- 页缓存
+- 分片级请求缓存
+- 查询缓存
+
+## **页缓存**
+
+为了数据的安全、可靠，常规操作中，数据都是保存在磁盘文件中的。所以对数据的访问，绝大数情况下其实就是对文件的访问，为了提升对文件的读写的访问效率，Linux 内核会以页大小（4KB）为单位，将文件划分为多个数据块。当用户对文件中的某个数据块进行读写操作时，内核首先会申请一个内存页（称为 PageCache 页缓存）与文件中的数据块进行绑定。
+
+<img src="./assets/image-20240808201627633.png" alt="image-20240808201627633" style="zoom: 50%;" />
+
+页缓存的基本理念是从磁盘读取数据后将数据放入可用内存中，以便下次读取时从内存返回数据，而且获取数据不需要进行磁盘查找。所有这些对应用程序来说是完全透明的，应用程序发出相同的系统调用，但操作系统可以使用页缓存而不是从磁盘读取。Java 程序是跨平台的，所以没有和硬件（磁盘，内存）直接交互的能力，如果想要和磁盘文件交互，那么必须要通过 OS 操作系统来完成文件的读写，我们一般就称之为用户态转换为内核态。而操作系统对文件进行读写时，实际上就是对文件的页缓存进行读写。所以对文件进行读写操作时，会分以下两种情况进行处理：
+
+⚫ 当从文件中读取数据时，如果要读取的数据所在的页缓存已经存在，那么就直接把页缓存的数据拷贝给用户即可。否则，内核首先会申请一个空闲的内存页（页缓存），然后从文件中读取数据到页缓存，并且把页缓存的数据拷贝给用户。
+
+⚫ 当向文件中写入数据时，如果要写入的数据所在的页缓存已经存在，那么直接把新数据写入到页缓存即可。否则，内核首先会申请一个空闲的内存页（页缓存），并且把新数据写入到页缓存中。对于被修改的页缓存，内核会定时把这些页缓存刷新到文件中。
+
+页缓存对 Elasticsearch 来说意味着什么？与访问磁盘上的数据相比，通过页缓存可以更快地访问数据。这就是为什么建议的 Elasticsearch 内存通常不超过总可用内存的一半，这样另一半就可用于页缓存了。这也意味着不会浪费任何内存
+
+如果数据本身发生更改，页缓存会将数据标记为脏数据，并将这些数据从页缓存中释放。由于 Elasticsearch 和 Lucene 使用的段只写入一次，因此这种机制非常适合数据的存储方式。段在初始写入之后是只读的，因此数据的更改可能是合并或添加新数据。在这种情况下，需要进行新的磁盘访问。另一种可能是内存被填满了。在这种情况下，缓存数据过期的操作为 LRU。
+
+### **分片级请求缓存**
+
+对一个或多个索引发送搜索请求时，搜索请求首先会发送到 ES 集群中的某个节点，称之为协调节点；协调节点会把该搜索请求分发给其他节点并在相应分片上执行搜索操作，我们把分片上的执行结果称为“本地结果集”，之后，分片再将执行结果返回给协调节点；协调节点获得所有分片的本地结果集之后，合并成最终的结果并返回给客户端。Elasticsearch 会在每个分片上缓存了本地结果集，这使得频繁使用的搜索请求几乎立即返回结果。这里的缓存，称之为 Request Cache, 全称是 Shard Request Cache，即分片级请求缓存。
+
+ES 能够保证在使用与不使用 Request Cache 情况下的搜索结果一致，那 ES 是如何保证的呢？这就要通过 Request Cache 的失效机制来了解啦。Request Cache 缓存失效是自动的，当索引 refresh 时就会失效，也就是说在默认情况下， Request Cache 是每 1 秒钟失效一次，但需要注意的是，只有在分片的数据实际上发生了变化时，刷新分片缓存才会失效。也就是说当一个文档被索引 到 该文档变成 Searchable 的这段时间内，不管是否有请求命中缓存该文档都不会被返回。
+
+所以我们可以通过 index.refresh_interval 参数来设置 refresh 的刷新时间间隔，刷新间隔越长，缓存的数据越多，当缓存不够的时候，将使用 LRU 最近最少使用策略删除数据。当然，我们也可以手动设置参数 indices.request.cache.expire 指定失效时间（单位为分钟），但是基本上我们没必要去这样做，因为缓存在每次索引 refresh 时都会自动失效。
+
+⚫ Request Cache 的使用
+
+默认情况下，Request Cache 是关闭的，我们可以在创建新的索引时启用
+
+```sh
+curl -XPUT 服务器 IP:端口/索引名 -d
+'{
+ "settings": {
+ "index.requests.cache.enable": true
+ }
+}'
+```
+
+也可以通过动态参数配置来进行设置：
+
+```sh
+curl -XPUT 服务器 IP:端口/索引名/_settings -d 
+'{ 
+ "index.requests.cache.enable": true 
+}'
+```
+
+开启缓存后，需要在搜索请求中加上 request_cache=true 参数，才能使查询请求被缓存，比如：
+
+```sh
+curl -XGET '服务器 IP:端口/索引名/_search?request_cache=true&pretty' -H 
+'Content-Type: application/json' -d
+'{
+ "size": 0,
+ "aggs": {
+ "popular_colors": {
+ "terms": {
+ "field": "colors"
+ }
+ }
+ }
+}'
+```
+
+两个注意事项：
+
+第一：参数 size：0 必须强制指定才能被缓存，否则请求是不会缓存的，即使手动的设置 request_cache=true
+
+第二：在使用 script 脚本执行查询时，由于脚本的执行结果是不确定的（比如使用random 函数或使用了当前时间作为参数），一定要指定 request_cache=false 禁用 Request Cache 缓存。
+
+⚫ Request Cache 的设置
+
+Request Cache 作用域为 Node，在 Node 中的 Shard 共享这个 Cache 空间。默认最大大小为 JVM 堆内存的 1％。可以使用以下命令在 config/elasticsearch.yml 文件中进行更改：
+
+```sh
+indices.requests.cache.size: 1%
+```
+
+Request Cache 是以查询的整个 DSL 语句做为 key 的，所以如果要命中缓存，那么查询生成的 DSL 一定要一样，即使修改了一个字符或者条件顺序，都不能利用缓存，需要重新生成 Cache。
+
+### **查询缓存**
+
+这种缓存的工作方式也与其他缓存有着很大的不同。页缓存方式缓存的数据与实际从查询中读取的数据量无关。当使用类似查询时，分片级请求缓存会缓存数据。查询缓存更精细些，可以缓存在不同查询之间重复使用的数据。
+
+Elasticsearch 具有 IndicesQueryCache 类。这个类与 IndicesService 的生命周期绑定在一起，这意味着它不是按索引，而是按节点的特性 — 这样做是有道理的，因为缓存本身使用了 Java 堆。这个索引查询缓存占用以下两个配置选项
+
+```sh
+indices.queries.cache.count：缓存条目总数，默认为 10,000
+indices.queries.cache.size：用于此缓存的 Java 堆的百分比，默认为 10%
+```
+
+查询缓存已进入下一个粒度级别，可以跨查询重用！凭借其内置的启发式算法，它只缓存多次使用的筛选器，还根据筛选器决定是否值得缓存，或者现有的查询方法是否足够快，以避免浪费任何堆内存。这些位集的生命周期与段的生命周期绑定在一起，以防止返回过时的数据。一旦使用了新段，就需要创建新的位集。
+
+### **缓存是加快检索速度的唯一方法吗**？
+
+➢ io_uring。这是一种在 Linux 下使用自 Linux 5.1 以来发布的完成队列进行异步 I/O 的新方法。请注意，io_uring 仍处于大力开发阶段。但是，Java 中有一些首次使用 io_uring 的尝试，例如 netty。简单应用程序的性能测试结果十分惊人。我想我们还得等一段时间才能看到实际的性能数据，尽管我预计这些数据也会有重大变化。我们希望 JDK 将来也能提供对这一功能的支持。有一些计划支持 io_uring 作为 Project Loom 的一部分，这可能会将 io_uring 引入 JVM。更多的优化，比如能够通过 madvise() 提示 Linux 内核的访问模式，还尚未内置于 JVM 中。这个提示可防止预读问题，即内核尝试读取的数据会比预期下次读取的数据要多，这在需要随机访问时是无用的。
+
+➢ Lucene 开发人员一如既往地忙于从任何系统中获得最大的收益。目前已经有使用Foreign Memory API 重写 Lucene MMapDirectory 的初稿，这可能会成为 Java 16 中的一个预览功能。然而，这样做并不是出于性能原因，而是为了克服当前 MMap 实现的某些限制
+
+➢ Lucene最近的另一个变化是通过在FileChannel 类中使用直接i/o (O_DIRECT)来摆脱原生扩展。这意味着写入数据将不会让页缓存出现“抖动”现象，这将是 Lucene 9 的功能
+
+## **性能优化之减少内存堆**
+
+由于 Elasticsearch 用户不断突破在 Elasticsearch 节点上存储的数据量的极限，所以他们有时会在耗尽磁盘空间之前就将堆内存用完了。对于这些用户来说，这个问题难免让他们沮丧，因为每个节点拟合尽可能多的数据通常是降低成本的重要手段。
+
+但为什么 Elasticsearch 需要堆内存来存储数据呢？为什么它不能只用磁盘空间呢？这其中有几个原因，但最主要的一个是，Lucene 需要在内存中存储一些信息，以便知道在磁盘的什么位置进行查找。例如，Lucene 的倒排索引由术语字典和术语索引组成，术语字典将术语按排序顺序归入磁盘上的区块，术语索引用于快速查找术语字典。该术语索引将术语前缀与磁盘上区块（包含具有该前缀的术语）起始位置的偏移量建立映射。术语字典在磁盘上，但是术语索引直到最近还在堆上。
+
+索引需要多少内存？通常情况下，每 GB 索引需要几 MB 内存。这并不算多，但随着用户在节点上安装 TB 数越来越大的磁盘，索引很快就需要 10-20 GB 的堆内存来存储这些 TB 量级的索引。鉴于 Elastic 的建议，不要超过 30 GB，不然就没有给聚合等其他堆内存消耗者留下太多空间，而且，如果 JVM 没有为集群管理操作留出足够的空间，就会导致稳定性问题。
+
+**使用** **7.7** **版本减少** **Elasticsearch** **堆！**
+
+## **功能优化之冻结层和可搜索快照**
+
+Elasticsearch 7.12 版中推出了冻结层的技术预览版，让您能够将计算与存储完全分离，并直接在对象存储（如 AWS S3、Microsoft Azure Storage 和 Google Cloud Storage）中搜索数据。作为我们数据层旅程的下一个重要里程碑，冻结层实现以超低成本长期存储大量数据的同时，还能保持数据处于完全活动和可搜索状态，显著扩展了您的数据覆盖范围。
+
+长期以来，我们一直支持通过多个数据层来进行数据生命周期管理：热层用于提供较高的处理速度，温层则用于降低成本，但性能也较低。两者都利用本地硬件来存储主数据和冗余副本。最近，我们引入了冷层，通过消除在本地存储冗余副本的需要，您可以在相同数量的硬件上最多存储两倍于热层的数据。尽管为了获得最佳性能，主数据仍然存储在本地，但冷层中的索引由存储在对象存储中的可搜索快照提供支持，以实现冗余。
+
+冻结层更进一步，完全不需要在本地存储任何数据。相反，它会使用可搜索快照来直接搜索存储在对象存储中的数据，而无需先将其解冻。本地缓存存储最近查询的数据，以便在进行重复搜索时提供最佳性能。因此，存储成本显著下降：与热层或温层相比，最多可降低90%；与冷层相比，最多可降低 80%。数据的全自动生命周期现已成为完整体：从热到温到冷，然后再到冻结，同时还可确保以尽可能低的存储成本获得所需的访问和搜索性能。
+
+冻结层利用可搜索快照将计算与存储完全分离。在根据索引生命周期管理 (ILM) 策略将数据从温层或冷层迁移到冻结层时，本地节点上的索引将迁移到 S3 或您选择的对象存储中。冷层将索引迁移到对象存储，但它仍然在本地节点上保留数据的单个完整副本，以确保提供快速而一致的搜索体验。另一方面，冻结层完全消除了本地副本，而是直接搜索对象存储中的数据。它会为最近查询的数据构建本地缓存，以便加快重复搜索的速度，但缓存大小只是存储在冻结层中的完整数据大小的一小部分。
+
+对于典型的 10% 本地缓存大小，这意味着您只需少数几个本地层节点即可处理数百TB 的冻结层数据。下面简单比较一下：如果 RAM 为 64 GB 的典型温层节点可管理 10 TB，冷层节点将能够处理大约两倍于此的 20 TB，而冻结层节点将跃升至 100 TB。这相当于 1:1500 的 RAM 与存储比率，这还只是一个保守的估计。
+
+### **功能优化之原生矢量搜索**
+
+Elasticsearch 8.0 版引入了一整套原生矢量搜索功能，让客户和员工能够使用他们自己的文字和语言来搜索并收到高度相关的结果。早在 Elasticsearch 7.0 版中，我们就针对高维矢量引入了字段类型。在 Elasticsearch 7.3 和 Elasticsearch 7.4 版中，引入了对矢量相似函数的支持。在 Elasticsearch 8.0 版中，将对自然语言处理 (NLP) 模型的原生支持直接引入了 Elasticsearch，让矢量搜索功能更容易实现。此外，Elasticsearch 8.0 版还包含了对近似最近邻 (ANN) 搜索的原生支持，因此可以快速且大规模地比较基于矢量的查询与基于矢量的文档语料库。
+
+自然语言处理（Natural Language Processing）是计算科学领域与人工智能领域中的一个重要方向。它研究能实现人与计算机之间用自然语言进行有效通信的各种理论和方法。自然语言处理是一门融语言学、计算机科学、数学于一体的科学。因此，这一领域的研究将涉及自然语言，即人们日常使用的语言，所以它与语言学的研究有着密切的联系，但又有重要的区别。自然语言处理并不是一般地研究自然语言，而在于研制能有效地实现自然语言通信的计算机系统，特别是其中的软件系统。因而它是计算机科学的一部分
+
+⚫ NLP 的目标
+
+NLP 的目标是让计算机在理解语言方面像人类一样智能，最终的目标是弥补人类交流（自然语言）和计算机理解（机器语言）之间的差距。
+
+⚫ 为什么需要 NLP
+
+有了 NLP，就可能完成自动语音、自动文本的编写等任务。让我们从大量的数据中解放出来，让计算机去执行。这些任务包括自动生成给定文本的摘要、机器翻译及其他的任务。
+
+## **功能优化之搜索聚合**
+
+Elasticsearch 7.13 版新增功能可以实现更快的聚合。在 date_histogram 聚合方面，Elasticsearch 通过在内部将其重写为 filters 聚合，获得了巨大的性能提升。具体来说，它变成了一个包含 range 查询的 filters 聚合。这就是 Elasticsearch 优化的内容 — range 查询。为了加快 terms 和 date_histogram 这两个聚合的速度。可以将它们作为 filters 运行，然后加快 filters 的聚合速度
 
 # 6 Elasticsearch面试题
 
@@ -4702,7 +6168,7 @@ ES 默认安装后设置的内存是 1GB，对于任何一个现实业务来说�
 
 系统中的数据， 随着业务的发展，时间的推移， 将会非常多， 而业务中往往采用模糊查询进行数据的搜索， 而模糊查询会导致查询引擎放弃索引，导致系统查询数据时都是全表扫描，在百万级别的数据库中，查询效率是非常低下的，而我们使用 ES 做一个全文索引，将经常查询的系统功能的某些字段，比如说电商系统的商品表中商品名，描述、价格还有 id 这些字段我们放入 ES 索引库里，可以提高查询速度。
 
-**Elasticsearch 的 master 选举流程？**
+## Elasticsearch 的 master 选举流程？
 
 - Elasticsearch的选主是ZenDiscovery模块负责的，主要包含Ping（节点之间通过这个RPC来发现彼此）和Unicast（单播模块包含-一个主机列表以控制哪些节点需要ping通）这两部分。
 
@@ -4710,7 +6176,7 @@ ES 默认安装后设置的内存是 1GB，对于任何一个现实业务来说�
 - 如果对某个节点的投票数达到一定的值（可以成为master节点数n/2+1）并且该节点自己也选举自己，那这个节点就是master。否则重新选举一直到满足上述条件。
 - master节点的职责主要包括集群、节点和索引的管理，不负责文档级别的管理；data节点可以关闭http功能。
 
-**Elasticsearch 集群脑裂问题？**
+## Elasticsearch 集群脑裂问题？
 
 “脑裂”问题可能的成因：
 
@@ -4739,11 +6205,11 @@ ES 默认安装后设置的内存是 1GB，对于任何一个现实业务来说�
 - 在 flush 过程中，内存中的缓冲将被清除，内容被写入一个新段，段的 fsync 将创建一个新的提交点，并将内容刷新到磁盘，旧的 translog 将被删除并开始一个新的 translog。
 - flush 触发的时机是定时触发（默认 30 分钟）或者 translog 变得太大（默认为 512M）时；
 
-**Elasticsearch 更新和删除文档的流程？**
+## Elasticsearch 更新和删除文档的流程？
 删除和更新也都是写操作，但是 Elasticsearch 中的文档是不可变的，因此不能被删除或者改动以展示其变更；
 磁盘上的每个段都有一个相应的.del 文件。当删除请求发送后，文档并没有真的被删除，而是在.del文件中被标记为删除。该文档依然能匹配查询，但是会在结果中被过滤掉。当段合并时，在.del 文件中被标记为删除的文档将不会被写入新段。
 在新的文档被创建时， Elasticsearch 会为该文档指定一个版本号，当执行更新时，旧版本的文档在.del文件中被标记为删除，新版本的文档被索引到一个新段。旧版本的文档依然能匹配查询，但是会在结果中被过滤掉。
-**Elasticsearch 搜索的流程？**
+## Elasticsearch 搜索的流程？
 
 ![img](./assets/8d3b9f4247a65762b91a7c0071d0dc3f.png)
 
@@ -4777,7 +6243,7 @@ ES 默认安装后设置的内存是 1GB，对于任何一个现实业务来说�
 
 - Lucene 使用了大量的文件。同时， Elasticsearch 在节点和 HTTP 客户端之间进行通信也使用了大量的套接字。 所有这一切都需要足够的文件描述符。你应该增加你的文件描述符，设置一个很大的值，如 64,000。
 
-**GC 方面，在使用 Elasticsearch 时要注意什么？**
+## GC 方面，在使用 Elasticsearch 时要注意什么？
 倒排词典的索引需要常驻内存，无法 GC，需要监控 data node 上 segment memory 增长趋势。
 
 各类缓存， field cache, filter cache, indexing cache, bulk queue 等等，要设置合理的大小，并且要应该根据最坏的情况来看 heap 是否够用，也就是各类缓存全部占满的时候，还有 heap 空间可以分配给其他任务吗？避免采用 clear cache 等“自欺欺人”的方式来释放内存。
@@ -4788,10 +6254,10 @@ cluster stats 驻留内存并无法水平扩展，超大规模集群可以考虑
 
 想知道 heap 够不够，必须结合实际应用场景，并对集群的 heap 使用情况做持续的监控。
 
-**Elasticsearch 对于大数据量（上亿量级）的聚合如何实现？**
+## Elasticsearch 对于大数据量（上亿量级）的聚合如何实现？
 Elasticsearch 提供的首个近似聚合是 cardinality 度量。它提供一个字段的基数，即该字段的 distinct或者 unique 值的数目。它是基于 HLL 算法的。 HLL 会先对我们的输入作哈希运算，然后根据哈希运算的结果中的 bits 做概率估算从而得到基数。其特点是：可配置的精度，用来控制内存的使用（更精确 ＝ 更多内存）；小的数据集精度是非常高的；我们可以通过配置参数，来设置去重需要的固定内存使用量。无论数千还是数十亿的唯一值，内存使用量只与你配置的精确度相关。
 
-**在并发情况下， Elasticsearch 如果保证读写一致？**
+## 在并发情况下， Elasticsearch 如果保证读写一致？
 
 - 可以通过版本号使用乐观并发控制，以确保新版本不会被旧版本覆盖，由应用层来处理具体的冲突；
 
@@ -4804,7 +6270,7 @@ Elasticsearch 提供的首个近似聚合是 cardinality 度量。它提供一�
 1. elasticsearch-head 插件。
 2. 通过 Kibana 监控 Elasticsearch。你可以实时查看你的集群健康状态和性能，也可以分析过去的集群、索引和节点指标
 
-**是否了解字典树？**
+## 是否了解字典树？
 字典树又称单词查找树， Trie 树，是一种树形结构，是一种哈希树的变种。典型应用是用于统计，排序和保存大量的字符串（但不仅限于字符串），所以经常被搜索引擎系统用于文本词频统计。它的优点是：利用字符串的公共前缀来减少查询时间，最大限度地减少无谓的字符串比较，查询效率比哈希树高。
 
 Trie 的核心思想是空间换时间，利用字符串的公共前缀来降低查询时间的开销以达到提高效率的目的。它有 3 个基本性质：
@@ -4815,7 +6281,7 @@ Trie 的核心思想是空间换时间，利用字符串的公共前缀来降低
 - 每个节点的所有子节点包含的字符都不相同。
 
 对于中文的字典树，每个节点的子节点用一个哈希表存储，这样就不用浪费太大的空间，而且查询速度上可以保留哈希的复杂度 O(1)。
-**Elasticsearch 中的集群、节点、索引、文档、类型是什么？**
+## Elasticsearch 中的集群、节点、索引、文档、类型是什么？
 
 - 集群是一个或多个节点（服务器）的集合，它们共同保存您的整个数据，并提供跨所有节点的联合索引和搜索功能。群集由唯一名 称标识，默认情况下为"elasticsearch"。此名称很重要，因为如果节点设置为按名称加入群集，则该节点只能是群集的一部分。
 - 节点是属于集群一部分的单个服务器。它存储数据并参与群集索引和搜索功能。
@@ -4823,12 +6289,179 @@ Trie 的核心思想是空间换时间，利用字符串的公共前缀来降低
 - 文档类似于关系数据库中的一行。不同之处在于索引中的每个文档可以具有不同的结构(字段)，但是对于通用字段应该具有相同的数据类型。MySQL => Databases => Tables => Columns / Rows，Elasticsearch=> Indices => Types =>具有属性的文档Doc。
 - 类型是索引的逻辑类别/分区，其语义完全取决于用户。
 
-**Elasticsearch 中的倒排索引是什么？**
+## Elasticsearch 中的倒排索引是什么？
 倒排索引是搜索引擎的核心。搜索引擎的主要目标是在查找发生搜索条件的文档时提供快速搜索。ES中的倒排索引其实就是 lucene 的倒排索引，区别于传统的正向索引， 倒排索引会再存储数据时将关键词和数据进行关联，保存到倒排表中，然后查询时，将查询内容进行分词后在倒排表中进行查询，最后匹配数据即可。
 
 
 
-# Elasticsearch部署
+# ES部署
+
+**Linux单节点部署**
+
+**一、下载软件**
+
+[下载Linux版的Elasticsearch](https://www.elastic.co/cn/downloads/past-releases/elasticsearch-7-8-0)
+
+**二、解压软件**
+
+```sh
+# 解压缩
+tar -zxvf elasticsearch-7.8.0-linux-x86_64.tar.gz -C /opt/module
+# 改名
+mv elasticsearch-7.8.0 es
+```
+
+**三、创建用户**
+
+因为安全问题， Elasticsearch 不允许 root 用户直接运行，所以要创建新用户，在 root 用户中创建新用户。
+
+```sh
+useradd es # 新增 es 用户
+passwd es # 为 es 用户设置密码
+userdel -r es # 如果错了，可以删除再加
+chown -R es:es /opt/module/es # 文件夹所有者
+```
+
+**四、修改配置文件**
+
+修改/opt/module/es/config/elasticsearch.yml文件。
+
+```sh
+# 加入如下配置
+cluster.name: elasticsearch
+node.name: node-1
+network.host: 0.0.0.0
+http.port: 9200
+cluster.initial_master_nodes: ["node-1"]
+```
+
+修改/etc/security/limits.conf
+
+```sh
+# 在文件末尾中增加下面内容
+# 每个进程可以打开的文件数的限制
+es soft nofile 65536
+es hard nofile 65536
+```
+
+修改/etc/security/limits.d/20-nproc.conf
+
+```sh
+# 在文件末尾中增加下面内容
+# 每个进程可以打开的文件数的限制
+es soft nofile 65536
+es hard nofile 65536
+# 操作系统级别对每个用户创建的进程数的限制
+* hard nproc 4096
+# 注： * 带表 Linux 所有用户名称
+```
+
+修改/etc/sysctl.conf
+
+```sh
+# 在文件中增加下面内容
+# 一个进程可以拥有的 VMA(虚拟内存区域)的数量,默认值为 65536
+vm.max_map_count=655360
+```
+
+重新加载
+
+```json
+sysctl -p
+```
+
+使用 ES 用户启动
+
+```sh
+cd /opt/module/es/
+#启动
+bin/elasticsearch
+#后台启动
+bin/elasticsearch -d  
+```
+
+启动时，会动态生成文件，如果文件所属用户不匹配，会发生错误，需要重新进行修改用户和用户组
+
+## 测试软件
+
+浏览器中输入地址： http://linux1:9200/
+
+![img](./assets/0a68d2c57a11ea1d689eca79a2da22ed.png)
+
+## Kibana-8 安装 & 使用
+
+[Kibana-8 下载地址](https://www.elastic.co/cn/downloads/past-releases#kibana)
+
+**安装软件**
+
+将压缩包 kibana-8.1.0-linux-x86_64.tar.gz 上传到虚拟机中
+
+```sh
+# 解压缩
+tar -zxvf kibana-8.1.0-linux-x86_
+```
+
+给 Kibana 生成证书文件
+
+```json
+# 在 ES 服务器中生成证书，输入回车即可
+cd /opt/module/elasticsearch-8.1.0
+bin/elasticsearch-certutil csr -name kibana -dns linux1
+# 解压文件
+unzip csr-bundle.zip
+# 将解压后的文件移动到 kibana 的 config 目录中
+mv kibana.csr kibana.key /opt/module/kibana-8.1.0/config/
+# 生成 crt 文件
+openssl x509 -req -in kibana.csr -signkey kibana.key -out kibana.crt
+```
+
+修改配置文件：kibana.yml
+
+```json
+# 服务端口
+server.port: 5601
+# 服务主机名
+server.host: "linux1"
+# 国际化 - 中文
+i18n.locale: "zh-CN"
+# ES 服务主机地址
+elasticsearch.hosts: ["https://linux1:9200"]
+# 访问 ES 服务的账号密码
+elasticsearch.username: "kibana"
+elasticsearch.password: "fnqIYLQGv81iyW5nWeZ-"
+elasticsearch.ssl.verificationMode: none
+elasticsearch.ssl.certificateAuthorities: 
+[ "/opt/module/elasticsearch-8.1.0/config/certs/elasticsearch-ca.pem" ]
+server.ssl.enabled: true
+server.ssl.certificate: /opt/module/kibana-8.1.0/config/kibana.crt
+server.ssl.key: /opt/module/kibana-8.1.0/config/kibana.key
+```
+
+修改软件目录拥有者
+
+```sh
+# 切换目录
+chown -R es:es /opt/module/kibana-8.1.0/
+```
+
+切换用户，启动软件
+
+```sh
+# 切换用户
+su es
+# 启动软件
+bin/kibana
+# 也可以后台启动
+nohup /opt/module/kibana-8.1.0/bin/kibana >kibana.log 2>&1 &
+```
+
+访问web页面 https://localhost:5601/
+
+
+
+
+
+
 
 
 
