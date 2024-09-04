@@ -39,7 +39,7 @@ Google，百度类的网站搜索，它们都是根据网页中的关键字生�
 
 ## Elasticsearch8 新特性
 
-➢减少内存堆使用，完全支持 ARM 架构，引入全新的方式以使用更少的存储空间，从而让每个节点托管更多的数据
+➢ 减少内存堆使用，完全支持 ARM 架构，引入全新的方式以使用更少的存储空间，从而让每个节点托管更多的数据
 
 ➢ 降低查询开销，在大规模部署中成效尤为明显 
 
@@ -177,7 +177,7 @@ ES 里的 Index 可以看做一个库，而 Types 相当于表， Documents 则�
 
 ### 索引-查询 & 删除
 
-查看所有索引
+**查看所有索引**
 在 Postman 中，向 ES 服务器发 GET 请求 ： http://127.0.0.1:9200/_cat/indices?v
 
 这里请求路径中的_cat 表示查看的意思， indices 表示索引，所以整体含义就是查看当前 ES服务器中的所有索引，就好像 MySQL 中的 show tables 的感觉，服务器响应结果如下 :
@@ -264,9 +264,7 @@ health status index uuid pri rep docs.count docs.deleted store.size pri.store.si
 
 ![img](./assets/b5adfdcf2321b9cd69fa9e381057aa55.png)
 
-注意，此处发送请求的方式必须为 POST，不能是 PUT，否则会发生错误 。
-
-返回结果：
+注意，此处发送请求的方式必须为 POST，不能是 PUT，否则会发生错误 。返回结果：
 
 ```json
 {
@@ -539,104 +537,6 @@ health status index uuid pri rep docs.count docs.deleted store.size pri.store.si
 ```
 
 ## 文档数据查询
-
-### 条件查询
-
-假设有以下文档内容，（在 Postman 中，向 ES 服务器发 GET请求 ： http://127.0.0.1:9200/shopping/_search）：
-
-```json
-{
-    "took": 5,
-    "timed_out": false,
-    "_shards": {
-        "total": 1,
-        "successful": 1,
-        "skipped": 0,
-        "failed": 0
-    },
-    "hits": {
-        "total": {
-            "value": 6,
-            "relation": "eq"
-        },
-        "max_score": 1,
-        "hits": [
-            {
-                "_index": "shopping",
-                "_type": "_doc",
-                "_id": "ANQqsHgBaKNfVnMbhZYU",
-                "_score": 1,
-                "_source": {
-                    "title": "小米手机",
-                    "category": "小米",
-                    "images": "http://www.gulixueyuan.com/xm.jpg",
-                    "price": 3999
-                }
-            },
-            {
-                "_index": "shopping",
-                "_type": "_doc",
-                "_id": "A9R5sHgBaKNfVnMb25Ya",
-                "_score": 1,
-                "_source": {
-                    "title": "小米手机",
-                    "category": "小米",
-                    "images": "http://www.gulixueyuan.com/xm.jpg",
-                    "price": 1999
-                }
-            },
-            {
-                "_index": "shopping",
-                "_type": "_doc",
-                "_id": "BNR5sHgBaKNfVnMb7pal",
-                "_score": 1,
-                "_source": {
-                    "title": "小米手机",
-                    "category": "小米",
-                    "images": "http://www.gulixueyuan.com/xm.jpg",
-                    "price": 1999
-                }
-            },
-            {
-                "_index": "shopping",
-                "_type": "_doc",
-                "_id": "BtR6sHgBaKNfVnMbX5Y5",
-                "_score": 1,
-                "_source": {
-                    "title": "华为手机",
-                    "category": "华为",
-                    "images": "http://www.gulixueyuan.com/xm.jpg",
-                    "price": 1999
-                }
-            },
-            {
-                "_index": "shopping",
-                "_type": "_doc",
-                "_id": "B9R6sHgBaKNfVnMbZpZ6",
-                "_score": 1,
-                "_source": {
-                    "title": "华为手机",
-                    "category": "华为",
-                    "images": "http://www.gulixueyuan.com/xm.jpg",
-                    "price": 1999
-                }
-            },
-            {
-                "_index": "shopping",
-                "_type": "_doc",
-                "_id": "CdR7sHgBaKNfVnMbsJb9",
-                "_score": 1,
-                "_source": {
-                    "title": "华为手机",
-                    "category": "华为",
-                    "images": "http://www.gulixueyuan.com/xm.jpg",
-                    "price": 1999
-                }
-            }
-        ]
-    }
-}
-```
 
 ### URL带参查询
 
@@ -1036,7 +936,7 @@ health status index uuid pri rep docs.count docs.deleted store.size pri.store.si
 }
 ```
 
-### 查询排序
+### 排序查询
 
 如果你想通过排序查出价格最高的手机，在 Postman 中，向 ES 服务器发 GET请求 ： http://127.0.0.1:9200/shopping/_search，附带JSON体如下：
 
@@ -1161,6 +1061,104 @@ health status index uuid pri rep docs.count docs.deleted store.size pri.store.si
                 "sort": [
                     1999
                 ]
+            }
+        ]
+    }
+}
+```
+
+### 条件查询
+
+假设有以下文档内容，（在 Postman 中，向 ES 服务器发 GET请求 ： http://127.0.0.1:9200/shopping/_search）：
+
+```json
+{
+    "took": 5,
+    "timed_out": false,
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 6,
+            "relation": "eq"
+        },
+        "max_score": 1,
+        "hits": [
+            {
+                "_index": "shopping",
+                "_type": "_doc",
+                "_id": "ANQqsHgBaKNfVnMbhZYU",
+                "_score": 1,
+                "_source": {
+                    "title": "小米手机",
+                    "category": "小米",
+                    "images": "http://www.gulixueyuan.com/xm.jpg",
+                    "price": 3999
+                }
+            },
+            {
+                "_index": "shopping",
+                "_type": "_doc",
+                "_id": "A9R5sHgBaKNfVnMb25Ya",
+                "_score": 1,
+                "_source": {
+                    "title": "小米手机",
+                    "category": "小米",
+                    "images": "http://www.gulixueyuan.com/xm.jpg",
+                    "price": 1999
+                }
+            },
+            {
+                "_index": "shopping",
+                "_type": "_doc",
+                "_id": "BNR5sHgBaKNfVnMb7pal",
+                "_score": 1,
+                "_source": {
+                    "title": "小米手机",
+                    "category": "小米",
+                    "images": "http://www.gulixueyuan.com/xm.jpg",
+                    "price": 1999
+                }
+            },
+            {
+                "_index": "shopping",
+                "_type": "_doc",
+                "_id": "BtR6sHgBaKNfVnMbX5Y5",
+                "_score": 1,
+                "_source": {
+                    "title": "华为手机",
+                    "category": "华为",
+                    "images": "http://www.gulixueyuan.com/xm.jpg",
+                    "price": 1999
+                }
+            },
+            {
+                "_index": "shopping",
+                "_type": "_doc",
+                "_id": "B9R6sHgBaKNfVnMbZpZ6",
+                "_score": 1,
+                "_source": {
+                    "title": "华为手机",
+                    "category": "华为",
+                    "images": "http://www.gulixueyuan.com/xm.jpg",
+                    "price": 1999
+                }
+            },
+            {
+                "_index": "shopping",
+                "_type": "_doc",
+                "_id": "CdR7sHgBaKNfVnMbsJb9",
+                "_score": 1,
+                "_source": {
+                    "title": "华为手机",
+                    "category": "华为",
+                    "images": "http://www.gulixueyuan.com/xm.jpg",
+                    "price": 1999
+                }
             }
         ]
     }
@@ -4068,7 +4066,7 @@ Node 1为每个节点创建一个批量请求，并将这些请求并行转发�
 **倒排索引原理**
 Elasticsearch使用一种称为倒排索引的结构，它适用于快速的全文搜索。
 
-见其名，知其意，有倒排索引，肯定会对应有正向索引。正向索引（forward index），反向索引（inverted index）更熟悉的名字是倒排索引。
+见其名，知其意，有倒排索引，肯定会对应有正向索引。**正向索引**（forward index），**反向索引**（inverted index）更熟悉的名字是倒排索引。
 
 所谓的正向索引，就是搜索引擎会将待搜索的文件都对应一个文件ID，搜索时将这个ID和搜索关键字进行对应，形成K-V对，然后对关键字进行统计计数。（统计？？下文有解释）
 ![img](./assets/26d40bfcab12ddc59702e922042c1ae3.png)
@@ -6456,18 +6454,6 @@ nohup /opt/module/kibana-8.1.0/bin/kibana >kibana.log 2>&1 &
 ```
 
 访问web页面 https://localhost:5601/
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

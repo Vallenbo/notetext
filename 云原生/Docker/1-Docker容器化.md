@@ -48,7 +48,7 @@ Cgroups的工作目录/sys/fs/cgroup下包含了Cgroups的所有内容
 
 
 
-# image镜像操作
+# Image镜像操作
 
 ## 镜像原理
 

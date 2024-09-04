@@ -30,46 +30,7 @@ Zookeeper：kafka集群依赖zookeeper来保存集群的的元信息，来保证
 - 在一个分区中，消息是有顺序的方式存储着，每个在分区的消费都是有一个递增的id。这个就是偏移量offset
 - 偏移量在分区中才是有意义的。在分区之间，offset是没有任何意义的
 
-## 工作流程
-
-生产者往kafka发送数据的流程（6步）
-<img src="assets/image-20230424112414352.png" alt="image-20230424112414352" style="zoom:67%;" />
-
-1、生产者从Kafka集群获取分区leader信息
-2、生产者将消息发送给leader
-3、leader将消息写入本地磁盘
-4、follower从leader拉取消息数据
-5、follower将消息写入本地磁盘后向leader发送ACK
-6、leader收到所有的follower的ACK之后向生产者发送ACK
-
-## 选择partition的原则
-
-某个 topic可以设置多个parition目录，生产者数据应该发往哪个分区呢？
-1、partition在写入的时候可以指定需要写入的partition,如果有指定，则写入对应的partition。
-2、如果没有指定partition,但是设置了数据的key,则会根据key的值hash出一个partition。
-3、如果既没指定partition，又没有设置key,则会采用轮询方式，即每次取一小段时间的数据写入某个partition，下一小段的时间写入下一个partition。
-
-# Topic分区数据和日志文件结构
-
-对于每个Topic主题下 partition数据存储如下，Kafka集群维护了一个partition分区数据日志文件结构如下:
-![image-20230424112426154](assets/image-20230424112426154.png)
-如上图，假如某个Topic有三个partition分区，采用轮询方式，在同一个partition上数据是有序存储的
-
-每个partition都是一个有序并且不可变的消息记录集合。
-	当新的数据写入时，追加到partition的末尾。在每个partition中，每条消息都会被分配一个顺序的唯一标识， 这个标识被称为offset（即偏移量），Kafka只保证在同一个partition内部消息是有序的，在不同partition之间并不能保证消息有序。
-
-Kafka可以配置一个保留期限，用来标识日志会在Kafka集群内保留多长时间。Kafka集群会保留在保留期限内所有被发布的消息，不管这些消息是否被消费过，超过保留期，这些数据将会被清空。由于Kafka会将数据进行持久化存储(即写入到硬盘上)，所以保留的数据大小可以设置为一个比较大的值。
-
-## Partition结构
-Partition以文件夹的形式存在， 每个partition文件夹下面会有多组segment文件，每组segment文件又包含. index文件、.1og文件、.timeindex文件三个文件
-
-- `.1og`文件就是实际存储message的地方
-- `.index`和`.time .index`文件为索引文件，用于检索消息。
-
-## 为什么kafka快?
-虽然是写入物理磁盘，但是每条记录都是通过index索引能快速定位
-
-# 消费模型
+## 消费模型
 
 **发布-订阅模式(一对多)**
 
@@ -95,7 +56,48 @@ Partition以文件夹的形式存在， 每个partition文件夹下面会有多�
 
 
 
-# 消息顺序及传递方式
+## 工作流程
+
+生产者往kafka发送数据的流程（6步）
+<img src="assets/image-20230424112414352.png" alt="image-20230424112414352" style="zoom:67%;" />
+
+1、生产者从Kafka集群获取分区leader信息
+2、生产者将消息发送给leader
+3、leader将消息写入本地磁盘
+4、follower从leader拉取消息数据
+5、follower将消息写入本地磁盘后向leader发送ACK
+6、leader收到所有的follower的ACK之后向生产者发送ACK
+
+## 数据选择partition原则
+
+某个 topic可以设置多个parition目录，生产者数据应该发往哪个分区呢？
+1、partition在写入的时候可以指定需要写入的partition,如果有指定，则写入对应的partition。
+2、如果没有指定partition,但是设置了数据的key,则会根据key的值hash出一个partition。
+3、如果既没指定partition，又没有设置key,则会采用轮询方式，即每次取一小段时间的数据写入某个partition，下一小段的时间写入下一个partition。
+
+## Partition数据写入
+
+对于每个Topic主题下 partition数据存储如下，Kafka集群维护了一个partition分区数据日志文件结构如下:
+![image-20230424112426154](assets/image-20230424112426154.png)
+如上图，假如某个Topic有三个partition分区，采用轮询方式，在同一个partition上数据是有序存储的
+
+每个partition都是一个有序并且不可变的消息记录集合。
+	当新的数据写入时，追加到partition的末尾。在每个partition中，每条消息都会被分配一个顺序的唯一标识， 这个标识被称为offset（即偏移量），Kafka只保证在同一个partition内部消息是有序的，在不同partition之间并不能保证消息有序。
+
+Kafka可以配置一个保留期限，用来标识日志会在Kafka集群内保留多长时间。Kafka集群会保留在保留期限内所有被发布的消息，不管这些消息是否被消费过，超过保留期，这些数据将会被清空。由于Kafka会将数据进行持久化存储(即写入到硬盘上)，所以保留的数据大小可以设置为一个比较大的值。
+
+## Partition结构内容
+
+Partition以文件夹的形式存在， 每个partition文件夹下面会有多组segment文件，每组segment文件又包含. index文件、.1og文件、.timeindex文件三个文件
+
+- `.1og`文件就是实际存储message的地方
+- `.index`和`.time .index`文件为索引文件，用于检索消息。
+
+## 为什么kafka快?
+
+虽然是写入物理磁盘，但是每条记录都是通过index索引能快速定位
+
+# 消息顺序及应答方式
 
 **数据发送ack应答机制**
 
@@ -121,11 +123,11 @@ producer在向kafka写入消息的时候，设置确认参数确定kafka接收�
 
 解决办法：
 
-> 1.设置一个分区，这样就可以保证所有消息的顺序，但是失去了拓展性和性能
+> 1.设置在一个分区，这样就可以保证所有消息的顺序，但是失去了拓展性和性能
 >
 > 2.支持通过设置消息的key,相同key的消息会发送的同一个分区
 
-**消息传递方式**
+**消息应答方式**
 
 最多一次——消息可能会丢失，永远不重复发送
 
@@ -174,6 +176,8 @@ kafka支持事务（0.11.0 or later）
 
 # 消息序列化
 
+一种优化方式
+
 recode消息序列化：将一个完整的数据拆分传输
 
 将对象以二进制的方式在网络之间传输或者保存到文件中，并可以根据特定的规则进行还原
@@ -194,7 +198,7 @@ recode消息序列化：将一个完整的数据拆分传输
 
 
 
-**Record Header用法 **
+## Record Header用法
 
 <img src="./assets/image-20240801161142737.png" alt="image-20240801161142737" style="zoom: 50%;" />
 
@@ -212,17 +216,13 @@ Kafka 是不保证分区之间的顺序的。如果取消订单这条消息在�
 
 同时引入Record Header使用，标记不同的事件类型
 
-
-
-
-
 <img src="./assets/image-20240801161008932.png" alt="image-20240801161008932" style="zoom:50%;" />
 
 
 
-# 监听器和负载均衡配置
+# 负载均衡配置和监听器
 
-server.properties 必要配置项
+负载均衡配置中 server.properties 文件内容必要配置项
 
 - broker.id
 - log.dirs
@@ -237,7 +237,7 @@ listeners:指定broker启动时本机的监听名称、端口
 listeners=PLAINTEXT://:9092					PLAINTEXT
 listeners=PLAINTEXT://192.168.1.10:9092		SSL
 listeners=PLAINTEXT://hostname:9092			SASL
-listeners=PLAINTEXT://0.0.0.0:9092			PLAINTEXTSASL_SSL 
+listeners=PLAINTEXT://0.0.0.0:9092			PLAINTEXTSASL_SSL
 ```
 
 **监听器 listeners 和 advertised.listeners**

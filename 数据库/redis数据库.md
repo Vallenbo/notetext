@@ -24,8 +24,7 @@ NoSQL：not only sql，泛指非关系型数据库。泛指那些不使用SQL语
 
 > Redis（Remote Dictionary Server ，远程字典服务） 是一个使用ANSIC编写的开源、支持网络、基于内存、可选持久性的键值对存储数据库，是NoSQL数据库。
 
-redis的出现主要是为了替代早期的Memcache缓存系统的。map内存型(数据存放在内存中)的非关系型(nosql)key-value(键值存储)数据库，
-支持数据的持久化(基于RDB和AOF，注: 数据持久化时将数据存放到文件中，每次启动redis之后会先将文件中数据加载到内存，经常用来做缓存、数据共享、购物车、消息队列、计数器、限流等。(最基本的就是缓存一些经常用到的数据，提高读写速度)。
+redis的出现主要是为了替代早期的Memcache缓存系统的。map内存型(数据存放在内存中)的非关系型(nosql)key-value(键值存储)数据库，支持数据的持久化(基于RDB和AOF，注: 数据持久化时将数据存放到文件中，每次启动redis之后会先将文件中数据加载到内存，经常用来做缓存、数据共享、购物车、消息队列、计数器、限流等。(最基本的就是缓存一些经常用到的数据，提高读写速度)。
 
 redis特性：
 
@@ -59,7 +58,7 @@ Redis 的应用场景包括：
 
 > 缓存系统（“热点”数据：高频读、低频写）：缓存用户信息，优惠券过期时间，验证码过期时间、session、token等
 >
-> 计数器：帖子的浏览数，视频播放次数，评论次数、点赞次数等
+> 计数器：帖子的浏览数，视频播放次数，评论次数、点赞次数等 
 >
 > 消息队列，秒杀系统
 >
@@ -2004,7 +2003,7 @@ set my_lock unique_value NX PX 30000
 
 ```bash
 [root@coder ~]## cd /usr/local/bin/redis-config/
-[root@coder redis-config]## vim redis.conf 
+[root@coder redis-config]## vim redis.conf
 ```
 
 ### 4.1.1 单位
@@ -2036,7 +2035,6 @@ set my_lock unique_value NX PX 30000
 
 ```bash
 ######################################### INCLUDES ###########################################
-
 ## Include one or more other config files here.  This is useful if you
 ## have a standard template that goes to all Redis servers but also need
 ## to customize a few per-server settings.  Include files can include

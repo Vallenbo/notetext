@@ -24,7 +24,7 @@ Linux Namespaces是Linux内核提供的一种资源隔离方案。Namespaces之�
 
 我们直接用一个示例来演示一下namespace隔离资源的效果。在命令行下，我们可以通过unshare命令来启动一个新进程，并为其新建相应的命名空间。在这个示例中，我们将通过unshare为我们的容器创建除cgroup和user之外的所有命名空间，这也是docker run something默认为容器创建的命名空间。本示例依赖docker环境来为我们提供一些配置上的便利。完整的示例script放在这里，方便大家scriptreplay回看过程。
 
-```
+```sh
 git clone https://github.com/DrmagicE/build-container-in-shell
 cd ./build-container-in-shell
 scriptreplay build_container.time build_container.his
@@ -33,7 +33,7 @@ scriptreplay build_container.time build_container.his
 **step1: 准备一个rootfs**
 首先，我们要为我们的容器准备自己的rootfs，用来为容器进程提供隔离后执行环境的文件系统。这里我们直接导出alpine镜像作为我们的rootfs，选择/root/container目录作为镜像rootfs：
 
-```
+```sh
 [root@drmagic container]# pwd 
 /root/container
 [root@drmagic container]# # 修改mount类型为private，确保后续的mount/umount不会在namespace之间传播
@@ -46,7 +46,7 @@ bin  dev  etc  home  lib  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp 
 
 **step2: 命名空间隔离**
 
-```
+```sh
 [root@drmagic container]# # 使用unshare为新的shell创建命名空间
 [root@drmagic container]# unshare --mount --uts --ipc --net --pid --fork /bin/bash
 [root@drmagic container]# echo $$ # 看看新进程的pid
