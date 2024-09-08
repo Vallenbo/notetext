@@ -1,3 +1,247 @@
+# 装饰模式
+
+**装饰模式**：是一种结构性设计模式，它允许在不改变对象自身的情况下，动态地给对象添加额外的功能。通过使用装饰模式，可以将功能分解为多个小的类，每个类负责一个特定的功能，从而实现灵活的组合。
+
+## 装饰模式的主要组成部分：
+
+1. **组件接口**：定义一个接口，所有具体组件和装饰者都需要实现这个接口。
+2. **具体组件**：实现组件接口的类，表示被装饰的对象。
+3. **装饰者**：持有一个组件接口的引用，并实现相同的接口，允许在调用组件的方法时添加额外的行为。
+
+## 装饰模式的优点：
+
+- 增强了类的功能。
+- 提高了代码的灵活性和可扩展性。
+- 避免了类的膨胀。
+
+下面是一个使用 Go 语言实现装饰模式的简单示例。这个示例展示了如何通过装饰器为一个 **基本的文本消息** 添加额外的功能。
+
+```go
+type Message interface { // Message 接口
+	GetContent() string
+}
+
+type BasicMessage struct { // BasicMessage 结构体
+	content string
+}
+
+func (m *BasicMessage) GetContent() string { // GetContent 方法
+	return m.content
+}
+
+func NewBasicMessage(content string) *BasicMessage { // NewBasicMessage 构造函数
+	return &BasicMessage{content: content}
+}
+
+type MessageDecorator struct { // MessageDecorator 装饰器结构体
+	Message Message
+}
+
+func NewMessageDecorator(m Message) *MessageDecorator { // NewMessageDecorator 构造函数
+	return &MessageDecorator{Message: m}
+}
+
+type EncryptedMessage struct { // EncryptedMessage 装饰器
+	*MessageDecorator
+}
+
+func (e *EncryptedMessage) GetContent() string { // GetContent 方法
+	return "Encrypted: " + e.Message.GetContent()
+}
+
+type UppercaseMessage struct { // UppercaseMessage 装饰器
+	*MessageDecorator
+}
+
+func (u *UppercaseMessage) GetContent() string { // GetContent 方法
+	return fmt.Sprintf("Uppercase: %s", u.Message.GetContent())
+}
+
+func main() {
+	// 创建基本消息
+	msg := NewBasicMessage("Hello, Decorator Pattern!")
+
+	// 使用装饰器
+	encryptedMsg := &EncryptedMessage{NewMessageDecorator(msg)}				// 1
+	uppercaseMsg := &UppercaseMessage{NewMessageDecorator(encryptedMsg)}    // 2
+
+	// 输出结果
+	fmt.Println(uppercaseMsg.GetContent())
+}
+```
+
+### 说明
+
+1. **Message 接口**：定义了获取消息内容的方法。
+2. **BasicMessage 结构体**：实现了 `Message` 接口，表示基本消息。
+3. **MessageDecorator 结构体**：作为装饰器的基类，持有一个 `Message` 对象。
+4. **EncryptedMessage 和 UppercaseMessage**：具体的装饰器，分别实现了加密和大写功能。
+5. **main 函数**：创建基本消息并通过装饰器添加功能，最后输出结果。
+
+这个示例展示了如何使用装饰模式来动态地为对象添加新功能。
+
+
+
+# 策略模式
+
+策略模式：是一种行为设计模式，它定义了一系列算法，将每个算法封装起来，并使它们可以互换。策略模式使得算法的变化独立于使用算法的客户。
+
+## 策略模式的主要组成部分：
+
+1. **策略接口**：定义一系列算法的接口。
+2. **具体策略**：实现策略接口的具体算法。
+3. **上下文**：持有一个策略的引用，并可以在运行时选择不同的策略。
+
+## 策略模式的优点：
+
+- 提高了代码的灵活性和可扩展性。
+- 避免了使用多重条件语句（如 if-else 或 switch-case）。
+- 可以在运行时选择不同的算法。
+
+示例代码（Golang）：以下是一个简单的策略模式的用例，展示了如何实现不同的支付策略。
+
+```go
+// Strategy interface
+type PaymentStrategy interface {
+	Pay(amount float64)
+}
+
+// 1、Concrete strategy: Credit Card
+type CreditCard struct {
+	CardNumber string
+}
+
+func (c *CreditCard) Pay(amount float64) {
+	fmt.Printf("Paid %.2f using Credit Card: %s\n", amount, c.CardNumber)
+}
+
+// 2、Concrete strategy: PayPal
+type PayPal struct {
+	Email string
+}
+
+func (p *PayPal) Pay(amount float64) {
+	fmt.Printf("Paid %.2f using PayPal: %s\n", amount, p.Email)
+}
+
+// Context
+type ShoppingCart struct {
+	PaymentMethod PaymentStrategy
+}
+
+func (cart *ShoppingCart) SetPaymentMethod(method PaymentStrategy) {
+	cart.PaymentMethod = method
+}
+
+func (cart *ShoppingCart) Checkout(amount float64) {
+	cart.PaymentMethod.Pay(amount)
+}
+
+func main() {
+	cart := &ShoppingCart{}
+
+	// Using Credit Card
+	cart.SetPaymentMethod(&CreditCard{CardNumber: "1234-5678-9012-3456"})
+	cart.Checkout(100.0)
+
+	// Using PayPal
+	cart.SetPaymentMethod(&PayPal{Email: "user@example.com"})
+	cart.Checkout(200.0)
+}
+```
+
+### 运行结果：
+```
+Paid 100.00 using Credit Card: 1234-5678-9012-3456
+Paid 200.00 using PayPal: user@example.com
+```
+
+在这个示例中，`PaymentStrategy` 是策略接口，`CreditCard` 和 `PayPal` 是具体策略。`ShoppingCart` 是上下文，它可以在运行时选择不同的支付策略。
+
+
+
+# 简单工厂模式
+
+工厂模式是一种创建性设计模式，它提供了一种创建对象的接口，但不暴露对象创建的具体逻辑。工厂模式可以帮助将对象的创建与使用分离，从而提高代码的灵活性和可维护性。
+
+## 工厂模式的主要组成部分：
+
+1. **产品接口**：定义产品的接口。
+2. **具体产品**：实现产品接口的具体类。
+3. **工厂接口**：定义创建产品的接口。
+4. **具体工厂**：实现工厂接口，负责创建具体产品的实例。
+
+## 工厂模式的优点：
+
+- 封装了对象的创建过程。
+- 提高了代码的灵活性和可扩展性。
+- 可以在不修改客户端代码的情况下引入新产品。
+
+示例代码（Golang）：以下是一个简单的工厂模式的用例，展示了如何创建不同类型的动物。
+
+```go
+// Product interface
+type Animal interface {
+	Speak() string
+}
+
+// Concrete products
+type Dog struct{}
+
+func (d *Dog) Speak() string {
+	return "Woof!"
+}
+
+type Cat struct{}
+
+func (c *Cat) Speak() string {
+	return "Meow!"
+}
+
+// Factory interface
+type AnimalFactory interface {
+	CreateAnimal() Animal
+}
+
+// Concrete factories
+type DogFactory struct{}
+
+func (f *DogFactory) CreateAnimal() Animal {
+	return &Dog{}
+}
+
+type CatFactory struct{}
+
+func (f *CatFactory) CreateAnimal() Animal {
+	return &Cat{}
+}
+
+// Client code
+func main() {
+	var factory AnimalFactory
+
+	// Create a Dog
+	factory = &DogFactory{}
+	dog := factory.CreateAnimal()
+	fmt.Println("Dog says:", dog.Speak())
+
+	// Create a Cat
+	factory = &CatFactory{}
+	cat := factory.CreateAnimal()
+	fmt.Println("Cat says:", cat.Speak())
+}
+```
+
+### 运行结果：
+```
+Dog says: Woof!
+Cat says: Meow!
+```
+
+在这个示例中，`Animal` 是产品接口，`Dog` 和 `Cat` 是具体产品。`AnimalFactory` 是工厂接口，`DogFactory` 和 `CatFactory` 是具体工厂。客户端代码通过工厂接口创建不同类型的动物，而不需要了解具体的创建逻辑。
+
+
+
 # MVC模式
 
 - 是一种常见的 “代码组织架构”， 可以在开发中，对数据进行处理并解耦。
