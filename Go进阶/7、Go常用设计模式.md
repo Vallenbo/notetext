@@ -1,3 +1,34 @@
+# 单例模式
+
+单例模式（Singleton Pattern）是一种创建型设计模式，确保一个类只有一个实例，并提供一个全局访问点。它常用于需要控制资源的共享，例如数据库连接或配置管理。
+
+### 在 Go 中实现单例模式
+
+```go
+// Singleton 是单例结构体
+type Singleton struct {
+    // 其他字段
+}
+
+// 声明一个私有的单例实例
+var instance *Singleton
+var once sync.Once
+
+// GetInstance 返回单例实例
+func GetInstance() *Singleton {
+    once.Do(func() {
+        instance = &Singleton{}
+    })
+    return instance
+}
+```
+
+1. **私有变量**: `instance` 是一个私有变量，存储单例的实例。
+2. **sync.Once**: `once` 确保 `instance` 只被初始化一次，避免并发问题。
+3. **GetInstance**: 该函数返回单例实例，使用 `once.Do` 确保初始化逻辑只执行一次。
+
+
+
 # 装饰模式
 
 **装饰模式**：是一种结构性设计模式，它允许在不改变对象自身的情况下，动态地给对象添加额外的功能。通过使用装饰模式，可以将功能分解为多个小的类，每个类负责一个特定的功能，从而实现灵活的组合。

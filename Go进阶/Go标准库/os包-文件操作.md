@@ -24,7 +24,7 @@ func main() {
 }
 ```
 
-# 一、读取文件：
+# 一、读取
 
 `path` 包里包含一个子包叫 `filepath`，这个子包提供了跨平台的函数，用于处理文件名和路径。例如 `Base()` 函数用于获得路径中的最后一个元素（不包含后面的分隔符）：
 
@@ -212,9 +212,9 @@ func main() {
 
 
 
-# 二、写入文件：
+# 二、写入
 
-## os.OpenFile打开文件的方式
+## 打开文件写入
 
 `os.OpenFile()`能够以指定模式打开文件，返回一个文件对象
 
@@ -240,7 +240,7 @@ func (f *File) Write(b []byte) (n int, err error) { } //参数为字节切片数
 func (f *File) WriteString(s string) (n int, err error) { } //参数为字符串数据
 ```
 
-## Write和WriteString字节数组写入文件
+## 字节数组方式写入
 
 ```go
 func main() {
@@ -257,7 +257,7 @@ func main() {
 }
 ```
 
-## bufio.NewWriter缓冲区
+## bufio缓冲区方式写入
 
 
 ```go
@@ -285,18 +285,37 @@ func main() {
 }
 ```
 
-## ioutil.WriteFile
+## 直接写入文件方式
+
+WriteFile(name string, data []byte, perm FileMode) 将数据写入命名文件，并在必要时创建它。
 
 ```go
 func main() {
 	str := "hello 沙河"
-	err := ioutil.WriteFile("./xx.txt", []byte(str), 0666)
+	err := os.WriteFile("./xx.txt", []byte(str), 0666)
 	if err != nil {
 		fmt.Println("write file failed, err:", err)
 		return
 	}
 }
 ```
+
+
+
+# MultiWriter多个流写入方式
+
+MultiWriter 创建一个 writer数组，返回一个writer，将其写入复制到所有提供的 writer
+
+```sh
+filer, err := os.Create("log.txt")
+	if err != nil {
+		panic(err)
+	}
+	os.WriteFile()
+	writer := io.MultiWriter(os.Stdout, filer)
+```
+
+
 
 ## io.Copy文件拷贝
 
@@ -388,14 +407,8 @@ func main() {
 
 通过把数据转换成纯文本，使用命名的字段来标注，让其具有可读性。这样的数据格式可以通过网络传输，而且是与平台无关的，任何类型的应用都能够读取和输出，不与操作系统和编程语言的类型相关。
 
-下面是一些术语说明：
-
-- 数据结构 --> 指定格式 = **序列化** 或 **编码**（传输之前）
-- 指定格式 --> 数据结构 = **反序列化** 或 **解码**（传输之后）
-
-序列化是在内存中把数据转换成指定格式（数据 -> 字符串），反之亦然（字符串 -> 数据）。
-
-编码也是一样的，只是输出一个数据流（实现了 `io.Writer` 接口）；解码是从一个数据流（实现了 `io.Reader`）输出到一个数据结构。
+- 序列化**（Serialization）**是将数据结构（如结构体、数组、切片等）转换为字节流或其他格式（如 JSON、XML、Protobuf 等）的过程。这使得数据可以被存储到文件中、发送到网络上或在不同的系统之间传输。
+- 反序列化**（Deserialization）**是将序列化后的数据（如字节流或 JSON 字符串）转换回原始数据结构的过程。这使得我们可以从存储或传输的数据中恢复出原始对象。
 
 ## Json示例
 
@@ -484,8 +497,6 @@ JSON 与 Go 类型对应如下：
 - 不支持循环数据结构；它将引起序列化进入一个无限循环
 - 指针可以被编码，实际上是对指针指向的值进行编码（或者指针是 `nil`）
 
-
-
 ## JSON编码
 
 &#8195;&#8195;json是go标准库里自带的序列化工具，使用了反射，效率比较低。
@@ -501,10 +512,8 @@ func easyjson.Unmarshal(data []byte, v easyjson.Unmarshaler) error
 ```Go
 import "github.com/bytedance/sonic"
 
-// Marshal
-output, err := sonic.Marshal(&data) 
-// Unmarshal
-err := sonic.Unmarshal(input, &data) 
+output, err := sonic.Marshal(&data) 		// Marshal
+err := sonic.Unmarshal(input, &data) 		// Unmarshal
 ```
 
 &#8195;&#8195;base64经常在http环境下用来传输较长的信息。任意byte数组都可以采用base64编码转为字符串，并且可以反解回byte数组。编码和解码的方法是公开、确定的， base64不属于加密算法。
@@ -766,9 +775,7 @@ func sendMsg(immortal *Immortal) error {
 
 func receiveMsg(immortal SimpleImmortal) (SimpleImmortal,error) {
 	dec := gob.NewDecoder(&buf)
-
 	return immortal,dec.Decode(&immortal)
-
 }
 ```
 

@@ -1,3 +1,5 @@
+rpc是一种协议，protobuf是一个代码和消息体生成工具，grpc是一个框架组合了rpc+protobuf使用，go-zero也是而且更完善
+
 # [gRPC](https://grpc.io/docs/languages/go/quickstart/)
 
 `gRPC`是一种现代化开源的**高性能RPC框架**，能够运行于任意环境之中。最初由谷歌进行开发。它使用HTTP/2作为传输协议。
@@ -33,7 +35,7 @@ go get google.golang.org/grpc			# 也可自行安装grpc
 
 
 
-# 编写protocbuf
+# 编写protobuf
 
 [语法参考文档（需翻墙）](https://developers.google.com/protocol-buffers/docs/proto3)
 

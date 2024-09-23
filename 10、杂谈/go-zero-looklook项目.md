@@ -1,3 +1,17 @@
+开发接口有哪些？
+
+差不多有10个接口，用户管理、商品展示、订单、queue、支付，公共接口10个
+
+
+
+
+
+订单生成步骤？
+
+
+
+
+
 # Filebeat:
 
 Filebeat是Elasticsearch提供的一个轻量级日志数据收集器。它能够监视指定的日志文件或位置，并将数据发送到Elasticsearch、Logstash或Kafka等地方。Filebeat通常用于构建日志收集管道，以便后续对日志进行分析和可视化。

@@ -2,7 +2,7 @@
 
 fmt包实现了类似C语言printf和scanf的格式化I/O。主要分为向外输出内容和获取输入内容两大部分。
 
-# 向外输出
+# 输出函数
 
 标准库`fmt`提供了以下几种输出相关函数。
 
@@ -54,7 +54,7 @@ func main() {
 
 ## Fprint
 
-`Fprint`系列函数会将内容输出到一个`io.Writer`接口类型的变量`w`中，我们通常用这个函数往文件中写入内容。
+`Fprint`系列函数允许你将格式化的输出写入到指定的 `io.Writer` 接口，而不仅仅是标准输出。我们通常用这个函数往文件中写入内容。
 
 ```go
 func Fprint(w io.Writer, a ...interface{}) (n int, err error)
@@ -350,7 +350,7 @@ fmt.Printf("%05s\n", s)
 00小王子
 ```
 
-# 获取输入
+# 输入函数
 
 Go语言`fmt`包下有`fmt.Scan`、`fmt.Scanf`、`fmt.Scanln`三个函数，可以在程序运行过程中从标准输入获取用户的输入。
 

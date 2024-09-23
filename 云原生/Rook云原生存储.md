@@ -850,7 +850,7 @@ ceph存储由外部提供,以下步骤在ceph上操作,⽬的是为kubenetes访�
 1. ceph新建ceph pool
 
 ```sh
-$ eph osd pool create k8s
+$ ceph osd pool create k8s
 3 pool ' k8s' created
 ```
 
