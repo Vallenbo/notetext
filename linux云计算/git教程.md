@@ -35,6 +35,35 @@ git status
 
 
 
+# 更新到多个平台
+
+```sh
+git branch							# 检查当前分支
+git branch -M main					# 将当前分支重命名为 main
+git push github-origin main -u		# 推送到 GitHub
+```
+
+配置git账户及三个上传路径：
+
+因为需要上传三个平台，所以三个平台都需要创建对应的仓库，不同的是上传步骤的改变
+刚刚已经上传到gitee上了，现在上传到github和gitlab上
+
+```sh
+// 配置github仓库路径：
+git remote add github-origin https://xxxxx.git
+// 配置gitee仓库路径：
+git remote add gitee-origin https://xxxxx.git
+```
+
+这样三大平台的仓库地址就配好了，只需要执行命令时执行不同的名即可
+
+```sh
+git push github-origin main
+git push gitee-origin main
+```
+
+
+
 # 基础指令
 
 ## 配置个人信息
