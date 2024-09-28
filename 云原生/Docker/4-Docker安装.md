@@ -22,12 +22,22 @@ yum-config-manager  --add-repo https://download.docker.com/linux/centos/docker-c
 yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
 ```
 
-**配置镜像加速器 vim /etc/docker/daemon.json**
+**配置镜像加速器**
 
 ```sh
+vim /etc/docker/daemon.json
+tee /etc/docker/daemon.json <<-'EOF'
 {
-"registry-mirrors": ["https://registry.docker-cn.com"，"https://docker.mirrors.ustc.edu.cn"]
+    "registry-mirrors": [
+        "https://dockerpull.com",
+        "https://docker.anyhub.us.kg",
+        "https://dockerhub.jobcher.com",
+        "https://dockerhub.icu",
+        "https://docker.awsl9527.cn"
+    ]
 }
+EOF
+sudo systemctl daemon-reload && sudo systemctl restart docker
 ```
 
 `systemctl daemon-reload && systemctl restart docker`	#重新加载配置文件及服务

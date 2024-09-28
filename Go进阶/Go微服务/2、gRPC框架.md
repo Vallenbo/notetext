@@ -88,6 +88,12 @@ protoc -I . --go_out=plugins=grpc:. ./*.proto     // 生成xxx.pb.go 文件。
 
 # grpc简单模式示例程序
 
+[gRPC](https://grpc.io/) 的 [Go](https://golang.org/) 实现：高性能、开源、通用 将移动和 HTTP/2 放在首位的 RPC 框架。
+
+```go
+import "google.golang.org/grpc"
+```
+
 使用Protocol Buffers带来的便利性。只需要去实现和注重业务方法，将其和grpc相绑定。该模式也是简单数据流模式。
 
 ==server端==：整个流程：注册socket监听器-->注册grpc服务，绑定类方法--->将socket和grpc服务相绑定

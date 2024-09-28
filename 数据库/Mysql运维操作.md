@@ -381,7 +381,7 @@ mycat start#启动			mycat stop#停止			mycat restart#重启
 
 
 
-# 开始
+# 安装和授权
 
 数据库管理系统分	Oracle	MySQL---开发相同---Mariadb
 
@@ -410,7 +410,6 @@ MyCLI ：一个支持自动补全和语法高亮的 MySQL/MariaDB 客户端  //`
 mysql> use mysql #使用数据库
 mysql> update user set host='%' where user='root'; #使能够远程连接
 mysql> flush privileges; #刷新权限
-
 
 #卸载安装mysql时报错，无法正常卸载或安装
 #需要删除或者mv掉mysql的数据目录
@@ -468,14 +467,11 @@ grant all privileges on xd_db.* to 'user'@'%' identified by 'redhat'
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root' WITH GRANT OPTION;
 
 # 5.6 版本：
-update mysql.user set password=password('123456') where User="root" and Host = "localhost";
+update mysql.user set password=password('123456') where User="root" and Host = "%";
 set password for root@localhost = password('123456');
 
-
 # 5.7 以上版本，password 字段被设置为了authentication_string，因此更新命令为：
-update mysql.user set authentication_string=password('123456') 
-where User="root" and Host="localhost";
-
+update mysql.user set authentication_string=password('123456') where User="root" and Host="localhost";
 
 # 8.0 以上的版本，以上的命令都不支持，有以下两个命令可用
 alter user 'root'@'localhost' identified by 'root';
@@ -492,14 +488,44 @@ SELECT HOST,USER,PASSWORD FROM user WHERE USER="luke";
 
 
 
-**外界无法访问mysql主机，解决方法1**
+## 问题1
+
+外界无法访问mysql主机
+
+```go
+2002-can‘t connect to server on localhost（10061）
+```
 
 一般情况下，我们只需要去修改/etc/mysql/my.cnf配置文件即可，将my.cnf配置文件中的bind-address=127.0.0.1改成bind-address=0.0.0.0，并且把skip-networking注释掉即可；
 
 ```sh
-port            = 3306
+port           		    = 3306
 bind-address            = 0.0.0.0
 mysqlx-bind-address     = 0.0.0.0
+```
+
+## 问题2
+
+```go
+1130- Host xxx is not allowed to connect to this MySQL server
+```
+问题通常在于缺少必要的权限。解决方法包括登录MySQL，切换到mysql库，更新root用户的host为%，刷新权限。完成后，即可成功远程连接。
+```go
+mysql> use mysql #使用数据库
+mysql> update user set host='%' where user='root'; #使能够远程连接
+mysql> flush privileges; #刷新权限
+```
+
+## 问题3
+
+```go
+1698 (28000): Access denied for user 'root'@'localhost'
+```
+
+尝试使用*root*用户连接到 MySQL 时，通常会在新安装 MySQL 时出现此错误消息。
+
+```go
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '123456';
 ```
 
 

@@ -316,73 +316,59 @@ docker run -d --restart=always ubuntu:latest ping www.docker.com
 
 Exit退出后容器自动终止
 
+```go
 查看容器docker ps查看正在运行的容器 		-a查看所有运行过的容器	-q只查看ID号  -n=1最后退出的容器
-
-`docker top test`查看容器内进程					-a输出所有容器统计信息，默认仅在运行中
-
-`docker info`查看docker服务运行详细信息		docker port ubunt查看容器的端口映射
-
-`docker stats ubunt`查看容器占用硬件资源情况	docker logs ubunt查看容器日志信息(历史命令)
-
+`docker top test`查看容器内进程
+-a输出所有容器统计信息，默认仅在运行中
+`docker info`查看docker服务运行详细信息		
+`docker port ubunt`查看容器的端口映射
+`docker stats ubunt`查看容器占用硬件资源情况	
+`docker logs ubunt`查看容器日志信息(历史命令)
 `docker logs --tail=5 9b53baf2246a`	#显示日志最后5行
 
 `docker diff ubunt`查看容器内文件的变更信息
-
 `docker inspect container/images -f {{.Size}}`	 #查看容器或镜像的详细信息	-f 过滤"key1=value"
-
 `docker ps -qf status=exited/running/paused`	#查看状态停止容器 ID
-
 `docker ps -f ancestor=nginx`	#根据镜像过滤
-
 `docker stats --no-stream 49a877175264`	#查询 registry 容器的 CPU、内存等统计信息
-
 停止删除容器`docker stop  {c1，c2}`停止多个容器		docker pause test暂停一个运行中的容器
 
 `docker rm $(docker ps -qa)`删除所有容器				-v删除容器挂载的数据卷
-
 －f强行终止并删除一个运行中的容器				-l删除容器的连接，保留容器
 
 docker rm `docker ps -a|grep Exited|awk '{print $1}'`
 
 `docker system prune -a`清理dangling镜像、退出的容器、无用的数据卷和网络、未使用的镜像[自动档]
-
 导入导出容器docker export -o test.tar ubunt导出容器(不管是否运行 -o指定保存目录)
 
 `docker export ubunt >test.tar`
-
 `docker import test.tar liunx:1.0`导入容器
 
 复制文件`docker cp test.sh ubunt:/ `在容器和主机之间复制文件		-a复制文件带有原始的uid/gid 信息
-
 链接容器在两个互联的容器之间创建了一个安全隧道，而且不用映射它们的端口到宿主主机上
 
 在启动db容器的时候没有使用 -p 和 -P 标记，从而避免了暴露数据库端口到外部网络上
 
 `docker run -it --name c5 --link c1:c5  centos  bash`		通过查看hosts文件获取链接信息
-
 `docker run -d -it  --name mysqldb  -P  192.168.2.5:5000/mysql/8.0  /bin/bash`
-
 \#链接
-
 6bdaa58b581e7b14ebd9cec3b0b9bb4688e4b3813df8a36dae271a039d7a4768
 
 `docker run -d -it  --name nginxweb  -P --link mysqldb:db  192.168.2.5:5000/nginx/latest  /bin/bash`
-
 \#链接数据库容器的db
-
 b15a009ebcdca820c6f92de7c104f414fd9fc6def115094078eb500fb282557d
 
 `docker inspect --format {{.HostConfig.Links}} b15a009ebcdc`
-
 [/mysqldb:/nginxweb/db]
-
 修改容器docker update修改容器配置信息
 
 基于运行容器创建镜像docker commit 基于已有容器创建镜像		-a作者信息	-m描述信息
-
 `docker commit -a "liu" -m "nginx"  cc  centos_nginx:1.0`以容器cc为基础创建centos_nginx镜像
 
 基于本地模板导入`cat ubuntu-18.04-x86_64-minimal.tar.gz I docker import - ubuntu:18.04`
+```
+
+
 
 ## 私有仓库
 
@@ -653,11 +639,11 @@ docker network inspect network
 
 ```sh
 [root@izoq008ryseuupz docker]# docker volume help
-	create      Create a volume
-  inspect     Display detailed information on one or more volumes
-  ls          List volumes
-  prune       Remove all unused local volumes
-  rm          Remove one or more volumes
+create      Create a volume
+inspect     Display detailed information on one or more volumes
+ls          List volumes
+prune       Remove all unused local volumes
+rm          Remove one or more volumes
 ```
 
 -v，--volume=[]，给容器挂载存储卷，挂载到容器的某个目录

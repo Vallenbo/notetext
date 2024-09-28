@@ -470,15 +470,17 @@ Requests:[1]]
 
 方式一：**r.Header[“Accept-Encoding”]**
 
-i. 得到的是一个字符串切片
+- i. 得到的是一个字符串切片
 
-ii. 结果[gzip, deflate, br]
+- ii. 结果[gzip, deflate, br]
+
 
 方式二：**r.Header.Get(“Accept-Encoding”)**
 
-i. 得到的是字符串形式的值，多个值使用逗号分隔
+- i. 得到的是字符串形式的值，多个值使用逗号分隔
 
-ii. 结果gzip, deflate, br
+- ii. 结果gzip, deflate, br
+
 
 ### **获取请求体中的信息**
 
@@ -723,8 +725,6 @@ t.ExecuteTemplate(w, "hello2.html", "我要在 hello2.html 中显示")
 ```
 
 变量 t 就是一个包含了两个模板的模板集合，第一个模板的名字是hello.html,第二个模板的名字是 hello2.html,如果直接调用 Execute 方法，则只有模板 hello.html 会被执行，如何想要执行模板 hello2.html，则需要调用 ExecuteTemplate 方法
-
-
 
 
 
@@ -1008,8 +1008,6 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 
 
 
-
-
 ## 客户端响应
 
 1、HTTP 处理程序使用 ResponseWriter 接口来构造 HTTP 响应。
@@ -1085,12 +1083,6 @@ req.Header.Add("If-None-Match", `W/"wyzzy"`)
 resp, err := client.Do(req)
 // ...
 ```
-
-
-
-
-
-
 
 
 

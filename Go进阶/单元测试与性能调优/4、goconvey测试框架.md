@@ -39,7 +39,6 @@ func Split(s, sep string) (result []string) {
 
 ```go
 // split_test.go
-
 import (
 	"testing"
 
