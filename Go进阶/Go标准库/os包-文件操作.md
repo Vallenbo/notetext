@@ -401,6 +401,8 @@ func main() {
 
 # JSON 数据格式
 
+Golang 提供的标准 JSON 解析库 encoding/json，在开发高性能、高并发的网络服务时会产生性能问题。所以很多开发者在实际的开发中，往往会选用第三方的高性能 JSON 解析库，例如 [jsoniter](https://github.com/json-iterator/go) 、 [easyjson](https://github.com/mailru/easyjson) 、 [jsonparser](https://github.com/buger/jsonparser) 等。
+
 数据结构要在网络中传输或保存到文件，就必须对其编码和解码；目前存在很多编码格式： JSON（JavaScript Object Notation），XML，gob，Google 缓冲协议等等。通常 JSON 被用于 web 后端和浏览器之间的通讯，但是在其它场景也同样的有用。
 
 结构可能包含二进制数据，如果将其作为文本打印，那么可读性是很差的。另外结构内部可能包含匿名字段，而不清楚数据的用意。

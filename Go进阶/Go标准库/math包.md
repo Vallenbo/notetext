@@ -55,23 +55,15 @@ math.Pow10(2)	//10^x，100
 math.Exp(2)	//e^x，7.389
 ```
 
-rand随机数生成器  
+## rand随机数生成器
+
+**基本介绍**
+
+在 Go 语言中，`math/rand`包用于生成伪随机数。所谓伪随机数，是指通过一个确定的算法产生的数值序列，这些序列看起来是随机的，但实际上只要给定相同的初始条件（种子），就会生成相同的序列。
+
+该包提供了一系列函数来生成不同类型的随机数，如整数、浮点数等，并且可以通过设置种子来控制随机数序列的起始状态。
 
 ```Go
-//创建一个Rand
-source := rand.NewSource(1) //seed相同的情况下，随机数生成器产生的数列是相同的
-rander := rand.New(source)
-for i := 0; i < 10; i++ {
-    fmt.Printf("%d ", rander.Intn(100))
-}
-fmt.Println()
-source.Seed(1) //必须重置一下Seed
-rander2 := rand.New(source)
-for i := 0; i < 10; i++ {
-    fmt.Printf("%d ", rander2.Intn(100))
-}
-fmt.Println()
-
 //使用全局Rand
 rand.Seed(1)                //如果对两次运行没有一致性要求，可以不设seed
 fmt.Println(rand.Int())     //随机生成一个整数
@@ -83,5 +75,20 @@ rand.Shuffle(len(arr), func(i, j int) { //随机打乱一个给定的slice
     arr[i], arr[j] = arr[j], arr[i]
 })
 fmt.Println(arr)
-```
 
+//创建一个Rand
+source := rand.NewSource(1)  
+rander := rand.New(source)
+for i := 0; i < 10; i++ {
+    fmt.Printf("%d ", rander.Intn(100))
+}
+fmt.Println()
+
+source.Seed(1) //必须重置一下Seed
+
+rander2 := rand.New(source)
+for i := 0; i < 10; i++ {
+    fmt.Printf("%d ", rander2.Intn(100))
+}
+fmt.Println()
+```

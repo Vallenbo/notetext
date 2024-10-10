@@ -1,7 +1,10 @@
+[示例 | Gin Web Framework (gin-gonic.com)](https://gin-gonic.com/zh-cn/docs/examples/)
+
+Go世界里最流行的Web框架，[Github](https://github.com/gin-gonic/gin)上有`32K+`star。 基于[httprouter](https://github.com/julienschmidt/httprouter)开发的Web框架。 [中文文档示例](https://gin-gonic.com/zh-cn/docs/examples/)齐全，简单易用的轻量级框架。
+
 # Gin框架介绍及使用
 
 `Gin`是一个用Go语言编写的web框架。它是一个拥有更好性能的API框架, 由于使用了`httprouter`，速度提高了近40倍。 如果你是性能和高效的追求者, 你会爱上`Gin`。
-Go世界里最流行的Web框架，[Github](https://github.com/gin-gonic/gin)上有`32K+`star。 基于[httprouter](https://github.com/julienschmidt/httprouter)开发的Web框架。 [中文文档示例](https://gin-gonic.com/zh-cn/docs/examples/)齐全，简单易用的轻量级框架。
 
 下载并安装`Gin`:
 
@@ -584,7 +587,7 @@ Gin框架中的路由使用的是[httprouter](https://github.com/julienschmidt/h
 
 # 路由拆分与注册
 
-### 基本的路由注册
+## 基本的路由注册
 
 下面最基础的gin路由注册方式，适用于路由条目比较少的简单项目或者项目demo。
 
@@ -604,7 +607,7 @@ func main() {
 }
 ```
 
-### 路由拆分成单独文件或包
+## 路由拆分成单独文件或包
 
 当项目的规模增大后就不太适合继续在项目的`main.go`文件中去实现路由注册相关逻辑了，我们会倾向于把路由部分的代码都拆分出来，形成一个单独的文件或包：
 
@@ -683,7 +686,7 @@ func main() {
 }
 ```
 
-### 路由拆分成多个文件
+## 路由拆分成多个文件
 
 当我们的业务规模继续膨胀，单独的一个`routers`文件或包已经满足不了我们的需求了，
 
@@ -746,7 +749,7 @@ func main() {
 }
 ```
 
-### 路由拆分到不同的APP
+## 路由拆分到不同的APP
 
 有时候项目规模实在太大，那么我们就更倾向于把业务拆分的更详细一些，例如把不同的业务代码拆分成不同的APP。
 
@@ -963,7 +966,7 @@ shopGroup := r.Group("/shop", StatCost()) //写法1
 
 
 
-## c.Abort()中间件中止
+## 中间件中止
 
 在Gin框架中，`c.Abort()`是一个常用的方法，用于中止当前请求的处理流程，并立即返回响应给客户端。当调用`c.Abort()`时，Gin会停止执行后续的中间件和处理函数，并直接返回响应。
 
@@ -981,6 +984,86 @@ r.GET("/hello", func(c *gin.Context) {
 ```
 
 
+
+## 插件化加载中间件
+
+iam-apiserver 支持插件化地加载 Gin 中间件，通过这种插件机制，我们可以根据需要选择中间件。
+
+那么，为什么要将中间件做成一种插件化的机制呢？一方面，每个中间件都完成某种功能，这些功能不是所有情况下都需要的；另一方面，中间件是追加在 HTTP 请求链路上的一个处理函数，会影响 API 接口的性能。为了保证 API 接口的性能，我们也需要选择性地加载中间件。
+
+例如，在测试环境中为了方便 Debug，可以选择加载 dump 中间件。dump 中间件可以打印请求包和返回包信息，这些信息可以协助我们 Debug。但是在现网环境中，我们不需要 dump 中间件来协助 Debug，而且如果加载了 dump 中间件，请求时会打印大量的请求信息，严重影响 API 接口的性能。这时候，我们就期望中间件能够按需加载。
+
+iam-apiserver 通过 [InstallMiddlewares](https://github.com/marmotedu/iam/blob/v1.0.4/internal/pkg/server/genericapiserver.go#L94) 函数来安装 Gin 中间件，函数代码如下：
+
+```go
+func (s *GenericAPIServer) InstallMiddlewares() {
+    // necessary middlewares
+    s.Use(middleware.RequestID())
+    s.Use(middleware.Context())
+
+    // install custom middlewares
+    for _, m := range s.middlewares {
+        mw, ok := middleware.Middlewares[m]
+        if !ok {
+            log.Warnf("can not find middleware: %s", m)
+
+            continue
+        }
+
+        log.Infof("install middleware: %s", m)
+        s.Use(mw)
+    }
+}
+```
+
+可以看到，安装中间件时，我们不仅安装了一些必备的中间件，还安装了一些可配置的中间件。
+
+上述代码安装了两个默认的中间件： [RequestID](https://github.com/marmotedu/iam/blob/v1.0.4/internal/pkg/middleware/requestid.go#L22) 和 [Context](https://github.com/marmotedu/iam/blob/v1.0.4/internal/pkg/middleware/context.go#L17) 。
+
+RequestID 中间件，主要用来在 HTTP 请求头和返回头中设置 `X-Request-ID` Header。如果 HTTP 请求头中没有 `X-Request-ID` HTTP 头，则创建 64 位的 UUID，如果有就复用。UUID 是调用 `github.com/satori/go.uuid` 包提供的 `NewV4().String()` 方法来生成的：
+
+```go
+rid = uuid.NewV4().String()
+```
+
+另外，这里有个 Go 常量的设计规范需要你注意：常量要跟该常量相关的功能包放在一起，不要将一个项目的常量都集中放在 const 这类包中。例如， [requestid.go](https://github.com/marmotedu/iam/blob/v1.0.4/internal/pkg/middleware/requestid.go) 文件中，我们定义了 `XRequestIDKey = "X-Request-ID"` 常量，其他地方如果需要使用 `XRequestIDKey`，只需要引入 `XRequestIDKey` 所在的包，并使用即可。
+
+Context 中间件，用来在 gin.Context 中设置 `requestID` 和 `username` 键，在打印日志时，将 gin.Context 类型的变量传递给 `log.L()` 函数， `log.L()` 函数会在日志输出中输出 `requestID` 和 `username` 域：
+
+```bash
+2021-07-09 13:33:21.362 DEBUG   apiserver       v1/user.go:106  get 2 users from backend storage.       {"requestID": "f8477cf5-4592-4e47-bdcf-82f7bde2e2d0", "username": "admin"}
+```
+
+`requestID` 和 `username` 字段可以方便我们后期过滤并查看日志。
+
+除了默认的中间件，iam-apiserver 还支持一些可配置的中间件，我们可以通过配置 iam-apiserver 配置文件中的 [server.middlewares](https://github.com/marmotedu/iam/blob/v1.0.4/configs/iam-apiserver.yaml#L11) 配置项，来配置这些这些中间件。
+
+可配置以下中间件：
+
+- recovery：捕获任何 panic，并恢复。
+- secure：添加一些安全和资源访问相关的 HTTP 头。
+- nocache：禁止客户端缓存 HTTP 请求的返回结果。
+- cors：HTTP 请求跨域中间件。
+- dump：打印出 HTTP 请求包和返回包的内容，方便 debug。注意，生产环境禁止加载该中间件。
+
+当然，你还可以根据需要，添加更多的中间件。方法很简单，只需要编写中间件，并将中间件添加到一个 `map[string]gin.HandlerFunc` 类型的变量中即可：
+
+```go
+func defaultMiddlewares() map[string]gin.HandlerFunc {
+    return map[string]gin.HandlerFunc{
+        "recovery":  gin.Recovery(),
+        "secure":    Secure,
+        "options":   Options,
+        "nocache":   NoCache,
+        "cors":      Cors(),
+        "requestid": RequestID(),
+        "logger":    Logger(),
+        "dump":      gindump.Dump(),
+    }
+}
+```
+
+上述代码位于 [internal/pkg/middleware/middleware.go](https://github.com/marmotedu/iam/blob/v1.0.4/internal/pkg/middleware/middleware.go#L56) 文件中。
 
 ## 中间件注意事项
 
@@ -1422,3 +1505,71 @@ func main() {
 	}
 }
 ```
+
+# 优雅的重启服务
+
+在讲优雅关停之前，先来看看不优雅的停止服务方式是什么样的。
+
+当我们需要重启服务时，首先需要停止服务，这时可以通过两种方式来停止我们的服务：
+
+- 在 Linux 终端键入 Ctrl + C（其实是发送 SIGINT 信号）。
+- 发送 SIGTERM 信号，例如 `kill` 或者 `systemctl stop` 等。
+
+当我们使用以上两种方式停止服务时，都会产生下面两个问题：
+
+- 有些请求正在处理，如果服务端直接退出，会造成客户端连接中断，请求失败。
+- 我们的程序可能需要做一些清理工作，比如等待进程内任务队列的任务执行完成，或者拒绝接受新的消息等。
+
+这些问题都会对业务造成影响，所以我们需要一种优雅的方式来关停我们的应用。在 Go 开发中，通常通过拦截 `SIGINT` 和 `SIGTERM` 信号，来实现优雅关停。当收到这两个信号时，应用进程会做一些清理工作，然后结束阻塞状态，继续执行余下的代码，最后自然退出进程。
+
+先来看一个简单的优雅关停的示例代码
+
+```go
+func main() {
+    router := gin.Default()
+    router.GET("/", func(c *gin.Context) {
+        time.Sleep(5 * time.Second)
+        c.String(http.StatusOK, "Welcome Gin Server")
+    })
+
+    srv := &http.Server{
+        Addr:    ":8080",
+        Handler: router,
+    }
+
+    go func() {
+        // 将服务在 goroutine 中启动
+        if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+            log.Fatalf("listen: %s\n", err)
+        }
+    }()
+
+    quit := make(chan os.Signal)
+    signal.Notify(quit, os.Interrupt)
+    <-quit // 阻塞等待接收 channel 数据
+    log.Println("Shutdown Server ...")
+
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // 5s 缓冲时间处理已有请求
+    defer cancel()
+    if err := srv.Shutdown(ctx); err != nil { // 调用 net/http 包提供的优雅关闭函数：Shutdown
+        log.Fatal("Server Shutdown:", err)
+    }
+    log.Println("Server exiting")
+}
+```
+
+# gin服务的健康检
+
+通常，我们会根据进程是否存在来判定 iam-apiserver 是否健康，例如执行 `ps -ef|grep iam-apiserver`。在实际开发中，我发现有时候服务进程仍然存在，但是 HTTP 服务却不能接收和处理请求，所以更加靠谱的检查方法是，直接请求 iam-apiserver 的健康检查接口。
+
+我们可以在启动 iam-apiserver 进程后，手动调用 iam-apiserver 健康检查接口进行检查。但还有更方便的方法：启动服务后自动调用健康检查接口。这个方法的具体实现，你可以查看 GenericAPIServer 提供的 [ping](https://github.com/marmotedu/iam/blob/v1.0.4/internal/pkg/server/genericapiserver.go#L219) 方法。在 ping 方法中，你需要注意函数中的如下代码：
+
+```go
+url := fmt.Sprintf("http://%s/healthz", s.InsecureServingInfo.Address)
+if strings.Contains(s.InsecureServingInfo.Address, "0.0.0.0") {
+    url = fmt.Sprintf("http://127.0.0.1:%s/healthz", strings.Split(s.InsecureServingInfo.Address, ":")[1])
+}
+```
+
+当 HTTP 服务监听在所有网卡时，请求 IP 为 `127.0.0.1`；当 HTTP 服务监听在指定网卡时，我们需要请求该网卡的 IP 地址。
+

@@ -35,7 +35,7 @@ git status
 
 
 
-# 更新到多个平台
+# 使用git更新到多个平台
 
 ```sh
 git branch							# 检查当前分支
@@ -109,7 +109,7 @@ git reset --hard 版本号
 一般.gitignore文件公司会给
 <img src="./assets/image-20240421154113074.png" alt="image-20240421154113074" style="zoom:50%;" />
 
-# 分支
+# 分支介绍及冲突解决
 
 <img src="./assets/image-20240421105134373.png" alt="image-20240421105134373" style="zoom: 67%;" />
 
@@ -122,6 +122,12 @@ git branch				## 查看本地分支 ，-a查看所有分支，-r仅查看远程�
 git branch 分支名					## 创建本地分支
 git checkout 分支名				## 切换分支
 git checkout -b 分支名				## 我们还可以直接切换到一个不存在的分支（创建并切换
+```
+
+**拉取更新后分支**
+
+```go
+git pull origin
 ```
 
 **1、合并**
@@ -141,7 +147,7 @@ git branch -d b1 				## 删除分支时，需要做各种检查
 git branch -D b1 				##不做任何检查，强制删除
 ```
 
-**3、解决冲突**
+**3、解决分支冲突**
 
 当两个分支上对文件的修改可能会存在冲突，例如同时修改了同一个文件的同一行，这时就需要手动解
 
@@ -157,7 +163,7 @@ git branch -D b1 				##不做任何检查，强制删除
 
 
 
-## 开发中分支使用原则与流程
+# 各类分支使用原则与流程
 
 几乎所有的版本控制系统都以某种形式支持分支。 使用分支意味着你可以把你的工作从开发主线上分离开来进行重大的Bug修改、开发新的功能，以免影响开发主线。在开发中，一般有如下分支使用原则与流程：
 
@@ -181,15 +187,92 @@ git branch -D b1 				##不做任何检查，强制删除
 
 ​	还有一些其他分支，在此不再详述，例如test分支（用于代码测试）、pre分支（预上线分支）等等。
 
+# 本地代码和仓库代码产生冲突
+
+1、先提交
+
+```go
+git add .
+git commit -m "test func" .
+```
+
+2、后解决冲突
+
+```go
+
+```
+
+**手动解决冲突**
+
+- 编辑冲突文件
 
 
 
+# git flow工作流
 
+## 使用初始化
 
+**初始化 Git Flow**：
 
+```
+git flow init
+```
 
+**创建和完成功能分支**：
 
+```
+git flow feature start new-feature # 开发新功能
+git flow feature finish new-feature
+```
 
+**创建和完成发布分支**：
+
+```
+git flow release start v1.0.0 # 测试和修复
+git flow release finish v1.0.0
+```
+
+**创建和完成修复分支**：
+
+```
+git flow hotfix start hotfix-1.0.1. # 修复紧急问题
+git flow hotfix finish hotfix-1.0.1
+```
+
+## 提交到仓库
+
+1、开始一个新的功能分支:
+
+```git
+git flow feature start feature-name
+```
+
+这将创建一个名为 feature/feature-name 的新分支，并切换到该分支
+2、进行开发和修改: 在这个功能分支中进行您的开发，完成代码更改。
+
+3、添加更改到暂存区: 当您完成开发后，将更改添加到暂存区:
+
+```go
+git add .
+```
+
+4、提交更改:提交您在功能分支上的更改:
+
+```go
+git commit -m "Description of changes" .
+```
+
+5、合并功能分支到 develop分支:完成提交后，运行以下命令将功能分支合并回 develop分支并删除功能分支:
+
+```go
+git flow feature finish feature-name
+```
+
+6、提交分支
+
+```go
+git push origin develop
+```
 
 
 
