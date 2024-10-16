@@ -36,13 +36,13 @@ db, err := gorm.Open(mysql.New(mysql.Config{
   DSN: "gorm:gorm@tcp(127.0.0.1:3306)/gorm?charset=utf8&parseTime=True&loc=Local", // DSN data source name
   DefaultStringSize: 256, // string 类型字段的默认长度
   DisableDatetimePrecision: true, // 禁用 datetime 精度，MySQL 5.6 之前的数据库不支持
-  DontSupportRenameIndex: true, // 重命名索引时采用删除并新建的方式，MySQL 5.7 之前的数据库和 MariaDB 不支持重命名索引
+  DontSupportRenameIndex: true, // 重命名索引时采用删除并新建的方式，MySQL 5.7 之前的数据库和MariaDB 不支持重命名索引
   DontSupportRenameColumn: true, // 用 `change` 重命名列，MySQL 8 之前的数据库和 MariaDB 不支持重命名列
   SkipInitializeWithVersion: false, // 根据当前 MySQL 版本自动配置
 }), &gorm.Config{})
 ```
 
-### 自定义驱动
+## 自定义驱动
 
 GORM 允许通过 `DriverName` 选项自定义 MySQL 驱动，例如：
 
@@ -59,20 +59,20 @@ db, err := gorm.Open(mysql.New(mysql.Config{
 }), &gorm.Config{})
 ```
 
-### 现有的数据库连接
+## 现有的数据库连接
 
 GORM 允许通过一个现有的数据库连接来初始化 `*gorm.DB`
 
 ```go
 import (
-  "database/sql"
-  "gorm.io/driver/mysql"
-  "gorm.io/gorm"
+    "database/sql"
+    "gorm.io/driver/mysql"
+    "gorm.io/gorm"
 )
 
 sqlDB, err := sql.Open("mysql", "mydb_dsn")
 gormDB, err := gorm.Open(mysql.New(mysql.Config{
-  Conn: sqlDB,
+    Conn: sqlDB,
 }), &gorm.Config{})
 ```
 
@@ -102,14 +102,7 @@ dsn := "sqlserver://gorm:LoremIpsum86@localhost:9930?database=gorm"
 db, err := gorm.Open(sqlserver.Open(dsn), &gorm.Config{})
 ```
 
-# GORM基本示例
-
-**注意:**
-
-1. 本文以MySQL数据库为例，讲解GORM各项功能的主要使用方法。
-2. 往下阅读本文前，你需要有一个能够成功连接上的MySQL数据库实例。
-
-## GORM操作MySQL
+# GORM操作MySQL基本示例
 
 使用GORM连接上面的`db1`进行创建、查询、更新、删除操作。
 
@@ -129,37 +122,17 @@ func main(){
 }
 ```
 
-## Docker快速创建MySQL实例
-
-很多同学如果不会安装MySQL或者懒得安装MySQL，可以使用一下命令快速运行一个MySQL8.0.19实例，当然前提是你要有docker环境…
-
-在本地的`13306`端口运行一个名为`mysql8019`，root用户名密码为`root1234`的MySQL容器环境:
-
-```bash
-docker run --name mysql8019 -p 13306:3306 -e MYSQL_ROOT_PASSWORD=root1234 -d mysql:8.0.19
-```
-
-在另外启动一个`MySQL Client`连接上面的MySQL环境，密码为上一步指定的密码`root1234`:
-
-```bash
-docker run -it --network host --rm mysql mysql -h127.0.0.1 -P13306 --default-character-set=utf8mb4 -uroot -p
-```
-
-在使用GORM前手动创建数据库`db1`：
-
-```mysql
-CREATE DATABASE db1;
-```
-
 
 
 # GORM Model定义
 
 在使用ORM工具时，通常我们需要在代码中定义模型（Models）与数据库中的数据表进行映射，在GORM中模型（Models）通常是正常定义的结构体、基本的go类型或它们的指针。 同时也支持`sql.Scanner`及`driver.Valuer`接口（interfaces）。
 
-## gorm.Model
+## gorm.Model定义模型方式一
 
 为了方便模型定义，GORM内置了一个`gorm.Model`结构体。`gorm.Model`是一个包含了`ID`, `CreatedAt`, `UpdatedAt`, `DeletedAt`四个字段的Golang结构体。
+
+[gorm tag字段标签说明 ](https://gorm.io/zh_CN/docs/models.html#字段标签)
 
 ```go
 type Model struct { // gorm.Model 定义
@@ -173,20 +146,12 @@ type Model struct { // gorm.Model 定义
 你可以将它嵌入到你自己的模型中：
 
 ```go
-type User struct { //1、 将 `ID`, `CreatedAt`, `UpdatedAt`, `DeletedAt`字段注入到`User`模型中
-  gorm.Model
+type User struct {
+  gorm.Model // 将 `ID`, `CreatedAt`, `UpdatedAt`, `DeletedAt`字段注入到`User`模型中
   Name string
 }
 ```
-
-```go
-type User struct { //2、 不使用gorm.Model，自行定义模型
-  ID   int
-  Name string
-}
-```
-
-## 模型定义示例
+模型定义示例
 
 ```go
 type User struct {
@@ -202,6 +167,23 @@ type User struct {
   IgnoreMe     int     `gorm:"-"` // 忽略本字段
 }
 ```
+
+## gorm.Model定义模型方式二
+
+匹配User表
+
+```go
+type User struct { //2、 不使用gorm.Model，自行定义模型
+  ID   int
+  Name string
+}
+
+func (User) TableName() string {
+	return "User"
+}
+```
+
+
 
 ## 结构体标记（tags）
 
@@ -294,6 +276,22 @@ type Animal struct { //可以使用结构体tag指定列名
 
 # 创建
 
+Gorm 的默认约定
+
+- 在 Gorm 中，如果没有显式指定表名，它会根据结构体的名称进行转换来确定表名。对于`Product`结构体，Gorm 会将其名称转换为复数形式作为默认的表名。
+- 转换规则通常是在结构体名称后添加`s`作为复数形式（这是一种简单的默认规则，实际情况可能因语言习惯等因素有所不同）。所以在这里，Gorm 会尝试将数据插入到名为`products`的表中。
+- 例如，如果结构体名称是`User`，Gorm 默认会将数据插入到`users`表中。
+
+自定义表名：如果想要自定义表名，可以通过在结构体定义中使用`gorm:"table:your_table_name"`标签来指定
+
+```go
+type Product struct {
+    Code  string `gorm:"column:code"` // column用于指定结构体中的字段对应的数据库表中的列名
+    Price int    `gorm:"column:price;type:int"` //多个属性用；分割
+    gorm.Model `gorm:"table:product_table"`	// 指定表名
+}
+```
+
 ## 创建数据表
 
 ```go
@@ -320,7 +318,7 @@ result.RowsAffected // 返回插入记录的条数
 
 ## 用指定的字段创建记录
 
-创建记录并更新给出的字段。
+通过Select指定字段，创建记录并更新给出的字段。
 
 ```go
 db.Select("Name", "Age", "CreatedAt").Create(&user)
@@ -396,7 +394,7 @@ errors.Is(result.Error, gorm.ErrRecordNotFound) // 检查 ErrRecordNotFound 错�
 
 > 对单个对象使用`Find`而不带limit，`db.Find(&user)`将会查询整个表并且只返回第一个对象，这是性能不高并且不确定的。
 
-和方法将按主键排序查找第一条和最后一条记录。仅当指向目标结构的指针作为参数传递给方法或使用 指定模型时，它们才有效。此外，如果没有为相关模型定义主键，则模型将按第一个字段排序。例如：`First``Last``db.Model()`
+和方法将按主键排序查找第一条和最后一条记录。仅当指向目标结构的指针作为参数传递给方法或使用 指定模型时，它们才有效。此外，如果没有为相关模型定义主键，则模型将按第一个字段排序。例如：`First` `Last` `db.Model()`
 
 ```go
 var user User
@@ -1016,3 +1014,128 @@ db.Session(&gorm.Session{CreateBatchSize: 1000}).Create(&users)
 # 钩子
 
 # 事务
+
+# 数据库插入自定义数据类型
+
+GORM 提供了少量接口，使用户能够为 GORM 定义支持的数据类型，这里以 [json](https://github.com/go-gorm/datatypes/blob/master/json.go) 为例
+
+```go
+type Teacher struct {
+	Name     string  `gorm:"type:varchar(20);not null"`
+	Email    string  `gorm:"type:varchar(20);not null"`
+	Salary   float64 `gorm:"type:float"` // 设置为浮点数
+	Age      uint8   `gorm:"type:int,check:age>30"`
+	birthday int64   `gorm:"serializer:unixtime;type:time"`
+	Roles    Roles   `gorm:"type:json"` // 修改为 json 类型
+}
+```
+
+go run 时，报错（`sql: converting argument $1 type: unsupported type []string, a slice of string`）
+
+分析原因：mysql中不支持`[]string` 类型的数据，不可以直接在结构体中定义`[]string`类型。
+
+## 解决方案
+
+基于`gorm` 库的特性，可以通过自定义`JSON`类型将数据传入，因此解决步骤一共分为两步：
+
+- step 1：将`[]string`类型编码为`JSON`类型数据；
+- step 2：自定义`JSON`类型数据，使得`gorm`可以支持，可以参考[GORM-自定义数据类型](https://link.juejin.cn?target=https%3A%2F%2Fgorm.io%2Fzh_CN%2Fdocs%2Fdata_types.html)
+
+**step 1**： 首先将结构体中数据类型定义改为一个新的自定义类型
+
+```go
+type Roles []string
+
+/**
+ * @description: todos 数据表
+ */
+type Teacher struct {
+	Name     string  `gorm:"type:varchar(20);not null"`
+	Email    string  `gorm:"type:varchar(20);not null"`
+	Salary   float64 `gorm:"type:float"` // 设置为浮点数
+	Age      uint8   `gorm:"type:int,check:age>30"`
+	birthday int64   `gorm:"serializer:unixtime;type:time"`
+	Roles    Roles   `gorm:"type:json"` // 修改为 json 类型
+}
+```
+
+**step 2**:自定义一个`JSON`类型，可以参考[GORM-自定义数据类型](https://link.juejin.cn?target=https%3A%2F%2Fgorm.io%2Fzh_CN%2Fdocs%2Fdata_types.html)
+
+我们 step 1把Tag自定义为`type Tag []string`,但是这种类型在gorm中还不可以直接识别，所以需要进一步自定义数据类型。
+
+```go
+func (t *Tag) Scan(value interface{}) error {
+	bytesValue, _ := value.([]byte)
+	return json.Unmarshal(bytesValue, t)
+}
+
+func (t Tag) Value() (driver.Value, error) {
+	return json.Marshal(t)
+}
+```
+
+- `Scan()`存入数据库前转为 string
+- `Value()`读出数据前转为 json 说白了就是，我们不是直接的把`[]string`类型的数据直接存入MySQL数据库，而是自定义成一个json类型，存储前，我们把它转为`string`,取出时，我们把转变为我们需要的`json`。（一共有3个步骤）就是这么一个简单的原理啦！
+
+[gorm官方文档中的自定义数据类型](https://link.juejin.cn?target=https%3A%2F%2Fgorm.io%2Fzh_CN%2Fdocs%2Fdata_types.html)
+
+GORM 提供了少量接口，让开发者能够自定义GORM 支持的数据类型
+
+**实现自定义数据类型**由以下两个函数实现
+
+- `Scan()`
+- `Value()`
+
+自定义的数据类型必须实现 [Scanner](https://link.juejin.cn?target=https%3A%2F%2Fpkg.go.dev%2Fdatabase%2Fsql%23Scanner) 和 [Valuer](https://link.juejin.cn?target=https%3A%2F%2Fpkg.go.dev%2Fdatabase%2Fsql%2Fdriver%23Valuer) 接口，以便让 GORM 知道如何将该类型接收、保存到数据库
+
+```go
+type Roles []string
+type Teacher struct {
+	Name     string  `gorm:"type:varchar(20);not null"`
+	Email    string  `gorm:"type:varchar(20);not null"`
+	Salary   float64 `gorm:"type:float"` // 设置为浮点数
+	Age      uint8   `gorm:"type:int,check:age>30"`
+	birthday int64   `gorm:"serializer:unixtime;type:time"`
+	Roles    Roles   `gorm:"type:json"` // 修改为 json 类型
+}
+
+func (t *Roles) Scan(value interface{}) error {
+	bytesValue, _ := value.([]byte)
+	return json.Unmarshal(bytesValue, t)
+}
+
+func (t Roles) Value() (driver.Value, error) {
+	return json.Marshal(t)
+}
+```
+
+
+
+## 数据库json类型解析成go相应类型
+
+
+
+
+
+# Docker快速创建MySQL实例
+
+很多同学如果不会安装MySQL或者懒得安装MySQL，可以使用一下命令快速运行一个MySQL8.0.19实例，当然前提是你要有docker环境…
+
+在本地的`13306`端口运行一个名为`mysql8019`，root用户名密码为`root1234`的MySQL容器环境:
+
+```bash
+docker run --name mysql8019 -p 13306:3306 -e MYSQL_ROOT_PASSWORD=root1234 -d mysql:8.0.19
+```
+
+在另外启动一个`MySQL Client`连接上面的MySQL环境，密码为上一步指定的密码`root1234`:
+
+```bash
+docker run -it --network host --rm mysql mysql -h127.0.0.1 -P13306 --default-character-set=utf8mb4 -uroot -p
+```
+
+在使用GORM前手动创建数据库`db1`：
+
+```mysql
+CREATE DATABASE db1;
+```
+

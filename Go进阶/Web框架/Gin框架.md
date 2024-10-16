@@ -12,7 +12,7 @@ Go世界里最流行的Web框架，[Github](https://github.com/gin-gonic/gin)上
 go get -u github.com/gin-gonic/gin
 ```
 
-# Gin渲染
+# Gin返回渲染
 
 ## 自定义模板函数渲染
 
@@ -48,7 +48,6 @@ r.LoadHTMLFiles("templates/posts/index.html", "templates/users/index.html")
 ```go
 {{define "posts/index.html"}}
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -79,7 +78,7 @@ r.GET("templates/list.html", func(c *gin.Context) {
 ```go
 	r.GET("/someJSON", func(c *gin.Context) { // 方式一：自己拼接JSON
 		c.JSON(http.StatusOK, gin.H{"message": "Hello world!"}) // gin.H 是map[string]interface{}的缩写
-	}) 
+	})
 	r.GET("/moreJSON", func(c *gin.Context) { // 方法二：使用结构体
 		var msg struct {
 			Name    string `json:"user"`
@@ -1314,7 +1313,7 @@ func homeHandler(c *gin.Context) {
 
 如果不想自己实现上述功能，你也可以使用Github上别人封装好的包，比如https://github.com/appleboy/gin-jwt。
 
-### refresh token
+## refresh token
 
 在某些业务场景下，我们可能还需要使用refresh token。
 
@@ -1558,7 +1557,7 @@ func main() {
 }
 ```
 
-# gin服务的健康检
+# gin服务的健康检查
 
 通常，我们会根据进程是否存在来判定 iam-apiserver 是否健康，例如执行 `ps -ef|grep iam-apiserver`。在实际开发中，我发现有时候服务进程仍然存在，但是 HTTP 服务却不能接收和处理请求，所以更加靠谱的检查方法是，直接请求 iam-apiserver 的健康检查接口。
 

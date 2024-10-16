@@ -245,6 +245,8 @@ select * from employee where age in (25， 30， 35);
 
 select * from employee where name like '__'; -- 姓名为两个字
 select * from employee where idcard like '%X'; -- 身份证最后为X
+
+select * from unit_service where network_segment in ('192.168.34.0','192.168.32.0');
 ```
 
 ### 聚合查询（聚合函数）

@@ -1,12 +1,14 @@
 # 在 Go 中如何使用 Viper 来管理配置
 
-Viper 源码仓库：[github.com/spf13/viper](https://link.juejin.cn/?target=https%3A%2F%2Fgithub.com%2Fspf13%2Fviper)
+Viper 源码仓库：[spf13/viper: Go configuration with fangs (github.com)](https://github.com/spf13/viper)
 
-Viper 是一个功能齐全的 Go 应用程序配置文件读取的库，支持很多场景。它可以处理各种类型的配置需求和格式，包括设置默认值、从多种配置文件和环境变量中读取配置信息、实时监视配置文件等。无论是小型应用还是大型分布式系统，Viper 都可以提供灵活而可靠的配置管理解决方案。在本文中，我们将深入探讨 Viper 的各种用法和使用场景，以帮助读者更好地了解和使用 Viper 来管理应用程序配置。
+Viper 是一个功能齐全的 Go 应用程序配置文件读取的库，支持很多场景。它可以处理各种类型的配置需求和格式，包括设置默认值、从多种配置文件和环境变量中读取配置信息、实时监视配置文件等。无论是小型应用还是大型分布式系统，Viper 都可以提供灵活而可靠的配置管理解决方案。
 
-## 为什么选择 Viper
+```go
+go get github.com/spf13/viper
+```
 
-当我们在做技术选型时，肯定要知道为什么选择某一项技术，而之所以选择使用 Viper 来管理应用程序的配置，Viper 官方给出了如下答案：
+# 为什么选择 Viper
 
 当构建应用程序时，你不想担心配置文件格式，只想专注于构建出色的软件。Viper 就是为了帮助我们解决这个问题而存在的。
 
@@ -37,33 +39,13 @@ Viper 采用以下优先级顺序来加载配置，按照优先级由高到低�
 
 Viper 包中最核心的两个功能是：如何把配置值读入 Viper 和从 Viper 中读取配置值，接下来我将分别介绍这两个功能。
 
-## 把配置值读入 Viper
+# 配置文件读入 Viper
 
-Viper 支持多种方式读入配置：
-
-- 设置默认配置值
-- 从配置文件读取配置
-- 监控并重新读取配置文件
-- 从 `io.Reader` 读取配置
-- 从环境变量读取配置
-- 从命令行参数读取配置
-- 从远程 key/value 存储读取配置
-
-我们一个一个来看。
-
-### 设置默认配置值
+## 设置默认配置值
 
 一个好的配置系统应该支持默认值。Viper 支持使用 `viper.SetDefault(key, value)` 为 `key` 设置默认值 `value`，在没有通过配置文件、环境变量、远程配置或命令行标志设置 `key` 所对应值的情况下，这很有用。
 
 ```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/spf13/viper"
-)
-
 func main() {
 	// 设置默认配置
 	viper.SetDefault("username", "jianghushinian")
@@ -83,26 +65,16 @@ username: jianghushinian
 server: map[ip:127.0.0.1 port:8080]
 ```
 
-### 从配置文件读取配置
+## 从配置文件读取配置
 
 Viper 支持从 JSON、TOML、YAML、HCL、INI、envfile 或 Java Properties 格式的配置文件中读取配置。Viper 可以搜索多个路径，但目前单个 Viper 实例只支持单个配置文件。**Viper 不会默认配置任何搜索路径，将默认决定留给应用程序**。
 
 主要有两种方式来加载配置文件：
 
 - 通过 `viper.SetConfigFile()` 指定配置文件，如果配置文件名中没有扩展名，则需要使用 `viper.SetConfigType()` 显式指定配置文件的格式。
-- 通过 `viper.AddConfigPath()` 指定配置文件的搜索路径中，可以通过多次调用，来设置多个配置文件搜索路径。然后通过 `viper.SetConfigName()` 指定不带扩展名的配置文件，Viper 会根据所添加的路径顺序查找配置文件，如果找到就停止查找。
+- 通过 `viper.AddConfigPath()` 指定配置文件的搜索路径中，可以通过多次调用，来设置多个配置文件搜索路径。然后通过`viper.SetConfigName()` 指定不带扩展名的配置文件，Viper 会根据所添加的路径顺序查找配置文件，如果找到就停止查找。
 
 ```go
-package main
-
-import (
-	"errors"
-	"flag"
-	"fmt"
-
-	"github.com/spf13/viper"
-)
-
 var (
 	cfg = flag.String("c", "", "config file.")
 )
@@ -133,6 +105,7 @@ func main() {
 
 	// 读取配置值
 	fmt.Printf("username: %s\n", viper.Get("username"))
+    fmt.Println("Values:", viper.GetStringSlice("values"))  // 读取一个包含多个值的键
 }
 ```
 
@@ -144,33 +117,31 @@ password: 123456
 server:
   ip: 127.0.0.1
   port: 8080
+
+key:
+  - value1
+  - value2
+  - value3
 ```
 
 执行以上示例代码得到如下输出：
 
 ```bash
-$ go run main.go -c ./config.yaml 
+$ go run main.go -c ./config.yaml
 using config file: ./config.yaml
 username: jianghushinian
+key: [value1 value2 value3]
 ```
 
-### 监控并重新读取配置文件
+
+
+## 监控并重新读取配置文件
 
 Viper 支持在应用程序运行过程中实时读取配置文件，即热加载配置。
 
 只需要调用 `viper.WatchConfig()` 即可开启此功能。
 
 ```go
-package main
-
-import (
-	"fmt"
-	"time"
-
-	"github.com/fsnotify/fsnotify"
-	"github.com/spf13/viper"
-)
-
 func main() {
 	viper.SetConfigFile("./config.yaml")
 	viper.ReadInConfig()
@@ -213,24 +184,15 @@ config file changed: config.yaml
 username: 江湖十年
 ```
 
-### 从 `io.Reader` 读取配置
+## 从 `io.Reader` 读取配置
 
 Viper 支持从任何实现了 `io.Reader` 接口的配置源中读取配置。
 
 ```go
-package main
-
-import (
-	"bytes"
-	"fmt"
-
-	"github.com/spf13/viper"
-)
-
 func main() {
-	viper.SetConfigType("yaml") // 或者使用 viper.SetConfigType("YAML")
+    viper.SetConfigType("yaml") // 或者使用 viper.SetConfigType("YAML")
 
-	var yamlExample = []byte(`
+    var yamlExample = []byte(`
 username: jianghushinian
 password: 123456
 server:
@@ -238,10 +200,10 @@ server:
   port: 8080
 `)
 
-	viper.ReadConfig(bytes.NewBuffer(yamlExample))
+    viper.ReadConfig(bytes.NewBuffer(yamlExample))
 
-	// 读取配置值
-	fmt.Printf("username: %s\n", viper.Get("username"))
+    // 读取配置值
+    fmt.Printf("username: %s\n", viper.Get("username"))
 }
 ```
 
@@ -254,7 +216,7 @@ $ go run main.go
 username: jianghushinian
 ```
 
-### 从环境变量读取配置
+## 从环境变量读取配置
 
 Viper 还支持从环境变量读取配置，有 5 个方法可以帮助我们使用环境变量:
 
@@ -275,33 +237,24 @@ Viper 还支持从环境变量读取配置，有 5 个方法可以帮助我们�
 使用示例：
 
 ```go
-package main
-
-import (
-	"fmt"
-	"strings"
-
-	"github.com/spf13/viper"
-)
-
 func main() {
-	viper.SetEnvPrefix("env") // 设置读取环境变量前缀，会自动转为大写 ENV
-	viper.AllowEmptyEnv(true) // 将空环境变量视为已设置
+    viper.SetEnvPrefix("env") // 设置读取环境变量前缀，会自动转为大写 ENV
+    viper.AllowEmptyEnv(true) // 将空环境变量视为已设置
 
-	viper.AutomaticEnv()      // 可以绑定全部环境变量
-	viper.BindEnv("username") // 也可以单独绑定某一个环境变量
-	viper.BindEnv("password")
+    viper.AutomaticEnv()      // 可以绑定全部环境变量
+    viper.BindEnv("username") // 也可以单独绑定某一个环境变量
+    viper.BindEnv("password")
 
-	// 将键名中的 . 或 - 替换成 _
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
+    // 将键名中的 . 或 - 替换成 _
+    viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 
-	// 读取配置
-	fmt.Printf("username: %v\n", viper.Get("username"))
-	fmt.Printf("password: %v\n", viper.Get("password"))
-	fmt.Printf("server.ip: %v\n", viper.Get("server.ip"))
+    // 读取配置
+    fmt.Printf("username: %v\n", viper.Get("username"))
+    fmt.Printf("password: %v\n", viper.Get("password"))
+    fmt.Printf("server.ip: %v\n", viper.Get("server.ip"))
 
-	// 读取全部配置，只能获取到通过 BindEnv 绑定的环境变量，无法获取到通过 AutomaticEnv 绑定的环境变量
-	fmt.Println(viper.AllSettings())
+    // 读取全部配置，只能获取到通过 BindEnv 绑定的环境变量，无法获取到通过 AutomaticEnv 绑定的环境变量
+    fmt.Println(viper.AllSettings())
 }
 ```
 
@@ -315,7 +268,7 @@ server.ip: 127.0.0.1
 map[password: username:jianghushinian]
 ```
 
-### 从命令行参数读取配置
+## 从命令行参数读取配置
 
 Viper 支持 [pflag](https://link.juejin.cn/?target=https%3A%2F%2Fgithub.com%2Fspf13%2Fpflag) 包（它们其实都在 [spf13](https://link.juejin.cn/?target=https%3A%2F%2Fgithub.com%2Fspf13) 仓库下），能够绑定命令行标志，从而读取命令行参数。
 
@@ -327,15 +280,6 @@ Viper 支持 [pflag](https://link.juejin.cn/?target=https%3A%2F%2Fgithub.com%2Fs
 示例程序如下：
 
 ```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
-)
-
 var (
 	username = pflag.StringP("username", "u", "", "help message for username")
 	password = pflag.StringP("password", "p", "", "help message for password")
@@ -364,16 +308,6 @@ password: 123456
 因为 pflag 能够兼容标准库的 flag 包，所以我们也可以变相的让 Viper 支持 flag。
 
 ```go
-package main
-
-import (
-	"flag"
-	"fmt"
-
-	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
-)
-
 func main() {
 	flag.String("username", "", "help message for username")
 
@@ -396,13 +330,12 @@ username: jianghushinian
 
 如果你不使用 flag 或 pflag，则 Viper 还提供了 Go 接口的形式来支持其他 Flags，具体用法可以参考[官方文档](https://link.juejin.cn/?target=https%3A%2F%2Fgithub.com%2Fspf13%2Fviper%23flag-interfaces)。
 
-### 从远程 key/value 存储读取配置
+## 从远程 key/value 存储读取配置
 
 要在 Viper 中启用远程支持，需要匿名导入 `viper/remote` 包：
 
 ```go
-go
-复制代码import _ "github.com/spf13/viper/remote"
+import _ "github.com/spf13/viper/remote"
 ```
 
 Viper 支持 etcd、Consul 等远程 key/value 存储，这里以 Consul 为例进行讲解。
@@ -419,8 +352,6 @@ $ docker run \
 ```
 
 Docker 容器启动好后，浏览器访问 `http://localhost:8500/`，即可进入 Consul 控制台，在 `user/config` 路径下编写 YAML 格式的配置。
-
-![image.png](./assets/75d79f1ffdbf49c1b3d000b251d8b385tplv-k3u1fbpfcp-zoom-in-crop-mark1512000.webp)
 
 使用 Viper 从 Consul 读取配置示例代码如下：
 
@@ -455,7 +386,7 @@ server.ip: 127.0.0.1
 
 > 笔记：如果你想停止通过 Docker 安装的 Consul 容器，则可以执行 `docker stop badger` 命令。如果需要删除，则可以执行 `docker rm badger` 命令。
 
-## 从 Viper 中读取配置值
+# 从 Viper 中读取配置值
 
 前文中我们介绍了各种将配置读入 Viper 的技巧，现在该学习如何使用这些配置了。
 
@@ -466,7 +397,7 @@ server.ip: 127.0.0.1
 - `AllSettings() map[string]interface{}`：返回所有配置。根据我的经验，如果使用环境变量指定配置，则只能获取到通过 `BindEnv` 绑定的环境变量，无法获取到通过 `AutomaticEnv` 绑定的环境变量。
 - `IsSet(key string) bool`：值得注意的是，在使用 `Get` 或 `Get<Type>` 获取配置值，如果找不到，则每个 `Get` 函数都会返回一个零值。为了检查给定的键是否存在，可以使用 `IsSet` 方法，存在返回 `true`，不存在返回 `false`。
 
-### 访问嵌套的键
+## 访问嵌套的键
 
 有如下配置文件 `config.yaml`：
 
@@ -481,21 +412,12 @@ server:
 可以通过 `.` 分隔符来访问嵌套字段。
 
 ```go
-go
-复制代码viper.Get("server.ip")
+viper.Get("server.ip")
 ```
 
 示例如下：
 
 ```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/spf13/viper"
-)
-
 func main() {
 	viper.SetConfigFile("./config.yaml")
 	viper.ReadInConfig()
@@ -534,14 +456,6 @@ server.ip: 10.0.0.1
 示例程序如下：
 
 ```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/spf13/viper"
-)
-
 func main() {
 	viper.SetConfigFile("./config.yaml")
 	viper.ReadInConfig()
@@ -566,28 +480,19 @@ server.port: 8080
 
 `server.ip` 打印结果为 `10.0.0.1`，而不再是 `server` map 中所对应的值 `127.0.0.1`。
 
-### 提取子树
+## 提取子树
 
 当使用 Viper 读取 `config.yaml` 配置文件后，`viper` 对象就包含了所有配置，并能通过 `viper.Get("server.ip")` 获取子配置。
 
 我们可以将这份配置理解为一颗树形结构，`viper` 对象就包含了这个完整的树，可以使用如下方法获取 `server` 子树。
 
 ```go
-go
-复制代码srvCfg := viper.Sub("server")
+srvCfg := viper.Sub("server")
 ```
 
 使用示例如下：
 
 ```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/spf13/viper"
-)
-
 func main() {
 	viper.SetConfigFile("./config.yaml")
 	viper.ReadInConfig()
@@ -609,7 +514,7 @@ ip: 127.0.0.1
 port: 8080
 ```
 
-### 反序列化
+## 反序列化
 
 Viper 提供了 2 个方法进行反序列化操作，以此来实现将所有或特定的值解析到结构体、map 等。
 
@@ -619,14 +524,6 @@ Viper 提供了 2 个方法进行反序列化操作，以此来实现将所有�
 使用示例如下：
 
 ```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/spf13/viper"
-)
-
 type Config struct {
 	Username string
 	Password string
@@ -669,14 +566,6 @@ password: 123456
 示例如下：
 
 ```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/spf13/viper"
-)
-
 type Config struct {
 	Chart struct {
 		Values map[string]interface{}
@@ -714,24 +603,15 @@ cfg: &{Chart:{Values:map[ingress:map[annotations:map[traefik.frontend.rule.type:
 
 > 注意⚠️：Viper 在后台使用 [mapstructure](https://link.juejin.cn/?target=github.com%2Fmitchellh%2Fmapstructure) 来解析值，其默认情况下使用 `mapstructure` tags。当我们需要将 Viper 读取的配置反序列到结构体中时，如果出现结构体字段跟配置项不匹配，则可以设置 `mapstructure` tags 来解决。
 
-### 序列化
+## 序列化
 
 一个好用的配置包不仅能够支持反序列化操作，还要支持序列化操作。Viper 支持将配置序列化成字符串，或直接序列化到文件中。
 
-#### 序列化成字符串
+### 序列化成字符串
 
 我们可以将全部配置序列化配置为 YAML 格式字符串。
 
 ```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/spf13/viper"
-	yaml "gopkg.in/yaml.v2"
-)
-
 // 序列化配置为 YAML 格式字符串
 func yamlStringSettings() string {
 	c := viper.AllSettings() // 获取全部配置
@@ -758,7 +638,7 @@ server:
 username: jianghushinian
 ```
 
-#### 写入配置文件
+### 写入配置文件
 
 Viper 还支持直接将配置序列化到文件中，提供了如下几个方法：
 
@@ -777,7 +657,7 @@ viper.SafeWriteConfigAs("/path/to/my/.config") // 将会报错，因为它已经
 viper.SafeWriteConfigAs("/path/to/my/.other_config")
 ```
 
-## 多实例对象
+# 多实例对象
 
 由于大多数应用程序都希望使用单个配置实例对象来管理配置，因此 viper 包默认提供了这一功能，它类似于一个单例。当我们使用 Viper 时不需要配置或初始化，Viper 实现了开箱即用的效果。
 
@@ -788,14 +668,6 @@ Viper 包支持的所有功能都被镜像为 `viper` 对象上的方法，这�
 多实例使用示例：
 
 ```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/spf13/viper"
-)
-
 func main() {
 	x := viper.New()
 	y := viper.New()
@@ -819,19 +691,11 @@ x.username: jianghushinian
 y.username: 江湖十年
 ```
 
-## 使用建议
+# 使用建议
 
 Viper 提供了众多方法可以管理配置，在实际项目开发中我们可以根据需要进行使用。如果是小型项目，推荐直接使用 `viper` 实例管理配置。
 
 ```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/spf13/viper"
-)
-
 func main() {
 	viper.SetConfigFile("./config.yaml")
 	if err := viper.ReadInConfig(); err != nil {
@@ -849,15 +713,6 @@ func main() {
 如果是中大型项目，一般都会有一个用来记录配置的结构体，可以使用 Viper 将配置反序列化到结构体中。
 
 ```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/fsnotify/fsnotify"
-	"github.com/spf13/viper"
-)
-
 type Config struct {
 	Username string
 	Password string
@@ -898,7 +753,7 @@ func main() {
 
 需要注意的是，直接使用 `viper` 实例管理配置的情况下，当我们通过 `viper.WatchConfig()` 监听了配置文件变化，如果配置变化，则变化会立刻体现在 `viper` 实例对象上，下次通过 `viper.Get()` 获取的配置即为最新配置。但是在使用结构体管理配置时，`viper` 实例对象变化了，记录配置的结构体 `Config` 是不会自动更新的，所以需要使用 `viper.OnConfigChange` 在回调函数中重新将变更后的配置反序列化到 `Config` 中。
 
-## 总结
+# 总结
 
 本文探讨 Viper 的各种用法和使用场景，首先说明了为什么使用 Viper，它的优势是什么。
 
