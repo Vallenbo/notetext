@@ -25,7 +25,7 @@ import (
 )
 
 func main() {
-	db, err := sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/dbname") // DSN:Data Source Name
+	db, err := sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local") // DSN:Data Source Name
 	if err != nil {
 		panic(err)
 	}

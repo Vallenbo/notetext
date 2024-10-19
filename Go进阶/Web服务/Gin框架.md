@@ -257,60 +257,6 @@ func getCurrentPath() string {
 }
 ```
 
-# validator表单验证
-
-对binding内字段的限制，和对传入数据的字段和类型进行验证。
-
-[go-playground/validator](https://github.com/go-playground/validator)：包验证器根据标签对结构体和单个字段进行值验证规则。
-
-```go
-type Login struct {// Binding from JSON
-  // binding:约束，required必填项 , min字符段最短为3
-  User     string `form:"user" json:"user" binding:"required,min=3,max=8"` 
-  Password string `form:"password" json:"password" binding:"required"`
-}
-
-type SignUpParam struct { //注册
-	Age        uint   `json:"age" binding:"gte=1,lte=130"` //validator 字段内容
-	Name       string `json:"name" binding:"required"`
-	Email      string `json:"email" binding:"required, email"`
-	Password   string `json:"password" binding:"required"`
-	RePassword string `json:"re_password" binding:"required,eqfield=Password"` //eqfield与指定字段约束一样
-}
-```
-
-[validator翻译和自定义错误](https://github.com/go-playground/validator/blob/master/_examples/translations/main.go)：定义中文报错提示
-
-```go
-import (
-	"fmt"
-
-	"github.com/go-playground/locales/en"
-	ut "github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator/v10"
-	en_translations "github.com/go-playground/validator/v10/translations/en" // validator的翻译器
-)
-
-func main() {
-	// NOTE: ommitting allot of error checking for brevity
-	en := en.New()
-	uni = ut.New(en, en)
-
-	// this is usually know or extracted from http 'Accept-Language' header
-	// also see uni.FindTranslator(...)
-	trans, _ := uni.GetTranslator("en")
-
-	validate = validator.New()
-	en_translations.RegisterDefaultTranslations(validate, trans)
-
-	translateAll(trans)
-	translateIndividual(trans)
-	translateOverride(trans) // yep you can specify your own in whatever locale you want!
-}
-```
-
-
-
 # 获取参数
 
 从路径中获取参数

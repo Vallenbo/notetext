@@ -1,6 +1,4 @@
-# Mariadb数据库管理系统
-
-
+# mysql数据库管理系统
 
 # mysql备份还原
 
@@ -38,13 +36,8 @@ rsync -avz /mnt/sata/* /var/lib/mysql/data
 错误日志是MySQL中最重要的日志之一，它记录了当mysqld启动和停止时，以及服务器在运行过程中发生任何严重错误时的相关信息。当数据库出现任何故障导致无法正常使用时，建议首先查看此日志。
 该日志是默认开启的，默认存放目录/var/log/mysqld.log ,默认的日志文件名为mysqld.log 。查看日志位置:
 
-```sql
-show variables like '%log_ error%';
-```
-
-
-
 ```sh
+mysql> show variables like '%log_ error%';
 root@node1:~# cat /var/lib/mysql/auto.cnf  //mysql服务的uuid值
 [auto]
 server-uuid=8ad434ed-2186-11ee-907c-000c29bd8e90
@@ -381,7 +374,7 @@ mycat start#启动			mycat stop#停止			mycat restart#重启
 
 
 
-# 安装和授权
+# 安装与授权
 
 数据库管理系统分	Oracle	MySQL---开发相同---Mariadb
 
@@ -586,6 +579,65 @@ mysql -u root -p linuxprobe < /root/linuxprobeDB.sql
 mysql> create database onlinedb;
 mysql> use onlinedb;
 mysql> source d:/onlinedb sql;
+```
+
+
+
+## 数据库字符集-查看和修改
+
+### 查看字符集
+
+查看MYSQL数据库服务器和数据库字符集
+
+```go
+方法一：show variables like '%character%';
+方法二：show variables like 'collation%';
+```
+
+查看库的字符集
+
+```go
+语法：show database status from 库名 like  表名;
+```
+
+
+查看表的字符集
+
+```go
+语法：show table status from 库名 like  表名;
+```
+
+查看表中所有列的字符集
+
+```go
+语法：show full columns from 表名;
+```
+
+二、设置字符集
+
+设置字符集一般有两种方法，一种是在创建表的时候设置字符集，另一种是表建成之后修改字符集。
+
+1.创建时指定字符集
+
+```go
+创建库的时候指定字符集：
+语法：create database 库名 default character set=字符集；
+
+创建表的时候指定字符集：
+语法：create table 表名（属性）default character set = 字符集；
+```
+
+2.修改字符集
+
+```go
+修改库的字符集
+语法：alter database 库名 default character set 字符集;
+
+修改表的字符集
+语法：alter table 表名 convert to character set 字符集;
+
+修改字段的字符集
+语法：alter table 表名 modify 字段名 字段属性 character set gbk；
 ```
 
 

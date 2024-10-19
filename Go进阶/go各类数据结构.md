@@ -1,7 +1,5 @@
 [常见数据结构及算法 - 《数据结构和算法（Golang实现）》 - 书栈网 · BookStack](https://www.bookstack.cn/read/hunterhug-goa.c/algorithm-README.md)
 
-
-
 # 可变长数组
 
 ```go
