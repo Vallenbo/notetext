@@ -74,9 +74,7 @@ redis的官方只提供了linux版本的redis，window系统的redis是微软团
 
 [官方原版](https://redis.io/) | [中文官网](http://www.redis.cn)
 
-## 3.1、下载和安装
-
-**ubuntu下安装**
+## ubuntu下安装
 
 ```bash
 安装命令：sudo apt-get install -y redis-server
@@ -93,7 +91,7 @@ redis的官方只提供了linux版本的redis，window系统的redis是微软团
 redis-cli
 ```
 
-**windows服务方式启动**
+## windows服务方式启动
 
 [下载地址](https://github.com/tporadowski/redis/releases)，使用以下命令启动redis服务端
 
@@ -112,7 +110,25 @@ redis-server --service-install redis.windows.conf、
 停止服务：redis-server --service-stop
 ```
 
-## 3.2、redis的配置
+## Docker方式安装
+
+读者可以选择在本机安装 redis 或使用云数据库，这里直接使用Docker启动一个 redis 环境，方便学习使用。
+
+使用下面的命令启动一个名为 redis507 的 5.0.7 版本的 redis server环境。
+
+```bash
+docker run --name redis507 -p 6379:6379 -d redis:5.0.7
+```
+
+**注意：**此处的版本、容器名和端口号可以根据自己需要设置。
+
+启动一个 redis-cli 连接上面的 redis server。
+
+```bash
+docker run -it --network host --rm redis:5.0.7 redis-cli
+```
+
+## redis的配置
 
 ```bash
 cat /etc/redis/redis.conf

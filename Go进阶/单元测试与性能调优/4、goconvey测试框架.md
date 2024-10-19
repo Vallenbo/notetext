@@ -1,8 +1,8 @@
-## GoConvey介绍
+# GoConvey介绍
 
 [GoConvey](https://github.com/smartystreets/goconvey)是一个非常非常好用的Go测试框架，它直接与`go test`集成，提供了很多丰富的断言函数，能够在终端输出可读的彩色测试结果，并且还支持全自动的Web UI。
 
-### 安装
+## 安装
 
 如果需要使用`goconvey`的Web UI程序，请执行下面的命令安装可执行程序。
 
@@ -16,7 +16,7 @@ go install github.com/smartystreets/goconvey@latest
 go get github.com/smartystreets/goconvey
 ```
 
-### 使用示例
+## 使用示例
 
 我们使用`goconvey`来为最开始的基础示例中的`Split`函数编写单元测试。`Split`函数如下：
 
@@ -103,11 +103,11 @@ func TestSplit(t *testing.T) {
 
 ![Colorful terminal output2](./assets/goconvey02.png)
 
-### 断言方法
+## 断言方法
 
 GoConvey为我们提供了很多种类断言方法在`So()`函数中使用。
 
-##### 一般相等类
+### 一般相等类
 
 ```go
 So(thing1, ShouldEqual, thing2)
@@ -123,7 +123,7 @@ So(thing1, ShouldBeFalse)
 So(thing1, ShouldBeZeroValue)
 ```
 
-##### 数字数量比较类
+### 数字数量比较类
 
 ```go
 So(1, ShouldBeGreaterThan, 0)
@@ -138,7 +138,7 @@ So(1.0, ShouldAlmostEqual, 0.99999999, .0001)   // tolerance is optional; defaul
 So(1.0, ShouldNotAlmostEqual, 0.9, .0001)
 ```
 
-##### 包含类
+### 包含类
 
 ```go
 So([]int{2, 4, 6}, ShouldContain, 4)
@@ -154,7 +154,7 @@ So(map[string]string{}, ShouldBeEmpty)
 So(map[string]string{"a": "b"}, ShouldHaveLength, 1) // supports map, slice, chan, and string
 ```
 
-##### 字符串类
+### 字符串类
 
 ```go
 So("asdf", ShouldStartWith, "as")
@@ -167,7 +167,7 @@ So("adsf", ShouldBeBlank)
 So("asdf", ShouldNotBeBlank)
 ```
 
-##### panic类
+### panic类
 
 ```go
 So(func(), ShouldPanic)
@@ -176,14 +176,14 @@ So(func(), ShouldPanicWith, "")		// or errors.New("something")
 So(func(), ShouldNotPanicWith, "")	// or errors.New("something")
 ```
 
-##### 类型检查类
+### 类型检查类
 
 ```go
 So(1, ShouldHaveSameTypeAs, 0)
 So(1, ShouldNotHaveSameTypeAs, "asdf")
 ```
 
-##### 时间和时间间隔类
+### 时间和时间间隔类
 
 ```go
 So(time.Now(), ShouldHappenBefore, time.Now())
@@ -197,7 +197,7 @@ So(time.Now(), ShouldHappenWithin, duration, time.Now())
 So(time.Now(), ShouldNotHappenWithin, duration, time.Now())
 ```
 
-##### 自定义断言方法
+### 自定义断言方法
 
 如果上面列出来的断言方法都不能满足你的需要，那么你还可以按照下面的格式自定义一个断言方法。
 

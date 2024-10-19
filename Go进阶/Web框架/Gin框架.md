@@ -334,7 +334,7 @@ func main() {
 	})
 ```
 
-## 获取URL路径传递参数
+## 通过URL路径获取参数
 
 请求的参数通过URL路径传递，例如：`/user/search/小王子/沙河`。 获取请求URL路径中的参数的方式如下。
 
@@ -350,7 +350,14 @@ r.GET("/user/search/:username/:address", func(c *gin.Context) { // http://user/s
 	})
 ```
 
-## 通过POST请求获取参数
+## 通过POST请求获取表单参数
+
+表单传输为post请求，http常见的传输格式为四种：
+
+- application/json
+- application/x-www-form-urlencoded
+- application/xml
+- multipart/form-data
 
 表单form参数，当前端请求的数据通过form表单提交时，例如向`/user/search`发送一个``POST`请求，获取请求数据的方式如下：
 
@@ -1087,6 +1094,14 @@ go funcXX(c.Copy())
 
 JWT全称JSON Web Token是一种跨域认证解决方案，属于一个开放的标准，它规定了一种Token实现方式，目前多用于前后端分离项目和OAuth2.0业务场景下。
 
+我们使用 Go 语言社区中的 jwt 相关库来构建我们的应用。[golang-jwt docs文档](https://golang-jwt.github.io/jwt/)
+
+```bash
+go get -u github.com/golang-jwt/jwt/v5
+```
+
+本文将使用这个库来实现我们生成JWT和解析JWT的功能。
+
 ## 为什么需要JWT？
 
 在之前的一些web项目中，我们通常使用的是`Cookie-Session`模式实现用户认证。相关流程大致如下：
@@ -1101,20 +1116,11 @@ JWT全称JSON Web Token是一种跨域认证解决方案，属于一个开放的
 
 在移动互联网时代，我们的用户可能使用浏览器也可能使用APP来访问我们的服务，我们的web应用可能是前后端分开部署在不同的端口，有时候我们还需要支持第三方登录，这下`Cookie-Session`的模式就有些力不从心了。
 
+**介绍JWT**
+
 JWT就是一种基于Token的轻量级认证模式，服务端认证通过后，会生成一个JSON对象，经过签名后得到一个Token（令牌）再发回给用户，用户后续请求只需要带上这个Token，服务端解密之后就能获取该用户的相关信息了。
 
 想要了解JWT的原理，推荐大家阅读：[阮一峰的JWT入门教程](https://www.ruanyifeng.com/blog/2018/07/json_web_token-tutorial.html)
-
-## 安装
-
-我们使用 Go 语言社区中的 jwt 相关库来构建我们的应用，例如：https://github.com/golang-jwt/jwt。
-
-```bash
-go get github.com/golang-jwt/jwt/v4
-go get -u github.com/golang-jwt/jwt/v5
-```
-
-本文将使用这个库来实现我们生成JWT和解析JWT的功能。
 
 ## 默认Claim
 
@@ -1130,7 +1136,6 @@ func GenRegisteredClaims() (string, error) {
 		Issuer:    "qimi",                                             // 签发人
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims) // 使用指定的签名方法和声明创建新的token
-
 	return token.SignedString(mySigningKey) // 生成签名字符串
 }
 
@@ -1182,7 +1187,7 @@ func GenToken(username string) (string, error) {
 	claims := CustomClaims{ // 创建一个我们自己的声明Claims
 		username, // 自定义字段
 		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TokenExpireDuration)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)), // 定义JWT的过期时间，这里以24小时为例
 			Issuer:    "my-project", // 签发人
 		},
 	}
@@ -1215,107 +1220,108 @@ func ParseToken(tokenString string) (*CustomClaims, error) { // ParseToken 解�
 
 ## 在gin框架中使用JWT
 
-首先我们注册一条路由`/auth`，对外提供获取Token的渠道：
+设置一条需要认证的路由`/api/protected`，只有通过authMiddleware()中间件才能正确返回数据
+
+设置可以登录的路由`/login`如下：
 
 ```go
-r.POST("/auth", authHandler)
-```
+func TestJwt(t *testing.T) {
+	r := gin.Default()
 
-我们的`authHandler`定义如下：
+	// 登录路由，生成 token
+	r.POST("/login", func(c *gin.Context) {
+		var user User
+		if err := c.ShouldBindJSON(&user); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 
-```go
-func authHandler(c *gin.Context) {
-	var user UserInfo
-	err := c.ShouldBind(&user) // 用户发送用户名和密码过来
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code": 2001,
-			"msg":  "无效的参数",
-		})
-		return
-	}
-	// 校验用户名和密码是否正确
-	if user.Username == "q1mi" && user.Password == "q1mi123" {
-		tokenString, _ := GenToken(user.Username) // 生成Token
-		c.JSON(http.StatusOK, gin.H{
-			"code": 2000,
-			"msg":  "success",
-			"data": gin.H{"token": tokenString},
-		})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": 2002,
-		"msg":  "鉴权失败",
+		// 这里可以进行用户认证逻辑，为了示例简单，假设用户名和密码都是"admin"
+		if user.Username == "admin" && user.Password == "admin" {
+			token, err := GenToken(user.Username)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "生成 token 失败"})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{"token": token})
+		} else {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "认证失败"})
+		}
 	})
-	return
+
+	// 需要认证的路由
+	api := r.Group("/api", authMiddleware())
+	api.GET("/protected", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"message": "欢迎，" + c.MustGet("username").(string)})
+	})
+
+	r.Run(":8080")
 }
 ```
+
+使用自定义Claims结构体和GenToken生成token、ParseToken解析token
 
 用户通过上面的接口获取Token之后，后续就会携带着Token再来请求我们的其他接口，这个时候就需要对这些请求的Token进行校验操作了，很显然我们应该实现一个检验Token的中间件，具体实现如下：
 
 ```go
-func JWTAuthMiddleware() func(c *gin.Context) { // JWTAuthMiddleware 基于JWT的认证中间件
+// 客户端携带Token有三种方式 1.放在请求头 2.放在请求体 3.放在URI
+// 这里假设Token放在Header的Authorization中
+// 这里的具体实现方式要依据你的实际业务情况决定
+func authMiddleware() gin.HandlerFunc { // 基于JWT的认证中间件
 	return func(c *gin.Context) {
-		// 客户端携带Token有三种方式 1.放在请求头 2.放在请求体 3.放在URI
-		// 这里假设Token放在Header的Authorization中，并使用Bearer开头
-		// 这里的具体实现方式要依据你的实际业务情况决定
-		authHeader := c.Request.Header.Get("Authorization")
-		if authHeader == "" {
-			c.JSON(http.StatusOK, gin.H{
-				"code": 2003,
-				"msg":  "请求头中auth为空",
-			})
+		tokenString := c.GetHeader("Authorization")
+		if tokenString == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "未提供 token"})
 			c.Abort()
 			return
 		}
 
-		parts := strings.SplitN(authHeader, " ", 2) // 按空格分割
-		if !(len(parts) == 2 && parts[0] == "Bearer") {
-			c.JSON(http.StatusOK, gin.H{
-				"code": 2004,
-				"msg":  "请求头中auth格式有误",
-			})
-			c.Abort()
-			return
-		}
-
-		mc, err := ParseToken(parts[1]) // parts[1]是获取到的tokenString，我们使用之前定义好的解析JWT的函数来解析它
+		CustomClaim, err := ParseToken(tokenString)
 		if err != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"code": 2005,
-				"msg":  "无效的Token",
-			})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "无效的 token"})
 			c.Abort()
 			return
 		}
-
-		c.Set("username", mc.Username) // 将当前请求的username信息保存到请求的上下文c上
-		c.Next() // 后续的处理函数可以用过c.Get("username")来获取当前请求的用户信息
+		if CustomClaim == nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "无法解析 token"})
+			c.Abort()
+			return
+		}
+        
+		c.Set("username", CustomClaim.Username)
+		c.Next()
 	}
-}
-```
-
-注册一个`/home`路由，发个请求验证一下吧。
-
-```go
-r.GET("/home", JWTAuthMiddleware(), homeHandler)
-
-func homeHandler(c *gin.Context) {
-	username := c.MustGet("username").(string)
-	c.JSON(http.StatusOK, gin.H{
-		"code": 2000,
-		"msg":  "success",
-		"data": gin.H{"username": username},
-	})
 }
 ```
 
 如果不想自己实现上述功能，你也可以使用Github上别人封装好的包，比如https://github.com/appleboy/gin-jwt。
 
-## refresh token
+> 测试：
+>
+> {  "message": "欢迎，admin" }
+
+## refresh 刷新token
 
 在某些业务场景下，我们可能还需要使用refresh token。
+
+```go
+// RefreshToken 刷新AccessToken
+func RefreshToken(aToken, rToken string) (newAToken, newRToken string, err error) {
+    // refresh token⽆效直接返回
+    if _, err = jwt.Parse(rToken, keyFunc); err != nil {
+        return
+    }
+    // 从旧access token中解析出claims数据
+    var claims MyClaims
+    _, err = jwt.ParseWithClaims(aToken, &claims, keyFunc)
+    v, _ := err.(*jwt.ValidationError)
+    // 当access token是过期错误 并且 refresh token没有过期时就创建⼀个新的access token
+    if v.Errors == jwt.ValidationErrorExpired {
+        return GenToken(claims.UserID)
+    }
+    return
+}
+```
 
 这里可以参考 [RFC 6749 OAuth2.0中关于refresh token的介绍](https://datatracker.ietf.org/doc/html/rfc6749#section-1.5)
 

@@ -7,9 +7,14 @@
 在许多Go语言项目中，我们需要一个好的日志记录器能够提供下面这些功能：
 
 - 能够将事件记录到文件中，而不是应用程序控制台。
+- 可以设置任何`io.Writer`作为日志记录输出并向其发送要写入的日志
 - 日志切割-能够根据文件大小、时间或间隔等来切割日志文件。
 - 支持不同的日志级别。例如INFO，DEBUG，ERROR等。
 - 能够打印基本信息，如调用文件/函数名和行号，日志时间等。
+
+缺点：
+
+- Zap本身不支持切割归档日志文件
 
 ## 默认的Go Logger
 
@@ -366,23 +371,31 @@ func InitLogger() {
 }
 ```
 
-## 使用Lumberjack进行日志切割归档
+# Lumberjack进行日志切割归档
 
-这个日志程序中唯一缺少的就是日志切割归档功能。
-
-> *Zap本身不支持切割归档日志文件*
+`lumberjack`是一个 Go 语言的日志轮转库，主要用于管理日志文件的大小、备份数量和保留时间等。
 
 官方的说法是为了添加日志切割归档功能，我们将使用第三方库[Lumberjack](https://github.com/natefinch/lumberjack)来实现。
 
-### 安装
-
-执行下面的命令安装 Lumberjack v2 版本。
-
-```bash
+```go
 go get gopkg.in/natefinch/lumberjack.v2
 ```
 
-### zap logger中加入Lumberjack
+**主要特点：**
+
+**日志轮转**：可以根据设定的规则自动对日志文件进行轮转。例如，当日志文件达到一定大小、经过一定时间或者满足其他条件时，会创建一个新的日志文件，并将旧的日志文件进行归档备份。
+
+**灵活配置：**
+
+- `Filename`：指定日志文件的路径和名称。
+- `MaxSize`：设置单个日志文件的最大大小（单位通常是兆字节），当达到这个大小后会进行日志轮转。
+- `MaxBackups`：指定保留的日志备份文件数量。当超过这个数量时，最旧的备份文件会被删除。
+- `MaxAge`：设置日志文件的最长保留时间（单位通常是天），超过这个时间的日志文件会被删除。
+- `Compress`：可以设置是否对旧的日志文件进行压缩存储，以节省磁盘空间。
+
+使用`lumberjack`库可以有效地管理日志文件，避免日志文件无限制增长，确保系统在长时间运行过程中不会因为日志文件过大而占用过多磁盘空间或影响
+
+## zap logger中加入Lumberjack
 
 要在zap中加入Lumberjack支持，我们需要修改`WriteSyncer`代码。我们将按照下面的代码修改`getLogWriter()`函数：
 
@@ -399,7 +412,29 @@ func getLogWriter() zapcore.WriteSyncer {
 }
 ```
 
-### 测试所有功能
+## 快速使用
+
+```go
+func Test_logrolate(t *testing.T) {
+	// 设置日志格式为文本格式（你可以根据需要选择其他格式）
+	log.SetFormatter(&log.TextFormatter{})
+
+	// 使用 Lumberjack 进行日志轮转配置
+	ljLogger := &lumberjack.Logger{
+		Filename:   fmt.Sprintf("logs/%s.log", time.Now().Format("2006-01-02")),
+		MaxSize:    10, // megabytes
+		MaxBackups: 2,
+		MaxAge:     30, // days
+	}
+
+	// 将日志输出设置为 Lumberjack 的写入器
+	log.SetOutput(ljLogger)
+	log.Info("This is a log message.")
+	log.Warn("This is a warning message.")
+}
+```
+
+## 测试所有功能
 
 最终，使用Zap/Lumberjack logger的完整示例代码如下：
 
@@ -467,7 +502,7 @@ func simpleHttpGet(url string) {
 
 
 
-### 其他切割库
+## 其他切割库
 
 想按日期切割可以使用[github.com/lestrrat-go/file-rotatelogs](https://github.com/lestrrat-go/file-rotatelogs)这个库，虽然目前不维护了，但也够用了。
 
@@ -484,11 +519,11 @@ zapcore.AddSync(l)
 
 
 
-# 使用zap接收gin框架默认的日志并配置日志归档
+# zap接收gin框架默认日志+归档
 
 我们该如何在日志中记录gin框架本身输出的那些日志呢？
 
-### gin默认的中间件
+## gin默认日志中间件
 
 首先我们来看一个最简单的gin项目：
 
@@ -496,9 +531,9 @@ zapcore.AddSync(l)
 func main() {
 	r := gin.Default()
 	r.GET("/hello", func(c *gin.Context) {
-		c.String("hello liwenzhou.com!")
+		c.String(200, "hello ")
 	})
-	r.Run(
+	r.Run()
 }
 ```
 
@@ -517,7 +552,7 @@ func Default() *Engine {
 
 其中`Logger()`是把gin框架本身的日志输出到标准输出（我们本地开发调试时在终端输出的那些日志就是它的功劳），而`Recovery()`是在程序出现panic的时候恢复现场并写入500响应的。
 
-### 基于zap的中间件
+## gin日志基于zap
 
 我们可以模仿`Logger()`和`Recovery()`的实现，使用我们的日志库来接收gin框架默认输出的日志。
 
@@ -603,7 +638,7 @@ r := gin.New()
 r.Use(GinLogger(), GinRecovery())
 ```
 
-### 在gin中使用zap日志切割
+## gin中使用zap日志切割
 
 最后我们再加入我们项目中常用的日志切割，完整版的`logger.go`代码如下：
 
@@ -772,10 +807,6 @@ func main() {
 
 # logrus日志库使用
 
-日志是程序中必不可少的一个环节，由于Go语言内置的日志库功能比较简洁，我们在实际开发中通常会选择使用第三方的日志库来进行开发。本文介绍了`logrus`这个日志库的基本使用。
-
-## logrus介绍
-
 Logrus是Go（golang）的结构化logger，与标准库logger完全API兼容。
 
 它有以下特点：
@@ -831,7 +862,7 @@ func main() {
 }
 ```
 
-## 日志级别
+## level日志级别
 
 Logrus有七个日志级别：`Trace`, `Debug`, `Info`, `Warning`, `Error`, `Fatal`and `Panic`。
 
@@ -855,7 +886,7 @@ log.SetLevel(log.InfoLevel) // 会记录info及以上级别 (warn, error, fatal,
 
 如果你的程序支持debug或环境变量模式，设置`log.Level = logrus.DebugLevel`会很有帮助。
 
-## 字段
+## log.Fields字段
 
 Logrus鼓励通过日志字段进行谨慎的结构化日志记录，而不是冗长的、不可解析的错误消息。
 
@@ -871,7 +902,7 @@ log.WithFields(log.Fields{
 
 `WithFields`的调用是可选的。
 
-## 默认字段
+## WithFields默认字段
 
 通常，将一些字段始终附加到应用程序的全部或部分的日志语句中会很有帮助。例如，你可能希望始终在请求的上下文中记录`request_id`和`user_ip`。
 
@@ -891,7 +922,122 @@ requestLogger.Warn("something not great happened")
 - msg：记录的日志信息
 - level：记录的日志级别
 
-## Hooks
+## Hooks钩子
+
+Logrus 最令人心动的两个功能，一个是结构化日志，另一个就是 Hooks 了。
+
+Hooks 为 Logrus 提供了极大的灵活性，通过 Hooks 可以实现各种扩展功能。比如可以通过 Hooks 实现：`Error` 以上级别日志发送邮件通知、重要日志告警、日志切割、程序优雅退出等，非常实用。
+
+Logrus 提供了 `Hook` 接口，只要我们实现了这个接口，并将其注册到 Logrus 中，就可以使用 Hooks 的强大能力了。`Hook` 接口定义如下：
+
+```go
+type Hook interface {
+	Levels() []Level
+	Fire(*Entry) error
+}
+```
+
+>  Levels返回一个日志级别切片，Logrus 记录的日志级别如果存在于切片中，则会触发 Hooks（即调用 Fire 方法）
+
+### 使用示例
+
+```go
+type CustomHook struct{}
+
+func (h *CustomHook) Levels() []logrus.Level {
+	return logrus.AllLevels
+}
+
+func (h *CustomHook) Fire(entry *logrus.Entry) error {
+	entry.Data["custom_field"] = "custom_value" // 在日志中添加额外的字段
+	if entry.Level >= logrus.ErrorLevel {       // 根据日志级别执行特定操作
+		fmt.Println("这是一个错误日志，执行一些特殊操作...")
+	}
+	return nil
+}
+
+func Test_LogrusHook(t *testing.T) {
+	Testlog := logrus.New()
+
+	hook := &CustomHook{}	// 添加自定义 Hook
+	Testlog.AddHook(hook)
+
+	Testlog.Info("这是一条信息日志")
+	Testlog.Error("这是一条错误日志")
+}
+```
+
+```go
+// 输出：
+time="2024-10-19T10:31:24+08:00" level=info msg="这是一条信      息日志" custom_field=custom_value
+这是一个错误日志，执行一些特殊操作...
+time="2024-10-19T10:31:24+08:00" level=error msg="这是一条错     误日志" custom_field=custom_value
+--- PASS: Test_LogrusHook (0.01s)
+PASS
+```
+
+### 通过hook写入db中
+
+通过hook钩子写入如mysql中
+
+```go
+type LogEntry struct {
+	ID      uint   `gorm:"column:id;primaryKey;autoIncrement" comment:"自增id" json:"id"`
+	Key     string `gorm:"column:key;type:varchar(255)" comment:"日志记录匹配 索引关键值" json:"key"`
+	Level   string `gorm:"column:level;type:varchar(255)" comment:"日志level字段" json:"level"`
+	Message string `gorm:"column:message;type:text" comment:"日志内容" json:"message"`
+}
+
+func (LogEntry) TableName() string {
+	return "logToDB"
+}
+
+func Test_logrusHookDB(*testing.T) {
+	// 连接数据库
+	db, err := gorm.Open(mysql.Open("root:123456@tcp(192.168.5.5:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"), &gorm.Config{})
+	if err != nil {
+		logrus.Fatalf("无法连接数据库：%v", err)
+	}
+
+	// 创建日志钩子，将日志同时写入数据库
+	logrus.AddHook(&DatabaseHook{db: db})
+	logrus.WithField("key", "example_key").Info("这是一条信息日志")
+	logrus.WithField("key", "another_key").Warn("这是一条警告日志")
+}
+
+type DatabaseHook struct {
+	db *gorm.DB
+}
+
+func (d *DatabaseHook) Levels() []logrus.Level {
+	return logrus.AllLevels
+}
+
+func (d *DatabaseHook) Fire(entry *logrus.Entry) error {
+	fmt.Printf("%+v\n", entry.Data["key"])
+	logEntry := LogEntry{
+		Key:     entry.Data["key"].(string),
+		Level:   entry.Level.String(),
+		Message: entry.Message,
+	}
+	if !d.db.Migrator().HasTable("logToDB") {
+		err := d.db.AutoMigrate(&logEntry)
+		if err != nil {
+			return err
+		}
+	}
+
+	err := d.db.Create(&logEntry).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+```
+
+
+
+### 官方使用
 
 你可以添加日志级别的钩子（Hook）。例如，向异常跟踪服务发送`Error`、`Fatal`和`Panic`、信息到StatsD或同时将日志发送到多个位置，例如syslog。
 
@@ -994,38 +1140,58 @@ func main() {
 "gopkg.in/natefinch/lumberjack.v2"
 ```
 
-**主要特点：**
 
-- **日志轮转**：可以根据设定的规则自动对日志文件进行轮转。例如，当日志文件达到一定大小、经过一定时间或者满足其他条件时，会创建一个新的日志文件，并将旧的日志文件进行归档备份。
-- 灵活配置
-  - `Filename`：指定日志文件的路径和名称。
-  - `MaxSize`：设置单个日志文件的最大大小（单位通常是兆字节），当达到这个大小后会进行日志轮转。
-  - `MaxBackups`：指定保留的日志备份文件数量。当超过这个数量时，最旧的备份文件会被删除。
-  - `MaxAge`：设置日志文件的最长保留时间（单位通常是天），超过这个时间的日志文件会被删除。
-  - `Compress`：可以设置是否对旧的日志文件进行压缩存储，以节省磁盘空间。
-
-使用`lumberjack`库可以有效地管理日志文件，避免日志文件无限制增长，确保系统在长时间运行过程中不会因为日志文件过大而占用过多磁盘空间或影响
 
 ```go
-func Test_logrolate(t *testing.T) {
-	// 设置日志格式为文本格式（你可以根据需要选择其他格式）
-	log.SetFormatter(&log.TextFormatter{})
 
-	// 使用 Lumberjack 进行日志轮转配置
-	ljLogger := &lumberjack.Logger{
-		Filename:   fmt.Sprintf("logs/%s.log", time.Now().Format("2006-01-02")),
-		MaxSize:    10, // megabytes
-		MaxBackups: 2,
-		MaxAge:     30, // days
-	}
+```
 
-	// 将日志输出设置为 Lumberjack 的写入器
-	log.SetOutput(ljLogger)
+# 实时读取log文件内容
 
-	log.Info("This is a log message.")
-	log.Warn("This is a warning message.")
+在做日志分析的时候，需要实时的获取日志里面的内容找到了`hpcloud/tail`
+
+```go
+package main
+
+import (
+    "fmt"
+    "time"
+
+    "github.com/hpcloud/tail"
+)
+
+func main() {
+    fileName := "./my.log"
+    tailconfig := tail.Config{
+        ReOpen:    true,                                 // 重新打开
+        Follow:    true,                                 // 是否跟随
+        Location:  &tail.SeekInfo{Offset: 0, Whence: 2}, // 从文件的哪个地方开始读
+        MustExist: false,                                // 文件不存在不报错
+        Poll:      true,
+    }
+    tails, err := tail.TailFile(fileName, tailconfig)
+    if err != nil {
+        fmt.Println("tail file failed, err:", err)
+        return
+    }
+
+    var (
+        line *tail.Line
+        ok   bool
+    )
+    for {
+        line, ok = <-tails.Lines
+        if !ok {
+            fmt.Printf("tail file close reopen, filename:%s\n", tails.Filename)
+            time.Sleep(time.Second)
+            continue
+        }
+        fmt.Println("line:", line.Text)
+    }
 }
 ```
+
+在同级目录下面定义一个my.log文件，在文件里面写入文字敲下回车，并且保存之后，程序会自动的获取并且打印，可以根据业务需要就行修改
 
 
 

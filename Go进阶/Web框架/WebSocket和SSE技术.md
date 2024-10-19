@@ -84,11 +84,11 @@ WebSocket 是一种在单个 TCP 连接上进行全双工通信的协议。它�
 
 WebSocket 的优点包括低延迟、实时性好、双向通信、较少的开销等，因此在实时应用程序中得到了广泛的应用，如在线聊天、实时游戏、股票行情推送等。
 
-# gorilla库构建ws服务
+# 运行websocket服务
 
 用`Go`自带的`net/http`库实现`WebSocket`服务还是太复杂了。好在有很多对`WebSocket`支持良好的第三方库，能减少我们很多底层的编码工作。
 
-这里我们使用`gorilla web toolkit`家族的另外一个库`gorilla/websocket`来实现我们的`WebSocket`服务，构建一个简单的`Echo`服务（`echo`意思是回音，就是客户端发什么，服务端再把消息发回给客户端）。
+这里我们使用`gorilla web toolkit`家族的另外一个库 ==gorilla/websocket== 来实现我们的`WebSocket`服务，构建一个简单的`Echo`服务（`echo`意思是回音，就是客户端发什么，服务端再把消息发回给客户端）。
 
 `github.com/gorilla/websocket`：这是一个非常流行的 Go WebSocket 库。它提供了强大的功能，包括连接管理、消息处理、心跳检测等。
 

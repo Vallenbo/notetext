@@ -1,12 +1,14 @@
-# Cobra命令行框架
+# Cobra命令行库
 
 2、f1ags的定义与配置绑定
 
 3、自定义参数验证与内置验证
 
+[Cobra文档库](https://pkg.go.dev/github.com/spf13/cobra#section-readme)
+
 # 介绍
 
-Cobra 由 Go 项目成员和 hugo 作者 spf13 创建，已经被许多流行的 Go 项目采用，比如 GitHub CLI 和 Docker CLI。[Cobra文档库](https://pkg.go.dev/github.com/spf13/cobra#section-readme)
+Cobra 由 Go 项目成员和 hugo 作者 spf13 创建，已经被许多流行的 Go 项目采用，比如 GitHub CLI 和 Docker CLI。
 
 **特性**
 
@@ -28,7 +30,11 @@ Cobra 由 Go 项目成员和 hugo 作者 spf13 创建，已经被许多流行的
 
 Cobra 非常易用，首先使用 `go get` 命令安装最新版本。
 
-此命令将安装 `cobra` generator 的可执行文件及其依赖项：`go get -u github.com/spf13/cobra`
+此命令将安装 `cobra` generator 的可执行文件及其依赖项：
+
+```go
+go get -u github.com/spf13/cobra
+```
 
 #  概念
 

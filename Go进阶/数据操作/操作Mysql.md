@@ -1,21 +1,4 @@
-**关系型数据库**：用表来存储一类数据
-**存储引擎**：类似于电脑和内存条
-**常见的存储引擎**：MyISAM和InnoDB
-**MyISAM**：查询速度快、支持表锁、不支持事务
-**InnoDB**：整体速度快、支持表锁和行锁
-**事务**：把一组SQL操作当做一个整体
-**事务特点**：ACID
-1、原子性：事务要么失败，要么成功，没有中间状态
-2、一致性：数据库的完整性没有被破坏
-3、隔离性：事务之间操作是相互隔离的
-4、持久性：事务操作的结果是不会丢失的
-
-索引：
-索引原理：B树和B+树
-
-
-
-# Go操作MySQL
+# database/sql库操作MySQL
 
 Go语言中的`database/sql`包提供了保证SQL或类SQL数据库的泛用接口，并不提供具体的数据库驱动。使用`database/sql`包时必须注入（至少）一个数据库驱动。
 
@@ -38,7 +21,6 @@ Open打开一个dirverName指定的数据库，dataSourceName指定数据源，�
 ```go
 import (
 	"database/sql"
-
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -68,12 +50,11 @@ func initDB() (err error) { // 定义一个初始化数据库的函数
 	// DSN:Data Source Name
 	dsn := "user:password@tcp(127.0.0.1:3306)/sql_test?charset=utf8mb4&parseTime=True"
 	// 不会校验账号密码是否正确
-	// 注意！！！这里不要使用:=，我们是给全局变量赋值，然后在main函数中使用全局变量db
-	db, err = sql.Open("mysql", dsn)
+	db, err = sql.Open("mysql", dsn) // 注意！！！这里不要使用:=，我们是给全局变量赋值，然后在main函数中使用全局变量db
 	if err != nil {
 		return err
 	}
-	
+
 	err = db.Ping() // 尝试与数据库建立连接（校验dsn是否正确）
 	if err != nil {
 		return err
@@ -110,23 +91,13 @@ SetMaxIdleConns设置连接池中的最大闲置连接数。 如果n大于最大
 
 ## CRUD
 
-### 建库建表
+建库建表
 
-我们先在MySQL中创建一个名为`sql_test`的数据库
+我们先在MySQL中创建一个名为`sql_test`的数据库，执行以下命令创建一张用于测试的数据表：
 
 ```sql
 CREATE DATABASE sql_test;
-```
-
-进入该数据库:
-
-```sql
-use sql_test;
-```
-
-执行以下命令创建一张用于测试的数据表：
-
-```sql
+use sql_test; # 进入该数据库:
 CREATE TABLE `user` (
     `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(20) DEFAULT '',
@@ -135,7 +106,7 @@ CREATE TABLE `user` (
 )ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 ```
 
-### 查询
+### 查询数据
 
 为了方便查询，我们事先定义好一个结构体来存储user表的数据。
 
@@ -398,7 +369,7 @@ sqlInjectDemo("xxx' and (select count(*) from user) <10 #")
 |   SQLite   |  `?` 和`$1`  |
 |   Oracle   |   `:name`    |
 
-## Go实现MySQL事务
+## MySQL事务
 
 ### 什么是事务？
 
@@ -482,15 +453,13 @@ func transactionDemo() { // 事务操作示例
 }
 ```
 
-# sqlx库使用指南
+# sqlx库sql库操作MySQL
 
-在项目中我们通常可能会使用`database/sql`连接MySQL数据库。本文借助使用`sqlx`实现批量插入数据的例子，介绍了`sqlx`中可能被你忽视了的`sqlx.In`和`DB.NamedExec`方法。
+在项目中我们通常可能会使用`database/sql`连接MySQL数据库。`sqlx`可以认为是Go语言内置`database/sql`的超集，本文借助使用`sqlx`实现批量插入数据的例子，介绍了`sqlx`中可能被你忽视了的`sqlx.In`和`DB.NamedExec`方法。
 
-## sqlx介绍
+`sqlx`在优秀的内置`database/sql`基础上提供了一组扩展。这些扩展中除了大家常用来查询的`Get(dest interface{}, ...) error`和`Select(dest interface{}, ...) error`外还有很多其他强大的功能。
 
-在项目中我们通常可能会使用`database/sql`连接MySQL数据库。`sqlx`可以认为是Go语言内置`database/sql`的超集，它在优秀的内置`database/sql`基础上提供了一组扩展。这些扩展中除了大家常用来查询的`Get(dest interface{}, ...) error`和`Select(dest interface{}, ...) error`外还有很多其他强大的功能。
-
-## 安装sqlx
+**安装sqlx**
 
 ```go
 go get github.com/jmoiron/sqlx

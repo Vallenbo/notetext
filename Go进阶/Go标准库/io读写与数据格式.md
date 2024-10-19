@@ -2,7 +2,9 @@
 
 计算机中的文件是存储在外部介质（通常是磁盘）上的数据集合，文件分为文本文件和二进制文件。
 
-# 打开和关闭文件
+# 通过文件对象读取
+
+## 打开/关闭文件
 
 os打开一个指定路径的文件，返回一个文件对象，【可对文件对象做（r,w,close操作），或者使用bufio库等进行操作】
 `os.Open`(文件地址)返回一个文件对象
@@ -24,12 +26,13 @@ func main() {
 }
 ```
 
-# 一、读取
+## 处理含路径的文件
 
 `path` 包里包含一个子包叫 `filepath`，这个子包提供了跨平台的函数，用于处理文件名和路径。例如 `Base()` 函数用于获得路径中的最后一个元素（不包含后面的分隔符）：
 
 ```go
 import "path/filepath"
+
 filename := filepath.Base(path)
 ```
 
@@ -51,10 +54,10 @@ func main() {
 		return
 	}
 	defer file.Close()
-	
+
 	var content []byte
 	var tmp = make([]byte, 128)
-	for { //使用for循环读取文件中的所有数据。
+	for { // 使用for循环读取文件中的所有数据。
 		n, err := file.Read(tmp) // 使用Read方法读取数据
 		if err == io.EOF {
 			fmt.Println("文件读完了")
@@ -104,7 +107,7 @@ func main() {
 
 ## bufio.NewReader带缓冲读取文件
 
-在file的基础上封装了一层API，支持更多的功能
+`bufio.Reader`在file的基础上封装了一层API，支持更多的功能。使用的默认缓冲区大小是 4096 字节。
 
 ```go
 func NewReader(rd io.Reader) *Reader //创建缓存区从终端去读取数据，指定读取截止符
@@ -118,9 +121,9 @@ func main() {
 		return
 	}
 	defer file.Close()
-	reader := bufio.NewReader(file)
+	reader := bufio.NewReader(file) //创建一个读取器
 	for {
-		line, err := reader.ReadString('\n') //注意是字符
+		line, err := reader.ReadString('\n') // 读取器 按照指定格式读取
 		if err == io.EOF {
 			if len(line) != 0 {
 				fmt.Println(line)
@@ -137,7 +140,7 @@ func main() {
 }
 ```
 
-## os.ReadFile读取整个文件
+# ReadFile直接读取整个文件
 
 能够读取完整的文件，只需要将文件名作为参数传入
 
@@ -155,6 +158,16 @@ func main() {
 	fmt.Println(string(content))
 }
 ```
+
+**一次性读取整个文件可能存在以下一些问题**：
+
+- 内存消耗方面：如果文件非常大，一次性将其全部读入内存可能会消耗大量的系统内存资源。这可能导致系统内存紧张，甚至在极端情况下可能引发内存溢出错误，使程序崩溃。
+
+- 性能方面：1、对于特别大的文件，读取操作可能会比较耗时，因为整个文件内容需要一次性加载到内存中，这可能导致程序在读取文件期间出现明显的延迟，影响程序的响应性能。2、如果同时有多个这样的大文件读取操作在进行，可能会使系统整体性能下降，影响其他正在运行的程序或服务。
+
+- 可扩展性方面：如果程序需要处理不同大小的文件，依赖一次性读取整个文件的方式会限制程序的可扩展性。当遇到超出预期大小的文件时，程序可能无法正常运行，需要进行较大的代码调整来适应。
+
+
 
 ## 读取用户的输入
 
@@ -177,7 +190,8 @@ func main() {
    // fmt.Scanf("%s %s", &firstName, &lastName)
    fmt.Printf("Hi %s %s!\n", firstName, lastName) // Hi Chris Naegels
    fmt.Sscanf(input, format, &f, &i, &s)
-   fmt.Println("From the string we read: ", f, i, s) // 输出结果: From the string we read: 56.12 5212 Go
+   fmt.Println("From the string we read: ", f, i, s)
+   // 输出结果: From the string we read: 56.12 5212 Go
 }
 ```
 
@@ -189,32 +203,38 @@ func main() {
 
 ```go
 func main() {
-    inputReader = bufio.NewReader(os.Stdin)
-    fmt.Println("Please enter some input: ")
-    input, err = inputReader.ReadString('\n')  // version 1
-    if err == nil {
-        fmt.Printf("The input was: %s\n", input)
-    }
-    
-    switch input {  // version 2 
-    case "Philip\r\n":  fallthrough
-    case "Ivo\r\n":     fallthrough
-    case "Chris\r\n":   fmt.Printf("Welcome %s\n", input)
-    default: fmt.Printf("You are not welcome here! Goodbye!\n")
-    }
+	inputReader = bufio.NewReader(os.Stdin)
+	fmt.Println("Please enter some input: ")
+	input, err = inputReader.ReadString('\n') // version 1
+	if err == nil {
+		fmt.Printf("The input was: %s\n", input)
+	}
 
-    switch input { // version 3
-    case "Philip\r\n", "Ivo\r\n":   fmt.Printf("Welcome %s\n", input)
-    default: fmt.Printf("You are not welcome here! Goodbye!\n")
-    }
+	switch input { // version 2
+	case "Philip\r\n":
+		fallthrough
+	case "Ivo\r\n":
+		fallthrough
+	case "Chris\r\n":
+		fmt.Printf("Welcome %s\n", input)
+	default:
+		fmt.Printf("You are not welcome here! Goodbye!\n")
+	}
+
+	switch input { // version 3
+	case "Philip\r\n", "Ivo\r\n":
+		fmt.Printf("Welcome %s\n", input)
+	default:
+		fmt.Printf("You are not welcome here! Goodbye!\n")
+	}
 }
 ```
 
 
 
-# 二、写入
+# 通过文件对象读取写入
 
-## 打开文件写入
+## 通过文件对象写入
 
 `os.OpenFile()`能够以指定模式打开文件，返回一个文件对象
 
@@ -266,7 +286,8 @@ func (b *Writer) WriteString(s string) (int, error) { } //将数据先写入缓�
 
 fileObj.Flush() //将缓存中的内容写入文件
 
-func WriteFile(name string, data []byte, perm FileMode) error //写入文件将数据写入命名文件，并在必要时创建它。
+//写入文件将数据写入命名文件，并在必要时创建它。
+func WriteFile(name string, data []byte, perm FileMode) error 
 ```
 
 ```go
@@ -279,30 +300,30 @@ func main() {
 	defer file.Close()
 	writer := bufio.NewWriter(file)
 	for i := 0; i < 10; i++ {
-		writer.WriteString("hello沙河\n") //将数据先写入缓存
+		writer.WriteString("hello沙河\n") // 将数据先写入缓存
 	}
-	writer.Flush() //将缓存中的内容写入文件
+	writer.Flush() // 将缓存中的内容写入文件
 }
 ```
 
-## 直接写入文件方式
+# WriteFile直接写入文件方式
 
-WriteFile(name string, data []byte, perm FileMode) 将数据写入命名文件，并在必要时创建它。
+WriteFile(name string, data []byte, perm FileMode) 
+
+这个函数会直接覆盖原有文件内容，如果文件不存在则创建新文件。简单易用，但不适合进行追加写入或逐步写入的场景。
 
 ```go
 func main() {
-	str := "hello 沙河"
-	err := os.WriteFile("./xx.txt", []byte(str), 0666)
-	if err != nil {
-		fmt.Println("write file failed, err:", err)
-		return
-	}
+    str := "hello 沙河"
+    err := os.WriteFile(`a.txt`, []byte("你好世界"),0666) // 末尾添加模式
+    if err != nil {
+        fmt.Println("write file failed, err:", err)
+        return
+    }
 }
 ```
 
-
-
-# MultiWriter多个流写入方式
+## MultiWriter多个流写入方式
 
 MultiWriter 创建一个 writer数组，返回一个writer，将其写入复制到所有提供的 writer
 
@@ -317,7 +338,7 @@ filer, err := os.Create("log.txt")
 
 
 
-## io.Copy文件拷贝
+# io.Copy文件拷贝
 
 如何拷贝一个文件到另一个文件？最简单的方式就是使用 `io` 包：
 
@@ -344,7 +365,7 @@ func CopyFile(dstName, srcName string) (written int64, err error) {
 }
 ```
 
-## Seek()定位
+# Seek()定位
 
 
 ```go
@@ -364,7 +385,7 @@ os.Stdin //从键盘标准输入，当从键盘输入的内容包含（空格时
 os.Stdout //输出到终端
 ```
 
-# compress 包：读取压缩文件
+# compress 包：读取/压缩文件
 
 `compress` 包提供了读取压缩文件的功能，支持的压缩文件格式为：bzip2、flate、gzip、lzw 和 zlib。
 
@@ -381,7 +402,7 @@ func main() {
 	defer fi.Close()
 
 	fz, err := gzip.NewReader(fi)
-  var r *bufio.Reader
+	var r *bufio.Reader
 	if err != nil {
 		r = bufio.NewReader(fi)
 	} else {
@@ -399,7 +420,7 @@ func main() {
 }
 ```
 
-# JSON 数据格式
+# JSON数据格式与json包使用
 
 Golang 提供的标准 JSON 解析库 encoding/json，在开发高性能、高并发的网络服务时会产生性能问题。所以很多开发者在实际的开发中，往往会选用第三方的高性能 JSON 解析库，例如 [jsoniter](https://github.com/json-iterator/go) 、 [easyjson](https://github.com/mailru/easyjson) 、 [jsonparser](https://github.com/buger/jsonparser) 等。
 

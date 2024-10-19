@@ -1,6 +1,6 @@
 # 在 Go 中如何使用 Viper 来管理配置
 
-Viper 源码仓库：[spf13/viper: Go configuration with fangs (github.com)](https://github.com/spf13/viper)
+Viper 源码仓库：[spf13/viper  (github.com)](https://github.com/spf13/viper)
 
 Viper 是一个功能齐全的 Go 应用程序配置文件读取的库，支持很多场景。它可以处理各种类型的配置需求和格式，包括设置默认值、从多种配置文件和环境变量中读取配置信息、实时监视配置文件等。无论是小型应用还是大型分布式系统，Viper 都可以提供灵活而可靠的配置管理解决方案。
 

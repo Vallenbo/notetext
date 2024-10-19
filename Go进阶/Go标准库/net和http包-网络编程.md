@@ -28,9 +28,7 @@ TCP服务端程序的处理流程：
 我们使用Go语言的net包实现的TCP服务端代码如下：
 
 ```go
-// tcp/server/main.go
-// TCP server端
-// 处理函数
+// TCP server端 处理函数
 func process(conn net.Conn) {
 	defer conn.Close() // 关闭连接
 	for {

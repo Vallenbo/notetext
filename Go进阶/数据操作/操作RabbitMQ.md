@@ -1,6 +1,6 @@
 这些教程涵盖了使用RabbitMQ创建消息传递应用程序的基础知识。 你需要安装RabbitMQ服务器才能完成这些教程，请参阅[安装指南](https://www.rabbitmq.com/download.html)或使用[Docker镜像](https://registry.hub.docker.com/_/rabbitmq/)。 这些教程的代码是[开源](https://github.com/rabbitmq/rabbitmq-tutorials)的，[官方网站](https://github.com/rabbitmq/rabbitmq-website)也是如此。
 
-# RabbitMQ Go教程1—HelloWorld
+# 1 HelloWorld
 
 ## 先决条件
 
@@ -231,7 +231,7 @@ go run receive.go
 
 
 
-# RabbitMQ Go教程2—任务队列
+# 2 任务队列
 
 ## 先决条件
 
@@ -676,7 +676,7 @@ func main() {
 
 
 
-# RabbitMQ Go教程3—发布/订阅
+# 3 发布/订阅
 
 
 
@@ -1026,7 +1026,7 @@ sudo rabbitmqctl list_bindings
 
 
 
-# RabbitMQ Go教程4—路由
+# 4 路由
 
 ## 路由
 
@@ -1358,7 +1358,7 @@ go run emit_log_direct.go error "Run. Run. Or it will explode."
 
 
 
-# RabbitMQ Go教程5—topic
+# 5 topic
 
 ## 先决条件
 
@@ -1608,7 +1608,7 @@ go run emit_log_topic.go "kern.critical" "A critical kernel error"
 
 
 
-# RabbitMQ Go教程6—RPC
+# 6 RPC
 
 ## 先决条件
 

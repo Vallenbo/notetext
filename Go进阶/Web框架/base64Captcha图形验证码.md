@@ -1,22 +1,22 @@
 [🎃Base64captcha🎃](https://github.com/mojocn/base64Captcha) 几行代码就可以定义自己内容的图形验证码库,支持任意unicode字符的内容.
 
-## 1. 📒 文档&Demo 📒
+# 1. 📒 文档&Demo 📒
 
 - [English](https://godoc.org/github.com/mojocn/base64Captcha)
 - [中文文档](https://github.com/mojocn/base64Captcha/blob/master/README_zh.md)
 - [Playground](https://captcha.mojotv.cn/)
 
-## 2. 🚀 快速上手 🚀
+# 2. 🚀 快速上手 🚀
 
-### 2.1 📥 下载base64Captcha包 📥
+## 2.1 📥 下载base64Captcha包 📥
 
 ```sh
 go get -u github.com/mojocn/base64Captcha
 ```
 
-### 2.2 🏂 在您的项目中使用base64Captcha 🏂
+## 2.2 🏂 在您的项目中使用base64Captcha 🏂
 
-#### 2.2.1 🏇 实现[Store interface](https://github.com/mojocn/base64Captcha/blob/master/interface_store.go) 或者使用自带memory store 🏇
+### 2.2.1 🏇 实现[Store interface](https://github.com/mojocn/base64Captcha/blob/master/interface_store.go) 或者使用自带memory store 🏇
 
 - [Build-in Memory Store](https://github.com/mojocn/base64Captcha/blob/master/store_memory.go)(只支持单机部署,多台服务器请自定义redis store)
 
@@ -34,7 +34,7 @@ type Store interface {
 }
 ```
 
-#### 2.2.2 🏄 实现[Driver interface](https://github.com/mojocn/base64Captcha/blob/master/interface_driver.go) 或者使用自带 drivers 🏄
+### 2.2.2 🏄 实现[Driver interface](https://github.com/mojocn/base64Captcha/blob/master/interface_driver.go) 或者使用自带 drivers 🏄
 
 包自带driver:
 
@@ -53,7 +53,7 @@ type Driver interface {
 }
 ```
 
-#### 2.2.3 🚴 核心代码[captcha.go](https://github.com/mojocn/base64Captcha/blob/master/captcha.go) 🚴
+### 2.2.3 🚴 核心代码[captcha.go](https://github.com/mojocn/base64Captcha/blob/master/captcha.go) 🚴
 
 captcha.go 是package的入口文件,源代码逻辑非常简单,如下:
 
@@ -92,7 +92,7 @@ func (c *Captcha) Verify(id, answer string, clear bool) (match bool) {
 }
 ```
 
-#### 2.2.4 🚵 生成Base64(image/audio)验证码字符串 🚵
+### 2.2.4 🚵 生成Base64(image/audio)验证码字符串 🚵
 
 ```go
 //Generate generates a random id, base64 image string or an error if any
@@ -108,7 +108,7 @@ func (c *Captcha) Generate() (id, b64s string, err error) {
 }
 ```
 
-#### 2.2.5 🤸 校验验证码内容 🤸
+### 2.2.5 🤸 校验验证码内容 🤸
 
 ```go
 //if you has multiple captcha instances which shares a same store. You may want to use `store.Verify` method instead.
@@ -119,7 +119,7 @@ func (c *Captcha) Verify(id, answer string, clear bool) (match bool) {
 }
 ```
 
-#### 2.2.6 🏃 完整实例代码 🏃
+### 2.2.6 🏃 完整实例代码 🏃
 
 ```go
 // example of HTTP server that uses the captcha package.
@@ -222,7 +222,7 @@ func main() {
 }
 ```
 
-### 2.3 🎬　使用历史版本　🎬
+## 2.3 🎬　使用历史版本　🎬
 
 [v1.2.2](https://github.com/mojocn/base64Captcha/tree/v1.2.2)
 
@@ -230,7 +230,7 @@ func main() {
  go get github.com/mojocn/base64Captcha@v1.2.2 
 ```
 
-## 3. 🎨 定制自己的图形验证码 🎨
+# 3. 🎨 定制自己的图形验证码 🎨
 
 您那个定制自己的图形验码内容,只需实现 [interface driver](https://github.com/mojocn/base64Captcha/blob/master/interface_driver.go) 和 [interface item](https://github.com/mojocn/base64Captcha/blob/master/interface_item.go).
 

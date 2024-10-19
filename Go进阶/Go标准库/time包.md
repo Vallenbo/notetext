@@ -21,6 +21,44 @@ func timeDemo() {  // timeDemo 时间对象的年月日时分秒
 }
 ```
 
+
+
+# 定时器
+
+使用`time.Tick(时间间隔)`来设置定时器，定时器的本质上是一个通道（channel）。
+
+```go
+func tickDemo() {
+	ticker := time.Tick(time.Second) //定义一个1秒间隔的定时器
+	for i := range ticker {
+		fmt.Println(i)//每秒都会执行的任务
+	}
+}
+```
+
+定时执行  
+
+```Go
+tm := time.NewTimer(3 * time.Second)
+<-tm.C //阻塞3秒钟
+//do something
+tm.Stop()
+
+//或者用：
+<-time.After(3 * time.Second) //阻塞3秒钟
+```
+
+周期执行  
+
+```Go
+tk := time.NewTicker(1 * time.Second)
+for i := 0; i < 10; i++ {
+    <-tk.C //阻塞1秒钟
+    //do something
+}
+tk.Stop()
+```
+
 # Location和time zone
 
 Go 语言中使用 location 来映射具体的时区。时区（Time Zone）是根据世界各国家与地区不同的经度而划分的时间定义，全球共分为24个时区。中国差不多跨5个时区，但为了使用方便只用东八时区的标准时即北京时间为准。
@@ -175,42 +213,6 @@ func (t Time) After(u Time) bool
 ```
 
 如果t代表的时间点在u之后，返回真；否则返回假。
-
-# 定时器
-
-使用`time.Tick(时间间隔)`来设置定时器，定时器的本质上是一个通道（channel）。
-
-```go
-func tickDemo() {
-	ticker := time.Tick(time.Second) //定义一个1秒间隔的定时器
-	for i := range ticker {
-		fmt.Println(i)//每秒都会执行的任务
-	}
-}
-```
-
-定时执行  
-
-```Go
-tm := time.NewTimer(3 * time.Second)
-<-tm.C //阻塞3秒钟
-//do something
-tm.Stop()
-
-//或者用：
-<-time.After(3 * time.Second) //阻塞3秒钟
-```
-
-周期执行  
-
-```Go
-tk := time.NewTicker(1 * time.Second)
-for i := 0; i < 10; i++ {
-    <-tk.C //阻塞1秒钟
-    //do something
-}
-tk.Stop()
-```
 
 
 

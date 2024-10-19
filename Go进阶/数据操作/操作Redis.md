@@ -1,58 +1,16 @@
+[go-redis 文档指南](https://redis.uptrace.dev/zh/guide/)
 
-
-# Go语言操作Redis
-
-在项目开发中redis的使用也比较频繁，本文介绍了Go语言中`go-redis`库的基本使用。
-
-# Redis介绍
-
-Redis是一个开源的内存数据库，Redis提供了多种不同类型的数据结构，很多业务场景下的问题都可以很自然地映射到这些数据结构上。除此之外，通过复制、持久化和客户端分片等特性，我们可以很方便地将Redis扩展成一个能够包含数百GB数据、每秒处理上百万次请求的系统。
-
-## Redis支持的数据结构
-
-Redis支持诸如字符串（string）、哈希（hashe）、列表（list）、集合（set）、带范围查询的排序集合（sorted set）、bitmap、hyperloglog、带半径查询的地理空间索引（geospatial index）和流（stream）等数据结构。
-
-## Redis应用场景
-
-- 缓存系统，减轻主数据库（MySQL）的压力。
-- 计数场景，比如微博、抖音中的关注数和粉丝数。
-- 热门排行榜，需要排序的场景特别适合使用ZSET。
-- 利用 LIST 可以实现队列的功能。
-- 利用 HyperLogLog 统计UV、PV等数据。
-- 使用 geospatial index 进行地理位置相关查询。
-
-## 准备Redis环境
-
-读者可以选择在本机安装 redis 或使用云数据库，这里直接使用Docker启动一个 redis 环境，方便学习使用。
-
-使用下面的命令启动一个名为 redis507 的 5.0.7 版本的 redis server环境。
-
-```bash
-docker run --name redis507 -p 6379:6379 -d redis:5.0.7
-```
-
-**注意：**此处的版本、容器名和端口号可以根据自己需要设置。
-
-启动一个 redis-cli 连接上面的 redis server。
-
-```bash
-docker run -it --network host --rm redis:5.0.7 redis-cli
-```
-
-# go-redis库
-
-## 安装
+# go-redis库操作Redis
 
 Go 社区中目前有很多成熟的 redis client 库操作 Redis 数据库。使用以下命令下安装 go-redis 库。
 
 ```go
-go get github.com/go-redis/redis
-go get github.com/go-redis/redis/v8  //最新版本的go-redis库的相关命令都需要传递context.Context参数
+go get github.com/redis/go-redis/v9
 ```
 
-## 连接
 
-### 普通连接模式
+
+## 普通连接模式
 
 go-redis 库中使用 redis.NewClient 函数连接 Redis 服务器。
 
@@ -76,7 +34,7 @@ if err != nil {
 rdb := redis.NewClient(opt)
 ```
 
-### TLS连接模式
+## TLS连接模式
 
 如果使用的是 TLS 连接方式，则需要使用 tls.Config 配置。
 
@@ -90,7 +48,7 @@ rdb := redis.NewClient(&redis.Options{
 })
 ```
 
-### Redis Sentinel模式
+## Redis Sentinel模式
 
 使用下面的命令连接到由 Redis Sentinel 管理的 Redis 服务器。
 
@@ -101,7 +59,7 @@ rdb := redis.NewFailoverClient(&redis.FailoverOptions{
 })
 ```
 
-### Redis Cluster模式
+## Redis Cluster模式
 
 使用下面的命令连接到 Redis Cluster，go-redis 支持按延迟或随机路由命令。
 
@@ -113,6 +71,44 @@ rdb := redis.NewClusterClient(&redis.ClusterOptions{
     // RouteRandomly: true,
 })
 ```
+
+# 快速使用
+
+```go
+var ctx = context.Background()
+
+func ExampleClient() {
+    rdb := redis.NewClient(&redis.Options{
+        Addr:     "localhost:6379",
+        Password: "", // no password set
+        DB:       0,  // use default DB
+    })
+
+    err := rdb.Set(ctx, "key", "value", 0).Err()
+    if err != nil {
+        panic(err)
+    }
+
+    val, err := rdb.Get(ctx, "key").Result()
+    if err != nil {
+        panic(err)
+    }
+    fmt.Println("key", val)
+
+    val2, err := rdb.Get(ctx, "key2").Result()
+    if err == redis.Nil {
+        fmt.Println("key2 does not exist")
+    } else if err != nil {
+        panic(err)
+    } else {
+        fmt.Println("key2", val2)
+    }
+    // Output: key value
+    // key2 does not exist
+}
+```
+
+
 
 # 基本使用
 
@@ -127,7 +123,7 @@ func doCommand() { // doCommand go-redis基本使用示例
 
 	val, err := rdb.Get(ctx, "key").Result() // 执行命令获取结果
 	fmt.Println(val, err)
-	
+
 	cmder := rdb.Get(ctx, "key") // 先获取到命令对象
 	fmt.Println(cmder.Val()) // 获取值
 	fmt.Println(cmder.Err()) // 获取错误
@@ -409,9 +405,9 @@ fmt.Println(incr.Val(), err)
 // TxPipelined demo
 var incr2 *redis.IntCmd
 _, err = rdb.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
-	incr2 = pipe.Incr(ctx, "tx_pipeline_counter")
-	pipe.Expire(ctx, "tx_pipeline_counter", time.Hour)
-	return nil
+    incr2 = pipe.Incr(ctx, "tx_pipeline_counter")
+    pipe.Expire(ctx, "tx_pipeline_counter", time.Hour)
+    return nil
 })
 fmt.Println(incr2.Val(), err)
 ```
@@ -425,7 +421,7 @@ EXPIRE pipeline_counts 3600
 EXEC
 ```
 
-## Watch
+## Watch事务操作
 
 我们通常搭配 `WATCH`命令来执行事务操作。从使用`WATCH`命令监视某个 key 开始，直到执行`EXEC`命令的这段时间里，如果有其他用户抢先对被监视的 key 进行了替换、更新、删除等操作，那么当用户尝试执行`EXEC`的时候，事务将失败并返回一个错误，用户可以根据这个错误选择重试事务或者放弃事务。
 

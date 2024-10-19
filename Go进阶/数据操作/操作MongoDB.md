@@ -1,52 +1,14 @@
-# Go语言操作mongoDB
+# 操作mongoDB
 
 mongoDB是目前比较流行的一个基于分布式文件存储的数据库，它是一个介于关系数据库和非关系数据库(NoSQL)之间的产品，是非关系数据库当中功能最丰富，最像关系数据库的。
 
-# mongoDB介绍
-
-[mongoDB](https://www.mongodb.com/)是目前比较流行的一个基于分布式文件存储的数据库，它是一个介于关系数据库和非关系数据库(NoSQL)之间的产品，是非关系数据库当中功能最丰富，最像关系数据库的。
-
-mongoDB中将一条数据存储为一个文档（document），数据结构由键值（key-value）对组成。 其中文档类似于我们平常编程中用到的JSON对象。 文档中的字段值可以包含其他文档，数组及文档数组。
-
-## mongoDB相关概念
-
-mongoDB中相关概念与我们熟悉的SQL概念对比如下：
-
-| MongoDB术语/概念 |                说明                 | 对比SQL术语/概念 |
-| :--------------: | :---------------------------------: | :--------------: |
-|     database     |               数据库                |     database     |
-|    collection    |                集合                 |      table       |
-|     document     |                文档                 |       row        |
-|      field       |                字段                 |      column      |
-|      index       |                index                |       索引       |
-|   primary key    | 主键 MongoDB自动将_id字段设置为主键 |   primary key    |
-
-
-
-# Go语言操作mongoDB
-
-我们这里使用的是官方的驱动包，当然你也可以使用第三方的驱动包（如mgo等）。 mongoDB官方版的Go驱动发布的比较晚（2018年12月13号）。
-
-## 安装mongoDB Go驱动包
-
-```bash
+```go
 go get github.com/mongodb/mongo-go-driver
 ```
 
 ## 通过Go代码连接mongoDB
 
 ```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"log"
-
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-)
-
 func main() {
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017") // 设置客户端连接配置
 	client, err := mongo.Connect(context.TODO(), clientOptions) // 连接到MongoDB
@@ -81,14 +43,6 @@ fmt.Println("Connection to MongoDB closed.")
 ## 连接池模式
 
 ```go
-import (
-	"context"
-	"time"
-
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-)
-
 func ConnectToDB(uri, name string, timeout time.Duration, num uint64) (*mongo.Database, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
