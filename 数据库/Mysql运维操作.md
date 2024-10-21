@@ -104,8 +104,6 @@ show variables like '%binlog_expire_logs_seconds%';
 
 
 
-
-
 ### 查询日志
 
 查询日志中记录了客户端的所有操作语句，而二进制日志不包含查询数据的SQL语句。默认情况下，查询日志是未开启的。如果需要开启查询日志，可以设置以下配置:
@@ -439,12 +437,6 @@ pid-file=/var/run/mariadb/mariadb.pid	#pid所在的目录
 !includedir /etc/my.cnf.d
 ```
 
-<img src="E:\Project\Textbook\linux云计算\数据库\assets\wps149.jpg" alt="img" style="zoom:67%;" /> <img src="E:\Project\Textbook\linux云计算\assets\wps150.jpg" alt="img" style="zoom:67%;" />
-
-<img src="E:\Project\Textbook\linux云计算\assets\wps151.jpg" alt="img" style="zoom:67%;" /> <img src="E:\Project\Textbook\linux云计算\数据库\assets\wps152.jpg" alt="img" style="zoom:67%;" />
-
-<img src="E:\Project\Textbook\linux云计算\数据库\assets\wps153.jpg" alt="img" style="zoom:67%;" /> 
-
 
 
 ## GRANT命令用于对用户进行授权：
@@ -613,7 +605,7 @@ mysql> source d:/onlinedb sql;
 语法：show full columns from 表名;
 ```
 
-二、设置字符集
+### 设置字符集
 
 设置字符集一般有两种方法，一种是在创建表的时候设置字符集，另一种是表建成之后修改字符集。
 
@@ -632,12 +624,16 @@ mysql> source d:/onlinedb sql;
 ```go
 修改库的字符集
 语法：alter database 库名 default character set 字符集;
+ALTER DATABASE database_name CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci
 
 修改表的字符集
 语法：alter table 表名 convert to character set 字符集;
+只修改表默认的字符集:	ALTER TABLE table_name DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+修改表默认的字符集和所有字符列的字符集: ALTER TABLE table_name CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 修改字段的字符集
 语法：alter table 表名 modify 字段名 字段属性 character set gbk；
+ALTER TABLE table_name CHANGE column_name column_name VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 
@@ -667,60 +663,12 @@ restrict(限制)表示如果该模式中已经定义了下属的数据库对象�
 
 数据操作DML操作：添加数据、修改数据、删除数据
 
-## 数据类型约束
-
-字符串类型：
-
-<img src="E:\Project\Textbook\linux云计算\assets\wps1-1682771292878-1.jpg" alt="img" style="zoom: 67%;" /> 
-
-
-
-数值类型：
-
-<img src="E:\Project\Textbook\linux云计算\assets\wps2-1682771292878-3.jpg" alt="img" style="zoom:67%;" /> 
-
-
-
-日期和时间类型：
-
-<img src="E:\Project\Textbook\linux云计算\assets\wps3-1682771292878-2.jpg" alt="img" style="zoom: 80%;" /> 
-
-
-
-表的字段约束：
-
-`int(4)、char(5)、varchar(7)`字段类型后面加括号限制宽度
-
-`unsigned` 表示无正负符号(给数值类型使用，数值小于占用存储空间前导0)
-
-`not null`	不能为空在操作数据库时如果输入该字段的数据为NULL，就会报错
-
-`default`	设置默认值
-
-`primary key`主键不能为空且唯一，一般和自动递增使用
-
-`auto_increment`定义列为自增属性，一般用于主键， 数值会自动加1
-
-`unique`	唯一索引(数据不能重复:用户名)可以增加查询速度,但是会降低插入和更新速度
-
-
-
-主键：
-
-1、表中每一行都应该有可以唯一 标识自己的一-列， 用于记录两条记录不能重复，任意两行都不具有相同的主键值
-
-2、应该总是定义主键虽然并不总是都需要主键，但大多数数据库设计人员都应保证他们创建的每个表具有一个主键，以便于以后的数据操纵和管理。
-
-
-
 ## 表定义
 
 ```sql
 use xxx;		//使用数据表
 create table XXX_back select * from XXX //数据表进行备份
 ```
-
-
 
 ### 创建数据表
 
@@ -740,7 +688,7 @@ CREATE TABLE Student(Sno CHAR(9) PRIMARY KEY,	/*列级完整性约束条件，Sn
 ```
 
 ```sql
-create table xxx（列名字  类型（20））	
+create table xxx（列名字  类型（20））
 create table 新表 as select  from 旧表	复制数据表结构及数据到新表
 create table 新表 as select  from 旧表 where false	复制数据表结构到新表
 ```

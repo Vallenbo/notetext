@@ -73,7 +73,7 @@ MySQL是关系型数据库，是基于二维表进行数据存储的，具体的
 查询当前数据库：
 `SELECT DATABASE ();`
 创建数据库：
-`CREATE DATABASE [IF NOT EXISTS] 数据库名 [DEFAULT CHARSET 字符集] [COLLATE 排序规则];`
+`CREATE DATABASE [IF NOT EXISTS] 数据库名 [DEFAULT charset 字符集] [COLLATE 排序规则];`
 删除数据库：
 `DROP DATABASE [IF EXISTS] 数据库名;`
 使用/切换数据库：
@@ -105,7 +105,7 @@ create table tb_user(
 	name varchar(50) comment '姓名',
 	age int comment '年龄',
 	gender varchar(1) comment '性别'
-) comment '用户表';
+) ENGINE = InnoDB AUTO_INCREMENT = 6 charACTER set = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic comment '用户表';
 ```
 **最后一个字段后面没有逗号**
 
@@ -132,34 +132,30 @@ create table tb_user(
 删除表，并重新创建该表：
 `TRUNCATE TABLE 表名;`
 
-### 数值类型
-
-<img src="./assets/wps2-1682771292878-3.jpg" alt="img" style="zoom：67%;" /> 
-
 ## DML（数据操作语言）
 
 ### INSERT（添加数据）
 
 指定字段：
-`INSERT INTO 表名 (字段名1， 字段名2， ...) VALUES (值1， 值2， ...);`
+`INSERT intO 表名 (字段名1， 字段名2， ...) VALUES (值1， 值2， ...);`
 全部字段：
-`INSERT INTO 表名 VALUES (值1， 值2， ...);`
+`INSERT intO 表名 VALUES (值1， 值2， ...);`
 
 批量添加数据：
-`INSERT INTO 表名 (字段名1， 字段名2， ...) VALUES (值1， 值2， ...)， (值1， 值2， ...)， (值1， 值2， ...);`
-`INSERT INTO 表名 VALUES (值1， 值2， ...)， (值1， 值2， ...)， (值1， 值2， ...);`
+`INSERT intO 表名 (字段名1， 字段名2， ...) VALUES (值1， 值2， ...)， (值1， 值2， ...)， (值1， 值2， ...);`
+`INSERT intO 表名 VALUES (值1， 值2， ...)， (值1， 值2， ...)， (值1， 值2， ...);`
 
 #### 注意事项
 
 - 字符串和日期类型数据应该包含在引号中
 - 插入的数据大小应该在字段的规定范围内
 
-### UPDATE （更新和删除数据)
+### UPdate （更新和删除数据)
 
 修改数据：
-`UPDATE 表名 SET 字段名1 = 值1， 字段名2 = 值2， ... [WHERE 条件];`
+`UPdate 表名 set 字段名1 = 值1， 字段名2 = 值2， ... [WHERE 条件];`
 例：修改id为1的数据, 将name修改为小昭, gender修改为 女
-`UPDATE emp SET name = 'Jack' WHERE id = 1;`
+`UPdate emp set name = 'Jack' WHERE id = 1;`
 
 删除数据：
 `DELETE FROM 表名 [WHERE 条件];`
@@ -401,7 +397,7 @@ drop user 'test'@'localhost'; -- 删除用户
 | ALL， ALL PRIVILEGES | 所有权限           |
 | SELECT               | 查询数据           |
 | INSERT               | 插入数据           |
-| UPDATE               | 修改数据           |
+| UPdate               | 修改数据           |
 | DELETE               | 删除数据           |
 | ALTER                | 修改表             |
 | DROP                 | 删除数据库/表/视图 |
@@ -484,19 +480,19 @@ select round(rand()*1000000，0);
 
 | 函数  | 功能  |
 | ------------ | ------------ |
-| CURDATE()  | 返回当前日期  |
-| CURTIME()  | 返回当前时间  |
+| CURdate()  | 返回当前日期  |
+| CURtime()  | 返回当前时间  |
 | NOW()  | 返回当前日期+时间  |
-| YEAR(date)  | 获取指定date的年份  |
+| year(date)  | 获取指定date的年份  |
 | MONTH(date)  | 获取指定date的月份  |
 | DAY(date)  | 获取指定date的日期  |
-| DATE_ADD(date， INTERVAL expr type)  | 返回一个日期/时间值加上一个时间间隔expr后的时间值  |
-| DATEDIFF(date1， date2)  | 返回起始时间date1和结束时间date2之间的天数  |
+| date_ADD(date， intERVAL expr type)  | 返回一个日期/时间值加上一个时间间隔expr后的时间值  |
+| dateDIFF(date1， date2)  | 返回起始时间date1和结束时间date2之间的天数  |
 
 例子：
 
 ```mysql
-SELECT DATE_ADD(NOW()， INTERVAL 70 YEAR); -- DATE_ADD
+SELECT date_ADD(NOW()， intERVAL 70 year); -- date_ADD
 
 -- 案例：查询所有员工的入职天数，并根据入职天数倒序排序。
 seLect name， datediff(curdate()， entrydate) as ' entrydays' from emp order by entrydays desc;
@@ -577,11 +573,11 @@ create table user(
 CREATE TABLE 表名(
 	字段名 字段类型，
 	...
-	[CONSTRAINT] [外键名称] FOREIGN KEY(外键字段名) REFERENCES 主表(主表列名)
+	[CONSTRAint] [外键名称] FOREIGN KEY(外键字段名) REFERENCES 主表(主表列名)
 );
 
 -- 方式二
-ALTER TABLE 表名 ADD CONSTRAINT 外键名称 FOREIGN KEY (外键字段名) REFERENCES 主表(主表列名);
+ALTER TABLE 表名 ADD CONSTRAint 外键名称 FOREIGN KEY (外键字段名) REFERENCES 主表(主表列名);
 alter table emp add constraint fk_emp_dept_id foreign key(dept_id) references dept(id); -- 例子
 ```
 
@@ -598,11 +594,11 @@ alter table emp add constraint fk_emp_dept_id foreign key(dept_id) references de
 | NO ACTION  | 当在父表中删除/更新对应记录时，首先检查该记录是否有对应外键，如果有则不允许删除/更新（与RESTRICT一致）  |
 | RESTRICT  | 当在父表中删除/更新对应记录时，首先检查该记录是否有对应外键，如果有则不允许删除/更新（与NO ACTION一致）  |
 | CASCADE  | 当在父表中删除/更新对应记录时，首先检查该记录是否有对应外键，如果有则也删除/更新外键在子表中的记录  |
-| SET NULL  | 当在父表中删除/更新对应记录时，首先检查该记录是否有对应外键，如果有则设置子表中该外键值为null（要求该外键允许为null）  |
-| SET DEFAULT  | 父表有变更时，子表将外键设为一个默认值（Innodb不支持）  |
+| set NULL  | 当在父表中删除/更新对应记录时，首先检查该记录是否有对应外键，如果有则设置子表中该外键值为null（要求该外键允许为null）  |
+| set DEFAULT  | 父表有变更时，子表将外键设为一个默认值（Innodb不支持）  |
 
 更改删除/更新行为：
-`ALTER TABLE 表名 ADD CONSTRAINT 外键名称 FOREIGN KEY (外键字段) REFERENCES 主表名(主表字段名) ON UPDATE 行为 ON DELETE 行为;`
+`ALTER TABLE 表名 ADD CONSTRAint 外键名称 FOREIGN KEY (外键字段) REFERENCES 主表名(主表字段名) ON UPdate 行为 ON DELETE 行为;`
 
 # 多表查询
 
@@ -751,7 +747,7 @@ select * from emp where age > 50;
 SELECT * FROM t1 WHERE column1 = (SELECT column1 FROM t2);
 ```
 
-> 子查询外部的语句可以是 INSERT / UPDATE / DELETE / SELECT 的任何一个
+> 子查询外部的语句可以是 INSERT / UPdate / DELETE / SELECT 的任何一个
 
 根据子查询结果可以分为：
 
@@ -847,12 +843,12 @@ update account set money = money - 1000 where name = '张三'; -- 2. 将张三�
 update account set money = money + 1000 where name = '李四'; -- 3. 将李四账户余额+1000
 
 SELECT @@AUTOCOMMIT; -- 查看事务提交方式
-SET @@AUTOCOMMIT = 0; -- 设置事务提交方式，1为自动提交，0为手动提交，该设置只对当前会话有效
+set @@AUTOCOMMIT = 0; -- 设置事务提交方式，1为自动提交，0为手动提交，该设置只对当前会话有效
 COMMIT; -- 提交事务
 ROLLBACK; -- 回滚事务
 
 -- 设置手动提交，上面代码改为：
-SET @@AUTOCOMMIT = 0; -- 开启事务为手动
+set @@AUTOCOMMIT = 0; -- 开启事务为手动
 select * from account where name = '张三';
 update account set money = money - 1000 where name = '张三';
 update account set money = money + 1000 where name = '李四';
@@ -944,7 +940,7 @@ MySQL 支持四种事务隔离级别，每种级别提供不同程度的数据�
 # 查看事务隔离级别：
 SELECT @@TRANSACTION_ISOLATION;
 # 设置事务隔离级别：
-SET [SESSION | GLOBAL] TRANSACTION ISOLATION LEVEL {READ UNCOMMITTED | READ COMMITTED | REPEATABLE READ | SERIALIZABLE};
+set [SESSION | GLOBAL] TRANSACTION ISOLATION LEVEL {READ UNCOMMITTED | READ COMMITTED | REPEATABLE READ | SERIALIZABLE};
 # SESSION 是会话级别，表示只针对当前会话有效，GLOBAL 表示对所有会话有效
 ```
 
@@ -1076,7 +1072,7 @@ Memory 引擎的表数据是存储在内存中的，受硬件问题、断电问�
 
 缺点：
 - 索引列也是要占用空间的
-- 索引大大提高了查询效率，但降低了更新的速度，比如 INSERT、UPDATE、DELETE
+- 索引大大提高了查询效率，但降低了更新的速度，比如 INSERT、UPdate、DELETE
 ```
 
 
@@ -1090,7 +1086,7 @@ MySQL的索引是在存储引擎层实现的，不同的存储引擎有不同的
 | B+Tree（默认） | 最常见的索引类型，大部分引擎都支持B+树索引  |
 | Hash  | 底层数据结构是用哈希表实现，只有精确匹配索引列的查询才有效，不支持范围查询  |
 | R-Tree(空间索引)  | 空间索引是 MyISAM 引擎的一个特殊索引类型，主要用于地理空间数据类型，通常使用较少  |
-| Full-Text(全文索引)  | 是一种通过建立倒排索引，快速匹配文档的方式，类似于 Lucene， Solr， ES  |
+| Full-text(全文索引)  | 是一种通过建立倒排索引，快速匹配文档的方式，类似于 Lucene， Solr， ES  |
 
 不同的存储引擎对于索引结构的支持情况
 
@@ -1191,7 +1187,7 @@ hash哈希索引就是采用一定的hash算法，将键值换算成新的hash�
 | 主键索引  | 针对于表中主键创建的索引  | 默认自动创建，只能有一个  | PRIMARY  |
 | 唯一索引  | 避免同一个表中某数据列中的值重复  | 可以有多个  | UNIQUE  |
 | 特定索引 | 快速定位特定数据  | 可以有多个  |   |
-| 全文索引  | 全文索引查找的是文本中的关键词，而不是比较索引中的值  | 可以有多个  | FULLTEXT  |
+| 全文索引  | 全文索引查找的是文本中的关键词，而不是比较索引中的值  | 可以有多个  | FULLtext  |
 
 **索引重复度**（或称为基数）是指索引中唯一值的数量。它是评估索引性能和选择合适索引的重要指标。
 
@@ -1242,7 +1238,7 @@ select * from user where name = 'Arm';	-- 备注：id为主键，name字段创�
 ## 语法
 
 创建索引：
-`CREATE [UNIQUE | FULLTEXT] INDEX index_name ON table_name (index_col_name， ...);`
+`CREATE [UNIQUE | FULLtext] INDEX index_name ON table_name (index_col_name， ...);`
 如果不加 CREATE 后面不加索引类型参数，则创建的是常规索引
 
 查看索引：
@@ -1270,7 +1266,7 @@ drop index idx_user_email on tb_user;	-- 删除索引
 
 ## 查看sql执行频次
 
-查看当前数据库的 INSERT， UPDATE， DELETE， SELECT 访问频次：
+查看当前数据库的 INSERT， UPdate， DELETE， SELECT 访问频次：
 `SHOW GLOBAL STATUS LIKE 'Com_______';` 或者 `SHOW SESSION STATUS LIKE 'Com_______';`
 
 ```sql
@@ -1317,7 +1313,7 @@ show profile 能在做SQL优化时帮我们了解**时间都耗费在哪里**。
 ```sql
 SELECT @@have_profiling;
 # profiling 默认关闭，可以通过set语句在session/global级别开启 profiling：
-SET profiling = 1;
+set profiling = 1;
 # 查看所有语句的耗时：
 show profiles;
 # 查看指定query_id的SQL语句各个阶段的耗时：
@@ -1803,11 +1799,11 @@ InnoDB实现了以下两种类型的行锁：
 | SQL                           | 行锁类型   | 说明                                     |
 | ----------------------------- | ---------- | ---------------------------------------- |
 | INSERT ...                    | 排他锁     | 自动加锁                                 |
-| UPDATE ...                    | 排他锁     | 自动加锁                                 |
+| UPdate ...                    | 排他锁     | 自动加锁                                 |
 | DELETE ...                    | 排他锁     | 自动加锁                                 |
 | SELECT（正常）                | 不加任何锁 |                                          |
 | SELECT ... LOCK IN SHARE MODE | 共享锁     | 需要手动在SELECT之后加LOCK IN SHARE MODE |
-| SELECT ... FOR UPDATE         | 排他锁     | 需要手动在SELECT之后加FOR UPDATE         |
+| SELECT ... FOR UPdate         | 排他锁     | 需要手动在SELECT之后加FOR UPdate         |
 
 默认情况下，InnoDB在 REPEATABLE READ事务隔离级别运行，InnoDB使用 next-key 锁进行搜索和索引扫描，以防止幻读。
 
@@ -1843,17 +1839,21 @@ performance_schema.data_locks;
 
 
 
+
+
+
+
 # mysql数值类型
 
 ## 整型
 
 | 类型名称      | 取值范围                                  | 大小    |
 | ------------- | ----------------------------------------- | ------- |
-| TINYINT       | -128〜127                                 | 1个字节 |
-| SMALLINT      | -32768〜32767                             | 2个宇节 |
-| MEDIUMINT     | -8388608〜8388607                         | 3个字节 |
-| INT (INTEGHR) | -2147483648〜2147483647                   | 4个字节 |
-| BIGINT        | -9223372036854775808〜9223372036854775807 | 8个字节 |
+| tinyint       | -128〜127                                 | 1个字节 |
+| smallint      | -32768〜32767                             | 2个宇节 |
+| mediumint     | -8388608〜8388607                         | 3个字节 |
+| int (intEGHR) | -2147483648〜2147483647                   | 4个字节 |
+| bigint        | -9223372036854775808〜9223372036854775807 | 8个字节 |
 
 无符号在数据类型后加 unsigned 关键字。
 
@@ -1861,34 +1861,34 @@ performance_schema.data_locks;
 
 | 类型名称             | 说明               | 存储需求   |
 | -------------------- | ------------------ | ---------- |
-| FLOAT                | 单精度浮点数       | 4 个字节   |
-| DOUBLE               | 双精度浮点数       | 8 个字节   |
-| DECIMAL (M， D)，DEC | 压缩的“严格”定点数 | M+2 个字节 |
+| float                | 单精度浮点数       | 4 个字节   |
+| double               | 双精度浮点数       | 8 个字节   |
+| decimal (M， D)，DEC | 压缩的“严格”定点数 | M+2 个字节 |
 
 ## 日期和时间
 
 | 类型名称  | 日期格式              | 日期范围                                              | 存储需求 |
 | --------- | --------------------- | ----------------------------------------------------- | -------- |
-| YEAR      | YYYY                  | 1901 ~ 2155                                           | 1 个字节 |
-| TIME      | HH：MM：SS            | -838：59：59 ~ 838：59：59                            | 3 个字节 |
-| DATE      | YYYY-MM-DD            | 1000-01-01 ~ 9999-12-3                                | 3 个字节 |
-| DATETIME  | YYYY-MM-DD HH：MM：SS | 1000-01-01 00：00：00 ~ 9999-12-31 23：59：59         | 8 个字节 |
-| TIMESTAMP | YYYY-MM-DD HH：MM：SS | 1980-01-01 00：00：01 UTC ~ 2040-01-19 03：14：07 UTC | 4 个字节 |
+| year      | YYYY                  | 1901 ~ 2155                                           | 1 个字节 |
+| time      | HH：MM：SS            | -838：59：59 ~ 838：59：59                            | 3 个字节 |
+| date      | YYYY-MM-DD            | 1000-01-01 ~ 9999-12-3                                | 3 个字节 |
+| datetime  | YYYY-MM-DD HH：MM：SS | 1000-01-01 00：00：00 ~ 9999-12-31 23：59：59         | 8 个字节 |
+| timeSTAMP | YYYY-MM-DD HH：MM：SS | 1980-01-01 00：00：01 UTC ~ 2040-01-19 03：14：07 UTC | 4 个字节 |
 
 ## 字符串
 
 | 类型名称   | 说明                                         | 存储需求                                                   |
 | ---------- | -------------------------------------------- | ---------------------------------------------------------- |
-| CHAR(M)    | 固定长度非二进制字符串                       | M 字节，1<=M<=255                                          |
-| VARCHAR(M) | 变长非二进制字符串                           | L+1字节，在此，L< = M和 1<=M<=255                          |
-| TINYTEXT   | 非常小的非二进制字符串                       | L+1字节，在此，L<2^8                                       |
-| TEXT       | 小的非二进制字符串                           | L+2字节，在此，L<2^16                                      |
-| MEDIUMTEXT | 中等大小的非二进制字符串                     | L+3字节，在此，L<2^24                                      |
-| LONGTEXT   | 大的非二进制字符串                           | L+4字节，在此，L<2^32                                      |
-| ENUM       | 枚举类型，只能有一个枚举字符串值             | 1或2个字节，取决于枚举值的数目 (最大值为65535)             |
-| SET        | 一个设置，字符串对象可以有零个或 多个SET成员 | 1、2、3、4或8个字节，取决于集合 成员的数量（最多64个成员） |
+| char(M)    | 固定长度非二进制字符串                       | M 字节，1<=M<=255                                          |
+| varchar(M) | 可变长非二进制字符串                         | L+1字节，在此，L< = M和 1<=M<=255                          |
+| tinytext   | 非常小的非二进制字符串                       | L+1字节，在此，L<2^8                                       |
+| text       | 小的非二进制字符串                           | L+2字节，在此，L<2^16                                      |
+| mediumtext | 中等大小的非二进制字符串                     | L+3字节，在此，L<2^24                                      |
+| longtext   | 大的非二进制字符串                           | L+4字节，在此，L<2^32                                      |
+| enum       | 枚举类型，只能有一个枚举字符串值             | 1或2个字节，取决于枚举值的数目 (最大值为65535)             |
+| set        | 一个设置，字符串对象可以有零个或 多个set成员 | 1、2、3、4或8个字节，取决于集合 成员的数量（最多64个成员） |
 
-# 二进制类型
+## 二进制类型
 
 | 类型名称       | 说明                 | 存储需求               |
 | -------------- | -------------------- | ---------------------- |
@@ -1897,8 +1897,340 @@ performance_schema.data_locks;
 | VARBINARY (M)  | 可变长度二进制字符串 | M+1 字节               |
 | TINYBLOB (M)   | 非常小的BLOB         | L+1 字节，在此，L<2^8  |
 | BLOB (M)       | 小 BLOB              | L+2 字节，在此，L<2^16 |
-| MEDIUMBLOB (M) | 中等大小的BLOB       | L+3 字节，在此，L<2^24 |
+| mediumBLOB (M) | 中等大小的BLOB       | L+3 字节，在此，L<2^24 |
 | LONGBLOB (M)   | 非常大的BLOB         | L+4 字节，在此，L<2^32 |
+
+# mysql表设计的经验
+
+## 前言
+
+作为后端开发，我们经常需要设计数据库表。整理了21个设计MySQL表的经验准则，分享给大家，希望大家看完会有帮助。
+
+## 1. 命名规范
+
+数据库表名、字段名、索引名等都需要命名规范，可读性高(一般要求用英文)，让别人一看命名，就知道这个字段表示什么意思。
+
+比如一个表的账号字段，**反例如下**：
+
+```
+acc_no,1_acc_no,zhanghao
+```
+
+**正例**：
+
+```
+account_no,account_number
+```
+
+- 表名、字段名必须使用小写字母或者数字，禁止使用数字开头，禁止使用拼音，并且一般不使用英文缩写。
+- 主键索引名为`pk_字段名`；唯一索引名为`uk_字段名`；普通索引名则为`idx_`字段名。
+
+## 2. 选择合适的字段类型
+
+设计表时，我们需要选择合适的字段类型，比如：
+
+- 尽可能选择存储空间小的字段类型，就好像数字类型的，从`tinyint、smallint、int、bigint`从左往右开始选择
+- 小数类型如金额，则选择 `decimal`，禁止使用 `float` 和 `double`。
+- 如果存储的字符串长度几乎相等，使用 `char` 定长字符串类型。
+- `varchar`是可变长字符串，不预先分配存储空间，长度不要超过`5000`。
+- 如果存储的值太大，建议字段类型修改为`text`，同时抽出单独一张表，用主键与之对应。
+- 同一表中，所有`varchar`字段的长度加起来，不能大于`65535`. 如果有这样的需求，请使用`TEXT/LONGTEXT` 类型。
+
+## 3. 主键设计要合理
+
+主键设计的话，最好不要与业务逻辑有所关联。有些业务上的字段，比如身份证，虽然是唯一的，一些开发者喜欢用它来做主键，但是不是很建议哈。主键最好是毫无意义的一串独立不重复的数字，比如UUID，又或者Auto_increment自增的主键，或者是雪花算法生成的主键等等;
+
+## 4. 选择合适的字段长度
+
+先问大家一个问题，大家知道数据库字段长度表示`字符长度`还是`字节长度`嘛？
+
+> 其实在mysql中，`varchar`和`char`类型表示字符长度，而其他类型表示的长度都表示字节长度。比如`char(10)`表示字符长度是`10`，而`bigint（4）`表示显示长度是`4`个字节，但是因为`bigint`实际长度是`8`个字节，所以`bigint（4）`的实际长度就是`8`个字节。
+
+我们在设计表的时候，需要充分考虑一个字段的长度，比如一个用户名字段（它的长度5~20个字符），你觉得应该设置多长呢？可以考虑设置为 `username varchar（32）`。字段长度一般设置为2的幂哈（也就是2的n次方）。
+
+## 5. 优先考虑逻辑删除，而不是物理删除
+
+什么是物理删除？什么是逻辑删除？
+
+- 物理删除：把数据从硬盘中删除，可释放存储空间
+- 逻辑删除：给数据添加一个字段，比如is_deleted，以标记该数据已经逻辑删除。
+
+物理删除就是执行delete语句，如删除account_no =‘666’的账户信息SQL如下：
+
+```mysql
+delete from account_info_tab whereaccount_no =‘666’;
+```
+
+逻辑删除呢，就是这样：
+
+```mysql
+update account_info_tab set is_deleted = 1 where account_no =‘666’;
+```
+
+**为什么推荐用逻辑删除，不推荐物理删除呢？**
+
+> - 为什么不推荐使用物理删除，因为恢复数据很困难
+> - 物理删除会使自增主键不再连续
+> - 核心业务表 的数据不建议做物理删除，只适合做状态变更。
+
+## 6. 每个表都需要添加这几个通用字段如主键、create_time、modifed_time等
+
+表必备一般来说，或具备这几个字段：
+
+- id： 主键，一个表必须得有主键，必须
+- create_time： 创建时间，必须
+- modifed_time: 修改时间，必须，更新记录时，需要更新它
+- version : 数据记录的版本号，用于乐观锁，非必须
+- remark ：数据记录备注，非必须
+- modified_by :修改人，非必须
+- creator ：创建人，非必须
+
+## 7. 一张表的字段不宜过多
+
+我们建表的时候，要牢记，一张表的字段不宜过多哈，一般尽量不要超过20个字段。
+
+如果一张表的字段过多，表中保存的数据可能就会很大，查询效率就会很低。因此，一张表不要设计太多字段哈，如果业务需求，实在需要很多字段，可以把一张大的表，拆成多张小的表，它们的主键相同即可。
+
+当表的字段数非常多时，可以将表分成两张表，一张作为条件查询表，一张作为详细内容表 (主要是为了性能考虑)。
+
+## 8. 尽可能使用not null定义字段
+
+如果没有特殊的理由， 一般都建议将字段定义为 NOT NULL 。
+
+**为什么呢？**
+
+- 首先， `NOT NULL` 可以防止出现空指针问题。
+- 其次，`NULL`值存储也需要额外的空间的，它也会导致比较运算更为复杂，使优化器难以优化SQL。
+- `NULL`值有可能会导致索引失效
+- 如果将字段默认设置成一个空字符串或常量值并没有什么不同，且都不会影响到应用逻辑， 那就可以将这个字段设置为`NOT NULL。`
+
+## 9. 设计表时，评估哪些字段需要加索引
+
+首先，评估你的表数据量。如果你的表数据量只有一百几十行，就没有必要加索引。否则设计表的时候，如果有查询条件的字段，一般就需要建立索引。但是索引也不能滥用：
+
+- 索引也不要建得太多，一般单表索引个数不要超过5个。因为创建过多的索引，会降低写得速度。
+- 区分度不高的字段，不能加索引，如性别等
+- 索引创建完后，还是要注意避免索引失效的情况，如使用mysql的内置函数，会导致索引失效的
+- 索引过多的话，可以通过联合索引的话方式来优化。然后的话，索引还有一些规则，如覆盖索引，最左匹配原则等等。
+
+假设你新建一张用户表，如下：
+
+```mysql
+CREATE TABLE user_info_tab (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `age` int(11) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `create_time` datetime NOT NULL,
+  `modifed_time` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+```
+
+对于这张表，很可能会有根据`user_id`或者`name`查询用户信息，并且，`user_id`是唯一的。因此，你是可以给`user_id`加上唯一索引，`name`加上普通索引。
+
+```mysql
+CREATE TABLE user_info_tab (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `age` int(11) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `create_time` datetime NOT NULL,
+  `modifed_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_name` (`name`) USING BTREE,
+  UNIQUE KEY un_user_id (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+```
+
+## 10. 不需要严格遵守 3NF，通过业务字段冗余来减少表关联
+
+什么是数据库三范式（3NF），大家是否还有印象吗？
+
+- 第一范式：对属性的原子性，要求属性具有原子性，不可再分解；
+- 第二范式：对记录的唯一性，要求记录有唯一标识，即实体的唯一性，即不存在部分依赖；
+- 第三方式：对字段的冗余性，要求任何字段不能由其他字段派生出来，它要求字段没有冗余，即不存在传递依赖；
+
+我们设计表及其字段之间的关系, 应尽量满足第三范式。但是有时候，可以适当冗余，来提高效率。比如以下这张表
+
+| 商品名称 | 商品型号 | 单价 | 数量 | 总金额 |
+| -------- | -------- | ---- | ---- | ------ |
+| 手机     | 华为     | 8000 | 5    | 40000  |
+
+以上这张存放商品信息的基本表。总金额这个字段的存在，表明该表的设计不满足第三范式，因为总金额可以由单价*数量得到，说明总金额是冗余字段。但是，增加总金额这个冗余字段，可以提高查询统计的速度，这就是以空间换时间的作法。
+
+当然，这只是个小例子哈，大家开发设计的时候，要结合具体业务哈。
+
+## 11. 避免使用MySQL保留字
+
+如果库名、表名、字段名等属性含有保留字时，SQL语句必须用反引号来引用属性名称，这将使得SQL语句书写、SHELL脚本中变量的转义等变得非常复杂。
+
+因此，我们一般`避免使用MySQL保留字`，如`select`、`interval`、`desc`等等
+
+## 12. 不搞外键关联，一般都在代码维护
+
+什么是外键呢？
+
+> 外键，也叫`FOREIGN KEY`，它是用于将两个表连接在一起的键。`FOREIGN KEY`是一个表中的一个字段（或字段集合），它引用另一个表中的`PRIMARY KEY`。它是用来保证数据的一致性和完整性的。
+
+阿里的Java规范也有这么一条：
+
+> 【强制】不得使用外键与级联，一切外键概念必须在应用层解决。
+
+我们为什么不推荐使用外键呢？
+
+> - 使用外键存在性能问题、并发死锁问题、使用起来不方便等等。每次做DELETE或者UPDATE都必须考虑外键约束，会导致开发的时候很难受,测试数据造数据也不方便。
+> - 还有一个场景不能使用外键，就是分库分表。
+
+## 13. 一般都选择INNODB存储引擎
+
+建表是需要选择**存储引擎**的，我们一般都选择`INNODB`存储引擎，除非读写比率小于`1%`, 才考虑使用`MyISAM` 。
+
+有些小伙伴可能会有疑惑，不是还有`MEMORY`等其他存储引擎吗？什么时候使用它呢？其实其他存储引擎一般除了都建议在`DBA`的指导下使用。
+
+我们来复习一下这MySQL这三种存储引擎的对比区别吧：
+
+| 特性         | INNODB | MyISAM | MEMORY |
+| ------------ | ------ | ------ | ------ |
+| 事务安全     | 支持   | 无     | 无     |
+| 存储限制     | 64TB   | 有     | 有     |
+| 空间使用     | 高     | 低     | 低     |
+| 内存使用     | 高     | 低     | 高     |
+| 插入数据速度 | 低     | 高     | 高     |
+| 是否支持外键 | 支持   | 无     | 无     |
+
+## 14. 选择合适统一的字符集。
+
+数据库库、表、开发程序等都需要统一字符集，通常中英文环境用`utf8`。
+
+MySQL支持的字符集有`utf8、utf8mb4、GBK、latin1`等。
+
+- utf8：支持中英文混合场景，国际通过，3个字节长度
+- utf8mb4: 完全兼容utf8，4个字节长度，一般存储emoji表情需要用到它。
+- GBK ：支持中文，但是不支持国际通用字符集，2个字节长度
+- latin1：MySQL默认字符集，1个字节长度
+
+## 15. 如果你的数据库字段是枚举类型的，需要在comment注释清楚
+
+如果你设计的数据库字段是枚举类型的话，就需要在comment后面注释清楚每个枚举的意思，以便于维护
+
+正例如下：
+
+```mysql
+`session_status` varchar(2) COLLATE utf8_bin NOT NULL COMMENT 'session授权态 00：在线-授权态有效 01：下线-授权态失效 02：下线-主动退出 03：下线-在别处被登录'
+```
+
+反例：
+
+```mysql
+`session_status` varchar(2) COLLATE utf8_bin NOT NULL COMMENT 'session授权态'
+```
+
+并且，如果你的枚举类型在未来的版本有增加修改的话，也需要同时维护到`comment`。
+
+## 16. 时间的类型选择
+
+我们设计表的时候，一般都需要加通用时间的字段，如`create_time、modified_time`等等。那对于时间的类型，我们该如何选择呢？
+
+对于MySQL来说，主要有`date、datetime、time、timestamp 和 year`。
+
+- date ：表示的日期值, 格式yyyy-mm-dd,范围1000-01-01 到 9999-12-31，3字节
+- time ：表示的时间值，格式 hh:mm:ss，范围-838:59:59 到 838:59:59，3字节
+- datetime：表示的日期时间值，格式yyyy-mm-dd hh:mm:ss，范围1000-01-01 00:00:00到9999-12-31 23:59:59```,8字节，跟时区无关
+- timestamp：表示的时间戳值，格式为yyyymmddhhmmss，范围1970-01-01 00:00:01到2038-01-19 03:14:07，4字节，跟时区有关
+- year：年份值，格式为yyyy。范围1901到2155，1字节
+
+推荐优先使用`datetime`类型来保存日期和时间，因为存储范围更大，且跟时区无关。
+
+## 17. 不建议使用Stored procedure (包括存储过程，触发器) 。
+
+**什么是存储过程**
+
+已预编译为一个可执行过程的一个或多个SQL语句。
+
+**什么是触发器**
+
+触发器，指一段代码，当触发某个事件时，自动执行这些代码。使用场景：
+
+- 可以通过数据库中的相关表实现级联更改。
+- 实时监控某张表中的某个字段的更改而需要做出相应的处理。
+- 例如可以生成某些业务的编号。
+- 注意不要滥用，否则会造成数据库及应用程序的维护困难。
+
+对于MYSQL来说，存储过程、触发器等还不是很成熟， 并没有完善的出错记录处理，不建议使用。
+
+## 18. 1:N 关系的设计
+
+日常开发中，1对多的关系应该是非常常见的。比如一个班级有多个学生，一个部门有多个员工等等。这种的建表原则就是： 在从表（N的这一方）创建一个字段，以字段作为外键指向主表（1的这一方）的主键。示意图如下:
+
+![image.png](./assets/jmifltchxqj2g_561a6c5346824449aad627427726527c.png)
+
+学生表是多（N）的一方，会有个字段class_id保存班级表的主键。当然，一班不加外键约束哈，只是单纯保存这个关系而已。
+
+有时候两张表存在N:N关系时，我们应该消除这种关系。通过增加第三张表，把N:N修改为两个 1:N。比如图书和读者，是一个典型的多对多的关系。一本书可以被多个读者借，一个读者又可以借多本书。我们就可以设计一个借书表，包含图书表的主键，以及读者的主键，以及借还标记等字段。
+
+## 19. 大字段
+
+设计表的时候，我们尤其需要关注一些大字段，即占用较多存储空间的字段。比如用来记录用户评论的字段，又或者记录博客内容的字段，又或者保存合同数据的字段。如果直接把表字段设计成text类型的话，就会浪费存储空间，查询效率也不好。
+
+在MySQl中，这种方式保存的设计方案，其实是不太合理的。这种非常大的数据，可以保存到mongodb中，然后，在业务表保存对应`mongodb`的`id`即可。
+
+这种设计思想类似于，我们表字段保存图片时，为什么不是保存图片内容，而是直接保存图片url即可。
+
+## 20. 考虑是否需要分库分表
+
+什么是分库分表呢？
+
+- 分库：就是一个数据库分成多个数据库，部署到不同机器。
+
+<img src="./assets/jmifltchxqj2g_56f37ba0558d4036aca9c58af806dd7c.png" alt="image.png" style="zoom: 25%;" />
+
+- 分表：就是一个数据库表分成多个表。
+
+<img src="./assets/jmifltchxqj2g_91ebaf5eaddb493b81a6186dbfadf416.png" alt="image.png" style="zoom:25%;" />
+
+我们在设计表的时候，其实可以提前估算一下，是否需要做分库分表。比如一些用户信息，未来可能数据量到达百万设置千万的话，就可以提前考虑分库分表。
+
+> 为什么需要分库分表: 数据量太大的话，SQL的查询就会变慢。如果一个查询SQL没命中索引，千百万数据量级别的表可能会拖垮整个数据库。即使SQL命中了索引，如果表的数据量超过一千万的话，查询也是会明显变慢的。这是因为索引一般是B+树结构，数据千万级别的话，B+树的高度会增高，查询就变慢啦。
+
+分库分表主要有水平拆分、垂直拆分的说法，拆分策略有`range`范围、`hash`取模。而分库分表主要有这些问题：
+
+- 事务问题
+- 跨库关联
+- 排序问题
+- 分页问题
+- 分布式ID
+
+## 21. sqL 编写的一些优化经验
+
+最后的话，跟大家聊来一些写SQL的经验吧：
+
+- 查询SQL尽量不要使用`select *`，而是`select`具体字段
+- 如果知道查询结果只有一条或者只要最大/最小一条记录，建议用`limit 1`
+- 应尽量避免在`where`子句中使用or来连接条件
+- 注意优化limit深分页问题
+- 使用`where`条件限定要查询的数据，避免返回多余的行
+- 尽量避免在索引列上使用mysql的内置函数
+- 应尽量避免在 `where`子句中对字段进行表达式操作
+- 应尽量避免在`where` 子句中使用!=或<>操作符
+- 使用联合索引时，注意索引列的顺序，一般遵循最左匹配原则。
+- 对查询进行优化，应考虑在`where` 及 `order by`涉及的列上建立索引
+- 如果插入数据过多，考虑批量插入
+- 在适当的时候，使用覆盖索引
+- 使用explain 分析你SQL的计划
+
+# 小技巧
+
+1. 在SQL语句之后加上`\G`会将结果的表格形式转换成行文本形式
+2. 查看Mysql数据库占用空间：
+
+```mysql
+SELECT table_schema "Database Name" , SUM(data_length + index_length) / (1024 * 1024) "Database Size in MB"
+FROM information_schema.TABLES
+GROUP BY table_schema;
+```
+
+
 
 # 权限一览表
 
@@ -1940,7 +2272,7 @@ GRANT 和 REVOKE 允许的静态权限
 | [`SHUTDOWN`](https：//dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_shutdown) | `Shutdown_priv`              | Server administration                   |
 | [`SUPER`](https：//dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_super) | `Super_priv`                 | Server administration                   |
 | [`TRIGGER`](https：//dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_trigger) | `Trigger_priv`               | Tables                                  |
-| [`UPDATE`](https：//dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_update) | `Update_priv`                | Tables or columns                       |
+| [`UPdate`](https：//dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_update) | `Update_priv`                | Tables or columns                       |
 | [`USAGE`](https：//dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_usage) | Synonym for “no privileges”  | Server administration                   |
 
 GRANT 和 REVOKE 允许的动态权限
@@ -1976,7 +2308,7 @@ GRANT 和 REVOKE 允许的动态权限
 | [`RESOURCE_GROUP_USER`](https：//dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_resource-group-user) | Resource group administration                     |
 | [`ROLE_ADMIN`](https：//dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_role-admin) | Server administration                             |
 | [`SESSION_VARIABLES_ADMIN`](https：//dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_session-variables-admin) | Server administration                             |
-| [`SET_USER_ID`](https：//dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_set-user-id) | Server administration                             |
+| [`set_USER_ID`](https：//dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_set-user-id) | Server administration                             |
 | [`SHOW_ROUTINE`](https：//dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_show-routine) | Server administration                             |
 | [`SYSTEM_USER`](https：//dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_system-user) | Server administration                             |
 | [`SYSTEM_VARIABLES_ADMIN`](https：//dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_system-variables-admin) | Server administration                             |
@@ -1984,24 +2316,5 @@ GRANT 和 REVOKE 允许的动态权限
 | [`VERSION_TOKEN_ADMIN`](https：//dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_version-token-admin) | Server administration                             |
 | [`XA_RECOVER_ADMIN`](https：//dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin) | Server administration                             |
 
-# 图形化界面工具
-
-- Workbench(免费)： http：//dev.mysql.com/downloads/workbench/
-- navicat(收费，试用版30天)： https：//www.navicat.com/en/download/navicat-for-mysql
-- Sequel Pro(开源免费，仅支持Mac OS)： http：//www.sequelpro.com/
-- HeidiSQL(免费)： http：//www.heidisql.com/
-- phpMyAdmin(免费)： https：//www.phpmyadmin.net/
-- SQLyog： https：//sqlyog.en.softonic.com/
 
 
-
-# 小技巧
-
-1. 在SQL语句之后加上`\G`会将结果的表格形式转换成行文本形式
-2. 查看Mysql数据库占用空间：
-```mysql
-SELECT table_schema "Database Name"
-     ， SUM(data_length + index_length) / (1024 * 1024) "Database Size in MB"
-FROM information_schema.TABLES
-GROUP BY table_schema;
-```

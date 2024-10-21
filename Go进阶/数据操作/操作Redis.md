@@ -128,7 +128,10 @@ func doCommand() { // doCommand go-redis基本使用示例
 	fmt.Println(cmder.Val()) // 获取值
 	fmt.Println(cmder.Err()) // 获取错误
 
-	err = rdb.Set(ctx, "key", 10, time.Hour).Err() // 直接执行命令获取错误
+	err = rdb.Set(ctx, "key", 10, time.Hour).Err() // string类型。直接执行命令获取错误
+    err = client.HSet("token_hash", "user_id", userID).Err() // hash类型
+    err = client.Expire("token_hash", time.Hour).Err()
+    err = client.SAdd("token_set", token1, token2).Err() // set类型
 
 	value := rdb.Get(ctx, "key").Val() // 直接执行命令获取值
 	fmt.Println(value)
