@@ -1050,7 +1050,7 @@ func defaultMiddlewares() map[string]gin.HandlerFunc {
 go funcXX(c.Copy())
 ```
 
-# JWT
+# Gin使用JWT
 
 JWT全称JSON Web Token是一种跨域认证解决方案，属于一个开放的标准，它规定了一种Token实现方式，目前多用于前后端分离项目和OAuth2.0业务场景下。
 

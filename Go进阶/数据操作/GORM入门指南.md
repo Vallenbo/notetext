@@ -1,7 +1,5 @@
 # GORM
 
-<img src="E:\Project\Textbook\Golang常用服务手册\assets\wps1.jpg" alt="img" style="zoom:50%;" /> 
-
 [gorm官方中文文档](https://gorm.io/zh_CN/docs/)
 
 gorm是一个使用Go语言编写的ORM框架。能直接使用代码操作数据库，进行表和数据库的创建。
